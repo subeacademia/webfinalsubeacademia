@@ -2,6 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ----- UI base (variables y utilidades .ui-*) ----- */
+:root {
+  --radius: 16px;
+  --shadow: 0 8px 30px rgba(2,6,23,.35);
+}
+.theme-light {
+  --bg: #f7fafc;
+  --card: #ffffff;
+  --muted: #475569;
+  --fg: #0f172a;
+  --accent: #0ea5e9;
+  --ring: rgba(14,165,233,.45);
+  --shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+/* Inputs contrastados (opt-in) */
+.ui-input {
+  width: 100%;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  border-radius: 12px;
+  padding: .85rem 1rem;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.ui-input::placeholder { color: color-mix(in srgb, var(--fg) 50%, transparent); }
+.ui-input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--ring);
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+}
+
+/* Botón primario (opt-in, no afecta Angular Material) */
+.ui-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .85rem 1.2rem; border-radius: 999px;
+  background: var(--accent); color: #001016; font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  box-shadow: var(--shadow);
+  transition: transform .06s ease, filter .2s ease;
+}
+.ui-btn:hover { filter: brightness(1.06); }
+.ui-btn:active { transform: translateY(1px); }
+
+/* Cards (opt-in) */
+.ui-card {
+  background: radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--accent) 8%, var(--card)) 0%, var(--card) 40%, var(--card) 100%);
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Chips (opt-in) */
+.ui-chip {
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  color: var(--fg); padding: .55rem .9rem; border-radius: 20px;
+}
+
+/* Toggle (opt-in) */
+.theme-toggle {
+  padding: .55rem .9rem; border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
 
 /* ----- Tokens de color (AA) ----- */
 :root {
@@ -30,9 +94,10 @@
   --accent: var(--ring);
 }
 
-/* Tema oscuro explícito (compatibilidad con .dark y [data-theme="dark"]) */
+/* Tema oscuro explícito (compatibilidad con .dark, .theme-dark y [data-theme="dark"]) */
 :root.dark,
-:root[data-theme="dark"] {
+:root[data-theme="dark"],
+.theme-dark {
   /* Tema OSCURO cuando existe la clase .dark en <html> */
   --bg: #0b1220;
   --fg: #E6EDF3;
@@ -56,10 +121,7 @@
   --accent: var(--ring);
 }
 
-html, body {
-  background: var(--bg);
-  color: var(--fg);
-}
+html, body { height: 100%; background: var(--bg); color: var(--fg); }
 
 /* Reset tipografía base y enlaces accesibles */
 html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
@@ -205,3 +267,6 @@ select {
 .reveal-down { transform: translateY(-16px); }
 .reveal-fade { transform: none; }
 
+/* Contraste básico global (inputs/selects/textarea)
+   Nota: eliminamos el forzado de tema oscuro para permitir que el toggle funcione.
+*/

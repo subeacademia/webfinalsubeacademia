@@ -55,14 +55,24 @@ export class I18nService {
 
   async ensureLoaded(lang: Language): Promise<void> {
     if (this.languageDictionariesCache.has(lang)) return;
-    const url = `/assets/i18n/${lang}.json`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      this.languageDictionariesCache.set(lang, {});
+    const win = (this.documentRef as any).defaultView as (Window & typeof globalThis) | undefined;
+    if (!win) {
+      // SSR: omitimos carga; el navegador la realizará en hidratación
       return;
     }
-    const json = (await response.json()) as Translations;
-    this.languageDictionariesCache.set(lang, json);
+    const base = win.location?.origin || this.documentRef.baseURI || '/';
+    const url = new URL(`/assets/i18n/${lang}.json`, base).toString();
+    try {
+      const response = await win.fetch(url);
+      if (!response.ok) {
+        this.languageDictionariesCache.set(lang, {});
+        return;
+      }
+      const json = (await response.json()) as Translations;
+      this.languageDictionariesCache.set(lang, json);
+    } catch {
+      this.languageDictionariesCache.set(lang, {});
+    }
   }
 
   translate(key: string): string {

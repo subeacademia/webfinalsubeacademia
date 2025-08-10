@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Firestore, collection, collectionData, limit, orderBy, query } from '@angular/fire/firestore';
 import { Storage, ref as storageRef, listAll, getDownloadURL } from '@angular/fire/storage';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -55,7 +55,7 @@ import { map } from 'rxjs/operators';
     <div class="mt-8">
       <div class="flex items-center gap-3 mb-2">
         <div class="font-medium">Últimos archivos</div>
-        <input class="border rounded px-2 py-1 text-sm" placeholder="Buscar por nombre" [(ngModel)]="search" (input)="applyFilter()" />
+        <input class="border rounded px-2 py-1 text-sm ui-input" placeholder="Buscar por nombre" [(ngModel)]="search" (input)="applyFilter()" />
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         <div *ngFor="let m of paged()" class="border rounded p-2 text-xs">

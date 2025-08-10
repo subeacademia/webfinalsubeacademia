@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -57,7 +57,7 @@ export class LoginComponent {
     this.loading.set(true);
     try {
       const { email, password } = this.form.getRawValue();
-      await this.auth.login(email!, password!);
+      await this.auth.loginWithEmailPassword(email!, password!);
       await this.router.navigateByUrl('/admin');
     } catch (e: any) {
       const code: string | undefined = e?.code;

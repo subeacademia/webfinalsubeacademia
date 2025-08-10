@@ -1,14 +1,11 @@
 import { Routes } from '@angular/router';
-import { AdminGuard } from '../core/auth/admin.guard';
-import { inject } from '@angular/core';
-import { Auth } from '@angular/fire/auth';
-import { Router } from '@angular/router';
+import { adminGuard } from '../core/guards/admin.guard';
 
 export const ADMIN_ROUTES: Routes = [
   { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
   {
     path: '',
-    canActivate: [AdminGuard],
+    canMatch: [adminGuard],
     loadComponent: () => import('./shell/admin-shell.component').then(m => m.AdminShellComponent),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'posts' },

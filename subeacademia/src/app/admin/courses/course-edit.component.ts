@@ -23,34 +23,34 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
       </div>
       <div class="grid gap-3 md:grid-cols-2">
         <label class="block">Idioma
-          <select class="w-full" formControlName="lang">
+          <select class="w-full ui-input" formControlName="lang">
             <option value="es">es</option><option value="en">en</option><option value="pt">pt</option>
           </select>
         </label>
         <label class="block">Título
-          <input class="w-full" formControlName="title" (input)="syncSlug()">
+          <input class="w-full ui-input" formControlName="title" (input)="syncSlug()">
         </label>
       </div>
       <label class="block">Slug
-        <input class="w-full" formControlName="slug">
+        <input class="w-full ui-input" formControlName="slug">
       </label>
       <label class="block">Resumen
-        <textarea class="w-full" rows="3" formControlName="summary"></textarea>
+        <textarea class="w-full ui-input" rows="3" formControlName="summary"></textarea>
       </label>
 
       <div class="grid gap-3 md:grid-cols-3">
         <label class="block">Nivel
-          <select class="w-full" formControlName="level">
+          <select class="w-full ui-input" formControlName="level">
             <option value="intro">intro</option>
             <option value="intermedio">intermedio</option>
             <option value="avanzado">avanzado</option>
           </select>
         </label>
         <label class="block">Duración (h)
-          <input class="w-full" type="number" formControlName="durationHours">
+          <input class="w-full ui-input" type="number" formControlName="durationHours">
         </label>
         <label class="block">Temas (coma)
-          <input class="w-full" [value]="(form.value.topics || []).join(', ')" (change)="onTopicsChange($any($event.target).value)">
+          <input class="w-full ui-input" [value]="(form.value.topics || []).join(', ')" (change)="onTopicsChange($any($event.target).value)">
         </label>
       </div>
 
@@ -77,12 +77,12 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
 
       <div class="grid gap-3 md:grid-cols-2">
         <label class="block">Estado
-          <select class="w-full" formControlName="status">
+          <select class="w-full ui-input" formControlName="status">
             <option>draft</option><option>published</option><option>scheduled</option>
           </select>
         </label>
         <label class="block">Fecha publicación
-          <input class="w-full" type="datetime-local" formControlName="publishedAtLocal">
+          <input class="w-full ui-input" type="datetime-local" formControlName="publishedAtLocal">
         </label>
       </div>
 
@@ -101,10 +101,10 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         </div>
         <div class="grid gap-2">
           <label>Nombre visible
-            <input class="w-full" [(ngModel)]="resName" />
+            <input class="w-full ui-input" [(ngModel)]="resName" />
           </label>
           <label>Tipo
-            <select class="w-full" [(ngModel)]="resKind">
+            <select class="w-full ui-input" [(ngModel)]="resKind">
               <option value="video">video</option>
               <option value="pdf">pdf</option>
               <option value="zip">zip</option>
@@ -113,12 +113,12 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           </label>
           <ng-container *ngIf="resKind !== 'link'; else linkTpl">
             <label>Archivo
-              <input class="w-full" type="file" (change)="onPickResFile($event)" />
+              <input class="w-full ui-input" type="file" (change)="onPickResFile($event)" />
             </label>
           </ng-container>
           <ng-template #linkTpl>
             <label>URL
-              <input class="w-full" [(ngModel)]="resUrl" />
+              <input class="w-full ui-input" [(ngModel)]="resUrl" />
             </label>
           </ng-template>
           <div class="flex justify-end gap-2 mt-2">

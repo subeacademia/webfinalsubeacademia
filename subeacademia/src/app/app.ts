@@ -2,13 +2,14 @@ import { Component, OnInit, isDevMode, signal, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
-import { ThemeService } from './shared/theme.service';
+import { ThemeService } from './theme.service';
 import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [RouterOutlet, AppShellComponent],
   template: `
     <app-shell>
@@ -20,15 +21,13 @@ import { FirebaseDataService } from './core/firebase-data.service';
 export class App implements OnInit {
   protected readonly title = signal('subeacademia');
   private readonly themeService = inject(ThemeService);
-  constructor(
-    private readonly router: Router,
-    private readonly i18n: I18nService,
-    private readonly seo: SeoService,
-    private readonly data: FirebaseDataService,
-  ) {}
+  private readonly router = inject(Router);
+  private readonly i18n = inject(I18nService);
+  private readonly seo = inject(SeoService);
+  private readonly data = inject(FirebaseDataService);
+  constructor() {}
   ngOnInit() {
-    // Inicializar tema al arrancar
-    this.themeService.init();
+    // ThemeService aplica el tema en el constructor (persistente)
     if (isDevMode()) {
       try {
         const hints = this.data.getIndexHints();
@@ -38,7 +37,7 @@ export class App implements OnInit {
     }
     // Inicializar lang y SEO según ruta
     this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
+      .pipe(filter((e: any) => e instanceof NavigationEnd))
       .subscribe(() => {
         const urlTree = this.router.parseUrl(this.router.url);
         const first = urlTree.root.children['primary']?.segments[0]?.path as

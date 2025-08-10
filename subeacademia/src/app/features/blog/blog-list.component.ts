@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Post } from '../../core/models/post.model';
 import { SeoService } from '../../core/seo/seo.service';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { LogService } from '../../core/log.service';
 
 @Component({
   selector: 'app-blog-list',
@@ -29,11 +30,11 @@ import { I18nService } from '../../core/i18n/i18n.service';
       <div class="mt-4 flex flex-wrap gap-3 text-sm">
         <label>
           Categoría:
-          <input #catInput class="border rounded px-2 py-1 ml-2" type="text" placeholder="p.ej. Educación" (change)="onCategoryChange(catInput.value)" />
+          <input #catInput class="border rounded px-2 py-1 ml-2 ui-input" type="text" placeholder="p.ej. Educación" (change)="onCategoryChange(catInput.value)" />
         </label>
         <label>
           Buscar:
-          <input #qInput class="border rounded px-2 py-1 ml-2" type="text" placeholder="título o tag" (input)="onQueryChange(qInput.value)" />
+          <input #qInput class="border rounded px-2 py-1 ml-2 ui-input" type="text" placeholder="título o tag" (input)="onQueryChange(qInput.value)" />
         </label>
       </div>
 
@@ -77,7 +78,7 @@ export class BlogListComponent {
   private readonly seo = inject(SeoService);
   private readonly i18n = inject(I18nService);
   private readonly route = inject(ActivatedRoute);
-  private readonly log = inject((await import('../../core/log.service')).LogService);
+  private readonly log = inject(LogService);
 
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly posts = signal<any[]>([]);
@@ -135,7 +136,7 @@ export class BlogListComponent {
         try {
           const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
           if (url) this.indexErrorUrl.set(url);
-          const isIndex = this.log.indexNeeded('posts', err, { lang });
+          const isIndex = this.log.indexNeeded({ area: 'posts', details: { lang } }, err);
           if (!isIndex) this.log.error('[BlogList] Error al cargar posts', err);
           this.errorMessage.set('Error al cargar publicaciones');
         } finally {

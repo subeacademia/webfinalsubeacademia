@@ -40,7 +40,8 @@
             "prerender": {
               "routesFile": "prerender-routes.txt",
               "discoverRoutes": false
-            }
+            },
+            "serviceWorker": false
           },
           "configurations": {
             "production": {
@@ -67,13 +68,18 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "serviceWorker": false
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4200,
+            "open": true
+          },
           "configurations": {
             "production": {
               "buildTarget": "subeacademia:build:production"
@@ -87,12 +93,12 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
         },
-          "prerender": {
-            "builder": "@angular/build:prerender",
-            "options": {
-              "routesFile": "prerender-routes.txt"
-            }
-          },
+        "prerender": {
+          "builder": "@angular/build:prerender",
+          "options": {
+            "routesFile": "prerender-routes.txt"
+          }
+        },
         "test": {
           "builder": "@angular/build:karma",
           "options": {

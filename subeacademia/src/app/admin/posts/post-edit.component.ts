@@ -28,13 +28,13 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         </div>
         <div class="grid gap-3 md:grid-cols-2">
           <label class="block">Idioma
-            <select formControlName="lang" class="w-full">
+            <select formControlName="lang" class="w-full ui-input">
               <option value="es">es</option><option value="en">en</option><option value="pt">pt</option>
             </select>
           </label>
           <label class="block">Título
             <input
-              class="w-full bg-[var(--input-bg)] text-[var(--input-fg)] placeholder-[color:var(--input-placeholder)] border border-[var(--input-border)] focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)]"
+              class="w-full ui-input"
               placeholder="Título"
               formControlName="title">
           </label>
@@ -42,14 +42,14 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         <label class="block">Slug</label>
         <div class="flex items-center gap-2">
           <input
-            class="flex-1 bg-[var(--input-bg)] text-[var(--input-fg)] placeholder-[color:var(--input-placeholder)] border border-[var(--input-border)] focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)]"
+            class="flex-1 ui-input"
             formControlName="slug"
             [readOnly]="lockSlug"
             placeholder="slug-automatico" />
           <button type="button" class="px-3 py-2 rounded-lg border border-[var(--input-border)]" (click)="lockSlug = !lockSlug">{{ lockSlug ? '✏️ Editar' : '🔒 Bloquear' }}</button>
         </div>
         <label class="block">Resumen
-          <textarea class="w-full" rows="3" formControlName="summary"></textarea>
+          <textarea class="w-full ui-input" rows="3" formControlName="summary"></textarea>
         </label>
         <div formGroupName="translations">
           <div formGroupName="es">
@@ -68,12 +68,12 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         </ng-template>
         <div class="grid gap-3 md:grid-cols-2">
           <label class="block">Estado
-            <select class="w-full" formControlName="status">
+            <select class="w-full ui-input" formControlName="status">
               <option>draft</option><option>published</option><option>scheduled</option>
             </select>
           </label>
           <label class="block">Fecha publicación
-            <input type="datetime-local" class="w-full" formControlName="publishedAtLocal">
+            <input type="datetime-local" class="w-full ui-input" formControlName="publishedAtLocal">
           </label>
         </div>
         <div class="flex gap-3 items-center">

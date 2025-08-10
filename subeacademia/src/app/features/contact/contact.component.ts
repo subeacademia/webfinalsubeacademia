@@ -15,17 +15,17 @@ import { RecaptchaV3Service } from '../../core/services/recaptcha-v3.service';
     <form (ngSubmit)="submit()" class="space-y-4">
       <div>
         <label class="block text-sm font-medium mb-1">Nombre</label>
-        <input [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" required class="w-full border rounded p-2" />
+        <input [ngModel]="name()" (ngModelChange)="name.set($event)" name="name" required class="w-full border rounded p-2 ui-input" />
       </div>
       <div>
         <label class="block text-sm font-medium mb-1">Email</label>
-        <input [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" type="email" required class="w-full border rounded p-2" />
+        <input [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" type="email" required class="w-full border rounded p-2 ui-input" />
       </div>
       <div>
         <label class="block text-sm font-medium mb-1">Mensaje</label>
-        <textarea [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" rows="5" required class="w-full border rounded p-2"></textarea>
+        <textarea [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" rows="5" required class="w-full border rounded p-2 ui-input"></textarea>
       </div>
-      <button type="submit" [disabled]="loading()" class="bg-blue-600 text-white px-4 py-2 rounded">
+      <button type="submit" [disabled]="loading()" class="ui-btn">
         {{ loading() ? 'Enviando…' : 'Enviar' }}
       </button>
       <p *ngIf="success()" class="text-green-600">Mensaje enviado correctamente.</p>

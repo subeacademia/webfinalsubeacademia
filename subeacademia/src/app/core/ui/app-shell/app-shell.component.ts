@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { I18nService } from '../../i18n/i18n.service';
 import { SettingsService, SiteSettings } from '../../data/settings.service';
-import { ThemeService } from '../../../shared/theme.service';
+import { ThemeService } from '../../../theme.service';
 
 type Lang = 'es' | 'en' | 'pt';
 
@@ -15,15 +15,15 @@ type Lang = 'es' | 'en' | 'pt';
   template: `
     <header class="sticky top-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
         <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
-          <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
-          <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-6 w-6 rounded"/>
+          <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
+          <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-7 w-7 md:h-8 md:w-8 rounded"/>
           <span>{{ brandName() }}</span>
         </a>
 
         <button class="md:hidden btn" (click)="toggleNav()" aria-label="Abrir menú">☰</button>
-        <button class="md:hidden btn" (click)="toggleTheme()" aria-label="Cambiar tema">{{ theme() === 'dark' ? '🌙' : '☀️' }}</button>
+        <button class="md:hidden theme-toggle" (click)="toggleTheme()" aria-label="Cambiar tema">{{ themeDark() ? '🌙 Dark' : '☀️ Light' }}</button>
 
-        <ul class="nav hidden md:flex items-center gap-2 flex-1">
+        <ul class="nav hidden md:flex items-center gap-2 flex-1 ml-4 md:ml-8">
           <li>
             <a [routerLink]="['/', currentLang()]"
                routerLinkActive="text-[var(--accent)]"
@@ -62,8 +62,8 @@ type Lang = 'es' | 'en' | 'pt';
 
         <!-- Acciones persistentes a la derecha (desktop) -->
         <div class="flex items-center gap-2 ml-2">
-          <button type="button" (click)="toggleTheme()" class="px-3 py-2 rounded-xl border border-[var(--input-border)]" aria-label="Cambiar tema" title="Cambiar tema">
-            🌓
+          <button type="button" (click)="toggleTheme()" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+            {{ themeDark() ? '🌙 Dark' : '☀️ Light' }}
           </button>
           <label class="sr-only" for="langSelectDesktop">Cambiar idioma</label>
           <select id="langSelectDesktop" class="btn" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
@@ -90,7 +90,7 @@ type Lang = 'es' | 'en' | 'pt';
               <option value="pt">PT</option>
             </select>
             <button class="btn w-full" (click)="toggleTheme()" aria-label="Cambiar tema">
-              {{ theme() === 'dark' ? 'Tema oscuro' : 'Tema claro' }}
+              {{ themeDark() ? 'Tema oscuro' : 'Tema claro' }}
             </button>
           </div>
         </div>
@@ -112,17 +112,7 @@ type Lang = 'es' | 'en' | 'pt';
         </nav>
       </div>
     </footer>
-
-    <!-- Botón flotante persistente para alternar tema (visible en todo momento) -->
-    <button
-      type="button"
-      class="fixed bottom-4 right-4 z-[1000] p-3 rounded-full shadow-lg border border-[var(--border)] bg-[var(--panel)] text-[var(--fg)]/90 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-      (click)="toggleTheme()"
-      aria-label="Cambiar tema (flotante)"
-      title="Cambiar tema"
-    >
-      <span aria-hidden="true">{{ theme() === 'dark' ? '🌙' : '☀️' }}</span>
-    </button>
+    
   `,
 })
 export class AppShellComponent {
@@ -133,9 +123,9 @@ export class AppShellComponent {
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
   private readonly themeService = inject(ThemeService);
-  theme = signal<'light'|'dark'>(this.themeService.current());
+  themeDark = signal<boolean>(this.themeService.isDark());
 
-  constructor(private readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
+  constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
     this.settings.get().subscribe((s: SiteSettings | undefined) => {
       if (!s) return;
@@ -160,10 +150,7 @@ export class AppShellComponent {
     }
   }
 
-  toggleTheme() {
-    this.themeService.toggle();
-    this.theme.set(this.themeService.current());
-  }
+  toggleTheme() { this.themeService.toggle(); this.themeDark.set(this.themeService.isDark()); }
 
   // Ya no gestionamos DOM aquí; lo hace ThemeService
 }

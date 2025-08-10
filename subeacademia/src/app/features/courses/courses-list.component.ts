@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Course } from '../../core/models/course.model';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SeoService } from '../../core/seo/seo.service';
+import { LogService } from '../../core/log.service';
 
 @Component({
   selector: 'app-courses-list',
@@ -29,7 +30,7 @@ import { SeoService } from '../../core/seo/seo.service';
       <div class="mt-4 flex flex-wrap gap-3 text-sm">
         <label>
           Nivel:
-          <select #levelSel class="border rounded px-2 py-1 ml-2" (change)="onLevelChange(levelSel.value)">
+          <select #levelSel class="border rounded px-2 py-1 ml-2 ui-input" (change)="onLevelChange(levelSel.value)">
             <option value="">Todos</option>
             <option value="intro">Intro</option>
             <option value="intermedio">Intermedio</option>
@@ -38,7 +39,7 @@ import { SeoService } from '../../core/seo/seo.service';
         </label>
         <label>
           Tema:
-          <input #topicInput class="border rounded px-2 py-1 ml-2" type="text" placeholder="p.ej. LLMs" (change)="onTopicChange(topicInput.value)" />
+          <input #topicInput class="border rounded px-2 py-1 ml-2 ui-input" type="text" placeholder="p.ej. LLMs" (change)="onTopicChange(topicInput.value)" />
         </label>
       </div>
 
@@ -82,7 +83,7 @@ export class CoursesListComponent {
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
-  private readonly log = inject((await import('../../core/log.service')).LogService);
+  private readonly log = inject(LogService);
 
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly courses = signal<any[]>([]);
@@ -141,7 +142,7 @@ export class CoursesListComponent {
         try {
           const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
           if (url) this.indexErrorUrl.set(url);
-          const isIndex = this.log.indexNeeded('courses', err, { lang });
+          const isIndex = this.log.indexNeeded({ area: 'courses', details: { lang } }, err);
           if (!isIndex) this.log.error('[CoursesList] Error al cargar cursos', err);
           this.errorMessage.set('Error al cargar cursos');
         } finally {

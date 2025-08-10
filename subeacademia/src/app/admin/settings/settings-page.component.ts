@@ -11,35 +11,35 @@ import { SettingsService, SiteSettings } from '../../core/data/settings.service'
   <h1 class="text-2xl font-semibold mb-3">Ajustes</h1>
   <form [formGroup]="form" class="grid gap-4 md:grid-cols-2" (ngSubmit)="save()">
     <label class="block">Nombre de marca
-      <input class="w-full" formControlName="brandName" />
+      <input class="w-full ui-input" formControlName="brandName" />
     </label>
     <label class="block">Logo URL
-      <input class="w-full" formControlName="logoUrl" />
+      <input class="w-full ui-input" formControlName="logoUrl" />
     </label>
     <label class="block">Idioma por defecto
-      <select class="w-full" formControlName="defaultLang">
+      <select class="w-full ui-input" formControlName="defaultLang">
         <option value="es">es</option><option value="en">en</option><option value="pt">pt</option>
       </select>
     </label>
     <label class="block">Email de contacto
-      <input class="w-full" formControlName="contactEmail" />
+      <input class="w-full ui-input" formControlName="contactEmail" />
     </label>
 
     <label class="block">GA4 Measurement ID
-      <input class="w-full" formControlName="ga4MeasurementId" />
+      <input class="w-full ui-input" formControlName="ga4MeasurementId" />
     </label>
     <label class="block">Search Console Verification
-      <input class="w-full" formControlName="searchConsoleVerification" />
+      <input class="w-full ui-input" formControlName="searchConsoleVerification" />
     </label>
 
     <label class="block">Twitter
-      <input class="w-full" formControlName="twitter" />
+      <input class="w-full ui-input" formControlName="twitter" />
     </label>
     <label class="block">LinkedIn
-      <input class="w-full" formControlName="linkedin" />
+      <input class="w-full ui-input" formControlName="linkedin" />
     </label>
     <label class="block">YouTube
-      <input class="w-full" formControlName="youtube" />
+      <input class="w-full ui-input" formControlName="youtube" />
     </label>
 
     <div class="md:col-span-2">

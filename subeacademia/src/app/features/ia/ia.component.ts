@@ -14,9 +14,9 @@ import { SeoService } from '../../core/seo/seo.service';
       <p class="text-muted mt-2">Interactúa con nuestro asistente.</p>
 
       <form class="mt-6 grid gap-3 max-w-3xl" (ngSubmit)="onAsk()">
-        <textarea [ngModel]="prompt()" (ngModelChange)="prompt.set($event)" name="prompt" rows="4" class="input" placeholder="Escribe tu pregunta..." required></textarea>
+        <textarea [ngModel]="prompt()" (ngModelChange)="prompt.set($event)" name="prompt" rows="4" class="ui-input" placeholder="Escribe tu pregunta..." required></textarea>
         <div class="flex items-center gap-3">
-          <button class="btn btn-primary" type="submit" [disabled]="loading()">{{ loading() ? 'Enviando…' : 'Preguntar' }}</button>
+          <button class="ui-btn" type="submit" [disabled]="loading()">{{ loading() ? 'Enviando…' : 'Preguntar' }}</button>
           <span class="muted" *ngIf="!isBrowser">La IA solo funciona en el navegador.</span>
         </div>
       </form>

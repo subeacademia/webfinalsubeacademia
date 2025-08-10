@@ -5,7 +5,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
   selector: 'app-rich-editor',
   standalone: true,
   template: `
-    <textarea class="w-full min-h-64 h-64" [value]="value" (input)="onInput($event)"></textarea>
+    <textarea class="w-full min-h-64 h-64 ui-input" [value]="value" (input)="onInput($event)"></textarea>
   `,
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => RichEditorComponent), multi: true }

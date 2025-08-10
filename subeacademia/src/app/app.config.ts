@@ -1,4 +1,5 @@
 import { APP_INITIALIZER, ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 import { DOCUMENT } from '@angular/common';
 import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -6,7 +7,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { ThemeService } from './shared/theme.service';
+import { ThemeService } from './theme.service';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator, collection, getDocs } from '@angular/fire/firestore';
@@ -81,6 +82,10 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideAnimations(),
     provideHttpClient(withFetch()),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
     provideFirebaseApp(() => initializeApp(runtimeEnv.firebase)),
     provideAuth(() => {
       const auth = getAuth();
@@ -109,13 +114,7 @@ export const appConfig: ApplicationConfig = {
       deps: [DOCUMENT],
       multi: true,
     },
-    {
-      // Inicializa el tema lo antes posible en el ciclo de arranque
-      provide: APP_INITIALIZER,
-      multi: true,
-      deps: [ThemeService],
-      useFactory: (theme: ThemeService) => () => theme.init(),
-    },
+    // ThemeService aplica el modo en su constructor; no necesitamos APP_INITIALIZER
     {
       provide: APP_INITIALIZER,
       multi: true,

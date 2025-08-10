@@ -36,6 +36,8 @@ import { PostsService } from '../../core/data/posts.service';
 export class PostsPageComponent{
   private svc = inject(PostsService);
   posts = signal<any[]>([]);
-  constructor(){ this.svc.list('es').subscribe(v => this.posts.set(v)); }
+  constructor(){
+    this.svc.list('es').then(v => this.posts.set(v));
+  }
 }
 

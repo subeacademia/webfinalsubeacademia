@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { isPlatformBrowser, NgClass } from '@angular/common';
 import { SeoService } from '../../core/seo/seo.service';
 import { FirebaseDataService } from '../../core/firebase-data.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { organizationJsonLd } from '../../core/seo/jsonld';
 import { RevealOnScrollDirective } from '../../shared/ui/reveal-on-scroll.directive';
@@ -155,18 +154,16 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   async ngAfterViewInit() {
     // Cargar destacados (no romper UI si falla)
-    this.data.getHomeFeatured(this.i18n.currentLang())
-      .pipe(takeUntilDestroyed())
-      .subscribe({ next: () => {}, error: () => {} });
+    const sub = this.data.getHomeFeatured(this.i18n.currentLang()).subscribe({ next: () => {}, error: () => {} });
 
     if (!this.isBrowser) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
+    if (reduceMotion) { sub.unsubscribe(); return; }
     const isSmall = window.matchMedia('(max-width: 640px)').matches;
 
     const canvas = this.hero3dRef?.nativeElement;
-    if (!canvas) return;
+    if (!canvas) { sub.unsubscribe(); return; }
 
     // Cargar Three.js de forma lazy
     const [THREE] = await Promise.all([
@@ -279,6 +276,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       document.addEventListener('visibilitychange', onVisibility);
 
       this.disposeFn = () => {
+        sub.unsubscribe();
         cancelAnimationFrame(animationFrameId);
         resizeObs.disconnect();
         io.disconnect();
