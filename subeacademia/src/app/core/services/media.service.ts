@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Storage, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
+import { Storage, getDownloadURL, ref, uploadBytes, uploadBytesResumable } from '@angular/fire/storage';
 import { Firestore, addDoc, collection } from '@angular/fire/firestore';
 import { MediaItem } from '../models/media.model';
 import { Auth } from '@angular/fire/auth';
@@ -15,6 +15,49 @@ export class MediaService {
       files.map(file => this.uploadSingle(file, options))
     );
     return results;
+  }
+
+  uploadWithProgress(file: File, options?: { convertToWebP?: boolean }, onProgress?: (p: number) => void): Promise<MediaItem> {
+    return new Promise<MediaItem>(async (resolve, reject) => {
+      try {
+        let uploadFile = file;
+        if (options?.convertToWebP && file.type.startsWith('image/') && !file.type.includes('webp')) {
+          try {
+            const converted = await this.convertImageToWebP(file);
+            if (converted) uploadFile = converted;
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        const timestamp = Date.now();
+        const path = `media/${timestamp}_${uploadFile.name}`;
+        const storageRef = ref(this.storage, path);
+        const task = uploadBytesResumable(storageRef, uploadFile, { contentType: uploadFile.type });
+        task.on('state_changed', (snap) => {
+          const p = (snap.bytesTransferred / snap.totalBytes) * 100;
+          onProgress?.(p);
+        }, (err) => reject(err), async () => {
+          const url = await getDownloadURL(task.snapshot.ref);
+          const createdBy = this.auth.currentUser?.uid ?? 'anonymous';
+          const itemBase = {
+            fileName: uploadFile.name,
+            path,
+            contentType: uploadFile.type,
+            size: uploadFile.size,
+            url,
+            createdAt: timestamp,
+            createdBy,
+            meta: {}
+          } as Omit<MediaItem, 'id'>;
+          const docRef = await addDoc(collection(this.firestore, 'media'), itemBase as any);
+          const item: MediaItem = { id: docRef.id, ...(itemBase as any) };
+          resolve(item);
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   private async uploadSingle(file: File, options?: { convertToWebP?: boolean }): Promise<MediaItem> {

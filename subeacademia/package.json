@@ -9,7 +9,7 @@
     "test": "ng test",
     "serve:ssr:subeacademia": "node dist/subeacademia/server/server.mjs",
     "build:ssg": "ng build --configuration=production",
-    "serve:ssg": "npx http-server dist/subeacademia/browser -p 4200"
+    "serve:ssg": "npx serve -s dist/subeacademia/browser -l 4200"
   },
   "prettier": {
     "overrides": [

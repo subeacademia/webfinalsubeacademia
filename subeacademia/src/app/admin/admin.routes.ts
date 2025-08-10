@@ -3,8 +3,10 @@ import { Routes } from '@angular/router';
 export const ADMIN_ROUTES: Routes = [
   {
     path: '',
+    canMatch: [() => import('../core/guards/admin.guard').then(m => m.adminGuard)],
     loadComponent: () => import('./dashboard/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'posts' },
       {
         path: 'posts',
         loadComponent: () => import('./posts/admin-posts.component').then((m) => m.AdminPostsComponent),
@@ -23,5 +25,9 @@ export const ADMIN_ROUTES: Routes = [
       },
     ],
   },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.component').then(m => m.LoginComponent)
+  }
 ];
 
