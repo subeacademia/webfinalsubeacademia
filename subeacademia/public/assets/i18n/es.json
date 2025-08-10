@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Sube Academ-IA",
+    "subtitle": "Educación aplicada + Inteligencia Artificial para profesionales y equipos."
+  },
+  "cta": {
+    "exploreCourses": "Explorar Cursos",
+    "readPosts": "Leer Publicaciones",
+    "finalTitle": "Sube de nivel con Academ-IA",
+    "finalText": "Descubre cursos y contenidos que multiplican tu impacto."
+  },
+  "benefits": [
+    { "title": "Aprende con proyectos", "text": "Casos reales, frameworks prácticos y feedback accionable." },
+    { "title": "IA como copiloto", "text": "Workflows de IA integrados para acelerar y elevar calidad." },
+    { "title": "Comunidad y soporte", "text": "Acompañamiento y updates continuos. No te quedas atrás." }
+  ],
+  "clients": { "title": "Empresas que confían" },
+  "blog": {
+    "title": "Últimas publicaciones",
+    "subtitle": "Ideas, guías prácticas y tendencias de IA aplicada.",
+    "viewAll": "Ver todo"
+  },
+  "courses": {
+    "title": "Cursos destacados",
+    "items": [
+      { "title": "IA para Product Managers", "text": "Roadmaps, priorización y métricas con IA." },
+      { "title": "Automatización con IA", "text": "Integraciones, agentes y eficiencia." },
+      { "title": "Prompt Engineering", "text": "De novato a pro, paso a paso." }
+    ]
+  }
+}

@@ -2,6 +2,7 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Inject, 
 import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { SeoService } from '../../core/seo/seo.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { organizationJsonLd } from '../../core/seo/jsonld';
 
 @Component({
@@ -17,15 +18,15 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
         <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 class="font-grotesk text-5xl md:text-7xl leading-[0.95] tracking-tight">
-              Sube Academ-IA
+              {{ i18n.getTranslations('hero.title') }}
             </h1>
             <p class="mt-5 text-lg text-[var(--muted)]">
-              Educación aplicada + Inteligencia Artificial para profesionales y equipos.
+              {{ i18n.getTranslations('hero.subtitle') }}
             </p>
 
             <div class="mt-8 flex flex-wrap gap-4" role="group" aria-label="Acciones principales">
-              <a routerLink="../cursos" class="btn btn-primary" aria-label="Explorar Cursos">Explorar Cursos</a>
-              <a routerLink="../blog" class="btn btn-ghost" aria-label="Leer Publicaciones">Leer Publicaciones</a>
+              <a routerLink="../cursos" class="btn btn-primary" aria-label="Explorar Cursos">{{ i18n.getTranslations('cta.exploreCourses') }}</a>
+              <a routerLink="../blog" class="btn btn-ghost" aria-label="Leer Publicaciones">{{ i18n.getTranslations('cta.readPosts') }}</a>
             </div>
           </div>
 
@@ -40,16 +41,16 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
           <article class="card">
-            <h2 class="h2">Aprende con proyectos</h2>
-            <p class="muted">Casos reales, frameworks prácticos y feedback accionable.</p>
+            <h2 class="h2">{{ i18n.getTranslations('benefits.0.title') }}</h2>
+            <p class="muted">{{ i18n.getTranslations('benefits.0.text') }}</p>
           </article>
           <article class="card">
-            <h2 class="h2">IA como copiloto</h2>
-            <p class="muted">Workflows de IA integrados para acelerar y elevar calidad.</p>
+            <h2 class="h2">{{ i18n.getTranslations('benefits.1.title') }}</h2>
+            <p class="muted">{{ i18n.getTranslations('benefits.1.text') }}</p>
           </article>
           <article class="card">
-            <h2 class="h2">Comunidad y soporte</h2>
-            <p class="muted">Acompañamiento y updates continuos. No te quedas atrás.</p>
+            <h2 class="h2">{{ i18n.getTranslations('benefits.2.title') }}</h2>
+            <p class="muted">{{ i18n.getTranslations('benefits.2.text') }}</p>
           </article>
         </div>
       </section>
@@ -57,7 +58,7 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- Casos/Clientes -->
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto">
-          <h2 class="h2">Empresas que confían</h2>
+          <h2 class="h2">{{ i18n.getTranslations('clients.title') }}</h2>
           <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6 opacity-80">
             <div class="logo-skel" aria-label="Cliente 1"></div>
             <div class="logo-skel" aria-label="Cliente 2"></div>
@@ -71,9 +72,9 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 class="h2">Últimas publicaciones</h2>
-            <p class="muted">Ideas, guías prácticas y tendencias de IA aplicada.</p>
-            <a routerLink="../blog" class="btn btn-link mt-4" aria-label="Ir al blog">Ver todo</a>
+            <h2 class="h2">{{ i18n.getTranslations('blog.title') }}</h2>
+            <p class="muted">{{ i18n.getTranslations('blog.subtitle') }}</p>
+            <a routerLink="../blog" class="btn btn-link mt-4" aria-label="Ir al blog">{{ i18n.getTranslations('blog.viewAll') }}</a>
           </div>
           <div class="grid gap-4">
             <a routerLink="../blog" class="item-row" aria-label="Entrada del blog destacada">
@@ -95,19 +96,19 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- Cursos destacados -->
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto">
-          <h2 class="h2">Cursos destacados</h2>
+          <h2 class="h2">{{ i18n.getTranslations('courses.title') }}</h2>
           <div class="mt-8 grid md:grid-cols-3 gap-6">
             <a routerLink="../cursos" class="course-card" aria-label="Curso 1">
-              <h3 class="h3">IA para Product Managers</h3>
-              <p class="muted">Roadmaps, priorización y métricas con IA.</p>
+              <h3 class="h3">{{ i18n.getTranslations('courses.items.0.title') }}</h3>
+              <p class="muted">{{ i18n.getTranslations('courses.items.0.text') }}</p>
             </a>
             <a routerLink="../cursos" class="course-card" aria-label="Curso 2">
-              <h3 class="h3">Automatización con IA</h3>
-              <p class="muted">Integraciones, agentes y eficiencia.</p>
+              <h3 class="h3">{{ i18n.getTranslations('courses.items.1.title') }}</h3>
+              <p class="muted">{{ i18n.getTranslations('courses.items.1.text') }}</p>
             </a>
             <a routerLink="../cursos" class="course-card" aria-label="Curso 3">
-              <h3 class="h3">Prompt Engineering</h3>
-              <p class="muted">De novato a pro, paso a paso.</p>
+              <h3 class="h3">{{ i18n.getTranslations('courses.items.2.title') }}</h3>
+              <p class="muted">{{ i18n.getTranslations('courses.items.2.text') }}</p>
             </a>
           </div>
         </div>
@@ -116,10 +117,10 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- CTA final -->
       <section class="py-20 md:py-28 px-6">
         <div class="max-w-4xl mx-auto text-center">
-          <h2 class="font-grotesk text-3xl md:text-5xl">Sube de nivel con Academ-IA</h2>
-          <p class="muted mt-4">Descubre cursos y contenidos que multiplican tu impacto.</p>
+          <h2 class="font-grotesk text-3xl md:text-5xl">{{ i18n.getTranslations('cta.finalTitle') }}</h2>
+          <p class="muted mt-4">{{ i18n.getTranslations('cta.finalText') }}</p>
           <div class="mt-8">
-            <a routerLink="../cursos" class="btn btn-primary" aria-label="Explorar Cursos CTA">Explorar Cursos</a>
+            <a routerLink="../cursos" class="btn btn-primary" aria-label="Explorar Cursos CTA">{{ i18n.getTranslations('cta.exploreCourses') }}</a>
           </div>
         </div>
       </section>
@@ -137,6 +138,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     private readonly ngZone: NgZone,
     @Inject(PLATFORM_ID) private readonly platformId: Object,
     private readonly seo: SeoService,
+    public readonly i18n: I18nService,
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     // Metadatos SEO para la landing

@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Sube Academ-IA",
+    "subtitle": "Applied education + Artificial Intelligence for professionals and teams."
+  },
+  "cta": {
+    "exploreCourses": "Explore Courses",
+    "readPosts": "Read Posts",
+    "finalTitle": "Level up with Academ-IA",
+    "finalText": "Discover courses and content that multiply your impact."
+  },
+  "benefits": [
+    { "title": "Learn by doing", "text": "Real cases, practical frameworks and actionable feedback." },
+    { "title": "AI as a copilot", "text": "Integrated AI workflows to accelerate and lift quality." },
+    { "title": "Community & support", "text": "Continuous guidance and updates. Don't fall behind." }
+  ],
+  "clients": { "title": "Trusted by" },
+  "blog": {
+    "title": "Latest posts",
+    "subtitle": "Ideas, practical guides and applied AI trends.",
+    "viewAll": "View all"
+  },
+  "courses": {
+    "title": "Featured courses",
+    "items": [
+      { "title": "AI for Product Managers", "text": "Roadmaps, prioritization and metrics with AI." },
+      { "title": "Automation with AI", "text": "Integrations, agents and efficiency." },
+      { "title": "Prompt Engineering", "text": "From novice to pro, step by step." }
+    ]
+  }
+}

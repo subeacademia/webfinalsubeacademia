@@ -28,7 +28,7 @@ export class App implements OnInit {
           | 'en'
           | 'pt'
           | undefined;
-        if (first) this.i18n.setDocumentLang(first);
+        if (first) void this.i18n.setLang(first);
 
         const url = this.router.url;
         if (url.includes('/blog')) {
