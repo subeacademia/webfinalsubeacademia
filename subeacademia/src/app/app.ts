@@ -1,9 +1,10 @@
-import { Component, OnInit, isDevMode, signal } from '@angular/core';
+import { Component, OnInit, isDevMode, signal, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { filter } from 'rxjs/operators';
 import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
+import { ThemeService } from './shared/theme.service';
 import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
@@ -18,6 +19,7 @@ import { FirebaseDataService } from './core/firebase-data.service';
 })
 export class App implements OnInit {
   protected readonly title = signal('subeacademia');
+  private readonly themeService = inject(ThemeService);
   constructor(
     private readonly router: Router,
     private readonly i18n: I18nService,
@@ -25,6 +27,8 @@ export class App implements OnInit {
     private readonly data: FirebaseDataService,
   ) {}
   ngOnInit() {
+    // Inicializar tema al arrancar
+    this.themeService.init();
     if (isDevMode()) {
       try {
         const hints = this.data.getIndexHints();

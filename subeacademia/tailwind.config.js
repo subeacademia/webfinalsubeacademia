@@ -1,14 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
       colors: {
-        bg: "#0A0F1A",
-        fg: "#E6EAF0",
-        muted: "#9AA3AF",
-        accent: "#00A3FF",
-        panel: "#0F1522",
+        bg: "#0b1220",
+        fg: "#e8eef7",
+        muted: "#a6b0c3",
+        accent: "#2563eb",
+        panel: "#121a2a",
       },
       fontFamily: {
         grotesk: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui'],

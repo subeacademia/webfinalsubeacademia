@@ -80,8 +80,8 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
       </aside>
 
       <div *ngIf="showPreview()" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-        <div class="bg-white max-w-4xl w-full rounded shadow-lg overflow-auto max-h-[85vh]">
-          <div class="flex items-center justify-between p-3 border-b">
+        <div class="card max-w-4xl w-full overflow-auto max-h-[85vh] p-0">
+          <div class="flex items-center justify-between p-3 border-b border-[var(--border)]">
             <div class="font-medium">Previsualización</div>
             <button class="btn" type="button" (click)="closePreview()">Cerrar</button>
           </div>

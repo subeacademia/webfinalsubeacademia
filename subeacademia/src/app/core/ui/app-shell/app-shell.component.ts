@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { I18nService } from '../../i18n/i18n.service';
 import { SettingsService, SiteSettings } from '../../data/settings.service';
+import { ThemeService } from '../../../shared/theme.service';
 
 type Lang = 'es' | 'en' | 'pt';
 
@@ -120,16 +121,16 @@ export class AppShellComponent {
 
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
-  theme = signal<'light'|'dark'>(this.detectInitialTheme());
+  theme = signal<'light'|'dark'>(this.themeService.current());
 
-  constructor(private readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
+  constructor(private readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService, private readonly themeService: ThemeService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
     this.settings.get().subscribe((s: SiteSettings | undefined) => {
       if (!s) return;
       if (s.brandName) this.brandName.set(s.brandName);
       this.logoUrl.set(s.logoUrl || null);
     });
-    this.applyTheme(this.theme());
+    // Theme se aplica vía ThemeService en App init; mantenemos señal para UI
   }
 
   toggleNav() { this.navOpen.set(!this.navOpen()); }
@@ -147,25 +148,11 @@ export class AppShellComponent {
     }
   }
 
-  private detectInitialTheme(): 'light'|'dark' {
-    try {
-      const saved = localStorage.getItem('theme') as 'light'|'dark'|null;
-      if (saved === 'light' || saved === 'dark') return saved;
-      const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return prefersDark ? 'dark' : 'light';
-    } catch { return 'light'; }
-  }
-
   toggleTheme() {
-    const next: 'light'|'dark' = this.theme() === 'dark' ? 'light' : 'dark';
-    this.theme.set(next);
-    try { localStorage.setItem('theme', next); } catch {}
-    this.applyTheme(next);
+    this.themeService.toggle();
+    this.theme.set(this.themeService.current());
   }
 
-  private applyTheme(mode: 'light'|'dark') {
-    const root = document.documentElement;
-    if (mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
-  }
+  // Ya no gestionamos DOM aquí; lo hace ThemeService
 }
 

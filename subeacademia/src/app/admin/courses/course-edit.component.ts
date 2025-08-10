@@ -94,17 +94,17 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
 
     <!-- Mini diálogo añadir recurso -->
     <div *ngIf="showResDlg()" class="fixed inset-0 bg-black/40 grid place-items-center p-4">
-      <div class="bg-white rounded shadow max-w-md w-full p-4 text-sm text-black">
+      <div class="card max-w-md w-full p-4 text-sm">
         <div class="flex items-center justify-between mb-2">
           <div class="font-medium">Añadir recurso</div>
           <button class="btn" type="button" (click)="closeResourceDialog()">×</button>
         </div>
         <div class="grid gap-2">
           <label>Nombre visible
-            <input class="w-full border rounded px-2 py-1" [(ngModel)]="resName" />
+            <input class="w-full" [(ngModel)]="resName" />
           </label>
           <label>Tipo
-            <select class="w-full border rounded px-2 py-1" [(ngModel)]="resKind">
+            <select class="w-full" [(ngModel)]="resKind">
               <option value="video">video</option>
               <option value="pdf">pdf</option>
               <option value="zip">zip</option>
@@ -118,7 +118,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           </ng-container>
           <ng-template #linkTpl>
             <label>URL
-              <input class="w-full border rounded px-2 py-1" [(ngModel)]="resUrl" />
+              <input class="w-full" [(ngModel)]="resUrl" />
             </label>
           </ng-template>
           <div class="flex justify-end gap-2 mt-2">

@@ -3,28 +3,39 @@
 @tailwind utilities;
 
 
-/* Tema claro por defecto */
+/* ----- Tokens de color (AA) ----- */
 :root {
+  /* Light */
   --bg: #ffffff;
-  --fg: #0a0f1a;
-  --muted: #4b5563; /* gris 600, contraste AA sobre blanco */
-  --accent: #00A3FF;
-  --panel: #f5f7fb;
+  --fg: #0b1220;          /* texto principal */
+  --muted: #5a6577;       /* texto secundario/placeholder */
+  --border: #d7dbe2;
+  --card: #f7f9fc;
   --input-bg: #ffffff;
-  --input-fg: #0a0f1a;
-  --ring: rgba(0, 163, 255, 0.45);
+  --input-fg: #0b1220;
+  --ring: #2563eb;        /* focus ring */
+  --link: #2563eb;
+
+  /* Compatibilidad con estilos existentes */
+  --accent: var(--ring);
+  --panel: var(--card);
 }
 
-/* Tema oscuro (aplicado en <html class="dark">) */
-.dark {
-  --bg: #0A0F1A;
-  --fg: #E6EAF0;
-  --muted: #9AA3AF; /* contraste AA sobre panel oscuro */
-  --accent: #00A3FF;
-  --panel: #0F1522;
-  --input-bg: #0F1522;
-  --input-fg: #E6EAF0;
-  --ring: rgba(0, 163, 255, 0.55);
+:root.dark {
+  /* Dark */
+  --bg: #0b1220;
+  --fg: #e8eef7;
+  --muted: #a6b0c3;
+  --border: #243044;
+  --card: #121a2a;
+  --input-bg: #0f1726;
+  --input-fg: #e8eef7;
+  --ring: #60a5fa;
+  --link: #60a5fa;
+
+  /* Compatibilidad con estilos existentes */
+  --accent: var(--ring);
+  --panel: var(--card);
 }
 
 html, body {
@@ -32,28 +43,43 @@ html, body {
   color: var(--fg);
 }
 
+/* Enlaces */
+a { color: var(--link); }
+
 /* Controles de formulario accesibles */
 input, select, textarea {
-  background-color: var(--input-bg);
+  background: var(--input-bg);
   color: var(--input-fg);
-  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
-  border-radius: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .625rem .75rem;
+  outline: none;
 }
-input::placeholder, textarea::placeholder {
-  color: var(--muted);
-  opacity: 1; /* asegurar contraste visible */
-}
+input::placeholder, textarea::placeholder { color: var(--muted); }
 input:focus, select:focus, textarea:focus, .btn:focus {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 30%, transparent);
+}
+
+/* Select (garantiza contraste también en dark) */
+select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2rem;
+  color-scheme: light dark; /* deja al SO colorear correctamente dropdown */
 }
 
 /* Utilidades solicitadas */
 .container { @apply max-w-7xl mx-auto px-4 md:px-6; }
 .btn { @apply inline-flex items-center gap-2 rounded-xl px-5 py-3 transition; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); background: color-mix(in srgb, var(--panel) 40%, transparent); }
-.btn-primary { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--fg); border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
-.card { @apply rounded-2xl backdrop-blur-lg shadow-lg; border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent); background: color-mix(in srgb, var(--panel) 60%, transparent); }
+.card { @apply rounded-2xl backdrop-blur-lg shadow-lg; border: 1px solid var(--border); background: var(--card); }
 
 /* Tipografías utilitarias */
 .font-grotesk { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif; }
@@ -67,18 +93,32 @@ input:focus, select:focus, textarea:focus, .btn:focus {
 /* Botones minimal */
 .btn { @apply inline-flex items-center justify-center rounded-2xl transition-transform duration-150; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); padding: 0.75rem 1rem; }
 .btn:hover { transform: translateY(-1px) scale(1.01); }
-.btn-primary { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--fg); border-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.btn-primary { background: var(--ring); color: #ffffff; border: none; border-radius: 12px; padding: .625rem 1rem; }
+.btn-primary:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent); }
 .btn-ghost { background: transparent; color: var(--fg); }
 .btn-link { color: var(--accent); text-underline-offset: 3px; }
 
 /* Cards */
-.card { @apply rounded-3xl p-6 border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); background: color-mix(in srgb, var(--panel) 60%, transparent); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+.card { @apply rounded-3xl p-6 border; border-color: var(--border); background: var(--card); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
 .course-card { @apply rounded-3xl p-5 border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); background: color-mix(in srgb, var(--panel) 50%, transparent); display: block; }
 .course-card:hover { transform: translateY(-2px); }
 .item-row { @apply rounded-2xl p-4 border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); display:block; }
 
 /* Logos skeleton */
 .logo-skel { @apply h-12 rounded-xl border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04)); }
+
+/* Skeletons / placeholders */
+.skeleton {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--card) 85%, #000 0%) 25%,
+    color-mix(in srgb, var(--card) 70%, #000 0%) 37%,
+    color-mix(in srgb, var(--card) 85%, #000 0%) 63%);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
 
 /* Animación de fondo muy sutil */
 @keyframes bgfade { from { opacity: 0.3; } to { opacity: 0.6; } }
