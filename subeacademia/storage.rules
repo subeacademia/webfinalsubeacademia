@@ -1,13 +1,18 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function isAuth() { return request.auth != null; }
-    match /{allPaths=**} {
-      // Lectura pública
-      allow read: if true;
-      // Escritura sólo autenticados
-      allow write: if isAuth();
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == "bruno@subeia.tech";
+    }
+    // Lectura pública de archivos publicados
+    match /public/{allPaths=**} {
+      allow read: if true;                // público
+      allow write: if isAdmin();
+    }
+    // Zona privada (si la necesitas)
+    match /private/{allPaths=**} {
+      allow read, write: if isAdmin();
     }
   }
 }
-

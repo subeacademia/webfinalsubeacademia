@@ -1,27 +1,23 @@
 import { Component, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 
 @Component({
   selector: 'app-rich-editor',
   standalone: true,
-  imports: [CKEditorModule],
   template: `
-    <ckeditor [editor]="Editor" [data]="value" (change)="onChange($event)"></ckeditor>
+    <textarea class="w-full min-h-64 h-64" [value]="value" (input)="onInput($event)"></textarea>
   `,
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => RichEditorComponent), multi: true }
   ]
 })
 export class RichEditorComponent {
-  public Editor = ClassicEditor;
   value = '';
 
-  onChange(e: any) {
-    const data = e.editor.getData();
-    this.value = data;
-    this._onChange(data);
+  onInput(e: Event) {
+    const v = (e.target as HTMLTextAreaElement)?.value ?? '';
+    this.value = v;
+    this._onChange(v);
     this._onTouched();
   }
 

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Storage, getDownloadURL, ref, uploadBytes, uploadBytesResumable, deleteObject } from '@angular/fire/storage';
+import { Storage, getDownloadURL, ref, uploadBytesResumable, deleteObject } from '@angular/fire/storage';
 import { Firestore, addDoc, collection } from '@angular/fire/firestore';
 import { MediaItem } from '../models/media.model';
 import { Auth } from '@angular/fire/auth';
@@ -31,7 +31,7 @@ export class MediaService {
         }
 
         const timestamp = Date.now();
-        const path = `media/${timestamp}_${uploadFile.name}`;
+        const path = `public/media/${timestamp}_${uploadFile.name}`;
         const storageRef = ref(this.storage, path);
         const task = uploadBytesResumable(storageRef, uploadFile, { contentType: uploadFile.type });
         task.on('state_changed', (snap) => {
@@ -72,12 +72,13 @@ export class MediaService {
     }
 
     const timestamp = Date.now();
-    const path = `media/${timestamp}_${uploadFile.name}`;
+    const path = `public/media/${timestamp}_${uploadFile.name}`;
     const storageRef = ref(this.storage, path);
-    const snapshot = await uploadBytes(storageRef, uploadFile, {
-      contentType: uploadFile.type
+    const task = uploadBytesResumable(storageRef, uploadFile, { contentType: uploadFile.type });
+    await new Promise<void>((resolve, reject) => {
+      task.on('state_changed', undefined, reject, () => resolve());
     });
-    const url = await getDownloadURL(snapshot.ref);
+    const url = await getDownloadURL(task.snapshot.ref);
 
     const createdBy = this.auth.currentUser?.uid ?? 'anonymous';
 

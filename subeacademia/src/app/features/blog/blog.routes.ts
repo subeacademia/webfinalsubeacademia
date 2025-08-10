@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { makeStateKey, TransferState } from '@angular/platform-browser';
+import { TransferState, makeStateKey } from '@angular/core';
 import { inject } from '@angular/core';
 import { ContentService } from '../../core/data/content.service';
 import { I18nService } from '../../core/i18n/i18n.service';

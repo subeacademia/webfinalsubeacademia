@@ -35,6 +35,8 @@
     "@angular/platform-server": "^20.1.0",
     "@angular/router": "^20.1.0",
     "@angular/ssr": "^20.1.5",
+    "@ckeditor/ckeditor5-angular": "^10.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
     "@types/three": "^0.179.0",
     "express": "^5.1.0",
     "firebase": "^11.10.0",

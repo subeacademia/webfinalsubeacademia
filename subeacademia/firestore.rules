@@ -1,13 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // Lectura pública
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ["bruno@subeia.tech"];
+    }
+    function isAuthed() { return request.auth != null; }
+
+    // Público (lectura) de posts/courses publicados
+    match /posts/{id} {
+      allow read: if resource.data.published == true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /courses/{id} {
+      allow read: if resource.data.published == true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Media metadata en colección media/
+    match /media/{id} {
       allow read: if true;
-      // Escritura sólo autenticados y con validaciones básicas
-      // TODO: Aplicar límite de tamaño máximo en bytes y validar types permitidos
-      allow write: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Settings del sitio
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
   }
 }
-

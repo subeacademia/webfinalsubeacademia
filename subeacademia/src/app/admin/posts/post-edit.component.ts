@@ -4,8 +4,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PostsService } from '../../core/data/posts.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { TranslationService } from '../../core/ai/translation.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -14,7 +12,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
 
 @Component({
   standalone: true,
-  imports: [CommonModule, NgIf, ReactiveFormsModule, RouterLink, CKEditorModule],
+  imports: [CommonModule, NgIf, ReactiveFormsModule, RouterLink],
   template: `
   <div class="mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id() ? 'Editar Post' : 'Nuevo Post'}}
@@ -42,7 +40,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           <textarea class="w-full" rows="3" formControlName="summary"></textarea>
         </label>
         <label class="block">Contenido</label>
-        <ckeditor [editor]="Editor" formControlName="content"></ckeditor>
+        <textarea class="w-full min-h-64 h-64" formControlName="content"></textarea>
         <div class="grid gap-3 md:grid-cols-2">
           <label class="block">Estado
             <select class="w-full" formControlName="status">
@@ -87,7 +85,7 @@ export class PostEditComponent {
   private translator = inject(TranslationService);
   private http = inject(HttpClient);
 
-  public Editor = ClassicEditor;
+  // Editor WYSIWYG deshabilitado temporalmente para evitar conflictos de tipos con CKEditor
 
   id = signal<string|null>(null);
   // Nuevo esquema: translations + languageFallback
@@ -115,8 +113,8 @@ export class PostEditComponent {
       this.id.set(maybeId);
       this.posts.get(maybeId).subscribe(p => {
         if (p) this.form.patchValue({
-          ...p,
-          publishedAtLocal: new Date(p.publishedAt || Date.now()).toISOString().slice(0,16)
+          ...(p as any),
+          publishedAtLocal: new Date((p as any).publishedAt || Date.now()).toISOString().slice(0,16)
         });
         this.translationsReady.set(!!(p as any)?.translations?.en && !!(p as any)?.translations?.pt);
       });

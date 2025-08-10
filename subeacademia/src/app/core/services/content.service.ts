@@ -22,7 +22,7 @@ export class ContentService {
     return (collectionData(q, { idField: 'id' }) as unknown as Observable<Post[]>)
       .pipe(
         catchError(() => of([])),
-        map((arr) => (arr && arr.length ? arr : getMockPosts(lang)))
+        map((arr) => (arr && arr.length ? arr : getMockPosts(_lang)))
       );
   }
 
@@ -33,7 +33,7 @@ export class ContentService {
       if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Post;
       const fallback = getMockPosts('es').find((p) => p.slug === slug) || null;
       return fallback;
-    }).catch(() => getMockPosts(lang).find((p) => p.slug === slug) || null);
+    }).catch(() => getMockPosts(_lang).find((p) => p.slug === slug) || null);
   }
 
   createPost(post: Post): Promise<void> {
@@ -64,7 +64,7 @@ export class ContentService {
     return (collectionData(q, { idField: 'id' }) as unknown as Observable<Course[]>)
       .pipe(
         catchError(() => of([])),
-        map((arr) => (arr && arr.length ? arr : getMockCourses('es')))
+        map((arr) => (arr && arr.length ? arr : getMockCourses(_lang)))
       );
   }
 
@@ -75,7 +75,7 @@ export class ContentService {
       if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Course;
       const fallback = getMockCourses('es').find((c) => c.slug === slug) || null;
       return fallback;
-    }).catch(() => getMockCourses(lang).find((c) => c.slug === slug) || null);
+    }).catch(() => getMockCourses(_lang).find((c) => c.slug === slug) || null);
   }
 
   createCourse(course: Course): Promise<void> {

@@ -9,9 +9,10 @@ export class MediaService {
   private db = inject(Firestore);
   private auth = inject(Auth);
 
-  upload(file: File, folder = 'uploads', onProgress?: (p: number) => void) {
+  upload(file: File, folder = 'public/media', onProgress?: (p: number) => void) {
     const uid = this.auth.currentUser?.uid || 'anonymous';
-    const path = `${folder}/${uid}/${Date.now()}-${file.name}`;
+    const normalizedFolder = folder.startsWith('public/') ? folder : `public/${folder}`;
+    const path = `${normalizedFolder}/${uid}/${Date.now()}-${file.name}`;
     const storageRef = ref(this.storage, path);
     const task = uploadBytesResumable(storageRef, file, { contentType: file.type });
 

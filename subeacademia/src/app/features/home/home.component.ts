@@ -242,7 +242,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
             positions[i + 2] = (Math.random() - 0.5) * 2;
           }
           geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-          geometry.attributes.position.needsUpdate = true;
+          (geometry.attributes as any)['position'].needsUpdate = true;
           geometry.computeBoundingSphere();
         }
       };

@@ -5,8 +5,9 @@ import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from
 export class MediaService {
   private storage = inject(Storage);
 
-  upload(file: File, folder='media', onProgress?: (p:number)=>void) {
-    const key = `${folder}/${Date.now()}-${(crypto as any).randomUUID?.() || Math.random()}-${file.name}`;
+  upload(file: File, folder='public/media', onProgress?: (p:number)=>void) {
+    const normFolder = folder.startsWith('public/') ? folder : `public/${folder}`;
+    const key = `${normFolder}/${Date.now()}-${(crypto as any).randomUUID?.() || Math.random()}-${file.name}`;
     const r = ref(this.storage, key);
     const task = uploadBytesResumable(r, file, { contentType: file.type });
 
