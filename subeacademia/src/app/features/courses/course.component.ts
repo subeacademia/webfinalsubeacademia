@@ -57,7 +57,7 @@ export class CourseComponent {
       const description = c.seo?.description ?? c.summary;
       const image = c.seo?.ogImage ?? c.coverUrl;
 
-      this.seo.updateTags({ title, description, image });
+      this.seo.updateTags({ title, description, image, type: 'website' });
 
       this.seo.setJsonLd('course', courseJsonLd({
         name: c.title,

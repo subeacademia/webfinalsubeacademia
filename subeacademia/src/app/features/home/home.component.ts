@@ -147,6 +147,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       description:
         'Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible. Únete a Sube Academ-IA.',
       image: '/og-placeholder.svg',
+      type: 'website',
     });
 
     // JSON-LD Organization
@@ -154,7 +155,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       'org',
       organizationJsonLd({
         name: 'Sube Academ-IA',
-        url: 'https://subeacademia.example.com',
+        url: 'https://www.subeacademia.cl',
         logo: '/logo.svg',
         sameAs: [],
       })

@@ -32,11 +32,11 @@ export class App implements OnInit {
 
         const url = this.router.url;
         if (url.includes('/blog')) {
-          this.seo.updateTags({ title: 'Blog · Sube Academia', description: 'Publicaciones y novedades' });
+          this.seo.updateTags({ title: 'Blog · Sube Academia', description: 'Publicaciones y novedades', type: 'website' });
         } else if (url.includes('/cursos')) {
-          this.seo.updateTags({ title: 'Cursos · Sube Academia', description: 'Cursos y rutas de aprendizaje' });
+          this.seo.updateTags({ title: 'Cursos · Sube Academia', description: 'Cursos y rutas de aprendizaje', type: 'website' });
         } else {
-          this.seo.updateTags({ title: 'Sube Academia', description: 'Aprende IA, cursos y recursos' });
+          this.seo.updateTags({ title: 'Sube Academia', description: 'Aprende IA, cursos y recursos', type: 'website' });
         }
       });
   }

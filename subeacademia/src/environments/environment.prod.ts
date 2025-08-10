@@ -14,6 +14,9 @@ export const environment = {
   ga4MeasurementId: "G-STV4N3EN88",
   backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate",
   // URL estimada de la Function en prod (v2)
-  contactEndpoint: "https://us-central1-web-subeacademia.cloudfunctions.net/sendEmail"
+  contactEndpoint: "https://us-central1-web-subeacademia.cloudfunctions.net/sendEmail",
+  settings: {
+    // searchConsoleVerification: "<TOKEN_VERIFICACION>"
+  } as { searchConsoleVerification?: string }
 };
 

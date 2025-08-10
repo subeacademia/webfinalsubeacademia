@@ -7,6 +7,8 @@ export interface SeoData {
   title?: string;
   description?: string;
   image?: string;
+  url?: string;
+  type?: 'website' | 'article';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +28,9 @@ export class SeoService {
     if (data.description)
       this.meta.updateTag({ property: 'og:description', content: data.description });
     if (data.image) this.meta.updateTag({ property: 'og:image', content: data.image });
+    const currentUrl = data.url || (this.document?.location ? this.document.location.href : undefined);
+    if (currentUrl) this.meta.updateTag({ property: 'og:url', content: currentUrl });
+    this.meta.updateTag({ property: 'og:type', content: data.type || 'website' });
 
     if (data.title) this.meta.updateTag({ name: 'twitter:title', content: data.title });
     if (data.description)

@@ -14,6 +14,10 @@ export const environment = {
   ga4MeasurementId: "G-STV4N3EN88",
   backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate",
   // Endpoint local del emulador de Functions (ajusta el projectId si cambia)
-  contactEndpoint: "http://127.0.0.1:5001/web-subeacademia/us-central1/sendEmail"
+  contactEndpoint: "http://127.0.0.1:5001/web-subeacademia/us-central1/sendEmail",
+  settings: {
+    // Añade tu token de verificación si corresponde
+    // searchConsoleVerification: "google-xxxxxxxxxxxxxxxx.html"
+  } as { searchConsoleVerification?: string }
 };
 

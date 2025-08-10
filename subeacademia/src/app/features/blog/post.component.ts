@@ -63,7 +63,7 @@ export class PostComponent {
       const description = p.seo?.description ?? p.summary;
       const image = p.seo?.ogImage ?? p.coverUrl;
 
-      this.seo.updateTags({ title, description, image });
+      this.seo.updateTags({ title, description, image, type: 'article' });
 
       const isScholarly = (p.categories || []).some((c) => c.toLowerCase().includes('científica'));
       this.seo.setJsonLd('post', articleJsonLd({
