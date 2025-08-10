@@ -27,7 +27,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
         </label>
       </div>
 
-      <section class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <ng-container *ngIf="loading(); else list">
           <app-skeleton-card />
           <app-skeleton-card />
@@ -51,7 +51,9 @@ import { I18nService } from '../../core/i18n/i18n.service';
         </ng-template>
       </section>
 
-      <p *ngIf="!loading() && posts().length === 0" class="mt-10 text-muted">No hay publicaciones.</p>
+      <div *ngIf="!loading() && posts().length === 0" class="mt-10 border rounded-lg p-6 text-center text-muted">
+        No hay publicaciones todavía
+      </div>
     </main>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

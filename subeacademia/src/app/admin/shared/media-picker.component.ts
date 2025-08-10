@@ -54,9 +54,8 @@ export class MediaPickerComponent {
       try{
         await this.media.uploadWithProgress(f, { convertToWebP: true }, p => this.progress.set(Math.round(p)));
       }catch(err:any){
-        console.error('Upload error', err);
-        const code = err?.code ? ` (${err.code})` : '';
-        this.error.set((err?.message || 'Error subiendo archivo') + code);
+        console.error(err?.code, err?.message);
+        this.error.set((err?.message || 'Error subiendo archivo') + (err?.code ? ` (${err.code})` : ''));
       }finally{
         this.progress.set(0);
       }

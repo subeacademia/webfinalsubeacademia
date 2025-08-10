@@ -7,7 +7,8 @@
     "build": "ng build",
     "build:ssg": "ng build --configuration=production",
     "serve:ssg": "npx http-server dist/subeacademia/browser -p 4200",
-    "seed": "ts-node tools/seed.ts"
+    "seed": "ts-node tools/seed.ts",
+    "deploy:indexes": "npx --yes firebase-tools@latest deploy --only firestore:indexes --project web-subeacademia --non-interactive"
   },
   "prettier": {
     "overrides": [

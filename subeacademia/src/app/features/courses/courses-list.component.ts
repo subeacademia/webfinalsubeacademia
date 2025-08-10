@@ -32,7 +32,7 @@ import { SeoService } from '../../core/seo/seo.service';
         </label>
       </div>
 
-      <section class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <ng-container *ngIf="loading(); else listCourses">
           <app-skeleton-card />
           <app-skeleton-card />
@@ -56,7 +56,9 @@ import { SeoService } from '../../core/seo/seo.service';
         </ng-template>
       </section>
 
-      <p *ngIf="!loading() && courses().length === 0" class="mt-10 text-muted">No hay cursos.</p>
+      <div *ngIf="!loading() && courses().length === 0" class="mt-10 border rounded-lg p-6 text-center text-muted">
+        No hay cursos todavía
+      </div>
     </main>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,15 +1,10 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    function isAdmin() {
-      return request.auth != null && request.auth.token.email in [
-        "bruno@subeia.tech"
-      ];
-    }
-
+    function isAuth() { return request.auth != null; }
     match /{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuth(); // TEMPORAL: sólo requiere sesión; luego volvemos a whitelist de admin
     }
   }
 }
