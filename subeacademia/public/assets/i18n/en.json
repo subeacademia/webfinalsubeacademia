@@ -6,8 +6,19 @@
   "cta": {
     "exploreCourses": "Explore Courses",
     "readPosts": "Read Posts",
+    "startNow": "Start now",
     "finalTitle": "Level up with Academ-IA",
     "finalText": "Discover courses and content that multiply your impact."
+  },
+  "sections": {
+    "whatWeDo": {
+      "title": "What we do",
+      "items": [
+        { "title": "AI education", "text": "Hands-on programs to master tools and foundations." },
+        { "title": "Team enablement", "text": "Workshops and guided rollouts for measurable outcomes." },
+        { "title": "Publications & applied research", "text": "Methods and real cases ready to execute." }
+      ]
+    }
   },
   "benefits": [
     { "title": "Learn by doing", "text": "Real cases, practical frameworks and actionable feedback." },

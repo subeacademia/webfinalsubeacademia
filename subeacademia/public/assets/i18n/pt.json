@@ -6,8 +6,19 @@
   "cta": {
     "exploreCourses": "Explorar Cursos",
     "readPosts": "Ler Publicações",
+    "startNow": "Começar agora",
     "finalTitle": "Eleve seu nível com a Academ-IA",
     "finalText": "Descubra cursos e conteúdos que multiplicam seu impacto."
+  },
+  "sections": {
+    "whatWeDo": {
+      "title": "O que fazemos",
+      "items": [
+        { "title": "Educação em IA", "text": "Programas práticos para dominar ferramentas e fundamentos." },
+        { "title": "Capacitação de equipes", "text": "Workshops e implantações guiadas com resultados mensuráveis." },
+        { "title": "Publicações e pesquisa aplicada", "text": "Metodologias e casos reais prontos para executar." }
+      ]
+    }
   },
   "benefits": [
     { "title": "Aprenda com projetos", "text": "Casos reais, frameworks práticos e feedback acionável." },

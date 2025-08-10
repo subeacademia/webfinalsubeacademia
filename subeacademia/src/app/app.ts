@@ -3,11 +3,16 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { filter } from 'rxjs/operators';
+import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  template: `<router-outlet />`,
+  imports: [RouterOutlet, AppShellComponent],
+  template: `
+    <app-shell>
+      <router-outlet />
+    </app-shell>
+  `,
   styleUrl: './app.css'
 })
 export class App implements OnInit {

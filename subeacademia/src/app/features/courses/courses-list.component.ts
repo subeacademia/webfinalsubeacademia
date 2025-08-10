@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { SkeletonCardComponent } from '../../core/ui/skeleton-card/skeleton-card.component';
 import { ContentService } from '../../core/services/content.service';
 import { Course } from '../../core/models/course.model';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -9,7 +10,7 @@ import { SeoService } from '../../core/seo/seo.service';
 @Component({
   selector: 'app-courses-list',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink],
+  imports: [NgIf, NgFor, RouterLink, SkeletonCardComponent],
   template: `
     <main class="container mx-auto p-6">
       <h1 class="text-3xl font-semibold">Cursos</h1>
@@ -32,23 +33,30 @@ import { SeoService } from '../../core/seo/seo.service';
       </div>
 
       <section class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a
-          *ngFor="let c of courses()"
-          [routerLink]="['/', currentLang(), 'cursos', c.slug]"
-          class="block border rounded-lg overflow-hidden hover:shadow-md transition bg-white"
-        >
-          <img *ngIf="c.coverUrl" [src]="c.coverUrl" [alt]="c.title" class="w-full h-40 object-cover" />
-          <div class="p-4">
-            <h3 class="text-lg font-semibold line-clamp-2">{{ c.title }}</h3>
-            <p class="text-sm text-muted line-clamp-3 mt-2">{{ c.summary }}</p>
-            <div class="mt-3 flex flex-wrap gap-2 text-xs text-primary">
-              <span *ngFor="let t of c.topics" class="px-2 py-0.5 bg-primary/10 rounded">#{{ t }}</span>
+        <ng-container *ngIf="loading(); else listCourses">
+          <app-skeleton-card />
+          <app-skeleton-card />
+          <app-skeleton-card />
+        </ng-container>
+        <ng-template #listCourses>
+          <a
+            *ngFor="let c of courses()"
+            [routerLink]="['/', currentLang(), 'cursos', c.slug]"
+            class="block border rounded-lg overflow-hidden hover:shadow-md transition bg-white"
+          >
+            <img *ngIf="c.coverUrl" [src]="c.coverUrl" [alt]="c.title" class="w-full h-40 object-cover" />
+            <div class="p-4">
+              <h3 class="text-lg font-semibold line-clamp-2">{{ c.title }}</h3>
+              <p class="text-sm text-muted line-clamp-3 mt-2">{{ c.summary }}</p>
+              <div class="mt-3 flex flex-wrap gap-2 text-xs text-primary">
+                <span *ngFor="let t of c.topics" class="px-2 py-0.5 bg-primary/10 rounded">#{{ t }}</span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </ng-template>
       </section>
 
-      <p *ngIf="courses().length === 0" class="mt-10 text-muted">No hay cursos.</p>
+      <p *ngIf="!loading() && courses().length === 0" class="mt-10 text-muted">No hay cursos.</p>
     </main>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,6 +69,7 @@ export class CoursesListComponent {
 
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly courses = signal<Course[]>([]);
+  protected readonly loading = signal<boolean>(true);
 
   private filterLevel = signal<'' | 'intro' | 'intermedio' | 'avanzado'>('');
   private filterTopic = signal<string>('');
@@ -88,6 +97,7 @@ export class CoursesListComponent {
   }
 
   private load() {
+    this.loading.set(true);
     const lang = this.currentLang();
     this.content.getCoursesByLangAndStatus(lang, 'published', 12).subscribe((list) => {
       let filtered = list;
@@ -96,6 +106,7 @@ export class CoursesListComponent {
       if (level) filtered = filtered.filter((c) => c.level === level);
       if (topic) filtered = filtered.filter((c) => c.topics?.some((t) => t.toLowerCase().includes(topic)));
       this.courses.set(filtered);
+      this.loading.set(false);
     });
   }
 }
