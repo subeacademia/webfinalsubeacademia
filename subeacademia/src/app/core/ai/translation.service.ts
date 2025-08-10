@@ -11,5 +11,10 @@ export class TranslationService {
   translate(body: { title: string; summary?: string; content: string; to: TranslateTo }) {
     return this.http.post<any>(`${environment.backendIaUrl}/translate`, body);
   }
+
+  // Nuevo: traduce bloques completos usando backendIaUrl directo
+  translateBlocks(payload: { textBlocks: { title: string; summary?: string; content: string }, sourceLang: 'es', targetLang: TranslateTo }) {
+    return this.http.post<any>(`${environment.backendIaUrl}`, payload);
+  }
 }
 

@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { AdminGuard } from '../core/auth/admin.guard';
+import { inject } from '@angular/core';
+import { Auth } from '@angular/fire/auth';
+import { Router } from '@angular/router';
 
 export const ADMIN_ROUTES: Routes = [
   { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },

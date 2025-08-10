@@ -4,6 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MediaService } from '../../core/media/media.service';
 import { FormsModule } from '@angular/forms';
+import { Firestore, collection, collectionData, limit, orderBy, query } from '@angular/fire/firestore';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-admin-media',
@@ -28,6 +30,7 @@ import { FormsModule } from '@angular/forms';
       <div *ngFor="let q of queue()" class="border rounded p-3">
         <div class="text-sm">{{ q.file.name }}</div>
         <mat-progress-bar mode="determinate" [value]="q.progress"></mat-progress-bar>
+        <div class="text-xs text-muted mt-1">{{ q.progress }}%</div>
       </div>
       <div class="flex gap-2">
         <button mat-flat-button color="primary" (click)="startUpload()" [disabled]="uploading()">Subir</button>
@@ -35,10 +38,26 @@ import { FormsModule } from '@angular/forms';
       </div>
     </div>
 
-    <div class="mt-8" *ngIf="uploaded().length">
-      <div class="font-medium mb-2">Subidos</div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <a *ngFor="let m of uploaded()" [href]="m.url" target="_blank" class="block border rounded p-2 text-xs break-all">{{ m.fileName }}</a>
+    <div class="mt-8">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="font-medium">Últimos archivos</div>
+        <input class="border rounded px-2 py-1 text-sm" placeholder="Buscar por nombre" [(ngModel)]="search" (input)="applyFilter()" />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div *ngFor="let m of paged()" class="border rounded p-2 text-xs">
+          <div class="font-medium break-all">{{ m.name }}</div>
+          <div class="text-muted break-all">
+            <a [href]="m.url" target="_blank">{{ m.url }}</a>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button mat-stroked-button color="primary" (click)="copy(m.url)">Copiar URL</button>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-center gap-2 mt-4 text-sm">
+        <button mat-button (click)="prevPage()" [disabled]="page() === 1">Anterior</button>
+        <span>Página {{ page() }}</span>
+        <button mat-button (click)="nextPage()" [disabled]="(page()*pageSize) >= filtered().length">Siguiente</button>
       </div>
     </div>
   `,
@@ -46,11 +65,21 @@ import { FormsModule } from '@angular/forms';
 })
 export class AdminMediaComponent {
   private readonly media = inject(MediaService);
+  private readonly db = inject(Firestore);
+  private readonly clipboard = inject(Clipboard);
 
   convertWebp = true;
   uploading = signal(false);
   queue = signal<Array<{ file: File; progress: number }>>([]);
-  uploaded = signal<Array<{ fileName: string; url: string }>>([]);
+  uploaded = signal<Array<{ name: string; url: string }>>([]);
+
+  // listado
+  items = signal<any[]>([]);
+  filtered = signal<any[]>([]);
+  paged = signal<any[]>([]);
+  page = signal<number>(1);
+  pageSize = 20;
+  search = '';
 
   onDragOver(ev: DragEvent) { ev.preventDefault(); }
 
@@ -77,7 +106,7 @@ export class AdminMediaComponent {
   async startUpload() {
     if (this.uploading()) return;
     this.uploading.set(true);
-    const items = [] as Array<{ fileName: string; url: string }>;
+    const items = [] as Array<{ name: string; url: string }>;
     for (const entry of this.queue()) {
       try {
         await this.media.upload(entry.file, 'media', (p) => {
@@ -91,6 +120,38 @@ export class AdminMediaComponent {
     this.uploaded.set([...this.uploaded(), ...items]);
     this.clearQueue();
     this.uploading.set(false);
+    this.load();
   }
+
+  constructor(){ this.load(); }
+
+  load(){
+    const colRef = collection(this.db, 'media');
+    const qRef = query(colRef, orderBy('createdAt','desc'), limit(this.pageSize*2));
+    collectionData(qRef, { idField: 'id' }).subscribe((arr:any[])=>{
+      this.items.set(arr || []);
+      this.applyFilter();
+    });
+  }
+
+  applyFilter(){
+    const term = (this.search || '').toLowerCase().trim();
+    const base = this.items();
+    const filtered = term ? base.filter(m => (m.name || '').toLowerCase().includes(term)) : base;
+    this.filtered.set(filtered);
+    this.page.set(1);
+    this.slicePage();
+  }
+
+  slicePage(){
+    const start = (this.page()-1)*this.pageSize;
+    const end = start + this.pageSize;
+    this.paged.set(this.filtered().slice(start,end));
+  }
+
+  nextPage(){ this.page.set(this.page()+1); this.slicePage(); }
+  prevPage(){ this.page.set(Math.max(1,this.page()-1)); this.slicePage(); }
+
+  copy(url: string){ this.clipboard.copy(url); }
 }
 

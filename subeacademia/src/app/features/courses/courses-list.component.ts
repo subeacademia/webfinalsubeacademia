@@ -16,6 +16,14 @@ import { SeoService } from '../../core/seo/seo.service';
       <h1 class="text-3xl font-semibold">Cursos</h1>
       <p class="text-muted mt-2">Aprende IA aplicada a educación.</p>
 
+      <div *ngIf="indexErrorUrl(); else okIndex" class="mt-4 p-4 border border-amber-300 bg-amber-50 rounded">
+        <div class="text-amber-800 text-sm">
+          Falta un índice de Firestore para esta consulta.
+        </div>
+        <a class="inline-block mt-2 px-3 py-1 bg-amber-600 text-white rounded text-sm" [href]="indexErrorUrl()" target="_blank" rel="noopener">Crear índice</a>
+      </div>
+      <ng-template #okIndex></ng-template>
+
       <div class="mt-4 flex flex-wrap gap-3 text-sm">
         <label>
           Nivel:
@@ -72,6 +80,8 @@ export class CoursesListComponent {
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly courses = signal<any[]>([]);
   protected readonly loading = signal<boolean>(true);
+  protected readonly indexErrorUrl = signal<string>('');
+  private lastCursor: number | null = null;
 
   private filterLevel = signal<'' | 'intro' | 'intermedio' | 'avanzado'>('');
   private filterTopic = signal<string>('');
@@ -101,19 +111,35 @@ export class CoursesListComponent {
   private load() {
     this.loading.set(true);
     const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
-    this.content.listCourses(lang, 30).subscribe((list: any[]) => {
-      const mapped = list.map((item:any)=> {
-        const trans = lang !== 'es' ? item?.translations?.[lang] : null;
-        return trans ? { ...item, ...trans } : item;
-      });
-      let filtered = mapped;
-      const level = this.filterLevel();
-      const topic = this.filterTopic().toLowerCase().trim();
-      if (level) filtered = filtered.filter((c) => c.level === level);
-      if (topic) filtered = filtered.filter((c) => c.topics?.some((t: string) => t.toLowerCase().includes(topic)));
-      this.courses.set(filtered);
-      this.loading.set(false);
+    this.content.listCourses(lang, 12, this.lastCursor).subscribe({
+      next: (list: any[]) => {
+        this.indexErrorUrl.set('');
+        const mapped = list.map((item:any)=> {
+          const base = item?.languageFallback || 'es';
+          const trans = item?.translations?.[lang] || item?.translations?.[base] || null;
+          return trans ? { ...item, ...trans } : item;
+        });
+        let filtered = mapped;
+        const level = this.filterLevel();
+        const topic = this.filterTopic().toLowerCase().trim();
+        if (level) filtered = filtered.filter((c) => c.level === level);
+        if (topic) filtered = filtered.filter((c) => c.topics?.some((t: string) => t.toLowerCase().includes(topic)));
+        this.courses.set(filtered);
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
+        if (url) this.indexErrorUrl.set(url);
+        this.loading.set(false);
+      }
     });
+  }
+
+  private extractCreateIndexUrl(message: string): string {
+    try {
+      const match = message.match(/https?:\/\/[^\s]*create_composite[^\s]*/i);
+      return match ? match[0] : '';
+    } catch { return ''; }
   }
 }
 

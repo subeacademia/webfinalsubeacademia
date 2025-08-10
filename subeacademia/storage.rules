@@ -3,8 +3,10 @@ service firebase.storage {
   match /b/{bucket}/o {
     function isAuth() { return request.auth != null; }
     match /{allPaths=**} {
+      // Lectura pública
       allow read: if true;
-      allow write: if isAuth(); // TEMPORAL: sólo requiere sesión; luego volvemos a whitelist de admin
+      // Escritura sólo autenticados
+      allow write: if isAuth();
     }
   }
 }

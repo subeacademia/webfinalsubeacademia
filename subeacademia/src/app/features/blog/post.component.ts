@@ -55,12 +55,17 @@ export class PostComponent {
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     const lang = this.i18n.currentLang();
-    // Cargar post por slug e idioma
+    // Cargar post por slug; las traducciones se resolverán por locale en render
     this.content.getPostBySlug(lang, slug).then((p) => {
       if (!p) return;
-      this.post.set(p);
-      const title = p.seo?.title ?? p.title;
-      const description = p.seo?.description ?? p.summary;
+      // mapear a traducción del locale con fallback
+      const t = (p as any).translations || {};
+      const base = (p as any).languageFallback || 'es';
+      const view = t[lang] || t[base] || {};
+      const mapped: any = { ...p, ...view };
+      this.post.set(mapped);
+      const title = p.seo?.title ?? mapped.title;
+      const description = p.seo?.description ?? mapped.summary;
       const image = p.seo?.ogImage ?? p.coverUrl;
 
       this.seo.updateTags({ title, description, image, type: 'article' });

@@ -2,15 +2,22 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, doc, docData, addDoc, updateDoc, query, where, orderBy, collectionData } from '@angular/fire/firestore';
 import { firstValueFrom } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
+import { Auth } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
   private db = inject(Firestore);
   private translator = inject(TranslationService);
+  private auth = inject(Auth);
 
   list(lang = 'es'){
     const col = collection(this.db, 'posts');
-    const q = query(col, where('lang','==',lang), where('status','in',['draft','published']), orderBy('publishedAt','desc'));
+    const q = query(
+      col,
+      where('lang','==',lang),
+      where('status','==','published'),
+      orderBy('publishedAt','desc')
+    );
     return collectionData(q, { idField:'id' });
   }
   get(id:string){
@@ -18,14 +25,16 @@ export class PostsService {
   }
   async create(data:any){
     const col = collection(this.db,'posts');
-    const base = { ...data, lang: 'es', langBase: 'es', createdAt: Date.now() };
+    const userEmail = this.auth.currentUser?.email || null;
+    const now = Date.now();
+    const base = { ...data, createdAt: now, updatedAt: now, authorEmail: userEmail };
     const ref = await addDoc(col, base);
     await this.tryTranslateAndSet(ref.id, base);
     return ref;
   }
 
   async update(id:string, data:any){
-    await updateDoc(doc(this.db,'posts',id), data);
+    await updateDoc(doc(this.db,'posts',id), { ...data, updatedAt: Date.now() });
     await this.tryTranslateAndSet(id, data);
   }
 

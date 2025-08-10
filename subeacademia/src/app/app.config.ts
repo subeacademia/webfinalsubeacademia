@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -10,13 +10,40 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
+import { connectAuthEmulator } from 'firebase/auth';
+import { connectFirestoreEmulator } from 'firebase/firestore';
+import { connectStorageEmulator } from 'firebase/storage';
 import { environment } from '../environments/environment';
+
+// Overrides de runtime con window.__env (opcional y simple)
+const runtimeEnv = ((): typeof environment => {
+  try {
+    const w: any = typeof window !== 'undefined' ? (window as any) : undefined;
+    if (w?.__env) {
+      return {
+        ...environment,
+        ...w.__env,
+        firebase: {
+          ...environment.firebase,
+          ...(w.__env.firebase || {}),
+        },
+      } as typeof environment;
+    }
+  } catch {
+    // no-op
+  }
+  return environment;
+})();
+
+function shouldUseEmulators(): boolean {
+  return isDevMode() && (runtimeEnv as any).useEmulators === true;
+}
 
 function injectGa4AndSearchConsoleFactory(doc: Document) {
   return () => {
     try {
       // Google Site Verification
-      const token = environment.settings?.searchConsoleVerification;
+      const token = runtimeEnv.settings?.searchConsoleVerification;
       if (token && !doc.querySelector('meta[name="google-site-verification"]')) {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'google-site-verification');
@@ -25,7 +52,7 @@ function injectGa4AndSearchConsoleFactory(doc: Document) {
       }
 
       // GA4
-      const id = environment.ga4MeasurementId;
+      const id = runtimeEnv.ga4MeasurementId;
       if (id) {
         if (!doc.getElementById('ga4-src')) {
           const s = doc.createElement('script');
@@ -55,10 +82,28 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideAnimations(),
     provideHttpClient(withFetch()),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage()),
+    provideFirebaseApp(() => initializeApp(runtimeEnv.firebase)),
+    provideAuth(() => {
+      const auth = getAuth();
+      if (shouldUseEmulators()) {
+        connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+      }
+      return auth;
+    }),
+    provideFirestore(() => {
+      const db = getFirestore();
+      if (shouldUseEmulators()) {
+        connectFirestoreEmulator(db, 'localhost', 8080);
+      }
+      return db;
+    }),
+    provideStorage(() => {
+      const storage = getStorage();
+      if (shouldUseEmulators()) {
+        connectStorageEmulator(storage, 'localhost', 9199);
+      }
+      return storage;
+    }),
     {
       provide: APP_INITIALIZER,
       useFactory: injectGa4AndSearchConsoleFactory,

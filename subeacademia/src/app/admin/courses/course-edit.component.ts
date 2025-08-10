@@ -5,13 +5,15 @@ import { CoursesService } from '../../core/data/courses.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
 import { MediaService } from '../../core/media/media.service';
+import { NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
 @Component({
   selector: 'app-course-edit',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MediaPickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, MediaPickerComponent, NgIf],
   template: `
   <div class="max-w-3xl mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id()? 'Editar Curso' : 'Nuevo Curso'}}</h1>
@@ -53,26 +55,22 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
       </div>
 
       <div class="space-y-2">
-        <div class="font-medium">Recursos</div>
+        <div class="font-medium flex items-center justify-between">
+          <span>Recursos</span>
+          <button class="btn" type="button" (click)="openResourceDialog()">Añadir recurso</button>
+        </div>
         <div class="space-y-2" formArrayName="resources">
           <div class="grid md:grid-cols-3 gap-2 items-center" *ngFor="let r of resources().controls; let i=index" [formGroupName]="i">
-            <select class="w-full" formControlName="type">
-              <option value="video">video</option>
-              <option value="pdf">pdf</option>
-              <option value="zip">zip</option>
-              <option value="image">image</option>
-            </select>
-            <input class="w-full" placeholder="URL" formControlName="url">
-            <div class="flex gap-2 items-center">
-              <input class="w-full" placeholder="Título" formControlName="title">
-              <button class="btn" type="button" (click)="removeResource(i)">Quitar</button>
+            <div class="text-sm truncate">
+              <strong>{{ r.value.title || r.value.name || r.value.type }}</strong>
+              <div class="muted truncate">{{ r.value.url }}</div>
             </div>
+            <div class="text-xs">{{ r.value.type }}</div>
+            <button class="btn" type="button" (click)="removeResource(i)">Quitar</button>
           </div>
         </div>
-        <div class="flex gap-2 items-center">
-          <button class="btn" type="button" (click)="fileInput.click()">Añadir recurso</button>
-          <input #fileInput type="file" class="hidden" (change)="onChooseResource($event)">
-          <span *ngIf="uploading()" class="text-sm text-[var(--muted)]">Subiendo… {{progress()}}%</span>
+        <div class="flex items-center gap-3" *ngIf="uploading()">
+          <span class="text-sm text-[var(--muted)]">Subiendo… {{progress()}}%</span>
           <span *ngIf="error()" class="text-sm text-red-500">{{error()}}</span>
         </div>
       </div>
@@ -89,10 +87,47 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
       </div>
 
       <div class="grid md:grid-cols-2 gap-4">
-        <button class="btn btn-primary" type="submit">Guardar</button>
+        <button class="btn btn-primary" type="submit" [disabled]="uploading()">Guardar</button>
         <button class="btn" type="button" (click)="goBack()">Volver</button>
       </div>
     </form>
+
+    <!-- Mini diálogo añadir recurso -->
+    <div *ngIf="showResDlg()" class="fixed inset-0 bg-black/40 grid place-items-center p-4">
+      <div class="bg-white rounded shadow max-w-md w-full p-4 text-sm text-black">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-medium">Añadir recurso</div>
+          <button class="btn" type="button" (click)="closeResourceDialog()">×</button>
+        </div>
+        <div class="grid gap-2">
+          <label>Nombre visible
+            <input class="w-full border rounded px-2 py-1" [(ngModel)]="resName" />
+          </label>
+          <label>Tipo
+            <select class="w-full border rounded px-2 py-1" [(ngModel)]="resKind">
+              <option value="video">video</option>
+              <option value="pdf">pdf</option>
+              <option value="zip">zip</option>
+              <option value="link">link</option>
+            </select>
+          </label>
+          <ng-container *ngIf="resKind !== 'link'; else linkTpl">
+            <label>Archivo
+              <input class="w-full" type="file" (change)="onPickResFile($event)" />
+            </label>
+          </ng-container>
+          <ng-template #linkTpl>
+            <label>URL
+              <input class="w-full border rounded px-2 py-1" [(ngModel)]="resUrl" />
+            </label>
+          </ng-template>
+          <div class="flex justify-end gap-2 mt-2">
+            <button class="btn" type="button" (click)="closeResourceDialog()">Cancelar</button>
+            <button class="btn btn-primary" type="button" (click)="confirmResource()" [disabled]="uploading()">Añadir</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="card p-4">
       <h2 class="text-xl font-semibold mb-2">Media</h2>
@@ -165,18 +200,34 @@ export class CourseEditComponent {
   error = signal<string|null>(null);
 
   translationsReady = signal(false);
+  // Mini-dialogo recurso
+  showResDlg = signal(false);
+  resKind: 'video'|'pdf'|'zip'|'link' = 'pdf';
+  resName = '';
+  resUrl = '';
+  resFile?: File;
 
-  async onChooseResource(e:any){
-    const file: File | undefined = (e.target?.files && e.target.files[0]) as File | undefined;
-    if(!file) return;
+  openResourceDialog(){ this.showResDlg.set(true); this.resKind='pdf'; this.resName=''; this.resUrl=''; this.resFile=undefined; }
+  closeResourceDialog(){ this.showResDlg.set(false); }
+  onPickResFile(e: any){ const f = e.target?.files?.[0] as File|undefined; if(f) { this.resFile = f; this.resName ||= f.name; } }
+  async confirmResource(){
     this.error.set(null);
-    this.uploading.set(true);
+    const createdAt = Date.now();
     try{
-      const up = await this.media.upload(file, 'courses', p => this.progress.set(p));
-      const type = guessType(up.contentType);
-      this.resources().push(this.fb.group({ type:[type], url:[up.url], title:[file.name], name:[file.name], size:[up.size], path:[up.path] }) as any);
+      if(this.resKind === 'link'){
+        if(!this.resUrl) throw new Error('URL requerida');
+        this.resources().push(this.fb.group({ type:['link'], url:[this.resUrl], title:[this.resName||'Link'], name:[this.resName||'Link'], size:[null], createdAt:[createdAt] }) as any);
+      } else {
+        const file = this.resFile;
+        if(!file) throw new Error('Archivo requerido');
+        this.uploading.set(true);
+        const up = await this.media.upload(file, 'courses', p => this.progress.set(p));
+        const type = guessType(up.type);
+        this.resources().push(this.fb.group({ type:[type], url:[up.url], title:[this.resName||file.name], name:[file.name], size:[up.size], path:[up.path], createdAt:[createdAt] }) as any);
+      }
+      this.closeResourceDialog();
     }catch(err:any){
-      this.error.set(err?.message || 'Error subiendo recurso');
+      this.error.set(err?.message || 'Error al añadir recurso');
     }finally{
       this.uploading.set(false);
       this.progress.set(0);

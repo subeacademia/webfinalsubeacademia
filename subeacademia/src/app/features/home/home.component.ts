@@ -46,7 +46,7 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
             </div>
           </div>
 
-          <div class="relative min-h-[300px] md:min-h-[520px] overflow-hidden rounded-3xl border border-white/10 shadow-xl panel-3d">
+          <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-xl panel-3d aspect-[4/3] sm:aspect-[16/9] max-h-[320px] sm:max-h-[480px]">
             <canvas #hero3d id="hero3d" style="width:100%; height:100%; display:block" class="w-full h-full" aria-hidden="true"></canvas>
           </div>
         </div>
@@ -168,8 +168,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     if (!this.isBrowser) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-    if (reduceMotion || !isDesktop) return;
+    if (reduceMotion) return;
+    const isSmall = window.matchMedia('(max-width: 640px)').matches;
 
     const canvas = this.hero3dRef?.nativeElement;
     if (!canvas) return;
@@ -185,13 +185,15 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       const camera = new THREE.PerspectiveCamera(55, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
       camera.position.z = 6;
 
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isSmall, alpha: true, powerPreference: 'low-power' });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.25 : 1.8));
       renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+      renderer.shadowMap.enabled = false;
+      renderer.shadowMap.autoUpdate = false;
 
       // Partículas discretas adaptadas a ancho
       const w = (canvas.parentElement?.clientWidth || canvas.clientWidth || window.innerWidth);
-      const particlesCount = w < 480 ? 120 : w < 768 ? 220 : 380;
+      const particlesCount = isSmall ? 80 : (w < 480 ? 120 : w < 768 ? 220 : 380);
       let positions = new Float32Array(particlesCount * 3);
       for (let i = 0; i < particlesCount * 3; i += 3) {
         positions[i] = (Math.random() - 0.5) * 6; // x
@@ -200,13 +202,14 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const material = new THREE.PointsMaterial({ color: getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#00A3FF', size: 0.02 });
+      const material = new THREE.PointsMaterial({ color: getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#00A3FF', size: isSmall ? 0.018 : 0.02 });
       const points = new THREE.Points(geometry, material);
       scene.add(points);
 
       // Líneas sutiles
       const lineMaterial = new THREE.LineBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.07 });
-      for (let i = 0; i < 30; i++) {
+      const linesCount = isSmall ? 8 : 30;
+      for (let i = 0; i < linesCount; i++) {
         const geo = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 2),
           new THREE.Vector3((Math.random() - 0.5) * 5, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 2),
@@ -271,10 +274,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       }, { root: null, threshold: 0 });
       io.observe(canvas);
 
+      // Pausar cuando la pestaña no está visible
+      const onVisibility = () => {
+        if (document.hidden) {
+          if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = 0 as any; }
+        } else {
+          if (!animationFrameId) animationFrameId = requestAnimationFrame(animate);
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+
       this.disposeFn = () => {
         cancelAnimationFrame(animationFrameId);
         resizeObs.disconnect();
         io.disconnect();
+        document.removeEventListener('visibilitychange', onVisibility);
         geometry.dispose();
         material.dispose();
         lineMaterial.dispose();

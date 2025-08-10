@@ -16,6 +16,14 @@ import { I18nService } from '../../core/i18n/i18n.service';
       <h1 class="text-3xl font-semibold">Blog</h1>
       <p class="text-muted mt-2">Explora artículos por categoría y etiqueta.</p>
 
+      <div *ngIf="indexErrorUrl(); else okIndex" class="mt-4 p-4 border border-amber-300 bg-amber-50 rounded">
+        <div class="text-amber-800 text-sm">
+          Falta un índice de Firestore para esta consulta.
+        </div>
+        <a class="inline-block mt-2 px-3 py-1 bg-amber-600 text-white rounded text-sm" [href]="indexErrorUrl()" target="_blank" rel="noopener">Crear índice</a>
+      </div>
+      <ng-template #okIndex></ng-template>
+
       <div class="mt-4 flex flex-wrap gap-3 text-sm">
         <label>
           Categoría:
@@ -67,6 +75,8 @@ export class BlogListComponent {
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly posts = signal<any[]>([]);
   protected readonly loading = signal<boolean>(true);
+  protected readonly indexErrorUrl = signal<string>('');
+  private lastCursor: any | null = null;
   private filterCategory = signal<string>('');
   private filterQuery = signal<string>('');
 
@@ -96,20 +106,35 @@ export class BlogListComponent {
   private load() {
     this.loading.set(true);
     const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
-    this.content.listPosts(lang, 30).subscribe((list: any[]) => {
-      const category = this.filterCategory().toLowerCase();
-      const q = this.filterQuery().toLowerCase();
-      // Mapear a vista según idioma con fallback ES
+    this.content.listPosts(lang, 12, this.lastCursor).subscribe({
+      next: (list: any[]) => {
+        this.indexErrorUrl.set('');
+        const category = this.filterCategory().toLowerCase();
+        const q = this.filterQuery().toLowerCase();
       const mapped = list.map((item:any)=> {
-        const trans = lang !== 'es' ? item?.translations?.[lang] : null;
+        const base = item?.languageFallback || 'es';
+        const trans = item?.translations?.[lang] || item?.translations?.[base] || null;
         return trans ? { ...item, ...trans } : item;
       });
-      let filtered = mapped;
-      if (category) filtered = filtered.filter((p) => (p.categories || []).some((c: string) => c.toLowerCase().includes(category)));
-      if (q) filtered = filtered.filter((p) => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || (p.tags || []).some((t: string) => t.toLowerCase().includes(q)));
-      this.posts.set(filtered);
-      this.loading.set(false);
+        let filtered = mapped;
+        if (category) filtered = filtered.filter((p) => (p.categories || []).some((c: string) => c.toLowerCase().includes(category)));
+        if (q) filtered = filtered.filter((p) => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || (p.tags || []).some((t: string) => t.toLowerCase().includes(q)));
+        this.posts.set(filtered);
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
+        if (url) this.indexErrorUrl.set(url);
+        this.loading.set(false);
+      }
     });
+  }
+
+  private extractCreateIndexUrl(message: string): string {
+    try {
+      const match = message.match(/https?:\/\/[^\s]*create_composite[^\s]*/i);
+      return match ? match[0] : '';
+    } catch { return ''; }
   }
 }
 

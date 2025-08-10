@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc, orderBy } from '@angular/fire/firestore';
 import { Course } from '../models';
 import { Observable, from, firstValueFrom } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
@@ -11,8 +11,13 @@ export class CoursesService {
   private readonly translator = inject(TranslationService);
 
   list(lang: string, status: 'draft'|'published'|'scheduled'|null = null): Observable<Course[]> {
-    let q = query(this.col, where('lang','==',lang));
-    return collectionData(q, { idField: 'id' }) as unknown as Observable<Course[]>;
+    const qRef = query(
+      this.col,
+      where('lang','==',lang),
+      where('status','==','published'),
+      orderBy('publishedAt','desc')
+    );
+    return collectionData(qRef, { idField: 'id' }) as unknown as Observable<Course[]>;
   }
 
   get(id: string): Observable<Course | undefined> {

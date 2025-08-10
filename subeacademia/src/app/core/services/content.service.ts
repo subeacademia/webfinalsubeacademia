@@ -16,9 +16,9 @@ export class ContentService {
     return docData(ref, { idField: 'id' }) as Observable<Post | undefined>;
   }
 
-  getPostsByLangAndStatus(lang: 'es' | 'pt' | 'en', status: 'draft' | 'published' | 'scheduled', max = 50): Observable<Post[]> {
+  getPostsByLangAndStatus(_lang: 'es' | 'pt' | 'en', status: 'draft' | 'published' | 'scheduled', max = 50): Observable<Post[]> {
     const ref = collection(this.firestore, 'posts');
-    const q = query(ref, where('lang', '==', lang), where('status', '==', status), orderBy('publishedAt', 'desc'), limit(max));
+    const q = query(ref, where('status', '==', status), orderBy('publishedAt', 'desc'), limit(max));
     return (collectionData(q, { idField: 'id' }) as unknown as Observable<Post[]>)
       .pipe(
         catchError(() => of([])),
@@ -26,12 +26,12 @@ export class ContentService {
       );
   }
 
-  getPostBySlug(lang: 'es' | 'pt' | 'en', slug: string): Promise<Post | null> {
+  getPostBySlug(_lang: 'es' | 'pt' | 'en', slug: string): Promise<Post | null> {
     const ref = collection(this.firestore, 'posts');
-    const q = query(ref, where('slug', '==', slug), where('lang', '==', lang), limit(1));
+    const q = query(ref, where('slug', '==', slug), limit(1));
     return getDocs(q).then(snap => {
       if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Post;
-      const fallback = getMockPosts(lang).find((p) => p.slug === slug) || null;
+      const fallback = getMockPosts('es').find((p) => p.slug === slug) || null;
       return fallback;
     }).catch(() => getMockPosts(lang).find((p) => p.slug === slug) || null);
   }
@@ -58,22 +58,22 @@ export class ContentService {
     return docData(ref, { idField: 'id' }) as Observable<Course | undefined>;
   }
 
-  getCoursesByLangAndStatus(lang: 'es' | 'pt' | 'en', status: 'draft' | 'published' | 'scheduled', max = 50): Observable<Course[]> {
+  getCoursesByLangAndStatus(_lang: 'es' | 'pt' | 'en', status: 'draft' | 'published' | 'scheduled', max = 50): Observable<Course[]> {
     const ref = collection(this.firestore, 'courses');
-    const q = query(ref, where('lang', '==', lang), where('status', '==', status), orderBy('publishedAt', 'desc'), limit(max));
+    const q = query(ref, where('status', '==', status), orderBy('publishedAt', 'desc'), limit(max));
     return (collectionData(q, { idField: 'id' }) as unknown as Observable<Course[]>)
       .pipe(
         catchError(() => of([])),
-        map((arr) => (arr && arr.length ? arr : getMockCourses(lang)))
+        map((arr) => (arr && arr.length ? arr : getMockCourses('es')))
       );
   }
 
-  getCourseBySlug(lang: 'es' | 'pt' | 'en', slug: string): Promise<Course | null> {
+  getCourseBySlug(_lang: 'es' | 'pt' | 'en', slug: string): Promise<Course | null> {
     const ref = collection(this.firestore, 'courses');
-    const q = query(ref, where('slug', '==', slug), where('lang', '==', lang), limit(1));
+    const q = query(ref, where('slug', '==', slug), limit(1));
     return getDocs(q).then(snap => {
       if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Course;
-      const fallback = getMockCourses(lang).find((c) => c.slug === slug) || null;
+      const fallback = getMockCourses('es').find((c) => c.slug === slug) || null;
       return fallback;
     }).catch(() => getMockCourses(lang).find((c) => c.slug === slug) || null);
   }
