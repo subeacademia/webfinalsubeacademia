@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
+import type { JsonLd } from './jsonld';
 
 export interface SeoData {
   title?: string;
@@ -9,7 +11,11 @@ export interface SeoData {
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
-  constructor(private readonly title: Title, private readonly meta: Meta) {}
+  constructor(
+    private readonly title: Title,
+    private readonly meta: Meta,
+    @Inject(DOCUMENT) private readonly document: Document,
+  ) {}
 
   updateTags(data: SeoData) {
     if (data.title) this.title.setTitle(data.title);
@@ -26,6 +32,18 @@ export class SeoService {
       this.meta.updateTag({ name: 'twitter:description', content: data.description });
     if (data.image) this.meta.updateTag({ name: 'twitter:image', content: data.image });
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
+  }
+
+  setJsonLd(id: string, data: JsonLd) {
+    const scriptId = `jsonld-${id}`;
+    let script = this.document.getElementById(scriptId) as HTMLScriptElement | null;
+    if (!script) {
+      script = this.document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = scriptId;
+      this.document.head.appendChild(script);
+    }
+    script.text = JSON.stringify(data);
   }
 }
 
