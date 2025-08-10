@@ -9,6 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Aplica el tema lo antes posible para evitar FOUC (flash de tema)
+    (function () {
+      try {
+        var d = document.documentElement;
+        var saved = localStorage.getItem('theme'); // 'light' | 'dark'
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = saved || (prefersDark ? 'dark' : 'light');
+        d.classList.toggle('dark', theme === 'dark');
+        d.setAttribute('data-theme', theme);
+        // Mejora nativa de formularios/scrollbars
+        d.style.colorScheme = theme;
+      } catch (e) { /* no-op */ }
+    })();
+  </script>
   <meta name="description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible. Únete a Sube Academ-IA.">
   <meta property="og:title" content="Sube Academ-IA | Educación + Inteligencia Artificial">
   <meta property="og:description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible.">

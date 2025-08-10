@@ -1,16 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Inject, NgZone, OnDestroy, PLATFORM_ID, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Inject, NgZone, OnDestroy, PLATFORM_ID, ViewChild, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { isPlatformBrowser, NgClass } from '@angular/common';
 import { SeoService } from '../../core/seo/seo.service';
 import { FirebaseDataService } from '../../core/firebase-data.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { organizationJsonLd } from '../../core/seo/jsonld';
+import { RevealOnScrollDirective } from '../../shared/ui/reveal-on-scroll.directive';
+import { CardComponent } from '../../shared/ui/card/card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RevealOnScrollDirective, CardComponent],
   template: `
     <main>
       <!-- Hero -->
@@ -19,36 +21,28 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
 
         <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 class="font-grotesk text-5xl md:text-7xl leading-[0.95] tracking-tight">
+            <h1 class="font-grotesk text-5xl md:text-7xl leading-[0.95] tracking-tight" revealOnScroll="up">
               {{ i18n.getTranslations('hero.title') }}
             </h1>
-            <p class="mt-5 text-lg text-[var(--muted)]">
+            <p class="mt-5 text-lg text-[var(--muted)]" revealOnScroll="up" [revealDelay]="120">
               {{ i18n.getTranslations('hero.subtitle') }}
             </p>
 
-            <div class="mt-8 flex flex-wrap gap-4" role="group" aria-label="Acciones principales">
-              <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="btn btn-primary" aria-label="Explorar Cursos">{{ i18n.getTranslations('cta.exploreCourses') }}</a>
-              <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="btn btn-ghost" aria-label="Leer Publicaciones">{{ i18n.getTranslations('cta.readPosts') }}</a>
+            <div class="mt-8 flex flex-wrap gap-4" role="group" aria-label="Acciones principales" revealOnScroll="up" [revealDelay]="220">
+              <app-card size="small" title="Cursos" description="Explora rutas aplicadas" actionLabel="Ver cursos" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
+              <app-card size="small" title="Blog" description="Lecturas y guías" actionLabel="Leer blog" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
             </div>
 
             <!-- Quick cards debajo de los botones -->
             <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Accesos rápidos">
-              <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Blog">
-                <span class="h3">Blog</span>
-              </a>
-              <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Cursos">
-                <span class="h3">Cursos</span>
-              </a>
-              <a [routerLink]="['/', i18n.currentLang(), 'ia']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a IA">
-                <span class="h3">IA</span>
-              </a>
-              <a [routerLink]="['/', i18n.currentLang(), 'contacto']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Contacto">
-                <span class="h3">Contacto</span>
-              </a>
+              <app-card size="small" title="Blog" actionLabel="Abrir" revealOnScroll="up" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
+              <app-card size="small" title="Cursos" actionLabel="Abrir" revealOnScroll="up" [revealDelay]="80" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
+              <app-card size="small" title="IA" actionLabel="Abrir" revealOnScroll="up" [revealDelay]="160" (action)="goTo(['/', i18n.currentLang(), 'ia'])"></app-card>
+              <app-card size="small" title="Contacto" actionLabel="Abrir" revealOnScroll="up" [revealDelay]="240" (action)="goTo(['/', i18n.currentLang(), 'contacto'])"></app-card>
             </div>
           </div>
 
-          <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-xl panel-3d aspect-[4/3] sm:aspect-[16/9] max-h-[320px] sm:max-h-[480px]">
+          <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-xl panel-3d aspect-[4/3] sm:aspect-[16/9] max-h-[320px] sm:max-h-[480px]" revealOnScroll="right">
             <canvas #hero3d id="hero3d" style="width:100%; height:100%; display:block" class="w-full h-full" aria-hidden="true"></canvas>
           </div>
         </div>
@@ -57,11 +51,11 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- Qué hacemos -->
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto">
-          <h2 class="h2">{{ i18n.getTranslations('sections.whatWeDo.title') }}</h2>
+          <h2 class="h2" revealOnScroll="up">{{ i18n.getTranslations('sections.whatWeDo.title') }}</h2>
           <div class="mt-6 grid md:grid-cols-3 gap-6">
-            <article class="card"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.0.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.0.text') }}</p></article>
-            <article class="card"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.1.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.1.text') }}</p></article>
-            <article class="card"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.2.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.2.text') }}</p></article>
+            <article class="card" revealOnScroll="up"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.0.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.0.text') }}</p></article>
+            <article class="card" revealOnScroll="up" [revealDelay]="120"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.1.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.1.text') }}</p></article>
+            <article class="card" revealOnScroll="up" [revealDelay]="240"><h3 class="h3">{{ i18n.getTranslations('sections.whatWeDo.items.2.title') }}</h3><p class="muted mt-1">{{ i18n.getTranslations('sections.whatWeDo.items.2.text') }}</p></article>
           </div>
         </div>
       </section>
@@ -69,12 +63,12 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- Casos/Clientes -->
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto">
-          <h2 class="h2">{{ i18n.getTranslations('clients.title') }}</h2>
+          <h2 class="h2" revealOnScroll="up">{{ i18n.getTranslations('clients.title') }}</h2>
           <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6 opacity-80">
-            <div class="logo-skel" aria-label="Cliente 1"></div>
-            <div class="logo-skel" aria-label="Cliente 2"></div>
-            <div class="logo-skel" aria-label="Cliente 3"></div>
-            <div class="logo-skel" aria-label="Cliente 4"></div>
+            <div class="logo-skel" aria-label="Cliente 1" revealOnScroll="up"></div>
+            <div class="logo-skel" aria-label="Cliente 2" revealOnScroll="up" [revealDelay]="80"></div>
+            <div class="logo-skel" aria-label="Cliente 3" revealOnScroll="up" [revealDelay]="160"></div>
+            <div class="logo-skel" aria-label="Cliente 4" revealOnScroll="up" [revealDelay]="240"></div>
           </div>
         </div>
       </section>
@@ -84,36 +78,27 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
         <div class="max-w-6xl mx-auto">
           <div class="flex items-end justify-between gap-4">
             <div>
-              <h2 class="h2">{{ i18n.getTranslations('blog.title') }}</h2>
-              <p class="muted">{{ i18n.getTranslations('blog.subtitle') }}</p>
+              <h2 class="h2" revealOnScroll="up">{{ i18n.getTranslations('blog.title') }}</h2>
+              <p class="muted" revealOnScroll="up" [revealDelay]="100">{{ i18n.getTranslations('blog.subtitle') }}</p>
             </div>
-            <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="btn btn-link" aria-label="Ir al blog">{{ i18n.getTranslations('blog.viewAll') }}</a>
+            <app-card size="small" [title]="i18n.getTranslations('blog.viewAll')" actionLabel="Ir" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
           </div>
-          <div class="mt-6 grid md:grid-cols-3 gap-6">
-            <a routerLink="blog" class="card p-5" aria-label="Post 1"><h3 class="h3">Tácticas de prompting</h3><p class="muted mt-1">Patrones para tareas críticas.</p></a>
-            <a routerLink="blog" class="card p-5" aria-label="Post 2"><h3 class="h3">RAG minimal</h3><p class="muted mt-1">Conecta y entrega valor.</p></a>
-            <a routerLink="blog" class="card p-5" aria-label="Post 3"><h3 class="h3">Evaluación de LLMs</h3><p class="muted mt-1">Métricas que importan.</p></a>
-          </div>
+            <div class="mt-6 grid md:grid-cols-3 gap-6">
+              <app-card size="small" title="Tácticas de prompting" description="Patrones para tareas críticas." [tags]="['Prompting', 'Productividad']" actionLabel="Leer" revealOnScroll="up" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
+              <app-card size="small" title="RAG minimal" description="Conecta y entrega valor." [tags]="['RAG', 'Arquitectura']" actionLabel="Leer" revealOnScroll="up" [revealDelay]="120" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
+              <app-card size="small" title="Evaluación de LLMs" description="Métricas que importan." [tags]="['Evaluación', 'LLM']" actionLabel="Leer" revealOnScroll="up" [revealDelay]="240" (action)="goTo(['/', i18n.currentLang(), 'blog'])"></app-card>
+            </div>
         </div>
       </section>
 
       <!-- Cursos destacados -->
       <section class="py-16 md:py-24 px-6">
         <div class="max-w-6xl mx-auto">
-          <h2 class="h2">{{ i18n.getTranslations('courses.title') }}</h2>
+          <h2 class="h2" revealOnScroll="up">{{ i18n.getTranslations('courses.title') }}</h2>
           <div class="mt-8 grid md:grid-cols-3 gap-6">
-            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 1">
-              <h3 class="h3">{{ i18n.getTranslations('courses.items.0.title') }}</h3>
-              <p class="muted">{{ i18n.getTranslations('courses.items.0.text') }}</p>
-            </a>
-            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 2">
-              <h3 class="h3">{{ i18n.getTranslations('courses.items.1.title') }}</h3>
-              <p class="muted">{{ i18n.getTranslations('courses.items.1.text') }}</p>
-            </a>
-            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 3">
-              <h3 class="h3">{{ i18n.getTranslations('courses.items.2.title') }}</h3>
-              <p class="muted">{{ i18n.getTranslations('courses.items.2.text') }}</p>
-            </a>
+            <app-card size="medium" [title]="i18n.getTranslations('courses.items.0.title')" [description]="i18n.getTranslations('courses.items.0.text')" [tags]="['Curso', 'Práctico']" actionLabel="Ver curso" revealOnScroll="up" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
+            <app-card size="medium" [title]="i18n.getTranslations('courses.items.1.title')" [description]="i18n.getTranslations('courses.items.1.text')" [tags]="['Curso', 'Aplicado']" actionLabel="Ver curso" revealOnScroll="up" [revealDelay]="120" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
+            <app-card size="medium" [title]="i18n.getTranslations('courses.items.2.title')" [description]="i18n.getTranslations('courses.items.2.text')" [tags]="['Curso', 'Hands-on']" actionLabel="Ver curso" revealOnScroll="up" [revealDelay]="240" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
           </div>
         </div>
       </section>
@@ -121,10 +106,10 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
       <!-- CTA final -->
       <section class="py-20 md:py-28 px-6">
         <div class="max-w-4xl mx-auto text-center">
-          <h2 class="font-grotesk text-3xl md:text-5xl">{{ i18n.getTranslations('cta.finalTitle') }}</h2>
-          <p class="muted mt-4">{{ i18n.getTranslations('cta.finalText') }}</p>
-          <div class="mt-8">
-            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="btn btn-primary" aria-label="Comenzar ahora">{{ i18n.getTranslations('cta.startNow') }}</a>
+          <h2 class="font-grotesk text-3xl md:text-5xl" revealOnScroll="up">{{ i18n.getTranslations('cta.finalTitle') }}</h2>
+          <p class="muted mt-4" revealOnScroll="up" [revealDelay]="120">{{ i18n.getTranslations('cta.finalText') }}</p>
+          <div class="mt-8" revealOnScroll="up" [revealDelay]="220">
+            <app-card size="small" [title]="i18n.getTranslations('cta.startNow')" actionLabel="Comenzar" (action)="goTo(['/', i18n.currentLang(), 'cursos'])"></app-card>
           </div>
         </div>
       </section>
@@ -137,6 +122,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   private isBrowser = false;
   private disposeFn: (() => void) | null = null;
+  private readonly router = inject(Router);
 
   constructor(
     private readonly ngZone: NgZone,
@@ -310,6 +296,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       this.disposeFn();
       this.disposeFn = null;
     }
+  }
+
+  goTo(commands: any[]) {
+    void this.router.navigate(commands);
   }
 }
 

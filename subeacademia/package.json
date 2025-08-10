@@ -9,7 +9,8 @@
     "serve:ssg": "npx http-server dist/subeacademia/browser -p 4200",
     "seed": "ts-node tools/seed.ts",
     "deploy:indexes": "firebase deploy --only \"firestore:indexes\" --project web-subeacademia",
-    "deploy:db": "firebase deploy --only firestore"
+    "deploy:db": "firebase deploy --only firestore",
+    "dev:clean": "rimraf .angular/cache && ng serve -o"
   },
   "prettier": {
     "overrides": [
@@ -68,6 +69,7 @@
     "sharp": "^0.34.3",
     "sitemap": "^8.0.0",
     "tailwindcss": "^3.4.17",
+    "rimraf": "^6.0.1",
     "typescript": "~5.8.2"
   }
 }

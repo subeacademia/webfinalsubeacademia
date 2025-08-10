@@ -61,8 +61,10 @@ html, body {
   color: var(--fg);
 }
 
-/* Enlaces */
-a { color: var(--link); }
+/* Reset tipografía base y enlaces accesibles */
+html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* Controles de formulario accesibles */
 input[type="text"],
@@ -78,6 +80,7 @@ textarea {
   border-radius: .75rem;
   padding: .8rem 1rem;
   outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
 }
 input::placeholder,
 textarea::placeholder {
@@ -90,6 +93,13 @@ textarea:focus,
 .btn:focus {
   border-color: var(--ring);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+}
+
+/* Hover sutil en campos */
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: color-mix(in srgb, var(--fg) 22%, var(--input-border));
 }
 
 /* Select (garantiza contraste también en dark) */
@@ -109,8 +119,6 @@ select {
 
 /* Utilidades solicitadas */
 .container { @apply max-w-7xl mx-auto px-4 md:px-6; }
-.btn { @apply inline-flex items-center gap-2 rounded-xl px-5 py-3 transition; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); background: color-mix(in srgb, var(--panel) 40%, transparent); }
-.card { @apply rounded-2xl backdrop-blur-lg shadow-lg; border: 1px solid var(--border); background: var(--card); }
 
 /* Tipografías utilitarias */
 .font-grotesk { font-family: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif; }
@@ -121,16 +129,18 @@ select {
 .h3 { @apply font-grotesk text-xl md:text-2xl; }
 .muted { color: var(--muted); }
 
-/* Botones minimal */
-.btn { @apply inline-flex items-center justify-center rounded-2xl transition-transform duration-150; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); padding: 0.75rem 1rem; }
-.btn:hover { transform: translateY(-1px) scale(1.01); }
+/* Botones minimal y variantes reutilizables */
+.btn { @apply inline-flex items-center justify-center rounded-2xl transition-transform duration-150; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); padding: 0.75rem 1rem; background: color-mix(in srgb, var(--panel) 35%, transparent); }
+.btn:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 10px 22px rgba(0,0,0,0.08); }
+.btn:active { transform: translateY(0); }
 .btn-primary { background: var(--ring); color: #ffffff; border: none; border-radius: 12px; padding: .625rem 1rem; }
+.btn-primary:hover { filter: brightness(1.05); box-shadow: 0 10px 24px color-mix(in srgb, var(--ring) 40%, transparent); }
 .btn-primary:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent); }
 .btn-ghost { background: transparent; color: var(--fg); }
 .btn-link { color: var(--accent); text-underline-offset: 3px; }
 
 /* Cards */
-.card { @apply rounded-3xl p-6 border; border-color: var(--border); background: var(--card); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+.card { @apply rounded-3xl p-6 border; border-color: var(--border); background: var(--card); box-shadow: 0 8px 30px rgba(0,0,0,0.14); }
 .course-card { @apply rounded-3xl p-5 border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); background: color-mix(in srgb, var(--panel) 50%, transparent); display: block; }
 .course-card:hover { transform: translateY(-2px); }
 .item-row { @apply rounded-2xl p-4 border; border-color: color-mix(in srgb, var(--fg) 10%, transparent); display:block; }
@@ -171,4 +181,27 @@ select {
               0 0 60px color-mix(in srgb, var(--accent) 15%, transparent) inset;
   pointer-events: none;
 }
+
+/* Chips / Tags minimalistas */
+.chip {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  background: color-mix(in srgb, var(--panel) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
+}
+
+/* Reveal on scroll (animaciones sutiles) */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .7s ease, transform .7s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+.reveal-left { transform: translateX(-16px); }
+.reveal-right { transform: translateX(16px); }
+.reveal-up { transform: translateY(16px); }
+.reveal-down { transform: translateY(-16px); }
+.reveal-fade { transform: none; }
 
