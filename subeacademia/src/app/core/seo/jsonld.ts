@@ -24,10 +24,11 @@ export function articleJsonLd(params: {
   dateModified?: string;
   authorName?: string;
   url?: string;
+  scholarly?: boolean;
 }): JsonLd {
   return {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': params.scholarly ? 'ScholarlyArticle' : 'Article',
     headline: params.headline,
     image: params.image,
     description: params.description,
@@ -43,6 +44,8 @@ export function courseJsonLd(params: {
   description?: string;
   providerName?: string;
   url?: string;
+  inLanguage?: string;
+  offers?: { price: number; priceCurrency?: string };
 }): JsonLd {
   return {
     '@context': 'https://schema.org',
@@ -53,6 +56,14 @@ export function courseJsonLd(params: {
       ? { '@type': 'Organization', name: params.providerName }
       : undefined,
     url: params.url,
+    inLanguage: params.inLanguage,
+    offers: params.offers
+      ? {
+          '@type': 'Offer',
+          price: params.offers.price,
+          priceCurrency: params.offers.priceCurrency ?? 'USD',
+        }
+      : undefined,
   };
 }
 

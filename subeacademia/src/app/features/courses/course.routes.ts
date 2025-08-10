@@ -4,6 +4,7 @@ export const COURSE_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./course.component').then((m) => m.CourseComponent),
+    data: { seo: { type: 'course' } },
   },
 ];
 

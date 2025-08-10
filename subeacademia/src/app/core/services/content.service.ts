@@ -3,6 +3,7 @@ import { Firestore, addDoc, collection, collectionData, deleteDoc, doc, docData,
 import { Observable } from 'rxjs';
 import { Post } from '../models/post.model';
 import { Course } from '../models/course.model';
+import { generateSlug } from '../utils/slug.util';
 
 @Injectable({ providedIn: 'root' })
 export class ContentService {
@@ -27,6 +28,7 @@ export class ContentService {
   }
 
   createPost(post: Post): Promise<void> {
+    if (!post.slug) post.slug = generateSlug(post.title);
     const ref = doc(this.firestore, 'posts', post.id);
     return setDoc(ref, post as any, { merge: false });
   }
@@ -60,6 +62,7 @@ export class ContentService {
   }
 
   createCourse(course: Course): Promise<void> {
+    if (!course.slug) course.slug = generateSlug(course.title);
     const ref = doc(this.firestore, 'courses', course.id);
     return setDoc(ref, course as any, { merge: false });
   }
