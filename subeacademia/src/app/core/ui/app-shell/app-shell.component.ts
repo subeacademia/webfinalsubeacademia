@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, WritableSignal, signal } fr
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { I18nService } from '../../i18n/i18n.service';
+import { SettingsService, SiteSettings } from '../../data/settings.service';
 
 type Lang = 'es' | 'en' | 'pt';
 
@@ -13,13 +14,14 @@ type Lang = 'es' | 'en' | 'pt';
   template: `
     <header class="sticky top-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
       <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
-        <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight">Sube Academ-IA</a>
+        <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2">
+          <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-6 w-6 rounded"/>
+          <span>{{ brandName() }}</span>
+        </a>
 
-        <button class="md:hidden btn" (click)="toggleMobile()" aria-label="Abrir menú">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z"/></svg>
-        </button>
+        <button class="md:hidden btn" (click)="toggleNav()" aria-label="Abrir menú">☰</button>
 
-        <ul class="hidden md:flex items-center gap-2">
+        <ul class="nav hidden md:flex items-center gap-2">
           <li>
             <a [routerLink]="['/', currentLang()]"
                routerLinkActive="text-[var(--accent)]"
@@ -51,12 +53,8 @@ type Lang = 'es' | 'en' | 'pt';
                class="btn"
                aria-label="Ir a Contacto">Contacto</a>
           </li>
-
-          <li class="relative" (mouseenter)="teamOpen = true" (mouseleave)="teamOpen = false">
-            <button class="btn" aria-haspopup="menu" [attr.aria-expanded]="teamOpen">Equipo</button>
-            <div *ngIf="teamOpen" class="absolute right-0 mt-2 w-40 card p-2">
-              <a [routerLink]="['/admin']" class="block px-3 py-2 rounded-lg hover:bg-white/10" aria-label="Ir a Admin">Admin</a>
-            </div>
+          <li>
+            <a routerLink="/admin" class="btn" aria-label="Ir a Admin">Admin</a>
           </li>
 
           <li>
@@ -70,14 +68,14 @@ type Lang = 'es' | 'en' | 'pt';
         </ul>
       </nav>
 
-      <div *ngIf="mobileOpen()" class="md:hidden border-t border-white/10 bg-[var(--panel)]/90">
+      <div [class.nav--open]="navOpen()" class="md:hidden border-t border-white/10 bg-[var(--panel)]/90 nav" *ngIf="navOpen()">
         <div class="container py-3 space-y-2">
-          <a (click)="closeMobile()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left" aria-label="Ir a Inicio">Home</a>
-          <a (click)="closeMobile()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left" aria-label="Ir a Blog">Blog</a>
-          <a (click)="closeMobile()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left" aria-label="Ir a Cursos">Cursos</a>
-          <a (click)="closeMobile()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left" aria-label="Ir a IA">IA</a>
-          <a (click)="closeMobile()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left" aria-label="Ir a Contacto">Contacto</a>
-          <a (click)="closeMobile()" [routerLink]="['/admin']" class="block btn w-full text-left" aria-label="Ir a Admin">Admin</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left" aria-label="Ir a Inicio">Home</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left" aria-label="Ir a Blog">Blog</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left" aria-label="Ir a Cursos">Cursos</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left" aria-label="Ir a IA">IA</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left" aria-label="Ir a Contacto">Contacto</a>
+          <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left" aria-label="Ir a Admin">Admin</a>
 
           <div class="pt-2">
             <select class="btn w-full" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
@@ -108,17 +106,24 @@ type Lang = 'es' | 'en' | 'pt';
   `,
 })
 export class AppShellComponent {
-  protected teamOpen = false;
-  protected mobileOpen: WritableSignal<boolean> = signal(false);
+  protected navOpen: WritableSignal<boolean> = signal(false);
 
   readonly currentLang: () => Lang;
 
-  constructor(private readonly router: Router, public readonly i18n: I18nService) {
+  brandName = signal<string>('Sube Academ-IA');
+  logoUrl = signal<string | null>(null);
+
+  constructor(private readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
+    this.settings.get().subscribe((s: SiteSettings | undefined) => {
+      if (!s) return;
+      if (s.brandName) this.brandName.set(s.brandName);
+      this.logoUrl.set(s.logoUrl || null);
+    });
   }
 
-  toggleMobile() { this.mobileOpen.set(!this.mobileOpen()); }
-  closeMobile() { this.mobileOpen.set(false); }
+  toggleNav() { this.navOpen.set(!this.navOpen()); }
+  closeNav() { this.navOpen.set(false); }
 
   onChangeLang(lang: Lang) {
     const supported = new Set(['es', 'en', 'pt']);

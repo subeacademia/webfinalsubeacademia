@@ -4,31 +4,33 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-admin-login',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   template: `
-    <div class="min-h-dvh grid place-items-center p-6">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="w-full max-w-sm space-y-4">
-        <h1 class="text-2xl font-semibold text-center">Acceso Admin</h1>
+    <div class="min-h-[70vh] grid place-items-center p-6">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="card w-full max-w-md p-6 space-y-4">
+        <h1 class="text-2xl font-semibold text-center">Acceso admin</h1>
+
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" required />
+          <input matInput formControlName="email" type="email" required />
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="w-full">
           <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="password" required />
+          <input matInput formControlName="password" type="password" required />
         </mat-form-field>
 
-        <button mat-flat-button color="primary" class="w-full" [disabled]="loading()">Entrar</button>
+        <button mat-raised-button color="primary" class="w-full" [disabled]="loading()">
+          {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+        </button>
 
-        <p *ngIf="error()" class="text-sm text-red-600">{{ error() }}</p>
-        <p class="text-xs text-gray-500 text-center">Protegido por reCAPTCHA • {{ siteKey }}</p>
+        <p *ngIf="error()" class="text-red-400 text-sm text-center">{{ error() }}</p>
       </form>
     </div>
   `,
@@ -38,8 +40,7 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
-
-  readonly siteKey = environment.recaptchaV3SiteKey;
+  private readonly route = inject(ActivatedRoute);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -49,48 +50,32 @@ export class LoginComponent {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  async onSubmit() {
+
+  async submit() {
     if (this.form.invalid || this.loading()) return;
     this.error.set(null);
     this.loading.set(true);
     try {
-      // Ejecutar reCAPTCHA v3 invisible
-      await this.executeRecaptcha('admin_login');
       const { email, password } = this.form.getRawValue();
-      await this.auth.loginWithEmailPassword(email!, password!);
+      await this.auth.login(email!, password!);
       await this.router.navigateByUrl('/admin');
     } catch (e: any) {
-      this.error.set(e?.message ?? 'Error al iniciar sesión');
+      const code: string | undefined = e?.code;
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+        this.error.set('Credenciales inválidas. Revisa tu email y contraseña.');
+      } else if (code === 'auth/user-not-found') {
+        this.error.set('No existe una cuenta con ese email.');
+      } else {
+        this.error.set(e?.message ?? 'No se pudo iniciar sesión');
+      }
     } finally {
       this.loading.set(false);
     }
   }
 
-  private async executeRecaptcha(action: string): Promise<void> {
-    if (typeof window === 'undefined') return; // SSR safety
-    const siteKey = this.siteKey;
-    if (!siteKey) return;
-    // Cargar script si no existe
-    if (!(window as any).grecaptcha) {
-      await new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => resolve();
-        script.onerror = () => resolve();
-        document.head.appendChild(script);
-      });
-    }
-    const grecaptcha = (window as any).grecaptcha;
-    if (!grecaptcha?.ready) return;
-    await new Promise<void>((res) => grecaptcha.ready(res));
-    try {
-      await grecaptcha.execute(siteKey, { action });
-    } catch (_) {
-      // Si falla, no bloquear login, solo registrar
-      console.warn('reCAPTCHA no disponible');
-    }
+  ngOnInit() {
+    const denied = this.route.snapshot.queryParamMap.get('denied');
+    if (denied) this.error.set('Tu cuenta no tiene permisos de administrador.');
   }
 }
 

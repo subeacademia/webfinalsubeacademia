@@ -49,6 +49,13 @@ html, body {
 /* Animación de fondo muy sutil */
 @keyframes bgfade { from { opacity: 0.3; } to { opacity: 0.6; } }
 
+/* Nav responsive */
+.nav { @apply flex gap-2; }
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .nav--open { display: block; }
+}
+
 /* Panel 3D con glow sutil */
 .panel-3d { position: relative; }
 .panel-3d::after {

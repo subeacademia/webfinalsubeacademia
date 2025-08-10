@@ -13,3 +13,5 @@
 /es/contacto
 /en/contacto
 /pt/contacto
+/admin
+/admin/login

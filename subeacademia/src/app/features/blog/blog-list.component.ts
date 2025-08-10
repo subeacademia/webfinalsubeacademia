@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@ang
 import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SkeletonCardComponent } from '../../core/ui/skeleton-card/skeleton-card.component';
-import { ContentService } from '../../core/services/content.service';
+import { ContentService } from '../../core/data/content.service';
 import { Post } from '../../core/models/post.model';
 import { SeoService } from '../../core/seo/seo.service';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -93,13 +93,13 @@ export class BlogListComponent {
 
   private load() {
     this.loading.set(true);
-    const lang = this.currentLang();
-    this.content.getPostsByLangAndStatus(lang, 'published', 12).subscribe((list) => {
+    const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
+    this.content.listPosts(lang, 30).subscribe((list: any[]) => {
       const category = this.filterCategory().toLowerCase();
       const q = this.filterQuery().toLowerCase();
       let filtered = list;
-      if (category) filtered = filtered.filter((p) => (p.categories || []).some((c) => c.toLowerCase().includes(category)));
-      if (q) filtered = filtered.filter((p) => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || (p.tags || []).some(t => t.toLowerCase().includes(q)));
+      if (category) filtered = filtered.filter((p) => (p.categories || []).some((c: string) => c.toLowerCase().includes(category)));
+      if (q) filtered = filtered.filter((p) => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || (p.tags || []).some((t: string) => t.toLowerCase().includes(q)));
       this.posts.set(filtered);
       this.loading.set(false);
     });

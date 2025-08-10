@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@ang
 import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SkeletonCardComponent } from '../../core/ui/skeleton-card/skeleton-card.component';
-import { ContentService } from '../../core/services/content.service';
+import { ContentService } from '../../core/data/content.service';
 import { Course } from '../../core/models/course.model';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SeoService } from '../../core/seo/seo.service';
@@ -98,13 +98,13 @@ export class CoursesListComponent {
 
   private load() {
     this.loading.set(true);
-    const lang = this.currentLang();
-    this.content.getCoursesByLangAndStatus(lang, 'published', 12).subscribe((list) => {
+    const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
+    this.content.listCourses(lang, 30).subscribe((list: any[]) => {
       let filtered = list;
       const level = this.filterLevel();
       const topic = this.filterTopic().toLowerCase().trim();
       if (level) filtered = filtered.filter((c) => c.level === level);
-      if (topic) filtered = filtered.filter((c) => c.topics?.some((t) => t.toLowerCase().includes(topic)));
+      if (topic) filtered = filtered.filter((c) => c.topics?.some((t: string) => t.toLowerCase().includes(topic)));
       this.courses.set(filtered);
       this.loading.set(false);
     });

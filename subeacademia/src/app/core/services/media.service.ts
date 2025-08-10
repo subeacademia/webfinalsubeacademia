@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Storage, getDownloadURL, ref, uploadBytes, uploadBytesResumable } from '@angular/fire/storage';
+import { Storage, getDownloadURL, ref, uploadBytes, uploadBytesResumable, deleteObject } from '@angular/fire/storage';
 import { Firestore, addDoc, collection } from '@angular/fire/firestore';
 import { MediaItem } from '../models/media.model';
 import { Auth } from '@angular/fire/auth';
@@ -120,6 +120,12 @@ export class MediaService {
       img.onerror = () => resolve(null);
       img.src = URL.createObjectURL(file);
     });
+  }
+
+  // Elimina un objeto de Storage por su path
+  delete(path: string) {
+    const r = ref(this.storage, path);
+    return deleteObject(r);
   }
 }
 

@@ -85,12 +85,12 @@
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
         },
-        "prerender": {
-          "builder": "@angular/build:prerender",
-          "options": {
-            "routesFile": "prerender-routes.json"
-          }
-        },
+          "prerender": {
+            "builder": "@angular/build:prerender",
+            "options": {
+              "routesFile": "prerender-routes.txt"
+            }
+          },
         "test": {
           "builder": "@angular/build:karma",
           "options": {

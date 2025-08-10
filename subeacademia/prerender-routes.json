@@ -13,6 +13,8 @@
   "/pt/ia",
   "/es/contacto",
   "/en/contacto",
-  "/pt/contacto"
+  "/pt/contacto",
+  "/admin",
+  "/admin/login"
 ]
 
