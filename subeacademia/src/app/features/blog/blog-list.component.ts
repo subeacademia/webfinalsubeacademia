@@ -65,7 +65,7 @@ export class BlogListComponent {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly currentLang = this.i18n.currentLang;
-  protected readonly posts = signal<Post[]>([]);
+  protected readonly posts = signal<any[]>([]);
   protected readonly loading = signal<boolean>(true);
   private filterCategory = signal<string>('');
   private filterQuery = signal<string>('');
@@ -99,7 +99,12 @@ export class BlogListComponent {
     this.content.listPosts(lang, 30).subscribe((list: any[]) => {
       const category = this.filterCategory().toLowerCase();
       const q = this.filterQuery().toLowerCase();
-      let filtered = list;
+      // Mapear a vista según idioma con fallback ES
+      const mapped = list.map((item:any)=> {
+        const trans = lang !== 'es' ? item?.translations?.[lang] : null;
+        return trans ? { ...item, ...trans } : item;
+      });
+      let filtered = mapped;
       if (category) filtered = filtered.filter((p) => (p.categories || []).some((c: string) => c.toLowerCase().includes(category)));
       if (q) filtered = filtered.filter((p) => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || (p.tags || []).some((t: string) => t.toLowerCase().includes(q)));
       this.posts.set(filtered);

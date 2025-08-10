@@ -8,6 +8,17 @@ async function main() {
   const now = Date.now();
   const langs: Array<'es' | 'en' | 'pt'> = ['es', 'en', 'pt'];
 
+  // Seed mínimo solicitado: crear un post publicado en español
+  await db.collection('posts').add({
+    lang: 'es',
+    title: 'Primer post',
+    slug: 'primer-post',
+    summary: 'Hola mundo',
+    content: 'Contenido',
+    status: 'published',
+    publishedAt: now,
+  });
+
   for (const lang of langs) {
     await db.collection('posts').add({
       lang,

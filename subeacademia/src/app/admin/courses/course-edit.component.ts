@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angula
 import { CoursesService } from '../../core/data/courses.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
+import { MediaService } from '../../core/data/media.service';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
@@ -15,6 +16,9 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
   <div class="max-w-3xl mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id()? 'Editar Curso' : 'Nuevo Curso'}}</h1>
     <form [formGroup]="form" (ngSubmit)="save()" class="card p-4 space-y-4 max-w-full">
+      <div *ngIf="translationsReady()" class="text-xs inline-flex items-center gap-2 px-2 py-1 rounded bg-emerald-50 text-emerald-700">
+        Traducciones listas ✓
+      </div>
       <div class="grid gap-3 md:grid-cols-2">
         <label class="block">Idioma
           <select class="w-full" formControlName="lang">
@@ -65,7 +69,12 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
             </div>
           </div>
         </div>
-        <button class="btn" type="button" (click)="addResource()">Añadir recurso</button>
+        <div class="flex gap-2 items-center">
+          <button class="btn" type="button" (click)="fileInput.click()">Añadir recurso</button>
+          <input #fileInput type="file" class="hidden" (change)="onChooseResource($event)">
+          <span *ngIf="uploading()" class="text-sm text-[var(--muted)]">Subiendo… {{progress()}}%</span>
+          <span *ngIf="error()" class="text-sm text-red-500">{{error()}}</span>
+        </div>
       </div>
 
       <div class="grid gap-3 md:grid-cols-2">
@@ -107,6 +116,7 @@ export class CourseEditComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private courses = inject(CoursesService);
+  private media = inject(MediaService);
 
   id = signal<string | null>(null);
 
@@ -134,6 +144,7 @@ export class CourseEditComponent {
           const value:any = c;
           this.form.patchValue({ ...value, publishedAtLocal: new Date(value.publishedAt || Date.now()).toISOString().slice(0,16) });
           this.setResources(value.resources || []);
+          this.translationsReady.set(!!(value as any)?.translations?.en && !!(value as any)?.translations?.pt);
         }
       });
     }
@@ -145,8 +156,32 @@ export class CourseEditComponent {
     for(const r of resources){ fa.push(this.fb.group({ type:[r.type], url:[r.url], title:[r.title || ''] }) as any); }
     this.form.setControl('resources', fa as any);
   }
-  addResource(){ this.resources().push(this.fb.group({ type:['video'], url:[''], title:[''] }) as any); }
+  addResource(){ this.resources().push(this.fb.group({ type:['file'], url:[''], title:[''] }) as any); }
   removeResource(i: number){ this.resources().removeAt(i); }
+
+  // Subida de recurso directo con progreso, y push al FormArray
+  uploading = signal(false);
+  progress = signal(0);
+  error = signal<string|null>(null);
+
+  translationsReady = signal(false);
+
+  async onChooseResource(e:any){
+    const file: File | undefined = (e.target?.files && e.target.files[0]) as File | undefined;
+    if(!file) return;
+    this.error.set(null);
+    this.uploading.set(true);
+    try{
+      const up = await this.media.upload(file, 'courses', p => this.progress.set(p));
+      const type = guessType(up.contentType);
+      this.resources().push(this.fb.group({ type:[type], url:[up.url], title:[file.name], name:[file.name], size:[up.size], path:[up.path] }) as any);
+    }catch(err:any){
+      this.error.set(err?.message || 'Error subiendo recurso');
+    }finally{
+      this.uploading.set(false);
+      this.progress.set(0);
+    }
+  }
 
   onTopicsChange(v: string){
     const topics = (v || '').split(',').map(x=>x.trim()).filter(Boolean);

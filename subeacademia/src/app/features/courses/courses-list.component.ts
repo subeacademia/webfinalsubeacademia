@@ -70,7 +70,7 @@ export class CoursesListComponent {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly currentLang = this.i18n.currentLang;
-  protected readonly courses = signal<Course[]>([]);
+  protected readonly courses = signal<any[]>([]);
   protected readonly loading = signal<boolean>(true);
 
   private filterLevel = signal<'' | 'intro' | 'intermedio' | 'avanzado'>('');
@@ -102,7 +102,11 @@ export class CoursesListComponent {
     this.loading.set(true);
     const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
     this.content.listCourses(lang, 30).subscribe((list: any[]) => {
-      let filtered = list;
+      const mapped = list.map((item:any)=> {
+        const trans = lang !== 'es' ? item?.translations?.[lang] : null;
+        return trans ? { ...item, ...trans } : item;
+      });
+      let filtered = mapped;
       const level = this.filterLevel();
       const topic = this.filterTopic().toLowerCase().trim();
       if (level) filtered = filtered.filter((c) => c.level === level);

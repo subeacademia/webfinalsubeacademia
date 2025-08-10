@@ -12,7 +12,7 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
   template: `
     <main>
       <!-- Hero -->
-      <section class="relative overflow-hidden min-h-[80dvh] grid place-items-center px-6 py-20 md:py-28">
+      <section class="relative min-h-[300px] md:min-h-[520px] overflow-hidden grid place-items-center px-6 py-20 md:py-28">
         <div class="absolute inset-0 -z-10 bg-gradient-to-b from-transparent/0 via-[var(--panel)]/30 to-[var(--panel)]/70 animate-[bgfade_12s_ease-in-out_infinite_alternate]" aria-hidden="true"></div>
 
         <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
@@ -46,9 +46,8 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
             </div>
           </div>
 
-          <div class="relative aspect-[4/3] lg:aspect-[5/4] rounded-3xl border border-white/10 shadow-xl overflow-hidden panel-3d">
-            <canvas #hero3d id="hero3d" class="hidden lg:block w-full h-full" aria-hidden="true"></canvas>
-            <img src="/og-placeholder.svg" alt="Animación sutil de líneas y partículas" class="block lg:hidden w-full h-full object-cover" loading="lazy" />
+          <div class="relative min-h-[300px] md:min-h-[520px] overflow-hidden rounded-3xl border border-white/10 shadow-xl panel-3d">
+            <canvas #hero3d id="hero3d" style="width:100%; height:100%; display:block" class="w-full h-full" aria-hidden="true"></canvas>
           </div>
         </div>
       </section>
@@ -190,9 +189,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8));
       renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
 
-      // Partículas discretas
-      const particlesCount = 600;
-      const positions = new Float32Array(particlesCount * 3);
+      // Partículas discretas adaptadas a ancho
+      const w = (canvas.parentElement?.clientWidth || canvas.clientWidth || window.innerWidth);
+      const particlesCount = w < 480 ? 120 : w < 768 ? 220 : 380;
+      let positions = new Float32Array(particlesCount * 3);
       for (let i = 0; i < particlesCount * 3; i += 3) {
         positions[i] = (Math.random() - 0.5) * 6; // x
         positions[i + 1] = (Math.random() - 0.5) * 4; // y
@@ -221,11 +221,27 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       const frameDuration = 1000 / targetFps;
 
       const onResize = () => {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
+        const wpx = canvas.clientWidth;
+        const hpx = canvas.clientHeight;
+        renderer.setSize(wpx, hpx, false);
+        camera.aspect = wpx / Math.max(1, hpx);
         camera.updateProjectionMatrix();
+
+        // Recalcular partículas según ancho
+        const cw = (canvas.parentElement?.clientWidth || wpx);
+        const newCount = cw < 480 ? 120 : cw < 768 ? 220 : 380;
+        const currentCount = positions.length / 3;
+        if (newCount !== currentCount) {
+          positions = new Float32Array(newCount * 3);
+          for (let i = 0; i < newCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 6;
+            positions[i + 1] = (Math.random() - 0.5) * 4;
+            positions[i + 2] = (Math.random() - 0.5) * 2;
+          }
+          geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+          geometry.attributes.position.needsUpdate = true;
+          geometry.computeBoundingSphere();
+        }
       };
       const resizeObs = new ResizeObserver(onResize);
       resizeObs.observe(canvas);
@@ -243,9 +259,22 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       };
       animationFrameId = requestAnimationFrame(animate);
 
+      // Pausar si sale de viewport
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            if (!animationFrameId) animationFrameId = requestAnimationFrame(animate);
+          } else {
+            if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = 0 as any; }
+          }
+        }
+      }, { root: null, threshold: 0 });
+      io.observe(canvas);
+
       this.disposeFn = () => {
         cancelAnimationFrame(animationFrameId);
         resizeObs.disconnect();
+        io.disconnect();
         geometry.dispose();
         material.dispose();
         lineMaterial.dispose();

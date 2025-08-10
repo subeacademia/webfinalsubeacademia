@@ -10,10 +10,11 @@ export class ContentService {
 
   listPosts(lang: string, size = 30): Observable<any[]> {
     if (!isPlatformBrowser(this.platformId)) return of([]);
+    // Se consulta SIEMPRE por base ES y luego se hace fallback a traducciones en la vista
     const col = collection(this.db, 'posts');
     const q = query(
       col,
-      where('lang', '==', lang),
+      where('langBase', '==', 'es'),
       where('status', '==', 'published'),
       orderBy('publishedAt', 'desc'),
       limit(size)
@@ -26,7 +27,7 @@ export class ContentService {
     const col = collection(this.db, 'courses');
     const q = query(
       col,
-      where('lang', '==', lang),
+      where('langBase', '==', 'es'),
       where('status', '==', 'published'),
       orderBy('publishedAt', 'desc'),
       limit(size)
