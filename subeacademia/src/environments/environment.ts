@@ -12,6 +12,8 @@ export const environment = {
   adminEmails: ["bruno@subeia.tech"],
   recaptchaV3SiteKey: "6LejfqArAAAAAM5SX8uEcX6pnw9onAdYcGNzRsXW",
   ga4MeasurementId: "G-STV4N3EN88",
-  backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate"
+  backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate",
+  // Endpoint local del emulador de Functions (ajusta el projectId si cambia)
+  contactEndpoint: "http://127.0.0.1:5001/web-subeacademia/us-central1/sendEmail"
 };
 

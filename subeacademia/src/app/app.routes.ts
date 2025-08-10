@@ -43,6 +43,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/ia/ia.routes').then((m) => m.IA_ROUTES),
   },
   {
+    path: ':lang/contacto',
+    canMatch: [() => import('./core/i18n/language.guard').then(m => m.languageGuard)],
+    resolve: { _lang: () => import('./core/i18n/language.guard').then(m => m.languageResolver) },
+    loadChildren: () => import('./features/contact/contact.routes').then((m) => m.CONTACT_ROUTES),
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES),
   },

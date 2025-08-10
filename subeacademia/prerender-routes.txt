@@ -10,3 +10,6 @@
 /es/ia
 /en/ia
 /pt/ia
+/es/contacto
+/en/contacto
+/pt/contacto
