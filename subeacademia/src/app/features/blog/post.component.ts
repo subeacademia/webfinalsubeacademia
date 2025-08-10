@@ -7,6 +7,7 @@ import { SeoService } from '../../core/seo/seo.service';
 import { articleJsonLd } from '../../core/seo/jsonld';
 import { Post } from '../../core/models/post.model';
 import { MarkdownModule } from 'ngx-markdown';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-post',
@@ -30,9 +31,14 @@ import { MarkdownModule } from 'ngx-markdown';
         </div>
       </header>
 
-      <section class="prose max-w-none mt-6">
-        <markdown [data]="p.content"></markdown>
+      <section class="prose max-w-none mt-6" *ngIf="p.contentHtml; else md">
+        <div [innerHTML]="safeHtml(p.contentHtml)"></div>
       </section>
+      <ng-template #md>
+        <section class="prose max-w-none mt-6">
+          <markdown [data]="p.content"></markdown>
+        </section>
+      </ng-template>
 
       <section *ngIf="p.media?.length" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <figure *ngFor="let m of p.media" class="border rounded overflow-hidden bg-white">
@@ -49,6 +55,7 @@ export class PostComponent {
   private readonly content = inject(ContentService);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   protected readonly post = signal<Post | null>(null);
 
@@ -64,15 +71,17 @@ export class PostComponent {
       const view = t[lang] || t[base] || {};
       const mapped: any = { ...p, ...view };
       this.post.set(mapped);
-      const title = p.seo?.title ?? mapped.title;
-      const description = p.seo?.description ?? mapped.summary;
+      const titleI18n = (p as any).titleI18n || {};
+      const summaryI18n = (p as any).summaryI18n || {};
+      const title = p.seo?.title ?? (titleI18n[lang] || titleI18n['es'] || mapped.title);
+      const description = p.seo?.description ?? (summaryI18n[lang] || summaryI18n['es'] || mapped.summary);
       const image = p.seo?.ogImage ?? p.coverUrl;
 
       this.seo.updateTags({ title, description, image, type: 'article' });
 
       const isScholarly = (p.categories || []).some((c) => c.toLowerCase().includes('científica'));
       this.seo.setJsonLd('post', articleJsonLd({
-        headline: p.title,
+        headline: title,
         description,
         image: image ? [image] : undefined,
         datePublished: p.publishedAt ? new Date(p.publishedAt).toISOString() : undefined,
@@ -82,6 +91,10 @@ export class PostComponent {
         scholarly: isScholarly,
       }));
     });
+  }
+
+  safeHtml(html: string | undefined | null): SafeHtml {
+    return this.sanitizer.bypassSecurityTrustHtml(html || '');
   }
 }
 

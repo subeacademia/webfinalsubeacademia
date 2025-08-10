@@ -151,7 +151,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       title: 'Sube Academ-IA | Educación + Inteligencia Artificial',
       description:
         'Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible. Únete a Sube Academ-IA.',
-      image: '/og-placeholder.svg',
+      image: 'assets/og-placeholder.svg',
       type: 'website',
     });
 

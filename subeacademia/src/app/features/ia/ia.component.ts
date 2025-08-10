@@ -46,7 +46,7 @@ export class IaComponent {
     this.seo.updateTags({
       title: 'Asistente IA | Sube Academ-IA',
       description: 'Haz preguntas y obtén respuestas de nuestro asistente IA.',
-      image: '/og-placeholder.svg',
+      image: 'assets/og-placeholder.svg',
     });
   }
 

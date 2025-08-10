@@ -14,8 +14,10 @@ export interface Course {
   id: string;
   lang: 'es' | 'pt' | 'en';
   title: string;
+  titleI18n?: { es?: string; en?: string; pt?: string };
   slug: string;
   summary: string;
+  summaryI18n?: { es?: string; en?: string; pt?: string };
   level: 'intro' | 'intermedio' | 'avanzado';
   durationHours?: number;
   topics: string[];

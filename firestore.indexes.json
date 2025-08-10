@@ -4,7 +4,6 @@
       "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "language", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "publishedAt", "order": "DESCENDING" }
       ]
@@ -13,16 +12,15 @@
       "collectionGroup": "posts",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "category", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "lang", "order": "ASCENDING" },
         { "fieldPath": "publishedAt", "order": "DESCENDING" }
       ]
     },
     {
-      "collectionGroup": "posts",
+      "collectionGroup": "courses",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "tags", "arrayConfig": "CONTAINS" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "publishedAt", "order": "DESCENDING" }
       ]
@@ -31,8 +29,8 @@
       "collectionGroup": "courses",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "level", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "publishedAt", "order": "DESCENDING" }
       ]
     },
@@ -40,23 +38,12 @@
       "collectionGroup": "courses",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "topics", "arrayConfig": "CONTAINS" },
         { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "courses",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "language", "order": "ASCENDING" },
-        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "topic", "order": "ASCENDING" },
         { "fieldPath": "publishedAt", "order": "DESCENDING" }
       ]
     }
   ],
-  "fieldOverrides": [
-    { "collectionGroup": "posts", "fieldPath": "content", "ttl": null, "indexes": [] }
-  ]
+  "fieldOverrides": []
 }
 

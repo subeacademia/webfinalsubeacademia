@@ -67,9 +67,19 @@ import { MarkdownModule } from 'ngx-markdown';
       <form [formGroup]="form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="space-y-3">
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Título</mat-label>
+            <mat-label>Título (ES)</mat-label>
             <input matInput formControlName="title" />
           </mat-form-field>
+          <div class="grid grid-cols-2 gap-3">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Título (EN)</mat-label>
+              <input matInput formControlName="titleEn" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Título (PT)</mat-label>
+              <input matInput formControlName="titlePt" />
+            </mat-form-field>
+          </div>
           <mat-form-field appearance="outline" class="w-full">
             <mat-label>Idioma</mat-label>
             <mat-select formControlName="lang">
@@ -79,9 +89,19 @@ import { MarkdownModule } from 'ngx-markdown';
             </mat-select>
           </mat-form-field>
           <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Resumen</mat-label>
+            <mat-label>Resumen (ES)</mat-label>
             <textarea matInput rows="4" formControlName="summary"></textarea>
           </mat-form-field>
+          <div class="grid grid-cols-2 gap-3">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Resumen (EN)</mat-label>
+              <textarea matInput rows="3" formControlName="summaryEn"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Resumen (PT)</mat-label>
+              <textarea matInput rows="3" formControlName="summaryPt"></textarea>
+            </mat-form-field>
+          </div>
           <div class="flex gap-2">
             <mat-form-field appearance="outline" class="flex-1">
               <mat-label>Slug</mat-label>
@@ -133,6 +153,7 @@ import { MarkdownModule } from 'ngx-markdown';
           <div class="flex items-center gap-2">
             <input type="file" (change)="onFile($event)" />
             <button mat-stroked-button type="button" (click)="insertMediaUrl()">Insertar URL</button>
+            <button mat-flat-button color="accent" type="button" (click)="autoTranslateI18n()">Traducir automáticamente a EN/PT</button>
           </div>
           <div class="border rounded p-2">
             <div class="text-sm font-medium mb-2">Vista previa</div>
@@ -172,8 +193,12 @@ export class AdminPostsComponent {
     id: [''],
     lang: ['es', Validators.required],
     title: ['', Validators.required],
+    titleEn: [''],
+    titlePt: [''],
     slug: [''],
     summary: [''],
+    summaryEn: [''],
+    summaryPt: [''],
     content: [''],
     categories: [[] as string[]],
     tags: [[] as string[]],
@@ -232,7 +257,15 @@ export class AdminPostsComponent {
 
   startEdit(p: Post) {
     this.editingId.set(p.id);
-    this.form.reset({ ...p });
+    const titleI18n: any = (p as any).titleI18n || {};
+    const summaryI18n: any = (p as any).summaryI18n || {};
+    this.form.reset({
+      ...p,
+      titleEn: titleI18n.en || '',
+      titlePt: titleI18n.pt || '',
+      summaryEn: summaryI18n.en || '',
+      summaryPt: summaryI18n.pt || '',
+    });
   }
 
   cancelEdit() {
@@ -249,6 +282,8 @@ export class AdminPostsComponent {
 
   async saveDraft() {
     const value = this.form.getRawValue() as unknown as Post;
+    (value as any).titleI18n = { es: value.title, en: (this.form.value as any).titleEn || undefined, pt: (this.form.value as any).titlePt || undefined };
+    (value as any).summaryI18n = { es: value.summary, en: (this.form.value as any).summaryEn || undefined, pt: (this.form.value as any).summaryPt || undefined };
     value.status = 'draft';
     value.updatedAt = Date.now();
     if (this.editingId() === 'new') {
@@ -262,6 +297,8 @@ export class AdminPostsComponent {
 
   async publish() {
     const value = this.form.getRawValue() as unknown as Post;
+    (value as any).titleI18n = { es: value.title, en: (this.form.value as any).titleEn || undefined, pt: (this.form.value as any).titlePt || undefined };
+    (value as any).summaryI18n = { es: value.summary, en: (this.form.value as any).summaryEn || undefined, pt: (this.form.value as any).summaryPt || undefined };
     value.status = 'published';
     value.publishedAt = Date.now();
     value.updatedAt = Date.now();
@@ -276,6 +313,8 @@ export class AdminPostsComponent {
 
   async schedule() {
     const value = this.form.getRawValue() as unknown as Post;
+    (value as any).titleI18n = { es: value.title, en: (this.form.value as any).titleEn || undefined, pt: (this.form.value as any).titlePt || undefined };
+    (value as any).summaryI18n = { es: value.summary, en: (this.form.value as any).summaryEn || undefined, pt: (this.form.value as any).summaryPt || undefined };
     value.status = 'scheduled';
     value.updatedAt = Date.now();
     if (!value.scheduledAt) value.scheduledAt = Date.now() + 24 * 60 * 60 * 1000;
@@ -318,6 +357,18 @@ export class AdminPostsComponent {
       const current = this.form.value.content || '';
       this.form.patchValue({ content: current + `\n\n![media](${url})\n` });
     }
+  }
+
+  async autoTranslateI18n(){
+    // Simular endpoint: generar versiones simples EN/PT basadas en ES
+    const baseTitle = (this.form.value as any).title || '';
+    const baseSummary = (this.form.value as any).summary || '';
+    // Simples placeholders para demo
+    const titleEn = baseTitle ? `${baseTitle} (EN)` : '';
+    const titlePt = baseTitle ? `${baseTitle} (PT)` : '';
+    const summaryEn = baseSummary ? `${baseSummary} (EN)` : '';
+    const summaryPt = baseSummary ? `${baseSummary} (PT)` : '';
+    this.form.patchValue({ titleEn, titlePt, summaryEn, summaryPt });
   }
 }
 

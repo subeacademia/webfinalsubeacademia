@@ -9,7 +9,7 @@ export function getMockPosts(lang: 'es' | 'en' | 'pt'): Post[] {
     authors: [{ name: 'Equipo Sube Academ-IA' }],
     categories: ['IA', 'Educación'],
     tags: ['ia', 'educacion'],
-    coverUrl: '/og-placeholder.svg',
+  coverUrl: 'assets/og-placeholder.svg',
   };
   if (lang === 'es') {
     return [
@@ -58,7 +58,7 @@ export function getMockCourses(lang: 'es' | 'en' | 'pt'): Course[] {
     status: 'published' as const,
     resources: [],
     topics: ['IA', 'LLMs'],
-    coverUrl: '/og-placeholder.svg',
+  coverUrl: 'assets/og-placeholder.svg',
   };
   if (lang === 'es') {
     return [

@@ -19,9 +19,14 @@ export interface Post {
   id: string;
   lang: 'es' | 'pt' | 'en';
   title: string;
+  titleI18n?: { es?: string; en?: string; pt?: string };
   slug: string;
   summary: string;
+  summaryI18n?: { es?: string; en?: string; pt?: string };
   content: string;
+  contentI18n?: { es?: string; en?: string; pt?: string };
+  contentHtml?: string;
+  contentText?: string;
   categories: string[];
   tags: string[];
   coverUrl?: string;

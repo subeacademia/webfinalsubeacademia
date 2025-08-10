@@ -7,15 +7,11 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideAuth, getAuth } from '@angular/fire/auth';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore';
-import { provideStorage, getStorage } from '@angular/fire/storage';
-import { connectAuthEmulator } from 'firebase/auth';
-import { connectFirestoreEmulator } from 'firebase/firestore';
-import { connectStorageEmulator } from 'firebase/storage';
+import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { provideFirestore, getFirestore, connectFirestoreEmulator, collection, getDocs } from '@angular/fire/firestore';
+import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
 import { environment } from '../environments/environment';
 import { FirebaseDataService } from './core/firebase-data.service';
-import { collection, getDocs } from 'firebase/firestore';
 
 // Overrides de runtime con window.__env (opcional y simple)
 const runtimeEnv = ((): typeof environment => {
@@ -91,7 +87,7 @@ export const appConfig: ApplicationConfig = {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
       }
       return auth;
-    }),
+    }, { runInZone: true }),
     provideFirestore(() => {
       const db = getFirestore();
       if (shouldUseEmulators()) {

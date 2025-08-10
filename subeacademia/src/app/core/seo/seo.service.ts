@@ -28,7 +28,7 @@ export class SeoService {
     if (data.title) this.meta.updateTag({ property: 'og:title', content: data.title });
     if (data.description)
       this.meta.updateTag({ property: 'og:description', content: data.description });
-    const ogImage = data.image || '/assets/og-placeholder.svg';
+    const ogImage = data.image || 'assets/og-placeholder.svg';
     if (ogImage) this.meta.updateTag({ property: 'og:image', content: ogImage });
     const currentUrl = data.url || (this.document?.location ? this.document.location.href : undefined);
     if (currentUrl) this.meta.updateTag({ property: 'og:url', content: currentUrl });

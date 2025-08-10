@@ -8,7 +8,8 @@
     "build:ssg": "ng build --configuration=production",
     "serve:ssg": "npx http-server dist/subeacademia/browser -p 4200",
     "seed": "ts-node tools/seed.ts",
-    "deploy:indexes": "firebase deploy --only \"firestore:indexes\" --project web-subeacademia"
+    "deploy:indexes": "firebase deploy --only \"firestore:indexes\" --project web-subeacademia",
+    "deploy:db": "firebase deploy --only firestore"
   },
   "prettier": {
     "overrides": [
@@ -40,6 +41,7 @@
     "@types/three": "^0.179.0",
     "express": "^5.1.0",
     "firebase": "^11.10.0",
+    "ngx-editor": "^19.0.0-beta.1",
     "ngx-markdown": "^20.0.0",
     "rxjs": "~7.8.0",
     "three": "^0.179.1",
@@ -53,6 +55,8 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "@types/prosemirror-model": "^1.16.2",
+    "@types/prosemirror-view": "^1.23.3",
     "autoprefixer": "^10.4.21",
     "jasmine-core": "~5.8.0",
     "karma": "~6.4.0",

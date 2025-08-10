@@ -56,6 +56,11 @@ type Lang = 'es' | 'en' | 'pt';
           <li>
             <a routerLink="/admin" class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
           </li>
+          <li>
+            <button class="btn" (click)="toggleTheme()" aria-label="Cambiar tema">
+              {{ theme() === 'dark' ? '🌙' : '☀️' }}
+            </button>
+          </li>
 
           <li>
             <label class="sr-only" for="langSelect">Cambiar idioma</label>
@@ -77,12 +82,15 @@ type Lang = 'es' | 'en' | 'pt';
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Contacto">Contacto</a>
           <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
 
-          <div class="pt-2">
+          <div class="pt-2 flex gap-2">
             <select class="btn w-full" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
               <option value="es">ES</option>
               <option value="en">EN</option>
               <option value="pt">PT</option>
             </select>
+            <button class="btn w-full" (click)="toggleTheme()" aria-label="Cambiar tema">
+              {{ theme() === 'dark' ? 'Tema oscuro' : 'Tema claro' }}
+            </button>
           </div>
         </div>
       </div>
@@ -112,6 +120,7 @@ export class AppShellComponent {
 
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
+  theme = signal<'light'|'dark'>(this.detectInitialTheme());
 
   constructor(private readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
@@ -120,6 +129,7 @@ export class AppShellComponent {
       if (s.brandName) this.brandName.set(s.brandName);
       this.logoUrl.set(s.logoUrl || null);
     });
+    this.applyTheme(this.theme());
   }
 
   toggleNav() { this.navOpen.set(!this.navOpen()); }
@@ -135,6 +145,27 @@ export class AppShellComponent {
     } else {
       void this.router.navigate(['/', lang]);
     }
+  }
+
+  private detectInitialTheme(): 'light'|'dark' {
+    try {
+      const saved = localStorage.getItem('theme') as 'light'|'dark'|null;
+      if (saved === 'light' || saved === 'dark') return saved;
+      const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return prefersDark ? 'dark' : 'light';
+    } catch { return 'light'; }
+  }
+
+  toggleTheme() {
+    const next: 'light'|'dark' = this.theme() === 'dark' ? 'light' : 'dark';
+    this.theme.set(next);
+    try { localStorage.setItem('theme', next); } catch {}
+    this.applyTheme(next);
+  }
+
+  private applyTheme(mode: 'light'|'dark') {
+    const root = document.documentElement;
+    if (mode === 'dark') root.classList.add('dark'); else root.classList.remove('dark');
   }
 }
 

@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { Component, PLATFORM_ID, OnDestroy, inject, signal } from '@angular/core';
+import { CommonModule, NgIf, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PostsService } from '../../core/data/posts.service';
@@ -7,12 +7,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { TranslationService } from '../../core/ai/translation.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer as AngularSanitizer } from '@angular/platform-browser';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
 @Component({
   standalone: true,
-  imports: [CommonModule, NgIf, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, NgIf, ReactiveFormsModule, FormsModule, RouterLink, NgxEditorModule],
   template: `
   <div class="mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id() ? 'Editar Post' : 'Nuevo Post'}}
@@ -39,8 +42,21 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         <label class="block">Resumen
           <textarea class="w-full" rows="3" formControlName="summary"></textarea>
         </label>
-        <label class="block">Contenido</label>
-        <textarea class="w-full min-h-64 h-64" formControlName="content"></textarea>
+        <div formGroupName="translations">
+          <div formGroupName="es">
+            <label class="block">Contenido</label>
+            <div *ngIf="isBrowser; else ssrNote">
+              <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+              <ngx-editor formControlName="content"
+                          [editor]="editor"
+                          [placeholder]="'Escribe el contenido...'">
+              </ngx-editor>
+            </div>
+          </div>
+        </div>
+        <ng-template #ssrNote>
+          <textarea class="w-full min-h-64 h-64" formControlName="content" placeholder="Editor disponible en navegador"></textarea>
+        </ng-template>
         <div class="grid gap-3 md:grid-cols-2">
           <label class="block">Estado
             <select class="w-full" formControlName="status">
@@ -76,7 +92,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
   </div>
   `
 })
-export class PostEditComponent {
+export class PostEditComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -84,6 +100,17 @@ export class PostEditComponent {
   private sanitizer = inject(DomSanitizer);
   private translator = inject(TranslationService);
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  protected isBrowser = isPlatformBrowser(this.platformId);
+  editor: Editor = this.isBrowser ? new Editor() : (undefined as unknown as Editor);
+  toolbar: Toolbar = [
+    ['bold', 'italic'],
+    ['underline', 'strike'],
+    [{ heading: ['h1', 'h2', 'h3'] }],
+    ['ordered_list', 'bullet_list'],
+    ['link'],
+    ['code']
+  ];
 
   // Editor WYSIWYG deshabilitado temporalmente para evitar conflictos de tipos con CKEditor
 
@@ -91,7 +118,7 @@ export class PostEditComponent {
   // Nuevo esquema: translations + languageFallback
   form = this.fb.group({
     translations: this.fb.group({
-      es: this.fb.group({ title: ['', Validators.required], summary: [''], content: ['', Validators.required] }),
+      es: this.fb.group({ title: ['', Validators.required], summary: [''], content: ['', Validators.required], contentHtml: [''], contentText: [''] }),
       en: this.fb.group({ title: [''], summary: [''], content: [''] }),
       pt: this.fb.group({ title: [''], summary: [''], content: [''] }),
     }),
@@ -121,6 +148,10 @@ export class PostEditComponent {
     }
   }
 
+  ngOnDestroy(): void {
+    this.editor?.destroy();
+  }
+
   syncSlug(){
     const esTitle = (this.form.value as any)?.translations?.es?.title || '';
     this.form.patchValue({ slug: slugify(esTitle) }, {emitEvent:false});
@@ -135,6 +166,15 @@ export class PostEditComponent {
     }
     if (v.publishedAtLocal) v.publishedAt = new Date(v.publishedAtLocal).getTime();
     delete v.publishedAtLocal;
+
+    // Persistir contentHtml y contentText (plain)
+    const tempDiv = this.isBrowser ? document.createElement('div') : null;
+    if (tempDiv) {
+      tempDiv.innerHTML = es.content;
+      const text = tempDiv.textContent || tempDiv.innerText || '';
+      v.translations.es.contentHtml = es.content;
+      v.translations.es.contentText = text;
+    }
 
     v.updatedAt = Date.now();
     if (!this.id()) v.createdAt = Date.now();
@@ -160,6 +200,8 @@ export class PostEditComponent {
     const raw = (this.form.value as any)?.translations?.es?.content || '';
     return this.sanitizer.bypassSecurityTrustHtml(raw);
   }
+
+  // No-op: con formControlName el contenido se sincroniza automáticamente
 
   async autoTranslate() {
     const es = (this.form.value as any)?.translations?.es || {};

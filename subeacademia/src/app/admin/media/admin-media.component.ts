@@ -5,7 +5,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MediaService } from '../../core/media/media.service';
 import { FormsModule } from '@angular/forms';
 import { Firestore, collection, collectionData, limit, orderBy, query } from '@angular/fire/firestore';
+import { Storage, ref as storageRef, listAll, getDownloadURL } from '@angular/fire/storage';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { AuthService } from '../../core/auth/auth.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-admin-media',
@@ -17,20 +20,31 @@ import { Clipboard } from '@angular/cdk/clipboard';
       <label class="inline-flex items-center gap-2 text-sm"><input type="checkbox" [(ngModel)]="convertWebp" /> Convertir a WebP</label>
     </div>
 
-    <div
-      class="border-2 border-dashed rounded p-6 text-center bg-gray-50"
-      (dragover)="onDragOver($event)"
-      (drop)="onDrop($event)"
-    >
-      Arrastra y suelta archivos aquí o
-      <input type="file" multiple (change)="onFilePick($event)" class="block mx-auto mt-2" />
-    </div>
+    <ng-container *ngIf="(isAdmin$|async) as isAdmin">
+      <div
+        class="border-2 border-dashed rounded p-6 text-center bg-gray-50"
+        [class.opacity-50]="!isAdmin"
+        (dragover)="isAdmin && onDragOver($event)"
+        (drop)="isAdmin && onDrop($event)"
+      >
+        Arrastra y suelta archivos aquí o
+        <input type="file" multiple (change)="onFilePick($event)" class="block mx-auto mt-2" [disabled]="!isAdmin" />
+        <div class="text-xs text-red-600 mt-2" *ngIf="!isAdmin">Debes ser administrador para subir archivos.</div>
+      </div>
+    </ng-container>
 
     <div class="mt-6 space-y-3" *ngIf="queue().length">
       <div *ngFor="let q of queue()" class="border rounded p-3">
         <div class="text-sm">{{ q.file.name }}</div>
         <mat-progress-bar mode="determinate" [value]="q.progress"></mat-progress-bar>
-        <div class="text-xs text-muted mt-1">{{ q.progress }}%</div>
+        <div class="text-xs text-muted mt-1">
+          <ng-container [ngSwitch]="q.state">
+            <span *ngSwitchCase="'running'">Subiendo… ({{ q.progress }}%)</span>
+            <span *ngSwitchCase="'success'" class="text-green-700">Completado</span>
+            <span *ngSwitchCase="'error'" class="text-red-700">Error</span>
+            <span *ngSwitchDefault>{{ q.progress }}%</span>
+          </ng-container>
+        </div>
       </div>
       <div class="flex gap-2">
         <button mat-flat-button color="primary" (click)="startUpload()" [disabled]="uploading()">Subir</button>
@@ -67,11 +81,14 @@ export class AdminMediaComponent {
   private readonly media = inject(MediaService);
   private readonly db = inject(Firestore);
   private readonly clipboard = inject(Clipboard);
+  private readonly auth = inject(AuthService);
+  private readonly storage = inject(Storage);
 
   convertWebp = true;
   uploading = signal(false);
-  queue = signal<Array<{ file: File; progress: number }>>([]);
+  queue = signal<Array<{ file: File; progress: number; state: 'idle'|'running'|'success'|'error' }>>([]);
   uploaded = signal<Array<{ name: string; url: string }>>([]);
+  isAdmin$ = this.auth.isAdmin$;
 
   // listado
   items = signal<any[]>([]);
@@ -98,7 +115,7 @@ export class AdminMediaComponent {
 
   addToQueue(files: File[]) {
     const current = this.queue();
-    this.queue.set([...current, ...files.map(f => ({ file: f, progress: 0 }))]);
+    this.queue.set([...current, ...files.map(f => ({ file: f, progress: 0, state: 'idle' as const }))]);
   }
 
   clearQueue() { this.queue.set([]); }
@@ -106,18 +123,23 @@ export class AdminMediaComponent {
   async startUpload() {
     if (this.uploading()) return;
     this.uploading.set(true);
-    const items = [] as Array<{ name: string; url: string }>;
     for (const entry of this.queue()) {
-      try {
-        await this.media.upload(entry.file, 'media', (p) => {
-          entry.progress = p;
-          this.queue.set([...this.queue()]);
+      await new Promise<void>((resolve) => {
+        this.media.uploadPublic(entry.file).subscribe({
+          next: (v) => {
+            entry.progress = v.progress;
+            entry.state = v.state as any;
+            this.queue.set([...this.queue()]);
+          },
+          error: (err) => {
+            console.error('Error subiendo', err);
+            entry.state = 'error';
+            resolve();
+          },
+          complete: () => resolve(),
         });
-      } catch (e) {
-        console.error(e);
-      }
+      });
     }
-    this.uploaded.set([...this.uploaded(), ...items]);
     this.clearQueue();
     this.uploading.set(false);
     this.load();
@@ -126,10 +148,16 @@ export class AdminMediaComponent {
   constructor(){ this.load(); }
 
   load(){
-    const colRef = collection(this.db, 'media');
-    const qRef = query(colRef, orderBy('createdAt','desc'), limit(this.pageSize*2));
-    collectionData(qRef, { idField: 'id' }).subscribe((arr:any[])=>{
-      this.items.set(arr || []);
+    // Listar archivos desde Storage en la carpeta pública
+    listAll(storageRef(this.storage, 'public')).then(async res => {
+      const items = await Promise.all(res.items.map(async it => ({
+        name: it.name,
+        url: await getDownloadURL(it)
+      })));
+      this.items.set(items);
+      this.applyFilter();
+    }).catch(() => {
+      this.items.set([]);
       this.applyFilter();
     });
   }

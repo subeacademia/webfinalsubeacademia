@@ -57,3 +57,15 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Firestore: índices y despliegue
+
+La configuración de Firestore está enlazada desde `firebase.json` a `../firestore.indexes.json` y `firestore.rules`.
+
+- Para desplegar únicamente Firestore (reglas e índices):
+
+```bash
+npm run deploy:db
+```
+
+Esto ejecuta `firebase deploy --only firestore`. Asegúrate de tener el proyecto seleccionado con `firebase use` o pasa `--project <id>`.

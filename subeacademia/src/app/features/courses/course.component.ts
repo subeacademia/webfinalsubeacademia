@@ -52,9 +52,13 @@ export class CourseComponent {
     const lang = this.i18n.currentLang();
     this.content.getCourseBySlug(lang, slug).then((c) => {
       if (!c) return;
-      this.course.set(c);
-      const title = c.seo?.title ?? c.title;
-      const description = c.seo?.description ?? c.summary;
+      const titleI18n: any = (c as any).titleI18n || {};
+      const summaryI18n: any = (c as any).summaryI18n || {};
+      const localizedTitle = titleI18n[lang] || titleI18n['es'] || c.title;
+      const localizedSummary = summaryI18n[lang] || summaryI18n['es'] || c.summary;
+      this.course.set({ ...(c as any), title: localizedTitle, summary: localizedSummary });
+      const title = c.seo?.title ?? localizedTitle;
+      const description = c.seo?.description ?? localizedSummary;
       const image = c.seo?.ogImage ?? c.coverUrl;
 
       this.seo.updateTags({ title, description, image, type: 'website' });
