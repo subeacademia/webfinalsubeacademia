@@ -1,0 +1,43 @@
+name: Build and Deploy to Hostinger
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+        working-directory: subeacademia
+      - name: Build SSG
+        run: npm run build:ssg
+        working-directory: subeacademia
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: subeacademia/dist/subeacademia/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: 46.202.145.250
+          username: u863881186
+          password: "Sube@2025"
+          port: 21
+          local-dir: dist
+          server-dir: public_html/
