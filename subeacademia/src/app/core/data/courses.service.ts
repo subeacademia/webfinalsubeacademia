@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc, orderBy } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc, orderBy, limit, getDocs } from '@angular/fire/firestore';
 import { Course } from '../models';
 import { Observable, from, firstValueFrom } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
@@ -17,7 +17,23 @@ export class CoursesService {
       where('status','==','published'),
       orderBy('publishedAt','desc')
     );
-    return collectionData(qRef, { idField: 'id' }) as unknown as Observable<Course[]>;
+    // Encapsular fallback en memoria si requiere índice
+    return new Observable<Course[]>((observer) => {
+      getDocs(qRef).then(snap => {
+        const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Course[];
+        observer.next(items); observer.complete();
+      }).catch(async (e:any) => {
+        if (String(e?.message || '').includes('requires an index')){
+          const snap = await getDocs(query(this.col, where('status','==','published'), limit(50)));
+          let items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Course[];
+          items = items.filter(c => (c as any).lang === lang);
+          items.sort((a:any,b:any)=> (b.publishedAt?.toMillis?.() ?? 0) - (a.publishedAt?.toMillis?.() ?? 0));
+          observer.next(items); observer.complete();
+        } else {
+          collectionData(qRef, { idField: 'id' }).subscribe(v => { observer.next(v as Course[]); observer.complete(); });
+        }
+      });
+    });
   }
 
   get(id: string): Observable<Course | undefined> {

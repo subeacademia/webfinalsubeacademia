@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, isDevMode, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { filter } from 'rxjs/operators';
 import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
+import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
   selector: 'app-root',
@@ -21,8 +22,16 @@ export class App implements OnInit {
     private readonly router: Router,
     private readonly i18n: I18nService,
     private readonly seo: SeoService,
+    private readonly data: FirebaseDataService,
   ) {}
   ngOnInit() {
+    if (isDevMode()) {
+      try {
+        const hints = this.data.getIndexHints();
+        // eslint-disable-next-line no-console
+        console.log('[Indices] Recomendados:', hints);
+      } catch {}
+    }
     // Inicializar lang y SEO según ruta
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))

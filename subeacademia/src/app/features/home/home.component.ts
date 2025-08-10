@@ -2,6 +2,8 @@ import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, Inject, 
 import { RouterLink } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { SeoService } from '../../core/seo/seo.service';
+import { FirebaseDataService } from '../../core/firebase-data.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { organizationJsonLd } from '../../core/seo/jsonld';
 
@@ -25,22 +27,22 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
             </p>
 
             <div class="mt-8 flex flex-wrap gap-4" role="group" aria-label="Acciones principales">
-              <a routerLink="cursos" class="btn btn-primary" aria-label="Explorar Cursos">{{ i18n.getTranslations('cta.exploreCourses') }}</a>
-              <a routerLink="blog" class="btn btn-ghost" aria-label="Leer Publicaciones">{{ i18n.getTranslations('cta.readPosts') }}</a>
+              <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="btn btn-primary" aria-label="Explorar Cursos">{{ i18n.getTranslations('cta.exploreCourses') }}</a>
+              <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="btn btn-ghost" aria-label="Leer Publicaciones">{{ i18n.getTranslations('cta.readPosts') }}</a>
             </div>
 
             <!-- Quick cards debajo de los botones -->
             <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Accesos rápidos">
-              <a routerLink="blog" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Blog">
+              <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Blog">
                 <span class="h3">Blog</span>
               </a>
-              <a routerLink="cursos" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Cursos">
+              <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Cursos">
                 <span class="h3">Cursos</span>
               </a>
-              <a routerLink="ia" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a IA">
+              <a [routerLink]="['/', i18n.currentLang(), 'ia']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a IA">
                 <span class="h3">IA</span>
               </a>
-              <a routerLink="contacto" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Contacto">
+              <a [routerLink]="['/', i18n.currentLang(), 'contacto']" class="card p-4 hover:bg-white/10" aria-label="Acceso rápido a Contacto">
                 <span class="h3">Contacto</span>
               </a>
             </div>
@@ -85,7 +87,7 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
               <h2 class="h2">{{ i18n.getTranslations('blog.title') }}</h2>
               <p class="muted">{{ i18n.getTranslations('blog.subtitle') }}</p>
             </div>
-            <a routerLink="blog" class="btn btn-link" aria-label="Ir al blog">{{ i18n.getTranslations('blog.viewAll') }}</a>
+            <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="btn btn-link" aria-label="Ir al blog">{{ i18n.getTranslations('blog.viewAll') }}</a>
           </div>
           <div class="mt-6 grid md:grid-cols-3 gap-6">
             <a routerLink="blog" class="card p-5" aria-label="Post 1"><h3 class="h3">Tácticas de prompting</h3><p class="muted mt-1">Patrones para tareas críticas.</p></a>
@@ -100,15 +102,15 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
         <div class="max-w-6xl mx-auto">
           <h2 class="h2">{{ i18n.getTranslations('courses.title') }}</h2>
           <div class="mt-8 grid md:grid-cols-3 gap-6">
-            <a routerLink="cursos" class="course-card" aria-label="Curso 1">
+            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 1">
               <h3 class="h3">{{ i18n.getTranslations('courses.items.0.title') }}</h3>
               <p class="muted">{{ i18n.getTranslations('courses.items.0.text') }}</p>
             </a>
-            <a routerLink="cursos" class="course-card" aria-label="Curso 2">
+            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 2">
               <h3 class="h3">{{ i18n.getTranslations('courses.items.1.title') }}</h3>
               <p class="muted">{{ i18n.getTranslations('courses.items.1.text') }}</p>
             </a>
-            <a routerLink="cursos" class="course-card" aria-label="Curso 3">
+            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="course-card" aria-label="Curso 3">
               <h3 class="h3">{{ i18n.getTranslations('courses.items.2.title') }}</h3>
               <p class="muted">{{ i18n.getTranslations('courses.items.2.text') }}</p>
             </a>
@@ -122,7 +124,7 @@ import { organizationJsonLd } from '../../core/seo/jsonld';
           <h2 class="font-grotesk text-3xl md:text-5xl">{{ i18n.getTranslations('cta.finalTitle') }}</h2>
           <p class="muted mt-4">{{ i18n.getTranslations('cta.finalText') }}</p>
           <div class="mt-8">
-            <a routerLink="cursos" class="btn btn-primary" aria-label="Comenzar ahora">{{ i18n.getTranslations('cta.startNow') }}</a>
+            <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="btn btn-primary" aria-label="Comenzar ahora">{{ i18n.getTranslations('cta.startNow') }}</a>
           </div>
         </div>
       </section>
@@ -141,6 +143,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     @Inject(PLATFORM_ID) private readonly platformId: Object,
     private readonly seo: SeoService,
     public readonly i18n: I18nService,
+    private readonly data: FirebaseDataService,
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     // Metadatos SEO para la landing
@@ -165,6 +168,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   }
 
   async ngAfterViewInit() {
+    // Cargar destacados (no romper UI si falla)
+    this.data.getHomeFeatured(this.i18n.currentLang())
+      .pipe(takeUntilDestroyed())
+      .subscribe({ next: () => {}, error: () => {} });
+
     if (!this.isBrowser) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

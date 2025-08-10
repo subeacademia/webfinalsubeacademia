@@ -14,6 +14,8 @@ import { connectAuthEmulator } from 'firebase/auth';
 import { connectFirestoreEmulator } from 'firebase/firestore';
 import { connectStorageEmulator } from 'firebase/storage';
 import { environment } from '../environments/environment';
+import { FirebaseDataService } from './core/firebase-data.service';
+import { collection, getDocs } from 'firebase/firestore';
 
 // Overrides de runtime con window.__env (opcional y simple)
 const runtimeEnv = ((): typeof environment => {
@@ -110,5 +112,57 @@ export const appConfig: ApplicationConfig = {
       deps: [DOCUMENT],
       multi: true,
     },
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [FirebaseDataService],
+      useFactory: () => () => {
+        try {
+          if (isDevMode()) {
+            const hints = (new FirebaseDataService() as any).getIndexHints?.();
+            if (Array.isArray(hints) && hints.length) {
+              // eslint-disable-next-line no-console
+              console.info('[Indices] Recomendados para Firestore:');
+              for (const h of hints) console.info(' -', h);
+            }
+          }
+        } catch {
+          // no-op
+        }
+      },
+    },
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      useFactory: () => async () => {
+        // Auditoría de Firebase en bootstrap
+        const cfg = runtimeEnv.firebase;
+        const expected = {
+          apiKey: 'AIzaSyAZZ4wdOfqdnB1X-vhd-pwsTMPvxpf2his',
+          authDomain: 'web-subeacademia.firebaseapp.com',
+          projectId: 'web-subeacademia',
+          storageBucket: 'web-subeacademia.appspot.com',
+        } as const;
+        const matches = cfg.apiKey === expected.apiKey
+          && cfg.authDomain === expected.authDomain
+          && cfg.projectId === expected.projectId
+          && cfg.storageBucket === expected.storageBucket;
+        const emulator = (runtimeEnv as any).useEmulators === true;
+        try {
+          const db = getFirestore();
+          // Healthcheck de lectura (colección exacta 'healthcheck')
+          await getDocs(collection(db, 'healthcheck'));
+          // Verificar rutas clave
+          const postsCol = collection(db, 'posts');
+          const coursesCol = collection(db, 'courses');
+          if (!postsCol || !coursesCol) throw new Error('Colecciones no disponibles');
+          // eslint-disable-next-line no-console
+          console.info('[Firebase OK]', { matchesConfig: matches, usingEmulators: emulator === true ? true : false });
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('[Firebase ERROR]', err, { matchesConfig: matches, usingEmulators: emulator });
+        }
+      }
+    }
   ],
 };

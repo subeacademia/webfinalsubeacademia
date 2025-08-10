@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, collectionData, query, orderBy } from '@angular/fire/firestore';
-import { MediaService } from '../../core/media/media.service';
+import { Firestore, collection, collectionData, query, orderBy, addDoc, serverTimestamp } from '@angular/fire/firestore';
+import { StorageService } from '../../core/storage.service';
 
 @Component({
   standalone: true,
@@ -10,13 +10,17 @@ import { MediaService } from '../../core/media/media.service';
   <div class="space-y-4">
     <h1 class="text-2xl font-semibold">Media</h1>
 
-    <div class="card p-4 space-y-2">
+    <div class="card p-4 space-y-3">
       <label class="btn">
         Elegir archivos
-        <input type="file" multiple class="hidden" (change)="onFiles($event)">
+        <input type="file" multiple class="hidden" (change)="onFiles($event)" [disabled]="busy()">
       </label>
       <div *ngIf="busy()" class="text-sm text-[var(--muted)]">Subiendo… {{progress()}}%</div>
+      <div class="w-full h-2 bg-black/10 rounded" *ngIf="busy()">
+        <div class="h-2 bg-primary rounded" [style.width.%]="progress()"></div>
+      </div>
       <p *ngIf="error()" class="text-red-400 text-sm">{{error()}}</p>
+      <div *ngIf="doneUrl()" class="text-sm">Listo: <a class="link" [href]="doneUrl()" target="_blank">Preview</a></div>
     </div>
 
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -30,13 +34,14 @@ import { MediaService } from '../../core/media/media.service';
   `
 })
 export class MediaPageComponent{
-  private media = inject(MediaService);
+  private storage = inject(StorageService);
   private db = inject(Firestore);
 
   items = signal<any[]>([]);
   busy = signal(false);
   progress = signal(0);
   error = signal<string|null>(null);
+  doneUrl = signal<string>('');
 
   constructor(){
     const col = collection(this.db, 'media');
@@ -52,7 +57,31 @@ export class MediaPageComponent{
     this.busy.set(true);
     for (const f of files){
       try{
-        await this.media.upload(f, 'media', p => this.progress.set(p));
+        this.doneUrl.set('');
+        await new Promise<void>((resolve, reject) => {
+          const sub = this.storage.uploadPublic(f).subscribe({
+            next: async (s) => {
+              this.progress.set(s.progress);
+              if (s.state === 'success' && s.downloadURL && s.path) {
+                await addDoc(collection(this.db, 'media'), {
+                  fileName: f.name,
+                  path: s.path,
+                  url: s.downloadURL,
+                  size: f.size,
+                  contentType: f.type,
+                  createdAt: serverTimestamp(),
+                });
+                this.doneUrl.set(s.downloadURL);
+                sub.unsubscribe();
+                resolve();
+              } else if (s.state === 'error') {
+                sub.unsubscribe();
+                reject(s.error);
+              }
+            },
+            error: (err) => { sub.unsubscribe(); reject(err); }
+          });
+        });
       }catch(err:any){
         console.error(err?.code, err?.message);
         this.error.set(err?.message || 'Error al subir');

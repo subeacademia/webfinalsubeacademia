@@ -3,6 +3,8 @@ import { NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SkeletonCardComponent } from '../../core/ui/skeleton-card/skeleton-card.component';
 import { ContentService } from '../../core/data/content.service';
+import { FirebaseDataService } from '../../core/firebase-data.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Course } from '../../core/models/course.model';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SeoService } from '../../core/seo/seo.service';
@@ -64,8 +66,11 @@ import { SeoService } from '../../core/seo/seo.service';
         </ng-template>
       </section>
 
-      <div *ngIf="!loading() && courses().length === 0" class="mt-10 border rounded-lg p-6 text-center text-muted">
-        No hay cursos todavía
+      <div *ngIf="!loading() && courses().length === 0 && !errorMessage()" class="mt-10 border rounded-lg p-6 text-center text-muted">
+        No hay resultados
+      </div>
+      <div *ngIf="!!errorMessage()" class="mt-4 p-3 rounded bg-red-50 text-red-700 text-sm">
+        {{ errorMessage() }}
       </div>
     </main>
   `,
@@ -73,14 +78,18 @@ import { SeoService } from '../../core/seo/seo.service';
 })
 export class CoursesListComponent {
   private readonly content = inject(ContentService);
+  private readonly data = inject(FirebaseDataService);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
   private readonly route = inject(ActivatedRoute);
+  private readonly log = inject((await import('../../core/log.service')).LogService);
 
   protected readonly currentLang = this.i18n.currentLang;
   protected readonly courses = signal<any[]>([]);
+  private readonly rawCourses = signal<any[]>([]);
   protected readonly loading = signal<boolean>(true);
   protected readonly indexErrorUrl = signal<string>('');
+  protected readonly errorMessage = signal<string>('');
   private lastCursor: number | null = null;
 
   private filterLevel = signal<'' | 'intro' | 'intermedio' | 'avanzado'>('');
@@ -95,7 +104,9 @@ export class CoursesListComponent {
       });
     });
 
-    this.route.queryParamMap.subscribe(() => this.load());
+    this.route.queryParamMap.subscribe(() => {
+      if (this.rawCourses().length) this.applyFilters(); else this.load();
+    });
     this.load();
   }
 
@@ -110,29 +121,44 @@ export class CoursesListComponent {
 
   private load() {
     this.loading.set(true);
+    this.errorMessage.set('');
     const lang = this.route.snapshot.paramMap.get('lang') || this.currentLang();
-    this.content.listCourses(lang, 12, this.lastCursor).subscribe({
+    this.data.getPublishedCourses({ level: this.filterLevel() || undefined, topic: this.filterTopic() || undefined, limit: 12 })
+      .pipe(takeUntilDestroyed())
+      .subscribe({
       next: (list: any[]) => {
         this.indexErrorUrl.set('');
-        const mapped = list.map((item:any)=> {
+        const mapped = (list || []).map((item:any)=> {
           const base = item?.languageFallback || 'es';
           const trans = item?.translations?.[lang] || item?.translations?.[base] || null;
           return trans ? { ...item, ...trans } : item;
         });
-        let filtered = mapped;
-        const level = this.filterLevel();
-        const topic = this.filterTopic().toLowerCase().trim();
-        if (level) filtered = filtered.filter((c) => c.level === level);
-        if (topic) filtered = filtered.filter((c) => c.topics?.some((t: string) => t.toLowerCase().includes(topic)));
-        this.courses.set(filtered);
+        this.rawCourses.set(mapped);
+        this.applyFilters();
         this.loading.set(false);
       },
       error: (err: any) => {
-        const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
-        if (url) this.indexErrorUrl.set(url);
-        this.loading.set(false);
+        try {
+          const url = this.extractCreateIndexUrl(err?.message || String(err || ''));
+          if (url) this.indexErrorUrl.set(url);
+          const isIndex = this.log.indexNeeded('courses', err, { lang });
+          if (!isIndex) this.log.error('[CoursesList] Error al cargar cursos', err);
+          this.errorMessage.set('Error al cargar cursos');
+        } finally {
+          this.loading.set(false);
+          this.courses.set([]);
+        }
       }
     });
+  }
+
+  private applyFilters() {
+    let filtered = this.rawCourses();
+    const level = this.filterLevel();
+    const topic = this.filterTopic().toLowerCase().trim();
+    if (level) filtered = filtered.filter((c) => c.level === level);
+    if (topic) filtered = filtered.filter((c) => (c.topics || []).some((t: string) => (t || '').toLowerCase().includes(topic)));
+    this.courses.set(filtered);
   }
 
   private extractCreateIndexUrl(message: string): string {

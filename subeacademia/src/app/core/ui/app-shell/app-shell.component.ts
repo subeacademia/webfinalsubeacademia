@@ -13,8 +13,8 @@ type Lang = 'es' | 'en' | 'pt';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="sticky top-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
-      <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
-        <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2">
+        <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
+          <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
           <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-6 w-6 rounded"/>
           <span>{{ brandName() }}</span>
         </a>
@@ -26,35 +26,35 @@ type Lang = 'es' | 'en' | 'pt';
             <a [routerLink]="['/', currentLang()]"
                routerLinkActive="text-[var(--accent)]"
                [routerLinkActiveOptions]="{ exact: true }"
-               class="btn"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Inicio">Home</a>
           </li>
           <li>
             <a [routerLink]="['/', currentLang(), 'blog']"
                routerLinkActive="text-[var(--accent)]"
-               class="btn"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Blog">Blog</a>
           </li>
           <li>
             <a [routerLink]="['/', currentLang(), 'cursos']"
                routerLinkActive="text-[var(--accent)]"
-               class="btn"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Cursos">Cursos</a>
           </li>
           <li>
             <a [routerLink]="['/', currentLang(), 'ia']"
                routerLinkActive="text-[var(--accent)]"
-               class="btn"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a IA">IA</a>
           </li>
           <li>
             <a [routerLink]="['/', currentLang(), 'contacto']"
                routerLinkActive="text-[var(--accent)]"
-               class="btn"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Contacto">Contacto</a>
           </li>
           <li>
-            <a routerLink="/admin" class="btn" aria-label="Ir a Admin">Admin</a>
+            <a routerLink="/admin" class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
           </li>
 
           <li>
@@ -70,12 +70,12 @@ type Lang = 'es' | 'en' | 'pt';
 
       <div [class.nav--open]="navOpen()" class="md:hidden border-t border-white/10 bg-[var(--panel)]/90 nav" *ngIf="navOpen()">
         <div class="container py-3 space-y-2">
-          <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left" aria-label="Ir a Inicio">Home</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left" aria-label="Ir a Blog">Blog</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left" aria-label="Ir a Cursos">Cursos</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left" aria-label="Ir a IA">IA</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left" aria-label="Ir a Contacto">Contacto</a>
-          <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left" aria-label="Ir a Admin">Admin</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Inicio">Home</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Blog">Blog</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Cursos">Cursos</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a IA">IA</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Contacto">Contacto</a>
+          <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
 
           <div class="pt-2">
             <select class="btn w-full" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
@@ -96,10 +96,10 @@ type Lang = 'es' | 'en' | 'pt';
       <div class="container py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
         <span>© Sube Academ-IA</span>
         <nav class="flex items-center gap-4" aria-label="Secundaria">
-          <a href="#" class="hover:text-white">Política de Privacidad</a>
-          <a href="#" class="hover:text-white">Twitter</a>
-          <a href="#" class="hover:text-white">LinkedIn</a>
-          <a href="#" class="hover:text-white">YouTube</a>
+          <a [routerLink]="['/', currentLang(), 'contacto']" class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Política de Privacidad">Política de Privacidad</a>
+          <a href="https://twitter.com" target="_blank" rel="noopener" class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Abrir Twitter">Twitter</a>
+          <a href="https://www.linkedin.com" target="_blank" rel="noopener" class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Abrir LinkedIn">LinkedIn</a>
+          <a href="https://www.youtube.com" target="_blank" rel="noopener" class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Abrir YouTube">YouTube</a>
         </nav>
       </div>
     </footer>

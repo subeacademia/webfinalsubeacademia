@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, doc, docData, addDoc, updateDoc, query, where, orderBy, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, doc, docData, addDoc, updateDoc, query, where, orderBy, collectionData, limit, getDocs } from '@angular/fire/firestore';
 import { firstValueFrom } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
 import { Auth } from '@angular/fire/auth';
@@ -18,7 +18,22 @@ export class PostsService {
       where('status','==','published'),
       orderBy('publishedAt','desc')
     );
-    return collectionData(q, { idField:'id' });
+    // Preferimos consulta optimizada; si requiere índice, fallback en memoria
+    return new Promise<any[]>((resolve) => {
+      getDocs(q).then(snap => {
+        resolve(snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })));
+      }).catch(async (e:any) => {
+        if (String(e?.message || '').includes('requires an index')){
+          const snap = await getDocs(query(col, where('status','==','published'), limit(50)));
+          let items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+          items = items.filter(p => p.lang === lang);
+          items.sort((a:any,b:any)=> (b.publishedAt?.toMillis?.() ?? 0) - (a.publishedAt?.toMillis?.() ?? 0));
+          resolve(items);
+        } else {
+          collectionData(q, { idField:'id' }).subscribe(v => resolve(v as any));
+        }
+      });
+    });
   }
   get(id:string){
     return docData(doc(this.db,'posts',id), { idField:'id' });
