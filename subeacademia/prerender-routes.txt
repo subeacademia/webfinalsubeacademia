@@ -1,0 +1,12 @@
+/es
+/en
+/pt
+/es/blog
+/en/blog
+/pt/blog
+/es/cursos
+/en/cursos
+/pt/cursos
+/es/ia
+/en/ia
+/pt/ia
