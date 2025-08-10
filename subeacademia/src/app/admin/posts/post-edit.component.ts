@@ -1,4 +1,4 @@
-import { Component, PLATFORM_ID, OnDestroy, inject, signal } from '@angular/core';
+import { Component, PLATFORM_ID, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, NgIf, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -33,12 +33,21 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
             </select>
           </label>
           <label class="block">Título
-            <input class="w-full" formControlName="title" (input)="syncSlug()">
+            <input
+              class="w-full bg-[var(--input-bg)] text-[var(--input-fg)] placeholder-[color:var(--input-placeholder)] border border-[var(--input-border)] focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)]"
+              placeholder="Título"
+              formControlName="title">
           </label>
         </div>
-        <label class="block">Slug
-          <input class="w-full" formControlName="slug">
-        </label>
+        <label class="block">Slug</label>
+        <div class="flex items-center gap-2">
+          <input
+            class="flex-1 bg-[var(--input-bg)] text-[var(--input-fg)] placeholder-[color:var(--input-placeholder)] border border-[var(--input-border)] focus:border-[var(--ring)] focus:ring-2 focus:ring-[var(--ring)]"
+            formControlName="slug"
+            [readOnly]="lockSlug"
+            placeholder="slug-automatico" />
+          <button type="button" class="px-3 py-2 rounded-lg border border-[var(--input-border)]" (click)="lockSlug = !lockSlug">{{ lockSlug ? '✏️ Editar' : '🔒 Bloquear' }}</button>
+        </div>
         <label class="block">Resumen
           <textarea class="w-full" rows="3" formControlName="summary"></textarea>
         </label>
@@ -72,11 +81,12 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           <a class="btn" routerLink="/admin/posts">Volver</a>
         </div>
       </div>
-      <aside class="card p-4 space-y-2">
+      <aside class="card p-4">
         <div class="text-sm text-[var(--muted)]">Previsualización</div>
-        <h2 class="text-xl font-semibold">{{ form.value.title || '(sin título)' }}</h2>
-        <p class="text-sm text-[var(--muted)]">{{ form.value.summary || '' }}</p>
-        <div class="prose max-w-none" [innerHTML]="sanitizedContent()"></div>
+        <h2 class="text-2xl font-semibold">{{ form.value.title || 'Sin título' }}</h2>
+        <p class="mt-2 text-[var(--muted)]">{{ form.value.summary || '' }}</p>
+        <hr class="my-4 border-[var(--input-border)]" />
+        <div class="prose prose-invert max-w-none" [innerHTML]="sanitizedContent()"></div>
       </aside>
 
       <div *ngIf="showPreview()" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
@@ -92,7 +102,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
   </div>
   `
 })
-export class PostEditComponent implements OnDestroy {
+export class PostEditComponent implements OnDestroy, OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -117,22 +127,25 @@ export class PostEditComponent implements OnDestroy {
   id = signal<string|null>(null);
   // Nuevo esquema: translations + languageFallback
   form = this.fb.group({
+    lang: ['es', Validators.required],
     translations: this.fb.group({
       es: this.fb.group({ title: ['', Validators.required], summary: [''], content: ['', Validators.required], contentHtml: [''], contentText: [''] }),
       en: this.fb.group({ title: [''], summary: [''], content: [''] }),
       pt: this.fb.group({ title: [''], summary: [''], content: [''] }),
     }),
     languageFallback: ['es', Validators.required],
-    title: [''], // desuso, mantenido por compatibilidad
+    title: ['', [Validators.required, Validators.minLength(3)]], // compatibilidad
     slug: ['', Validators.required],
-    summary: [''], // desuso
-    content: [''], // desuso
+    summary: [''], // compatibilidad
+    content: ['', [Validators.required, Validators.minLength(10)]], // compatibilidad
     status: ['published'],
     publishedAt: [Date.now()],
     publishedAtLocal: [''],
     tags: [[] as string[]],
     category: ['']
   });
+
+  lockSlug = true;
 
   constructor(){
     const maybeId = this.route.snapshot.paramMap.get('id');
@@ -152,9 +165,24 @@ export class PostEditComponent implements OnDestroy {
     this.editor?.destroy();
   }
 
-  syncSlug(){
-    const esTitle = (this.form.value as any)?.translations?.es?.title || '';
-    this.form.patchValue({ slug: slugify(esTitle) }, {emitEvent:false});
+  ngOnInit(): void {
+    const slugControl = this.form.controls['slug'] as any;
+    const titleControl = this.form.controls['title'] as any;
+    let slugManuallyEdited = false;
+
+    if (slugControl?.valueChanges) {
+      slugControl.valueChanges.subscribe(() => {
+        if (!this.lockSlug) slugManuallyEdited = true;
+      });
+    }
+
+    if (titleControl?.valueChanges) {
+      titleControl.valueChanges.subscribe((title: string) => {
+        if (this.lockSlug && !slugManuallyEdited) {
+          slugControl.setValue(slugify(title || ''), { emitEvent: false });
+        }
+      });
+    }
   }
 
   async save(){

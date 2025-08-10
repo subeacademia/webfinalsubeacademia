@@ -5,37 +5,55 @@
 
 /* ----- Tokens de color (AA) ----- */
 :root {
-  /* Light */
+  /* Tema CLARO por defecto */
   --bg: #ffffff;
-  --fg: #0b1220;          /* texto principal */
-  --muted: #5a6577;       /* texto secundario/placeholder */
-  --border: #d7dbe2;
-  --card: #f7f9fc;
+  --fg: #0b1220;              /* texto principal */
+  --fg-muted: #5a6577;        /* texto secundario/placeholder */
+  --surface-1: #f7f9fc;       /* superficies elevadas */
+  --surface-2: #ffffff;       /* superficie base */
+
+  /* Inputs */
   --input-bg: #ffffff;
-  --input-fg: #0b1220;
-  --ring: #2563eb;        /* focus ring */
-  --link: #2563eb;
+  --input-fg: var(--fg);
+  --input-placeholder: color-mix(in srgb, var(--fg-muted) 80%, transparent);
+  --input-border: #d7dbe2;
+
+  /* Accesibilidad / interacción */
+  --ring: #2563eb;            /* focus ring */
+  --link: var(--ring);
 
   /* Compatibilidad con estilos existentes */
+  --muted: var(--fg-muted);
+  --border: var(--input-border);
+  --card: var(--surface-1);
+  --panel: var(--surface-2);
   --accent: var(--ring);
-  --panel: var(--card);
 }
 
-:root.dark {
-  /* Dark */
+/* Tema oscuro explícito (compatibilidad con .dark y [data-theme="dark"]) */
+:root.dark,
+:root[data-theme="dark"] {
+  /* Tema OSCURO cuando existe la clase .dark en <html> */
   --bg: #0b1220;
-  --fg: #e8eef7;
-  --muted: #a6b0c3;
-  --border: #243044;
-  --card: #121a2a;
-  --input-bg: #0f1726;
-  --input-fg: #e8eef7;
-  --ring: #60a5fa;
-  --link: #60a5fa;
+  --fg: #E6EDF3;
+  --fg-muted: #9FB1C1;
+  --surface-1: #111827;
+  --surface-2: #0b1220;
 
-  /* Compatibilidad con estilos existentes */
+  --input-bg: var(--surface-1);
+  --input-fg: var(--fg);
+  --input-placeholder: #9FB1C180;
+  --input-border: #2b3a4b;
+
+  --ring: #3b82f6;
+  --link: var(--ring);
+
+  /* Compatibilidad */
+  --muted: var(--fg-muted);
+  --border: var(--input-border);
+  --card: var(--surface-1);
+  --panel: var(--surface-2);
   --accent: var(--ring);
-  --panel: var(--card);
 }
 
 html, body {
@@ -47,18 +65,31 @@ html, body {
 a { color: var(--link); }
 
 /* Controles de formulario accesibles */
-input, select, textarea {
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="url"],
+input[type="number"],
+select,
+textarea {
   background: var(--input-bg);
   color: var(--input-fg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: .625rem .75rem;
+  border: 1px solid var(--input-border);
+  border-radius: .75rem;
+  padding: .8rem 1rem;
   outline: none;
 }
-input::placeholder, textarea::placeholder { color: var(--muted); }
-input:focus, select:focus, textarea:focus, .btn:focus {
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder, var(--muted));
+}
+/* Foco accesible */
+input:focus,
+select:focus,
+textarea:focus,
+.btn:focus {
   border-color: var(--ring);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 30%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
 }
 
 /* Select (garantiza contraste también en dark) */

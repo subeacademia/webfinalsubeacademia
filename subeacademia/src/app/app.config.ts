@@ -6,6 +6,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { ThemeService } from './shared/theme.service';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator, collection, getDocs } from '@angular/fire/firestore';
@@ -107,6 +108,13 @@ export const appConfig: ApplicationConfig = {
       useFactory: injectGa4AndSearchConsoleFactory,
       deps: [DOCUMENT],
       multi: true,
+    },
+    {
+      // Inicializa el tema lo antes posible en el ciclo de arranque
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [ThemeService],
+      useFactory: (theme: ThemeService) => () => theme.init(),
     },
     {
       provide: APP_INITIALIZER,

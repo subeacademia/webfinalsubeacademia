@@ -23,7 +23,9 @@ export class ThemeService {
 
   apply(theme: 'light' | 'dark'): void {
     if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
+      const root = document.documentElement;
+      root.classList.toggle('dark', theme === 'dark');
+      root.setAttribute('data-theme', theme);
     }
     try { localStorage.setItem(this.storageKey, theme); } catch {}
   }
