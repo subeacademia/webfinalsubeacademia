@@ -10,29 +10,28 @@ export class ContentService {
 
   listPosts(lang: string, size = 30): Observable<any[]> {
     if (!isPlatformBrowser(this.platformId)) return of([]);
-    // Se consulta SIEMPRE por base ES y luego se hace fallback a traducciones en la vista
-    const col = collection(this.db, 'posts');
-    const q = query(
-      col,
-      where('langBase', '==', 'es'),
+    const colRef = collection(this.db, 'posts');
+    const qRef = query(
+      colRef,
+      where('lang', '==', lang),
       where('status', '==', 'published'),
       orderBy('publishedAt', 'desc'),
       limit(size)
     );
-    return collectionData(q, { idField: 'id' }) as unknown as Observable<any[]>;
+    return collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>;
   }
 
   listCourses(lang: string, size = 30): Observable<any[]> {
     if (!isPlatformBrowser(this.platformId)) return of([]);
-    const col = collection(this.db, 'courses');
-    const q = query(
-      col,
-      where('langBase', '==', 'es'),
+    const colRef = collection(this.db, 'courses');
+    const qRef = query(
+      colRef,
+      where('lang', '==', lang),
       where('status', '==', 'published'),
       orderBy('publishedAt', 'desc'),
       limit(size)
     );
-    return collectionData(q, { idField: 'id' }) as unknown as Observable<any[]>;
+    return collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>;
   }
 }
 

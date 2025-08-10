@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angula
 import { CoursesService } from '../../core/data/courses.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
-import { MediaService } from '../../core/data/media.service';
+import { MediaService } from '../../core/media/media.service';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Firestore, collection, collectionData } from '@angular/fire/firestore';
-import { MediaService } from '../../core/services/media.service';
+import { MediaService } from '../../core/media/media.service';
 
 @Component({
   standalone: true,
@@ -52,7 +52,7 @@ export class MediaPickerComponent {
     this.uploading.set(true);
     for(const f of files){
       try{
-        await this.media.uploadWithProgress(f, { convertToWebP: true }, p => this.progress.set(Math.round(p)));
+        await this.media.upload(f, 'media', p => this.progress.set(Math.round(p)));
       }catch(err:any){
         console.error(err?.code, err?.message);
         this.error.set((err?.message || 'Error subiendo archivo') + (err?.code ? ` (${err.code})` : ''));

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, addDoc, collectionData, query, orderBy } from '@angular/fire/firestore';
-import { MediaService } from '../../core/data/media.service';
+import { Firestore, collection, collectionData, query, orderBy } from '@angular/fire/firestore';
+import { MediaService } from '../../core/media/media.service';
 
 @Component({
   standalone: true,
@@ -52,10 +52,7 @@ export class MediaPageComponent{
     this.busy.set(true);
     for (const f of files){
       try{
-        const up = await this.media.upload(f, 'media', p => this.progress.set(p));
-        await addDoc(collection(this.db, 'media'), {
-          fileName: f.name, ...up, createdAt: Date.now()
-        });
+        await this.media.upload(f, 'media', p => this.progress.set(p));
       }catch(err:any){
         console.error(err?.code, err?.message);
         this.error.set(err?.message || 'Error al subir');
