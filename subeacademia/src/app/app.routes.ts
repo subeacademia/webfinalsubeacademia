@@ -6,7 +6,10 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
 
   // Admin SIN idioma (antes del matcher)
-  { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
+  },
 
   // Página de login global (opcional)
   { path: 'login', loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent) },

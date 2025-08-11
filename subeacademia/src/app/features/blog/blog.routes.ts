@@ -26,5 +26,9 @@ export const BLOG_ROUTES: Routes = [
       }
     }
   },
+  {
+    path: ':slug',
+    loadComponent: () => import('./post.component').then((m) => m.PostComponent),
+  }
 ];
 
