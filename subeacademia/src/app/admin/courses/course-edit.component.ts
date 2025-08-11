@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angula
 import { CoursesService } from '../../core/data/courses.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
-import { MediaService } from '../../core/media/media.service';
+import { MediaService } from '../../core/data/media.service';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -235,7 +235,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
         if(!file) throw new Error('Archivo requerido');
         this.uploading.set(true);
         const up = await this.media.upload(file, 'courses', p => this.progress.set(p));
-        const type = guessType(up.type);
+        const type = guessType(up.contentType);
         this.resources().push(this.fb.group({ type:[type], url:[up.url], title:[this.resName||file.name], name:[file.name], size:[up.size], path:[up.path], createdAt:[createdAt] }) as any);
       }
       this.closeResourceDialog();

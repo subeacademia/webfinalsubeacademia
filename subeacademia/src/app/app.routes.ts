@@ -1,9 +1,15 @@
 import { Routes } from '@angular/router';
 import { langMatcher } from './core/routing/lang.matcher';
 import { HomeComponent } from './pages/home/home.component';
+import { LanguageGuard } from './core/i18n/language.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [LanguageGuard],
+    component: HomeComponent,
+  },
 
   // Admin SIN idioma (antes del matcher)
   {
@@ -22,7 +28,7 @@ export const routes: Routes = [
   {
     matcher: langMatcher,
     children: [
-      { path: '', loadChildren: () => import('./features/home/home.routes').then(m => m.HOME_ROUTES) },
+      { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'cursos', loadChildren: () => import('./features/courses/courses.routes').then(m => m.COURSES_ROUTES) },
       { path: 'ia', loadChildren: () => import('./features/ia/ia.routes').then(m => m.IA_ROUTES) },

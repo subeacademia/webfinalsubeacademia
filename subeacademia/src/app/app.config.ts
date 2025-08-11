@@ -7,7 +7,7 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { ThemeService } from './theme.service';
+import { ThemeService } from './shared/theme.service';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator, collection, getDocs } from '@angular/fire/firestore';

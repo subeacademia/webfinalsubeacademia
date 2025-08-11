@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StorageService } from '../../core/storage.service';
-import { MediaService } from '../../core/media/media.service';
+import { MediaService } from '../../core/data/media.service';
 
 @Component({
   standalone: true,

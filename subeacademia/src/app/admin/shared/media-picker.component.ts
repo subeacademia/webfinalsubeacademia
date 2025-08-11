@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MediaService } from '../../core/media/media.service';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
+import { MediaService } from '../../core/data/media.service';
 
 @Component({
   standalone: true,
   selector: 'app-media-picker',
-  imports: [CommonModule],
+  imports: [CommonModule, NgIf, NgFor],
   template: `
   <div class="space-y-3">
     <div class="card p-4">

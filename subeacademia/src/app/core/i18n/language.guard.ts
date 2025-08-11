@@ -1,5 +1,6 @@
-import { inject } from '@angular/core';
-import { CanMatchFn, ResolveFn, Route, Router, UrlSegment } from '@angular/router';
+import { inject, Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { CanActivate, CanMatchFn, ResolveFn, Route, Router, UrlSegment, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { isPlatformServer } from '@angular/common';
 import { I18nService } from './i18n.service';
 
 const SUPPORTED = new Set(['es', 'en', 'pt']);
@@ -19,6 +20,33 @@ export const languageGuard: CanMatchFn = (
   void i18n.setLang(first as 'es' | 'en' | 'pt');
   return true;
 };
+
+@Injectable({ providedIn: 'root' })
+export class LanguageGuard implements CanActivate {
+  constructor(
+    private readonly router: Router,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
+  ) {}
+
+  canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): boolean {
+    // En SSR no redirigimos; dejamos continuar
+    if (isPlatformServer(this.platformId)) {
+      return true;
+    }
+
+    try {
+      const browserLangFull = navigator.language || (navigator as any).userLanguage || 'es';
+      const browserLang = String(browserLangFull).slice(0, 2).toLowerCase();
+      const target = SUPPORTED.has(browserLang) ? browserLang : 'es';
+      void this.router.navigate([`/${target}`]);
+    } catch {
+      void this.router.navigate(['/es']);
+    }
+
+    // Cancelar la navegación actual; el guard redirige
+    return false;
+  }
+}
 
 // Resolver para precargar diccionario antes de activar la ruta
 export const languageResolver: ResolveFn<boolean> = async (route) => {

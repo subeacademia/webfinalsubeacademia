@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MediaService } from '../../core/media/media.service';
+import { MediaService } from '../../core/data/media.service';
 import { FormsModule } from '@angular/forms';
 import { Storage, ref as storageRef, listAll, getDownloadURL } from '@angular/fire/storage';
 import { Clipboard } from '@angular/cdk/clipboard';

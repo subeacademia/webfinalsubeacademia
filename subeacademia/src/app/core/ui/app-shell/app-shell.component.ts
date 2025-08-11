@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { I18nService } from '../../i18n/i18n.service';
 import { SettingsService, SiteSettings } from '../../data/settings.service';
-import { ThemeService } from '../../../theme.service';
+import { ThemeService } from '../../../shared/theme.service';
 
 type Lang = 'es' | 'en' | 'pt';
 
@@ -123,7 +123,7 @@ export class AppShellComponent {
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
   private readonly themeService = inject(ThemeService);
-  themeDark = signal<boolean>(this.themeService.isDark());
+  themeDark = signal<boolean>(this.themeService.current() === 'dark');
 
   constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
@@ -150,7 +150,7 @@ export class AppShellComponent {
     }
   }
 
-  toggleTheme() { this.themeService.toggle(); this.themeDark.set(this.themeService.isDark()); }
+  toggleTheme() { this.themeService.toggle(); this.themeDark.set(this.themeService.current() === 'dark'); }
 
   // Ya no gestionamos DOM aquí; lo hace ThemeService
 }

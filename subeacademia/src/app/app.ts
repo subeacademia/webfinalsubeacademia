@@ -4,7 +4,7 @@ import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { Subject, filter, takeUntil } from 'rxjs';
 import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
-import { ThemeService } from './theme.service';
+import { ThemeService } from './shared/theme.service';
 import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
@@ -28,6 +28,8 @@ export class App implements OnInit, OnDestroy {
   private readonly unsubscribe$ = new Subject<void>();
   constructor() {}
   ngOnInit() {
+    // Inicializa el tema (lee almacenamiento y aplica clases)
+    try { this.themeService.init(); } catch {}
     // ThemeService aplica el tema en el constructor (persistente)
     if (isDevMode()) {
       try {
