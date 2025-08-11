@@ -1,7 +1,7 @@
 import { APP_INITIALIZER, ApplicationConfig, isDevMode, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideServiceWorker } from '@angular/service-worker';
 import { DOCUMENT } from '@angular/common';
-import { PreloadAllModules, provideRouter, withComponentInputBinding, withPreloading } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
@@ -78,7 +78,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withComponentInputBinding(), withPreloading(PreloadAllModules)),
+    provideRouter(routes, withComponentInputBinding()),
     provideClientHydration(withEventReplay()),
     provideAnimations(),
     provideHttpClient(withFetch()),
@@ -87,13 +87,14 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideFirebaseApp(() => initializeApp(runtimeEnv.firebase)),
+    // Registrar Auth globalmente ahora que el resto de servicios no lo requieren al inicio
     provideAuth(() => {
       const auth = getAuth();
       if (shouldUseEmulators()) {
         connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
       }
       return auth;
-    }, { runInZone: true }),
+    }),
     provideFirestore(() => {
       const db = getFirestore();
       if (shouldUseEmulators()) {
@@ -134,38 +135,6 @@ export const appConfig: ApplicationConfig = {
         }
       },
     },
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      useFactory: () => async () => {
-        // Auditoría de Firebase en bootstrap
-        const cfg = runtimeEnv.firebase;
-        const expected = {
-          apiKey: 'AIzaSyAZZ4wdOfqdnB1X-vhd-pwsTMPvxpf2his',
-          authDomain: 'web-subeacademia.firebaseapp.com',
-          projectId: 'web-subeacademia',
-          storageBucket: 'web-subeacademia.appspot.com',
-        } as const;
-        const matches = cfg.apiKey === expected.apiKey
-          && cfg.authDomain === expected.authDomain
-          && cfg.projectId === expected.projectId
-          && cfg.storageBucket === expected.storageBucket;
-        const emulator = (runtimeEnv as any).useEmulators === true;
-        try {
-          const db = getFirestore();
-          // Healthcheck de lectura (colección exacta 'healthcheck')
-          await getDocs(collection(db, 'healthcheck'));
-          // Verificar rutas clave
-          const postsCol = collection(db, 'posts');
-          const coursesCol = collection(db, 'courses');
-          if (!postsCol || !coursesCol) throw new Error('Colecciones no disponibles');
-          // eslint-disable-next-line no-console
-          console.info('[Firebase OK]', { matchesConfig: matches, usingEmulators: emulator === true ? true : false });
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error('[Firebase ERROR]', err, { matchesConfig: matches, usingEmulators: emulator });
-        }
-      }
-    }
+    // Nota: evitamos tocar Firebase en APP_INITIALIZER para no romper la hidración/SSR
   ],
 };

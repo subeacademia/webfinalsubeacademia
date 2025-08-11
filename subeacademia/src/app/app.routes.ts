@@ -8,11 +8,15 @@ export const routes: Routes = [
   // Admin SIN idioma (antes del matcher)
   {
     path: 'admin',
-    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
+    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    data: { preload: false }
   },
 
   // Página de login global (opcional)
-  { path: 'login', loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent) },
+  { 
+    path: 'login', 
+    loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent),
+  },
 
   // Público con idioma restringido
   {

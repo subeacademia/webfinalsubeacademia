@@ -8,7 +8,7 @@ import { Auth } from '@angular/fire/auth';
 export class PostsService {
   private db = inject(Firestore);
   private translator = inject(TranslationService);
-  private auth = inject(Auth);
+  private auth = inject(Auth, { optional: true });
 
   list(lang = 'es'){
     const col = collection(this.db, 'posts');
@@ -40,7 +40,7 @@ export class PostsService {
   }
   async create(data:any){
     const col = collection(this.db,'posts');
-    const userEmail = this.auth.currentUser?.email || null;
+    const userEmail = this.auth?.currentUser?.email || null;
     const now = Date.now();
     const base = { ...data, createdAt: now, updatedAt: now, authorEmail: userEmail };
     const ref = await addDoc(col, base);

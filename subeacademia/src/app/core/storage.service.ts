@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
+import { Injectable, inject } from '@angular/core';
+import { Storage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from '@angular/fire/storage';
 import { Observable } from 'rxjs';
 
 export type UploadState = 'running' | 'success' | 'error';
@@ -13,7 +13,7 @@ export interface UploadProgress {
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
-  private storage = getStorage();
+  private storage = inject(Storage);
 
   uploadPublic(file: File): Observable<UploadProgress> {
     const safeName = file.name.replace(/\s+/g, '-');

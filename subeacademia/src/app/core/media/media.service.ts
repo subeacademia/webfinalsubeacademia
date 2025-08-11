@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
+import { Storage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
 import { Firestore, collection, addDoc, serverTimestamp, collectionData, query, orderBy } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, defer } from 'rxjs';
@@ -7,12 +7,12 @@ import { generateSlug } from '../utils/slug.util';
 
 @Injectable({ providedIn: 'root' })
 export class MediaService {
-  private storage = getStorage();
+  private storage = inject(Storage);
   private db = inject(Firestore);
-  private auth = inject(Auth);
+  private auth = inject(Auth, { optional: true });
 
   upload(file: File, folder = 'public/media', onProgress?: (p: number) => void) {
-    const uid = this.auth.currentUser?.uid || 'anonymous';
+     const uid = this.auth?.currentUser?.uid || 'anonymous';
     const normalizedFolder = folder.startsWith('public/') ? folder : `public/${folder}`;
     const path = `${normalizedFolder}/${uid}/${Date.now()}-${file.name}`;
     const storageRef = ref(this.storage, path);
@@ -70,7 +70,7 @@ export class MediaService {
           try {
             const url = await getDownloadURL(task.snapshot.ref);
             // Registrar en colección "media" (opcional, útil para histórico)
-            const uid = this.auth.currentUser?.uid || 'anonymous';
+             const uid = this.auth?.currentUser?.uid || 'anonymous';
             await addDoc(collection(this.db, 'media'), {
               name: file.name,
               path,
