@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Auth, User, authState, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthCoreService {
@@ -10,13 +11,20 @@ export class AuthCoreService {
   readonly authState$: Observable<User | null> = authState(this.auth).pipe(shareReplay(1));
   readonly isLoggedIn$: Observable<boolean> = this.authState$.pipe(map(u => !!u));
 
-  // Admin mínimo por email permitido (ajusta el listado)
-  private readonly allowedAdmins = new Set<string>(['bruno@subeia.tech']);
+  // Lista de admins declarada en environment
+  private readonly allowedAdmins = new Set<string>(environment.adminEmails || []);
 
   readonly isAdmin$: Observable<boolean> = this.authState$.pipe(
     map(u => !!u?.email && this.allowedAdmins.has(u.email!)),
     shareReplay(1)
   );
+
+  /** Versión síncrona usada por guards para evitar re-suscripciones innecesarias */
+  isAdminSync(): boolean {
+    const current = (this.auth as any).currentUser as User | null;
+    const email = current?.email ?? null;
+    return !!email && this.allowedAdmins.has(email);
+  }
 
   // Lógica básica de login/logout sin depender de guards ni router
   async loginWithEmailPassword(email: string, password: string) {

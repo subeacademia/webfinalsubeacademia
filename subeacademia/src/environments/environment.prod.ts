@@ -17,6 +17,8 @@ export const environment = {
   ga4MeasurementId: "G-KC1T2FD7JB",
   // Endpoint del backend de IA (por ejemplo, en Vercel)
   backendIaUrl: "PON_AQUI_TU_ENDPOINT_VERCEL",
+  // Endpoint alternativo para Azure Function generate
+  azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
   // No se usan emuladores en prod
   useEmulators: false,
   settings: {} as { searchConsoleVerification?: string },

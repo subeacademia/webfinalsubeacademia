@@ -10,7 +10,7 @@ export const AuthGuard: CanActivateFn = () => {
     map((ok) => {
       // eslint-disable-next-line no-console
       console.info('[Guard] Auth', ok);
-      return ok ? true : router.createUrlTree(['/login']);
+      return ok ? true : router.createUrlTree(['/admin/login']);
     })
   );
 };

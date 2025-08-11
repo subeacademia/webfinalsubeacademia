@@ -57,11 +57,30 @@ export class IaComponent {
     if (!q || !this.isBrowser) return;
     this.loading.set(true);
     try {
-      const res = await this.ia.askOnce<{ prompt: string }, { text?: string; answer?: string; content?: string; message?: string }>({ prompt: q });
-      const text = (res as any)?.text || (res as any)?.answer || (res as any)?.content || (res as any)?.message || JSON.stringify(res);
+      // La API espera un esquema tipo OpenAI: { messages: [{role, content}], ... }
+      const payload = {
+        messages: [
+          { role: 'system', content: 'Eres un asistente de Sube Academ-IA. Responde de forma breve, clara y útil.' },
+          { role: 'user', content: q }
+        ],
+        maxTokens: 600,
+        temperature: 0.7
+      };
+      const res = await this.ia.generarTextoAzureOnce(payload);
+      const text = (res as any)?.choices?.[0]?.message?.content
+        || (res as any)?.content
+        || (res as any)?.text
+        || (res as any)?.message
+        || (typeof res === 'string' ? res : JSON.stringify(res));
       this.answer.set(text);
     } catch (err: any) {
-      this.error.set(err?.message || 'Error al consultar el asistente');
+      const raw = err?.error;
+      const friendly = (typeof raw === 'string' && raw)
+        || raw?.error
+        || raw?.message
+        || err?.message
+        || 'Error al consultar el asistente';
+      this.error.set(friendly);
     } finally {
       this.loading.set(false);
     }

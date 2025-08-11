@@ -45,7 +45,7 @@ export class AdminShellComponent implements OnInit {
   }
   async logout(){
     await this.authSvc.logout();
-    void this.router.navigate(['/es']);
+    void this.router.navigate(['/admin/login']);
   }
 }
 

@@ -60,6 +60,11 @@ export class LoginComponent {
     try {
       const { email, password } = this.form.getRawValue();
       await this.auth.loginWithEmailPassword(email!, password!);
+      // Si no es admin, redirigimos a login con mensaje
+      if (!this.authCore.isAdminSync()) {
+        await this.router.navigate(['/admin/login'], { queryParams: { denied: 1 } });
+        return;
+      }
       await this.router.navigateByUrl('/admin');
     } catch (e: any) {
       const code: string | undefined = e?.code;
