@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MediaService } from '../../core/media/media.service';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, collectionData, limit, orderBy, query } from '@angular/fire/firestore';
 import { Storage, ref as storageRef, listAll, getDownloadURL } from '@angular/fire/storage';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { AuthService } from '../../core/services/auth.service';
@@ -79,7 +78,7 @@ import { map } from 'rxjs/operators';
 })
 export class AdminMediaComponent {
   private readonly media = inject(MediaService);
-  private readonly db = inject(Firestore);
+  // Firestore no se usa directamente aquí; todo acceso a colecciones se hace vía servicios
   private readonly clipboard = inject(Clipboard);
   private readonly auth = inject(AuthService);
   private readonly storage = inject(Storage);

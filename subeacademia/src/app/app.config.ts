@@ -119,10 +119,10 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       multi: true,
       deps: [FirebaseDataService],
-      useFactory: () => () => {
+      useFactory: (data: FirebaseDataService) => () => {
         try {
           if (isDevMode()) {
-            const hints = (new FirebaseDataService() as any).getIndexHints?.();
+            const hints = data.getIndexHints?.();
             if (Array.isArray(hints) && hints.length) {
               // eslint-disable-next-line no-console
               console.info('[Indices] Recomendados para Firestore:');

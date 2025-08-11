@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AuthCoreService } from '../../core/auth-core.service';
 import { NgIf } from '@angular/common';
-import { authState, Auth, User } from '@angular/fire/auth';
+import { User } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-admin-shell',
@@ -34,15 +35,13 @@ import { authState, Auth, User } from '@angular/fire/auth';
 })
 export class AdminShellComponent implements OnInit {
   private authSvc = inject(AuthService);
-  private auth = inject(Auth);
+  private coreAuth = inject(AuthCoreService);
   private router = inject(Router);
   open = true;
   userEmail: string | null = null;
   ngOnInit(){
     if (typeof window !== 'undefined') this.open = window.innerWidth >= 768;
-    authState(this.auth).subscribe((u: User | null) => {
-      this.userEmail = u?.email ?? null;
-    });
+    this.coreAuth.authState$.subscribe((u: User | null) => { this.userEmail = u?.email ?? null; });
   }
   async logout(){
     await this.authSvc.logout();

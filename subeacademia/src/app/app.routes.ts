@@ -7,6 +7,9 @@ export const routes: Routes = [
   // Admin SIN idioma (antes del matcher)
   { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },
 
+  // Página de login global (opcional)
+  { path: 'login', loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent) },
+
   // Público con idioma restringido
   {
     matcher: langMatcher,

@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from '@angular/fire/storage';
-import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, serverTimestamp, collectionData, query, orderBy } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Observable } from 'rxjs';
+import { Observable, defer } from 'rxjs';
 import { generateSlug } from '../utils/slug.util';
 
 @Injectable({ providedIn: 'root' })
@@ -93,6 +93,22 @@ export class MediaService {
       return () => {
         try { task.cancel(); } catch { /* noop */ }
       };
+    });
+  }
+
+  // Listado de media desde Firestore (encapsulado en servicio)
+  listAll() {
+    return defer(() => collectionData(collection(this.db, 'media'), { idField: 'id' }));
+  }
+
+  listRecent(limitCount: number = 60) {
+    return defer(() => collectionData(query(collection(this.db, 'media'), orderBy('createdAt','desc')), { idField: 'id' }));
+  }
+
+  async recordUpload(entry: { name: string; path: string; url: string; size: number; type: string }) {
+    await addDoc(collection(this.db, 'media'), {
+      ...entry,
+      createdAt: serverTimestamp(),
     });
   }
 }

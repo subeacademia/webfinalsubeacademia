@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, collectionData, query, where, orderBy, limit } from '@angular/fire/firestore';
 import { LogService } from './log.service';
-import { Observable, catchError, map, of, switchMap } from 'rxjs';
+import { Observable, catchError, defer, map, of, switchMap } from 'rxjs';
 
 type Post = { id?: string; status?: string; lang?: string; tags?: string[]; title?: string; publishedAt?: any; };
 type Course = { id?: string; status?: string; level?: string; topic?: string; title?: string; publishedAt?: any; };
@@ -35,11 +35,11 @@ export class FirebaseDataService {
     const postsCol = collection(this.fs, 'posts');
     const constraints: any[] = [ where('status','==','published'), orderBy('publishedAt','desc'), limit(n) ];
     if (params?.lang) constraints.splice(1, 0, where('lang','==', params.lang)); // status + lang + orderBy => índice
-    const primary$ = collectionData(query(postsCol, ...constraints), { idField: 'id' }) as Observable<Post[]>;
+    const primary$ = defer(() => collectionData(query(postsCol, ...constraints), { idField: 'id' }) as Observable<Post[]>);
 
     // FALLBACK (sin índices): trae por fecha y filtra en memoria
     const fbConstraints: any[] = [ orderBy('publishedAt','desc'), limit(n*3) ];
-    const fallback$ = (collectionData(query(postsCol, ...fbConstraints), { idField: 'id' }) as Observable<Post[]>)
+    const fallback$ = (defer(() => collectionData(query(postsCol, ...fbConstraints), { idField: 'id' }) as Observable<Post[]>))
       .pipe(
         map((rows: Post[]) => {
           let r = rows.filter(x => x?.status === 'published');
@@ -64,11 +64,11 @@ export class FirebaseDataService {
     const constraints: any[] = [ where('status','==','published'), orderBy('publishedAt','desc'), limit(n) ];
     if (params?.level) constraints.splice(1, 0, where('level','==', params.level)); // status + level + orderBy => índice
     if (params?.topic) constraints.splice(1, 0, where('topic','==', params.topic)); // status + topic + orderBy => otro índice
-    const primary$ = collectionData(query(coursesCol, ...constraints), { idField: 'id' }) as Observable<Course[]>;
+    const primary$ = defer(() => collectionData(query(coursesCol, ...constraints), { idField: 'id' }) as Observable<Course[]>);
 
     // FALLBACK (sin índices)
     const fbConstraints: any[] = [ orderBy('publishedAt','desc'), limit(n*3) ];
-    const fallback$ = (collectionData(query(coursesCol, ...fbConstraints), { idField: 'id' }) as Observable<Course[]>)
+    const fallback$ = (defer(() => collectionData(query(coursesCol, ...fbConstraints), { idField: 'id' }) as Observable<Course[]>))
       .pipe(
         map((rows: Course[]) => {
           let r = rows.filter(x => x?.status === 'published');

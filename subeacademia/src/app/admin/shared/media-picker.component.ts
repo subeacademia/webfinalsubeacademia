@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, collectionData } from '@angular/fire/firestore';
 import { MediaService } from '../../core/media/media.service';
 
 @Component({
@@ -29,7 +28,6 @@ import { MediaService } from '../../core/media/media.service';
   `
 })
 export class MediaPickerComponent {
-  private db = inject(Firestore);
   private media = inject(MediaService);
 
   items = signal<any[]>([]);
@@ -41,8 +39,7 @@ export class MediaPickerComponent {
   @Output() chosen = new EventEmitter<any>();
 
   constructor(){
-    const col = collection(this.db, 'media');
-    collectionData(col, {idField:'id'}).subscribe((v:any)=> this.items.set(v));
+    this.media.listAll().subscribe((v:any)=> this.items.set(v));
   }
 
   async onFiles(e:any){

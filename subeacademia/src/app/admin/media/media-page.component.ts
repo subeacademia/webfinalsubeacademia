@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, collectionData, query, orderBy, addDoc, serverTimestamp } from '@angular/fire/firestore';
 import { StorageService } from '../../core/storage.service';
+import { MediaService } from '../../core/media/media.service';
 
 @Component({
   standalone: true,
@@ -35,7 +35,7 @@ import { StorageService } from '../../core/storage.service';
 })
 export class MediaPageComponent{
   private storage = inject(StorageService);
-  private db = inject(Firestore);
+  private mediaService = inject(MediaService);
 
   items = signal<any[]>([]);
   busy = signal(false);
@@ -44,9 +44,7 @@ export class MediaPageComponent{
   doneUrl = signal<string>('');
 
   constructor(){
-    const col = collection(this.db, 'media');
-    collectionData(query(col, orderBy('createdAt','desc')), {idField:'id'})
-      .subscribe((v:any)=> this.items.set(v));
+    this.mediaService.listRecent().subscribe((v:any)=> this.items.set(v));
   }
 
   async onFiles(e:any){
@@ -63,17 +61,21 @@ export class MediaPageComponent{
             next: async (s) => {
               this.progress.set(s.progress);
               if (s.state === 'success' && s.downloadURL && s.path) {
-                await addDoc(collection(this.db, 'media'), {
-                  fileName: f.name,
-                  path: s.path,
-                  url: s.downloadURL,
-                  size: f.size,
-                  contentType: f.type,
-                  createdAt: serverTimestamp(),
-                });
-                this.doneUrl.set(s.downloadURL);
-                sub.unsubscribe();
-                resolve();
+                try {
+                  await this.mediaService.recordUpload({
+                    name: f.name,
+                    path: s.path,
+                    url: s.downloadURL,
+                    size: f.size,
+                    type: f.type,
+                  });
+                  this.doneUrl.set(s.downloadURL);
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                } finally {
+                  sub.unsubscribe();
+                }
               } else if (s.state === 'error') {
                 sub.unsubscribe();
                 reject(s.error);

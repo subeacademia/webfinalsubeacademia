@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc, orderBy, limit, getDocs } from '@angular/fire/firestore';
 import { Course } from '../models';
-import { Observable, from, firstValueFrom } from 'rxjs';
+import { Observable, from, firstValueFrom, defer } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
 
 @Injectable({ providedIn: 'root' })
@@ -30,14 +30,14 @@ export class CoursesService {
           items.sort((a:any,b:any)=> (b.publishedAt?.toMillis?.() ?? 0) - (a.publishedAt?.toMillis?.() ?? 0));
           observer.next(items); observer.complete();
         } else {
-          collectionData(qRef, { idField: 'id' }).subscribe(v => { observer.next(v as Course[]); observer.complete(); });
+          defer(() => collectionData(qRef, { idField: 'id' })).subscribe(v => { observer.next(v as Course[]); observer.complete(); });
         }
       });
     });
   }
 
   get(id: string): Observable<Course | undefined> {
-    return docData(doc(this.db, `courses/${id}`), { idField: 'id' }) as unknown as Observable<Course | undefined>;
+    return defer(() => docData(doc(this.db, `courses/${id}`), { idField: 'id' }) as unknown as Observable<Course | undefined>);
   }
 
   async create(data: Course) {

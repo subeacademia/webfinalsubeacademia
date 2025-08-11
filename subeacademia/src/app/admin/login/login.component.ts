@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AuthCoreService } from '../../core/auth-core.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -39,6 +40,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
+  private readonly authCore = inject(AuthCoreService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 

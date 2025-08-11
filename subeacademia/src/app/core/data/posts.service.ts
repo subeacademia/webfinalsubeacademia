@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, doc, docData, addDoc, updateDoc, query, where, orderBy, collectionData, limit, getDocs } from '@angular/fire/firestore';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, defer } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
 import { Auth } from '@angular/fire/auth';
 
@@ -30,13 +30,13 @@ export class PostsService {
           items.sort((a:any,b:any)=> (b.publishedAt?.toMillis?.() ?? 0) - (a.publishedAt?.toMillis?.() ?? 0));
           resolve(items);
         } else {
-          collectionData(q, { idField:'id' }).subscribe(v => resolve(v as any));
+          defer(() => collectionData(q, { idField:'id' })).subscribe(v => resolve(v as any));
         }
       });
     });
   }
   get(id:string){
-    return docData(doc(this.db,'posts',id), { idField:'id' });
+    return defer(() => docData(doc(this.db,'posts',id), { idField:'id' }));
   }
   async create(data:any){
     const col = collection(this.db,'posts');

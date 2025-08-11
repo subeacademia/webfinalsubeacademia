@@ -69,3 +69,10 @@ npm run deploy:db
 ```
 
 Esto ejecuta `firebase deploy --only firestore`. Asegúrate de tener el proyecto seleccionado con `firebase use` o pasa `--project <id>`.
+
+## Notas de arquitectura (Auth/Firestore/PWA)
+
+- Única fuente de verdad de sesión/admin: `src/app/core/auth-core.service.ts`. No depende de router ni guards.
+- Guards minimalistas: `src/app/core/auth.guard.ts` (login) y `src/app/core/admin.guard.ts` (admin). Usar `canActivate` en rutas.
+- Acceso a Firestore: exclusivamente dentro de servicios inyectables (nunca en top-level ni directamente en componentes). Ejemplos: `core/media/media.service.ts`, `core/services/content.service.ts`, `core/firebase-data.service.ts`.
+- Desarrollo sin Service Worker: `angular.json` tiene `serviceWorker: false` en dev y en opciones base; en producción se habilita vía `provideServiceWorker` con `enabled: !isDevMode()` en `app.config.ts`.
