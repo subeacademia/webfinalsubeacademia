@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  background: #0b1220; /* fondo dark */
+  color: #e8eef7;      /* texto base */
+}
+
+/* Ajustes finos opcionales */
+section { scroll-margin-top: 80px; }
+

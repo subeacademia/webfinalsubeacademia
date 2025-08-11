@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { langMatcher } from './core/routing/lang.matcher';
+import { HomeComponent } from './pages/home/home.component';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: '/es' },
+  { path: '', component: HomeComponent },
 
   // Admin SIN idioma (antes del matcher)
   { path: 'admin', loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES) },
@@ -23,5 +24,5 @@ export const routes: Routes = [
   },
 
   // 404
-  { path: '**', redirectTo: '/es' },
+  { path: '**', component: HomeComponent },
 ];
