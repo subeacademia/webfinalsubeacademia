@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer as AngularSanitizer } from '@angular/platform-browser';
+import { Subject, takeUntil } from 'rxjs';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
@@ -147,22 +148,19 @@ export class PostEditComponent implements OnDestroy, OnInit {
 
   lockSlug = true;
 
+  private readonly unsubscribe$ = new Subject<void>();
+
   constructor(){
     const maybeId = this.route.snapshot.paramMap.get('id');
     if (maybeId) {
       this.id.set(maybeId);
-      this.posts.get(maybeId).subscribe(p => {
-        if (p) this.form.patchValue({
-          ...(p as any),
-          publishedAtLocal: new Date((p as any).publishedAt || Date.now()).toISOString().slice(0,16)
-        });
-        this.translationsReady.set(!!(p as any)?.translations?.en && !!(p as any)?.translations?.pt);
-      });
     }
   }
 
   ngOnDestroy(): void {
     this.editor?.destroy();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   ngOnInit(): void {
@@ -171,17 +169,36 @@ export class PostEditComponent implements OnDestroy, OnInit {
     let slugManuallyEdited = false;
 
     if (slugControl?.valueChanges) {
-      slugControl.valueChanges.subscribe(() => {
-        if (!this.lockSlug) slugManuallyEdited = true;
-      });
+      slugControl.valueChanges
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(() => {
+          if (!this.lockSlug) slugManuallyEdited = true;
+        });
     }
 
     if (titleControl?.valueChanges) {
-      titleControl.valueChanges.subscribe((title: string) => {
-        if (this.lockSlug && !slugManuallyEdited) {
-          slugControl.setValue(slugify(title || ''), { emitEvent: false });
-        }
-      });
+      titleControl.valueChanges
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe((title: string) => {
+          if (this.lockSlug && !slugManuallyEdited) {
+            slugControl.setValue(slugify(title || ''), { emitEvent: false });
+          }
+        });
+    }
+
+    const maybeId = this.id();
+    if (maybeId) {
+      this.posts
+        .get(maybeId)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(p => {
+          if (p)
+            this.form.patchValue({
+              ...(p as any),
+              publishedAtLocal: new Date((p as any).publishedAt || Date.now()).toISOString().slice(0, 16)
+            });
+          this.translationsReady.set(!!(p as any)?.translations?.en && !!(p as any)?.translations?.pt);
+        });
     }
   }
 

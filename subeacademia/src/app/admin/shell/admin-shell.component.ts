@@ -1,9 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthCoreService } from '../../core/auth-core.service';
 import { NgIf } from '@angular/common';
 import { User } from '@angular/fire/auth';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-shell',
@@ -33,15 +34,23 @@ import { User } from '@angular/fire/auth';
 </div>
   `
 })
-export class AdminShellComponent implements OnInit {
+export class AdminShellComponent implements OnInit, OnDestroy {
   private authSvc = inject(AuthService);
   private coreAuth = inject(AuthCoreService);
   private router = inject(Router);
   open = true;
   userEmail: string | null = null;
+  private readonly unsubscribe$ = new Subject<void>();
+
   ngOnInit(){
     if (typeof window !== 'undefined') this.open = window.innerWidth >= 768;
-    this.coreAuth.authState$.subscribe((u: User | null) => { this.userEmail = u?.email ?? null; });
+    this.coreAuth.authState$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe((u: User | null) => { this.userEmail = u?.email ?? null; });
+  }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
   async logout(){
     await this.authSvc.logout();

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { SettingsService } from '../../core/services/settings.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-settings',
@@ -64,7 +65,7 @@ import { SettingsService } from '../../core/services/settings.service';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminSettingsComponent {
+export class AdminSettingsComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly settings = inject(SettingsService);
 
@@ -81,21 +82,31 @@ export class AdminSettingsComponent {
     instagram: [''],
   });
 
-  constructor() {
-    this.settings.getSettings().subscribe(s => {
-      if (s) {
-        this.form.patchValue({
-          brandName: s.brandName,
-          logoUrl: s.logoUrl,
-          defaultLang: s.defaultLang,
-          twitter: s.socials?.twitter || '',
-          linkedin: s.socials?.linkedin || '',
-          youtube: s.socials?.youtube || '',
-          github: s.socials?.github || '',
-          instagram: s.socials?.instagram || '',
-        });
-      }
-    });
+  private readonly unsubscribe$ = new Subject<void>();
+
+  ngOnInit(): void {
+    this.settings
+      .getSettings()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(s => {
+        if (s) {
+          this.form.patchValue({
+            brandName: s.brandName,
+            logoUrl: s.logoUrl,
+            defaultLang: s.defaultLang,
+            twitter: s.socials?.twitter || '',
+            linkedin: s.socials?.linkedin || '',
+            youtube: s.socials?.youtube || '',
+            github: s.socials?.github || '',
+            instagram: s.socials?.instagram || '',
+          });
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   async save() {

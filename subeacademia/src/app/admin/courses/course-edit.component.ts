@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { CoursesService } from '../../core/data/courses.service';
@@ -7,6 +7,7 @@ import { MediaPickerComponent } from '../shared/media-picker.component';
 import { MediaService } from '../../core/media/media.service';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
@@ -146,7 +147,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
   </div>
   `,
 })
-export class CourseEditComponent {
+export class CourseEditComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -154,6 +155,7 @@ export class CourseEditComponent {
   private media = inject(MediaService);
 
   id = signal<string | null>(null);
+  private readonly unsubscribe$ = new Subject<void>();
 
   form = this.fb.group({
     lang: ['es', Validators.required],
@@ -170,19 +172,30 @@ export class CourseEditComponent {
     publishedAtLocal: ['']
   });
 
-  constructor(){
+  ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if(id){
+    if (id) {
       this.id.set(id);
-      this.courses.get(id).subscribe(c=>{
-        if(c){
-          const value:any = c;
-          this.form.patchValue({ ...value, publishedAtLocal: new Date(value.publishedAt || Date.now()).toISOString().slice(0,16) });
-          this.setResources(value.resources || []);
-          this.translationsReady.set(!!(value as any)?.translations?.en && !!(value as any)?.translations?.pt);
-        }
-      });
+      this.courses
+        .get(id)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(c => {
+          if (c) {
+            const value: any = c;
+            this.form.patchValue({
+              ...value,
+              publishedAtLocal: new Date(value.publishedAt || Date.now()).toISOString().slice(0, 16)
+            });
+            this.setResources(value.resources || []);
+            this.translationsReady.set(!!(value as any)?.translations?.en && !!(value as any)?.translations?.pt);
+          }
+        });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
   resources(){ return this.form.get('resources') as unknown as FormArray<any>; }
