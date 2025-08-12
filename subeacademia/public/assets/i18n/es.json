@@ -70,6 +70,15 @@
   "blog.header.title": "Nuestro Blog",
   "blog.header.subtitle": "Ideas, tutoriales y noticias sobre Inteligencia Artificial y tecnología.",
   "ia.header.title": "Asistente de IA",
+  "chatbot.header_title": "Asistente Sube IA",
+  "chatbot.welcome": "¡Hola! Soy tu asistente de Sube Academ-IA. ¿En qué puedo ayudarte hoy?",
+  "chatbot.starter1": "¿Qué es Sube Academia?",
+  "chatbot.starter2": "Quiero hablar con un asesor",
+  "chatbot.starter3": "¿Qué cursos ofrecen?",
+  "chatbot.input_placeholder": "Escribe tu mensaje...",
+  "chatbot.contact_response": "¡Claro! Puedes contactar a un asesor escribiendo a {{email}}, llamando al {{phone}} o visitando nuestra página de contacto.",
+  "chatbot.default_response": "Entendido. Para darte la mejor respuesta, te recomiendo hablar con uno de nuestros asesores expertos. Puedes encontrar sus datos en la página de contacto.",
+  "chatbot.error_response": "Lo siento, parece que hay un problema de conexión. Por favor, intenta de nuevo más tarde.",
   "courses": {
     "title": "Cursos destacados",
     "items": [

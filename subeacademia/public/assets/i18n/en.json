@@ -70,6 +70,15 @@
   "blog.header.title": "Our Blog",
   "blog.header.subtitle": "Ideas, tutorials, and news about Artificial Intelligence and technology.",
   "ia.header.title": "AI Assistant",
+  "chatbot.header_title": "Sube AI Assistant",
+  "chatbot.welcome": "Hi! I'm your Sube Academ-IA assistant. How can I help you today?",
+  "chatbot.starter1": "What is Sube Academia?",
+  "chatbot.starter2": "I want to talk to an advisor",
+  "chatbot.starter3": "What courses do you offer?",
+  "chatbot.input_placeholder": "Type your message...",
+  "chatbot.contact_response": "Sure! You can contact an advisor by emailing {{email}}, calling {{phone}}, or visiting our contact page.",
+  "chatbot.default_response": "Got it. For the best answer, I recommend speaking with one of our expert advisors. You can find their details on the contact page.",
+  "chatbot.error_response": "Sorry, there seems to be a connection issue. Please try again later.",
   "courses": {
     "title": "Featured courses",
     "items": [

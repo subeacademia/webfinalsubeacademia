@@ -49,12 +49,7 @@ type Lang = 'es' | 'en' | 'pt';
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Blog">Blog</a>
           </li>
-          <li>
-            <a [routerLink]="['/', currentLang(), 'ia']"
-               routerLinkActive="text-[var(--accent)]"
-               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-               aria-label="Ir a IA">IA</a>
-          </li>
+          
           <li>
             <a [routerLink]="['/', currentLang(), 'contacto']"
                routerLinkActive="text-[var(--accent)]"
@@ -86,7 +81,7 @@ type Lang = 'es' | 'en' | 'pt';
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Cursos">Cursos</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'nosotros']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Nosotros">Nosotros</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Blog">Blog</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a IA">IA</a>
+          
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Contacto">Contacto</a>
           <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
 

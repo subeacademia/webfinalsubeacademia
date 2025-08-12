@@ -1,19 +1,22 @@
 import { Component, OnDestroy, OnInit, isDevMode, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { Subject, filter, takeUntil } from 'rxjs';
 import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
+import { ChatbotComponent } from './shared/ui/chatbot/chatbot.component';
 import { ThemeService } from './shared/theme.service';
 import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppShellComponent],
+  imports: [RouterOutlet, AppShellComponent, ChatbotComponent, CommonModule],
   template: `
     <app-shell>
       <router-outlet />
+      <app-chatbot *ngIf="!isAdminRoute" />
     </app-shell>
   `,
   styleUrl: './app.css'
@@ -26,6 +29,7 @@ export class App implements OnInit, OnDestroy {
   private readonly seo = inject(SeoService);
   private readonly data = inject(FirebaseDataService, { optional: true } as any);
   private readonly unsubscribe$ = new Subject<void>();
+  isAdminRoute = false;
   constructor() {}
   ngOnInit() {
     // Inicializa el tema (lee almacenamiento y aplica clases)
@@ -53,6 +57,7 @@ export class App implements OnInit, OnDestroy {
         if (first) void this.i18n.setLang(first);
 
         const url = this.router.url;
+        this.isAdminRoute = url.startsWith('/admin');
         if (url.includes('/blog')) {
           this.seo.updateTags({ title: 'Blog · Sube Academia', description: 'Publicaciones y novedades', type: 'website' });
         } else if (url.includes('/cursos')) {
