@@ -82,4 +82,14 @@
     "see_more": "Ver CV Completo",
     "go_back": "Volver"
   }
+  ,
+  "course": {
+    "back_to_courses": "Volver a Cursos",
+    "syllabus_title": "Temario del Curso",
+    "details_title": "Detalles del Curso",
+    "duration": "Duración",
+    "lessons": "Lecciones",
+    "level": "Nivel",
+    "enroll_button": "Inscribirse Ahora"
+  }
 }

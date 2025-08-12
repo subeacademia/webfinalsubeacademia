@@ -1,5 +1,5 @@
 export interface CourseResource {
-  type: 'video' | 'pdf' | 'zip' | 'image';
+  type: 'video' | 'pdf' | 'zip' | 'image' | 'link' | 'file';
   url: string;
   title?: string;
 }
@@ -12,40 +12,44 @@ export interface CourseSeo {
 
 export interface CourseModule {
   title: string;
+  title_en?: string;
+  title_pt?: string;
   lessons: string[];
+  lessons_en?: string[];
+  lessons_pt?: string[];
 }
 
 export interface Course {
-  id: string;
-  lang: 'es' | 'pt' | 'en';
+  id?: string;
+  slug: string;
   title: string;
-  titleI18n?: { es?: string; en?: string; pt?: string };
-  // Traducciones explícitas para UI
   title_en?: string;
   title_pt?: string;
-  slug: string;
-  summary: string;
-  summaryI18n?: { es?: string; en?: string; pt?: string };
-  // Nivel interno; se mapea en UI a 'Principiante' | 'Intermedio' | 'Avanzado'
-  level: 'intro' | 'intermedio' | 'avanzado';
-  // Metadatos adicionales para UI
-  category?: string;
   description?: string;
   description_en?: string;
   description_pt?: string;
-  duration?: string; // p.ej. "10 horas"
-  lessonCount?: number;
-  durationHours?: number;
-  topics: string[];
-  coverUrl?: string;
   image?: string;
-  modules?: CourseModule[];
-  resources: CourseResource[];
+  category?: string;
+  level?: 'Principiante' | 'Intermedio' | 'Avanzado' | 'intro' | 'intermedio' | 'avanzado';
+  duration?: string; // ej: "10 horas"
+  lessonCount?: number;
+  date?: any; // Firestore timestamp
+  modules?: CourseModule[]; // Programa académico
+
+  // Campos legacy/opcionales para compatibilidad con datos existentes
+  lang?: 'es' | 'pt' | 'en';
+  titleI18n?: { es?: string; en?: string; pt?: string };
+  summary?: string;
+  summaryI18n?: { es?: string; en?: string; pt?: string };
+  durationHours?: number | null;
+  coverUrl?: string;
+  resources?: CourseResource[];
   price?: number;
-  publishedAt: number;
+  publishedAt?: number | any;
   updatedAt?: number;
-  status: 'draft' | 'published' | 'scheduled';
+  status?: 'draft' | 'published' | 'scheduled';
   scheduledAt?: number;
   seo?: CourseSeo;
+  topics?: string[];
 }
 

@@ -40,6 +40,18 @@ export class CoursesService {
     return defer(() => docData(doc(this.db, `courses/${id}`), { idField: 'id' }) as unknown as Observable<Course | undefined>);
   }
 
+  async getBySlug(slug: string): Promise<Course | null> {
+    try {
+      const qRef = query(this.col, where('slug', '==', slug), limit(1));
+      const snap = await getDocs(qRef);
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      return { id: d.id, ...(d.data() as any) } as Course;
+    } catch {
+      return null;
+    }
+  }
+
   async create(data: Course) {
     const base:any = { ...data, lang: 'es', langBase: 'es', createdAt: Date.now() };
     const ref = await addDoc(this.col, base as any);

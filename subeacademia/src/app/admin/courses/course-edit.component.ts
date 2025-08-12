@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { CoursesService } from '../../core/data/courses.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
@@ -42,13 +42,13 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
       <div class="grid gap-3 md:grid-cols-3">
         <label class="block">Nivel
           <select class="w-full ui-input" formControlName="level">
-            <option value="intro">intro</option>
-            <option value="intermedio">intermedio</option>
-            <option value="avanzado">avanzado</option>
+            <option value="Principiante">Principiante</option>
+            <option value="Intermedio">Intermedio</option>
+            <option value="Avanzado">Avanzado</option>
           </select>
         </label>
-        <label class="block">Duración (h)
-          <input class="w-full ui-input" type="number" formControlName="durationHours">
+        <label class="block">Duración (texto)
+          <input class="w-full ui-input" type="text" formControlName="duration">
         </label>
         <label class="block">Temas (coma)
           <input class="w-full ui-input" [value]="(form.value.topics || []).join(', ')" (change)="onTopicsChange($any($event.target).value)">
@@ -85,6 +85,24 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         <label class="block">Fecha publicación
           <input class="w-full ui-input" type="datetime-local" formControlName="publishedAtLocal">
         </label>
+      </div>
+
+      <!-- Programa Académico -->
+      <div formArrayName="modules" class="space-y-3">
+        <h3 class="text-lg font-medium">Programa Académico</h3>
+        <div *ngFor="let module of modules.controls; let i = index" [formGroupName]="i" class="p-4 my-2 border rounded">
+          <input formControlName="title" placeholder="Título del Módulo" class="w-full ui-input mb-2">
+          <button class="btn" type="button" (click)="removeModule(i)">Eliminar Módulo</button>
+
+          <div formArrayName="lessons" class="mt-3 space-y-2">
+            <div *ngFor="let lesson of lessons(i).controls; let j = index" class="flex items-center gap-2">
+              <input [formControlName]="j" placeholder="Lección" class="w-full ui-input">
+              <button class="btn" type="button" (click)="removeLesson(i, j)">X</button>
+            </div>
+            <button class="btn" type="button" (click)="addLesson(i)">Añadir Lección</button>
+          </div>
+        </div>
+        <button class="btn" type="button" (click)="addModule()">Añadir Módulo</button>
       </div>
 
       <div class="grid md:grid-cols-2 gap-4">
@@ -162,14 +180,15 @@ export class CourseEditComponent implements OnInit, OnDestroy {
     title: ['', Validators.required],
     slug: [''],
     summary: [''],
-    level: ['intro'],
-    durationHours: [null as number | null],
+    level: ['Principiante'],
+    duration: [''],
     topics: [[] as string[]],
     resources: this.fb.array([] as any[]),
     media: this.fb.array([] as any[]),
     status: ['draft'],
     publishedAt: [Date.now()],
-    publishedAtLocal: ['']
+    publishedAtLocal: [''],
+    modules: this.fb.array([] as any[]),
   });
 
   ngOnInit(): void {
@@ -187,6 +206,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
               publishedAtLocal: new Date(value.publishedAt || Date.now()).toISOString().slice(0, 16)
             });
             this.setResources(value.resources || []);
+            this.setModules((value as any).modules || []);
             this.translationsReady.set(!!(value as any)?.translations?.en && !!(value as any)?.translations?.pt);
           }
         });
@@ -206,6 +226,26 @@ export class CourseEditComponent implements OnInit, OnDestroy {
   }
   addResource(){ this.resources().push(this.fb.group({ type:['file'], url:[''], title:[''] }) as any); }
   removeResource(i: number){ this.resources().removeAt(i); }
+
+  // Modules (Programa académico)
+  get modules(): FormArray { return this.form.get('modules') as unknown as FormArray; }
+  private createModuleGroup(data?: any): FormGroup {
+    return this.fb.group({
+      title: [data?.title || '', Validators.required],
+      lessons: this.fb.array((data?.lessons?.length ? data.lessons : ['']).map((l:string)=> this.fb.control(l, Validators.required)))
+    });
+  }
+  setModules(mods: Array<{ title: string; lessons: string[] }>) {
+    const arr = this.fb.array([]) as unknown as FormArray;
+    for (const m of mods) arr.push(this.createModuleGroup(m));
+    if (mods.length === 0) arr.push(this.createModuleGroup());
+    this.form.setControl('modules', arr as any);
+  }
+  addModule(): void { this.modules.push(this.createModuleGroup()); }
+  removeModule(index: number): void { this.modules.removeAt(index); }
+  lessons(moduleIndex: number): FormArray { return this.modules.at(moduleIndex).get('lessons') as FormArray; }
+  addLesson(moduleIndex: number): void { this.lessons(moduleIndex).push(this.fb.control('', Validators.required)); }
+  removeLesson(moduleIndex: number, lessonIndex: number): void { this.lessons(moduleIndex).removeAt(lessonIndex); }
 
   // Subida de recurso directo con progreso, y push al FormArray
   uploading = signal(false);
