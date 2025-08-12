@@ -19,11 +19,17 @@ export interface Post {
   id: string;
   lang: 'es' | 'pt' | 'en';
   title: string;
+  // Campos opcionales para títulos traducidos
+  title_en?: string;
+  title_pt?: string;
   titleI18n?: { es?: string; en?: string; pt?: string };
   slug: string;
   summary: string;
   summaryI18n?: { es?: string; en?: string; pt?: string };
   content: string;
+  // Campos opcionales para contenido traducido
+  content_en?: string;
+  content_pt?: string;
   contentI18n?: { es?: string; en?: string; pt?: string };
   contentHtml?: string;
   contentText?: string;

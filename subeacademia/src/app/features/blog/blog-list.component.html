@@ -1,0 +1,86 @@
+<div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+  <!-- Encabezado de la Sección del Blog -->
+  <header class="py-16 sm:py-24 text-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white" i18n>
+        Nuestro Blog
+      </h1>
+      <p class="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-500 dark:text-gray-400" i18n>
+        Ideas, tutoriales y noticias sobre Inteligencia Artificial y tecnología.
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Aviso de índice de Firestore -->
+    <div *ngIf="indexErrorUrl()" class="mb-6 p-4 border border-amber-300 bg-amber-50 dark:bg-amber-900/30 rounded">
+      <div class="text-amber-800 dark:text-amber-200 text-sm" i18n>
+        Falta un índice de Firestore para esta consulta.
+      </div>
+      <a class="inline-block mt-2 px-3 py-1 bg-amber-600 text-white rounded text-sm" [href]="indexErrorUrl()" target="_blank" rel="noopener" i18n>Crear índice</a>
+    </div>
+
+    <!-- Estados de carga / contenido -->
+    <ng-container *ngIf="loading(); else content">
+      <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
+    </ng-container>
+    <ng-template #content>
+      <ng-container *ngIf="posts().length > 0; else noPosts">
+        <!-- Grid de Cards -->
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- Inicio del Bucle para cada Card de Post -->
+          <div *ngFor="let post of posts()" class="group">
+            <a [routerLink]="['/', currentLang(), 'blog', post.slug]">
+              <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <!-- Imagen de la Card -->
+                <div class="h-48 overflow-hidden" *ngIf="post.coverUrl as img">
+                  <img [src]="img" [alt]="getTranslatedPost(post).title" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+
+                <!-- Contenido de la Card -->
+                <div class="p-6">
+                  <!-- Categoría o Etiqueta -->
+                  <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                    {{ (post.categories && post.categories[0]) || 'Artículo' }}
+                  </p>
+
+                  <!-- Título Traducido -->
+                  <h2 class="mt-2 text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                    {{ getTranslatedPost(post).title }}
+                  </h2>
+
+                  <!-- Resumen Traducido -->
+                  <p class="mt-3 text-gray-600 dark:text-gray-400 text-base line-clamp-3">
+                    {{ getTranslatedPost(post).excerpt }}
+                  </p>
+
+                  <!-- Metadatos del Post -->
+                  <div class="mt-6 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                    <span>{{ post.publishedAt | date: 'longDate' }}</span>
+                    <span i18n>· {{ post['readingTime'] || 5 }} min de lectura</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <!-- Fin del Bucle -->
+        </div>
+      </ng-container>
+    </ng-template>
+
+    <!-- Plantillas para estados de carga y sin posts -->
+    <ng-template #loadingTpl>
+      <div class="text-center py-12">
+        <p i18n>Cargando artículos...</p>
+      </div>
+    </ng-template>
+
+    <ng-template #noPosts>
+      <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <h3 class="text-2xl font-bold" i18n>No hay artículos todavía</h3>
+        <p class="mt-2 text-gray-500 dark:text-gray-400" i18n>Vuelve pronto para leer nuestro contenido.</p>
+      </div>
+    </ng-template>
+  </main>
+</div>
+

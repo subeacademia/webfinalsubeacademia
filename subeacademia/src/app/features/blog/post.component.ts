@@ -1,52 +1,70 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NgFor, NgIf, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { ContentService } from '../../core/services/content.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SeoService } from '../../core/seo/seo.service';
 import { articleJsonLd } from '../../core/seo/jsonld';
 import { Post } from '../../core/models/post.model';
-import { MarkdownModule } from 'ngx-markdown';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { generateSlug } from '../../core/utils/slug.util';
 
 @Component({
   selector: 'app-post',
   standalone: true,
-  imports: [NgIf, NgFor, MarkdownModule],
+  imports: [NgIf, NgFor, DatePipe],
   template: `
-    <article class="container mx-auto p-6" *ngIf="post() as p">
-      <header class="space-y-3">
-        <h1 class="text-3xl font-bold">{{ p.title }}</h1>
-        <p class="text-muted">{{ p.summary }}</p>
-        <img *ngIf="p.coverUrl" [src]="p.coverUrl" [alt]="p.title" class="w-full max-h-96 object-cover rounded" />
-        <div class="flex flex-wrap gap-2 text-xs text-primary">
-          <span *ngFor="let tag of p.tags" class="px-2 py-0.5 bg-primary/10 rounded">#{{ tag }}</span>
-        </div>
-        <div *ngIf="p.authors?.length" class="text-sm text-muted">
-          Autor(es):
-          <ng-container *ngFor="let a of p.authors; let last = last">
-            <a *ngIf="a.url; else plain" [href]="a.url" rel="author" class="underline">{{ a.name }}</a><ng-container *ngIf="!last">, </ng-container>
-            <ng-template #plain>{{ a.name }}<ng-container *ngIf="!last">, </ng-container></ng-template>
-          </ng-container>
+    <div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen" *ngIf="post() as p">
+      <!-- Encabezado con Imagen de Portada -->
+      <header class="relative h-96">
+        <img [src]="p.coverUrl" [alt]="translatedTitle" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-center p-4">
+          <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-4">
+            {{ translatedTitle }}
+          </h1>
+          <p class="text-gray-300">
+            <span i18n>Publicado el</span> {{ p.publishedAt | date:'longDate' }}
+          </p>
         </div>
       </header>
 
-      <section class="prose max-w-none mt-6" *ngIf="p.contentHtml; else md">
-        <div [innerHTML]="safeHtml(p.contentHtml)"></div>
-      </section>
-      <ng-template #md>
-        <section class="prose max-w-none mt-6">
-          <markdown [data]="p.content"></markdown>
-        </section>
-      </ng-template>
+      <div class="container mx-auto px-6 py-12 lg:grid lg:grid-cols-12 lg:gap-12">
+        <!-- Columna Principal del Contenido -->
+        <article class="lg:col-span-8">
+          <div
+            class="prose prose-lg dark:prose-invert max-w-none"
+            [innerHTML]="translatedContent">
+            <!-- El contenido del post se renderizará aquí -->
+          </div>
+        </article>
 
-      <section *ngIf="p.media?.length" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <figure *ngFor="let m of p.media" class="border rounded overflow-hidden bg-white">
-          <img *ngIf="m.type === 'image'" [src]="m.url" [alt]="m.title || p.title" class="w-full h-48 object-cover" />
-          <div class="p-3 text-sm" *ngIf="m.title">{{ m.title }}</div>
-        </figure>
-      </section>
-    </article>
+        <!-- Barra Lateral (Sidebar) -->
+        <aside class="lg:col-span-4 mt-12 lg:mt-0 lg:sticky lg:top-24 h-fit">
+          <!-- Tarjeta del Autor -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4" i18n>Sobre el Autor</h3>
+            <div class="flex items-center">
+              <img src="https://placehold.co/100x100/E2E8F0/4A5568?text=Autor" alt="Autor" class="w-16 h-16 rounded-full mr-4">
+              <div>
+                <p class="font-semibold text-lg">{{ p.authors[0].name || 'Autor' }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ p.summary }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de Contenidos -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-bold mb-4" i18n>En este artículo</h3>
+            <ul class="space-y-2">
+              <li *ngFor="let item of tableOfContents">
+                <a [href]="'#' + item.id" class="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                  {{ item.title }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -55,9 +73,10 @@ export class PostComponent {
   private readonly content = inject(ContentService);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
-  private readonly sanitizer = inject(DomSanitizer);
 
   protected readonly post = signal<Post | null>(null);
+  public tableOfContents: { id: string; title: string }[] = [];
+  private processedContent = '';
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -71,6 +90,8 @@ export class PostComponent {
       const view = t[lang] || t[base] || {};
       const mapped: any = { ...p, ...view };
       this.post.set(mapped);
+      const initialContent = (mapped as any)[`content_${lang}`] || mapped.contentI18n?.[lang] || mapped.contentHtml || mapped.content || '';
+      this.generateTableOfContents(initialContent);
       const titleI18n = (p as any).titleI18n || {};
       const summaryI18n = (p as any).summaryI18n || {};
       const title = p.seo?.title ?? (titleI18n[lang] || titleI18n['es'] || mapped.title);
@@ -93,8 +114,59 @@ export class PostComponent {
     });
   }
 
-  safeHtml(html: string | undefined | null): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(html || '');
+  get translatedTitle(): string {
+    const p = this.post();
+    if (!p) return '';
+    const lang = this.i18n.currentLang();
+    return (p as any)[`title_${lang}`] || p.titleI18n?.[lang] || p.title;
+  }
+
+  get translatedContent(): string {
+    const p = this.post();
+    if (!p) return '';
+    const lang = this.i18n.currentLang();
+    const content = (p as any)[`content_${lang}`] || p.contentI18n?.[lang] || p.contentHtml || p.content || '';
+    this.generateTableOfContents(content);
+    return this.processedContent;
+  }
+
+  private generateTableOfContents(htmlContent: string): void {
+    try {
+      // SSR guard
+      if (typeof window === 'undefined' || typeof (window as any).DOMParser === 'undefined') {
+        this.tableOfContents = [];
+        this.processedContent = htmlContent || '';
+        return;
+      }
+      const parser = new (window as any).DOMParser();
+      const doc = parser.parseFromString(htmlContent || '', 'text/html');
+      const headings = Array.from(doc.querySelectorAll('h2')) as HTMLElement[];
+      const usedIds = new Set<string>();
+      const toc: { id: string; title: string }[] = [];
+
+      for (const h2 of headings) {
+        const rawTitle = (h2.textContent || '').trim();
+        if (!rawTitle) continue;
+        let id = generateSlug(rawTitle);
+        let suffix = 2;
+        while (usedIds.has(id) || (id && doc.getElementById(id))) {
+          id = `${id.replace(/-\d+$/, '')}-${suffix++}`;
+        }
+        if (id) {
+          h2.setAttribute('id', id);
+          usedIds.add(id);
+          toc.push({ id, title: rawTitle });
+        }
+      }
+
+      this.tableOfContents = toc;
+      // Serializar de vuelta el HTML procesado
+      // Usamos body.innerHTML para preservar el contenido tal cual fue parseado
+      this.processedContent = doc.body ? doc.body.innerHTML : htmlContent || '';
+    } catch {
+      this.tableOfContents = [];
+      this.processedContent = htmlContent || '';
+    }
   }
 }
 

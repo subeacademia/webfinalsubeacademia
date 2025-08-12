@@ -1,7 +1,8 @@
 :host {
   display: block;
-  background: #0b1220; /* fondo dark */
-  color: #e8eef7;      /* texto base */
+  /* Hereda del ThemeService vía CSS variables */
+  background: var(--bg);
+  color: var(--fg);
 }
 
 /* Ajustes finos opcionales */

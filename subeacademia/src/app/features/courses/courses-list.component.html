@@ -1,0 +1,70 @@
+<main class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+  <!-- Encabezado -->
+  <header class="py-16 text-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white" i18n>
+        Explora Nuestros Cursos
+      </h1>
+      <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-500 dark:text-gray-400" i18n>
+        Formación práctica en Inteligencia Artificial para llevar tu carrera al siguiente nivel.
+      </p>
+
+      <!-- Controles de filtros -->
+      <div class="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
+        <div class="relative w-full sm:w-96">
+          <input (input)="updateSearchTerm($event)" type="text" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar cursos..." i18n-placeholder>
+          <span class="pointer-events-none absolute right-3 top-2.5 text-gray-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </span>
+        </div>
+
+        <ng-container *ngIf="categories$ | async as categories">
+          <div class="flex flex-wrap items-center gap-2">
+            <button *ngFor="let cat of categories" (click)="setCategory(cat)" class="px-3 py-1.5 rounded-full border text-sm transition"
+              [ngClass]="{
+                'bg-indigo-600 border-indigo-600 text-white': (activeCategory | async) === cat,
+                'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800': (activeCategory | async) !== cat
+              }">
+              {{ cat | titlecase }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </header>
+
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div *ngIf="filteredCourses$ | async as courses; else loading">
+      <div *ngIf="courses.length > 0; else noResults" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <a *ngFor="let course of courses" [routerLink]="['/', currentLangValue, 'cursos', course.slug]" class="group block">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden h-full flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5">
+            <img [src]="(course.image || '/assets/og-placeholder.svg')" [alt]="getTranslatedCourse(course).title" class="h-48 w-full object-cover">
+            <div class="p-6 flex flex-col flex-grow">
+              <p class="text-sm font-semibold text-indigo-500 dark:text-indigo-400">{{ course.category || 'General' }}</p>
+              <h3 class="mt-2 text-lg font-bold text-gray-900 dark:text-white flex-grow">{{ getTranslatedCourse(course).title }}</h3>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ getTranslatedCourse(course).description }}</p>
+              <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ (getTranslatedCourse(course).duration || '—') }}</span>
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg> {{ getTranslatedCourse(course).lessonCount }} <ng-container i18n>Lecciones</ng-container></span>
+                <span class="px-2 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">{{ getTranslatedCourse(course).level }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Estados de Carga y Sin Resultados -->
+    <ng-template #loading>
+      <p class="text-center py-12" i18n>Cargando cursos...</p>
+    </ng-template>
+    <ng-template #noResults>
+      <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <h3 class="text-2xl font-bold" i18n>No se encontraron cursos</h3>
+        <p class="mt-2 text-gray-500 dark:text-gray-400" i18n>Intenta ajustar tu búsqueda o filtros.</p>
+      </div>
+    </ng-template>
+  </section>
+</main>
+
+

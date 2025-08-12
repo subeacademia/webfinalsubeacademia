@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { SkeletonCardComponent } from '../../core/ui/skeleton-card/skeleton-card.component';
 import { ContentService } from '../../core/data/content.service';
 import { FirebaseDataService } from '../../core/firebase-data.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,63 +12,8 @@ import { LogService } from '../../core/log.service';
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, SkeletonCardComponent],
-  template: `
-    <main class="container mx-auto p-6">
-      <h1 class="text-3xl font-semibold">Blog</h1>
-      <p class="text-muted mt-2">Explora artículos por categoría y etiqueta.</p>
-
-      <div *ngIf="indexErrorUrl(); else okIndex" class="mt-4 p-4 border border-amber-300 bg-amber-50 rounded">
-        <div class="text-amber-800 text-sm">
-          Falta un índice de Firestore para esta consulta.
-        </div>
-        <a class="inline-block mt-2 px-3 py-1 bg-amber-600 text-white rounded text-sm" [href]="indexErrorUrl()" target="_blank" rel="noopener">Crear índice</a>
-      </div>
-      <ng-template #okIndex></ng-template>
-
-      <div class="mt-4 flex flex-wrap gap-3 text-sm">
-        <label>
-          Categoría:
-          <input #catInput class="border rounded px-2 py-1 ml-2 ui-input" type="text" placeholder="p.ej. Educación" (change)="onCategoryChange(catInput.value)" />
-        </label>
-        <label>
-          Buscar:
-          <input #qInput class="border rounded px-2 py-1 ml-2 ui-input" type="text" placeholder="título o tag" (input)="onQueryChange(qInput.value)" />
-        </label>
-      </div>
-
-      <section class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <ng-container *ngIf="loading(); else list">
-          <app-skeleton-card />
-          <app-skeleton-card />
-          <app-skeleton-card />
-        </ng-container>
-        <ng-template #list>
-          <a
-            *ngFor="let post of posts()"
-            [routerLink]="['/', currentLang(), 'blog', post.slug]"
-            class="block border rounded-lg overflow-hidden hover:shadow-md transition bg-white"
-          >
-            <img *ngIf="post.coverUrl" [src]="post.coverUrl" [alt]="post.title" class="w-full h-40 object-cover" />
-            <div class="p-4">
-              <h3 class="text-lg font-semibold line-clamp-2">{{ post.title }}</h3>
-              <p class="text-sm text-muted line-clamp-3 mt-2">{{ post.summary }}</p>
-              <div class="mt-3 flex flex-wrap gap-2 text-xs text-primary">
-                <span *ngFor="let tag of post.tags" class="px-2 py-0.5 bg-primary/10 rounded">#{{ tag }}</span>
-              </div>
-            </div>
-          </a>
-        </ng-template>
-      </section>
-
-      <div *ngIf="!loading() && posts().length === 0 && !errorMessage()" class="mt-10 border rounded-lg p-6 text-center text-muted">
-        No hay resultados
-      </div>
-      <div *ngIf="!!errorMessage()" class="mt-4 p-3 rounded bg-red-50 text-red-700 text-sm">
-        {{ errorMessage() }}
-      </div>
-    </main>
-  `,
+  imports: [NgIf, NgFor, RouterLink, DatePipe, NgTemplateOutlet],
+  templateUrl: './blog-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BlogListComponent {
@@ -113,6 +57,20 @@ export class BlogListComponent {
 
   onCategoryChange(v: string) { this.filterCategory.set(v || ''); this.load(); }
   onQueryChange(v: string) { this.filterQuery.set(v || ''); this.load(); }
+
+  public getTranslatedPost(post: Post) {
+    const lang = this.currentLang();
+    const langCode = typeof lang === 'function' ? lang() : lang;
+    const titleFromI18n = (post as any)?.titleI18n?.[langCode];
+    const titleFromSuffix = (post as any)?.[`title_${langCode}`];
+    const title = titleFromI18n || titleFromSuffix || post.title;
+
+    const summaryFromI18n = (post as any)?.summaryI18n?.[langCode];
+    const summaryFromSuffix = (post as any)?.[`summary_${langCode}`];
+    const excerpt = summaryFromI18n || summaryFromSuffix || (post as any)?.excerpt || post.summary || '';
+
+    return { ...post, title, excerpt } as Post & { excerpt: string };
+  }
 
   private load() {
     this.loading.set(true);
