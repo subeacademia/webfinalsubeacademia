@@ -7,6 +7,7 @@ import { SeoService } from '../../core/seo/seo.service';
 import { articleJsonLd } from '../../core/seo/jsonld';
 import { Post } from '../../core/models/post.model';
 import { generateSlug } from '../../core/utils/slug.util';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-post',
@@ -30,6 +31,15 @@ import { generateSlug } from '../../core/utils/slug.util';
       <div class="container mx-auto px-6 py-12 lg:grid lg:grid-cols-12 lg:gap-12">
         <!-- Columna Principal del Contenido -->
         <article class="lg:col-span-8">
+          <!-- Visor PDF si existe -->
+          <div *ngIf="pdfUrlSafe" class="mb-8">
+            <div class="rounded-xl overflow-hidden border border-[var(--border)] bg-[var(--panel)]" style="height: 70vh;">
+              <iframe [src]="pdfUrlSafe" title="PDF" class="w-full h-full" loading="lazy"></iframe>
+            </div>
+            <div class="text-sm mt-2">
+              <a class="btn" [href]="pdfUrlRaw" target="_blank" rel="noopener">Abrir PDF en nueva pestaña</a>
+            </div>
+          </div>
           <div
             class="prose prose-lg dark:prose-invert max-w-none"
             [innerHTML]="translatedContent">
@@ -73,10 +83,13 @@ export class PostComponent {
   private readonly content = inject(ContentService);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   protected readonly post = signal<Post | null>(null);
   public tableOfContents: { id: string; title: string }[] = [];
   private processedContent = '';
+  public pdfUrlSafe: SafeResourceUrl | null = null;
+  public pdfUrlRaw: string | null = null;
 
   constructor() {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -99,6 +112,11 @@ export class PostComponent {
       const image = p.seo?.ogImage ?? p.coverUrl;
 
       this.seo.updateTags({ title, description, image, type: 'article' });
+
+      // PDF adjunto opcional
+      const pdfItem = (p.media || []).find((m:any)=> (m?.type||'').toLowerCase()==='pdf' && m.url);
+      this.pdfUrlRaw = pdfItem?.url || null;
+      this.pdfUrlSafe = this.pdfUrlRaw ? this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrlRaw) : null;
 
       const isScholarly = (p.categories || []).some((c) => c.toLowerCase().includes('científica'));
       this.seo.setJsonLd('post', articleJsonLd({

@@ -21,7 +21,7 @@ type Lang = 'es' | 'en' | 'pt';
         </a>
 
         <button class="md:hidden btn" (click)="toggleNav()" aria-label="Abrir menú">☰</button>
-        <button class="md:hidden theme-toggle" (click)="toggleTheme()" aria-label="Cambiar tema">{{ themeDark() ? '🌙 Dark' : '☀️ Light' }}</button>
+        <button class="md:hidden theme-toggle" (click)="toggleTheme()" aria-label="Cambiar tema">{{ themeDark() ? '🌙' : '☀️' }}</button>
 
         <ul class="nav hidden md:flex items-center gap-2 flex-1 ml-4 md:ml-8">
           <li>
@@ -61,9 +61,9 @@ type Lang = 'es' | 'en' | 'pt';
         </ul>
 
         <!-- Acciones persistentes a la derecha (desktop) -->
-        <div class="flex items-center gap-2 ml-2">
+        <div class="hidden md:flex items-center gap-2 ml-2">
           <button type="button" (click)="toggleTheme()" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
-            {{ themeDark() ? '🌙 Dark' : '☀️ Light' }}
+            {{ themeDark() ? '🌙' : '☀️' }}
           </button>
           <label class="sr-only" for="langSelectDesktop">Cambiar idioma</label>
           <select id="langSelectDesktop" class="btn" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
@@ -89,9 +89,6 @@ type Lang = 'es' | 'en' | 'pt';
               <option value="en">EN</option>
               <option value="pt">PT</option>
             </select>
-            <button class="btn w-full" (click)="toggleTheme()" aria-label="Cambiar tema">
-              {{ themeDark() ? 'Tema oscuro' : 'Tema claro' }}
-            </button>
           </div>
         </div>
       </div>

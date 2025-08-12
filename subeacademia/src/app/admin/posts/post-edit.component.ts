@@ -1,5 +1,5 @@
 import { Component, PLATFORM_ID, OnDestroy, OnInit, inject, signal } from '@angular/core';
-import { CommonModule, NgIf, isPlatformBrowser } from '@angular/common';
+import { CommonModule, NgIf, NgFor, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PostsService } from '../../core/data/posts.service';
@@ -17,7 +17,7 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
 
 @Component({
   standalone: true,
-  imports: [CommonModule, NgIf, ReactiveFormsModule, FormsModule, RouterLink, NgxEditorModule, MediaPickerComponent],
+  imports: [CommonModule, NgIf, NgFor, ReactiveFormsModule, FormsModule, RouterLink, NgxEditorModule, MediaPickerComponent],
   template: `
   <div class="mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id() ? 'Editar Post' : 'Nuevo Post'}}
@@ -72,6 +72,33 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
             <label class="block">URL del autor (opcional)
               <input class="w-full ui-input" placeholder="https://mi-sitio" formControlName="authorUrl" />
             </label>
+          </div>
+        </div>
+
+        <!-- PDFs adjuntos -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block font-medium">PDFs adjuntos</label>
+            <button class="btn" type="button" (click)="pickPdf.set(true)">Añadir PDF</button>
+          </div>
+          <div class="grid gap-2" *ngIf="pdfsFromForm().length; else noPdf">
+            <div class="flex items-center justify-between text-sm" *ngFor="let m of pdfsFromForm(); let i=index">
+              <span class="truncate">{{ m.title || m.url }}</span>
+              <button class="btn" type="button" (click)="removePdf(i)">Quitar</button>
+            </div>
+          </div>
+          <ng-template #noPdf>
+            <div class="text-sm text-[var(--muted)]">No hay PDFs adjuntos.</div>
+          </ng-template>
+        </div>
+
+        <div *ngIf="pickPdf()" class="fixed inset-0 bg-black/40 grid place-items-center p-4">
+          <div class="card max-w-3xl w-full p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="font-medium">Seleccionar PDF</div>
+              <button type="button" class="btn" (click)="pickPdf.set(false)">Cerrar</button>
+            </div>
+            <app-media-picker (chosen)="onPickPdf($event)"></app-media-picker>
           </div>
         </div>
 
@@ -192,7 +219,8 @@ export class PostEditComponent implements OnDestroy, OnInit {
     category: [''],
     coverUrl: [''],
     authorName: [''],
-    authorUrl: ['']
+    authorUrl: [''],
+    media: this.fb.nonNullable.control([] as any[])
   });
 
   lockSlug = true;
@@ -294,6 +322,31 @@ export class PostEditComponent implements OnDestroy, OnInit {
   onPickCover(m:any){
     this.form.patchValue({ coverUrl: m?.url || '' });
     this.pickCover.set(false);
+  }
+
+  pickPdf = signal(false);
+  onPickPdf(m:any){
+    const isPdf = (m?.contentType || m?.type || '').includes('pdf') || /\.pdf($|\?)/i.test(m?.url || '');
+    if (!isPdf) { alert('Selecciona un archivo PDF'); return; }
+    const current: any[] = (this.form.value as any).media || [];
+    const item = { type: 'pdf', url: m.url, title: m.fileName || m.name || 'PDF' } as any;
+    if (!current.some(x => x.url === item.url)) {
+      this.form.patchValue({ media: [...current, item] });
+    }
+    this.pickPdf.set(false);
+  }
+  removePdf(index:number){
+    const current: any[] = (this.form.value as any).media || [];
+    const pdfs = current.filter(x => x.type === 'pdf');
+    const target = pdfs[index];
+    const rest = current.filter(x => x !== target);
+    this.form.patchValue({ media: rest });
+  }
+
+  pdfsFromForm(): Array<{ type:string; url:string; title?:string }>{
+    const v: any = this.form?.value || {};
+    const arr: any[] = Array.isArray(v.media) ? v.media : [];
+    return arr.filter(x => x && x.type === 'pdf');
   }
 
   showPreview = signal(false);
