@@ -59,8 +59,7 @@ export class BlogListComponent {
   onQueryChange(v: string) { this.filterQuery.set(v || ''); this.load(); }
 
   public getTranslatedPost(post: Post) {
-    const lang = this.currentLang();
-    const langCode = typeof lang === 'function' ? lang() : lang;
+    const langCode = this.currentLang();
     const titleFromI18n = (post as any)?.titleI18n?.[langCode];
     const titleFromSuffix = (post as any)?.[`title_${langCode}`];
     const title = titleFromI18n || titleFromSuffix || post.title;
