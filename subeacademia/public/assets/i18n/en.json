@@ -1,10 +1,36 @@
 {
   "home": {
     "hero": {
-      "title": "Transform Your Future with Artificial Intelligence",
-      "subtitle": "At SubeAcademia, we offer the most advanced and practical training to master the AI tools that are redefining the professional world.",
-      "cta": "Explore Courses",
-      "secondaryLink": "Read the Blog"
+      "title": "Empower Your Talent in the Age of Artificial Intelligence",
+      "subtitle": "We develop the 13 key competencies that companies and professionals need to lead the digital transformation. Learn with our unique adaptive AI methodology: Agile, Responsible, Ethical, and Sustainable.",
+      "cta": "Discover Your Potential",
+      "secondaryLink": "Explore Our Courses"
+    },
+    "problem": {
+      "title": "The Skills Gap is Today's Biggest Challenge",
+      "stat1_value": "60%",
+      "stat1_desc": "of workers in LATAM lack essential digital skills.",
+      "stat2_value": "44%",
+      "stat2_desc": "of job skills will change in the next 5 years.",
+      "stat3_value": "5.6M",
+      "stat3_desc": "workers in Chile need AI training to remain competitive."
+    },
+    "solution": {
+      "title": "Our Solution: Smart Training for the Future of Work",
+      "feature1_title": "Adaptive Learning with AVE-AI",
+      "feature1_desc": "Our Evolutionary Virtual Classroom personalizes the learning path for each user, ensuring more effective and efficient training.",
+      "feature2_title": "ARES-AI Methodology",
+      "feature2_desc": "We implement a unique approach that is Agile, Responsible, Ethical, and Sustainable, preparing professionals for the real challenges of the corporate world.",
+      "feature3_title": "Development of 13 Key Competencies",
+      "feature3_desc": "We focus on the most in-demand skills in the market, from critical thinking to technological design and ethical awareness."
+    },
+    "logos": {
+      "title": "Companies That Already Trust Us"
+    },
+    "cta_final": {
+      "title": "Ready to Lead the Transformation?",
+      "subtitle": "Let's talk about how we can empower your team and prepare your organization for the future of AI.",
+      "button": "Contact an Advisor"
     }
   },
   "hero": {
@@ -46,5 +72,14 @@
       { "title": "Automation with AI", "text": "Integrations, agents and efficiency." },
       { "title": "Prompt Engineering", "text": "From novice to pro, step by step." }
     ]
+  },
+  "about": {
+    "title": "The Team Behind the Learning Revolution",
+    "subtitle": "We are a multidisciplinary team of innovators, educators, and technologists passionate about transforming human potential through Artificial Intelligence.",
+    "founders_title": "Founding Team",
+    "collaborators_title": "Collaborating Partners",
+    "flip_prompt": "Flip to learn more",
+    "see_more": "View Full CV",
+    "go_back": "Go Back"
   }
 }

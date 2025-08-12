@@ -32,6 +32,7 @@ export const routes: Routes = [
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'cursos', loadChildren: () => import('./features/courses/courses.routes').then(m => m.COURSES_ROUTES) },
       { path: 'ia', loadChildren: () => import('./features/ia/ia.routes').then(m => m.IA_ROUTES) },
+      { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
       { path: 'contacto', loadChildren: () => import('./features/contact/contact.routes').then(m => m.CONTACT_ROUTES) },
     ],
   },

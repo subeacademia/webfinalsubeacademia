@@ -1,7 +1,9 @@
-import { Component, ElementRef, Inject, NgZone, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, Inject, NgZone, OnDestroy, OnInit, PLATFORM_ID, ViewChild, HostListener } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { ThemeService } from '../../../shared/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-hero-scene',
@@ -16,12 +18,18 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
   private controls!: OrbitControls;
-  private particles!: THREE.Points;
+  private neuronLayers: THREE.Group[] = [];
+  private connections!: THREE.LineSegments;
   private frameId: number | null = null;
+  private themeSubscription!: Subscription;
+
+  private darkThemeColors = { bg: 0x0a0a1a, neuron: 0x818cf8, connection: 0x4f46e5 };
+  private lightThemeColors = { bg: 0xe0e7ff, neuron: 0x4f46e5, connection: 0x6366f1 };
 
   constructor(
     private ngZone: NgZone,
-    @Inject(PLATFORM_ID) private platformId: object
+    @Inject(PLATFORM_ID) private platformId: object,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
@@ -30,77 +38,115 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
         this.initScene();
         this.animate();
       });
-      window.addEventListener('resize', this.onWindowResize);
+      this.themeSubscription = this.themeService.isDarkTheme$.subscribe(isDark => {
+        this.updateTheme(isDark);
+      });
     }
   }
 
   ngOnDestroy(): void {
-    if (this.frameId != null) {
-      cancelAnimationFrame(this.frameId);
-    }
-    if (isPlatformBrowser(this.platformId)) {
-      window.removeEventListener('resize', this.onWindowResize);
-    }
+    if (this.frameId != null) cancelAnimationFrame(this.frameId);
     this.controls?.dispose();
-    // Liberar recursos Three.js
-    this.renderer?.dispose();
-    (this.particles?.geometry as THREE.BufferGeometry)?.dispose();
-    (this.particles?.material as THREE.PointsMaterial)?.dispose();
+    this.themeSubscription?.unsubscribe();
   }
 
   private initScene(): void {
     const canvas = this.canvasRef.nativeElement;
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.z = 200;
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+    this.camera.position.z = 100;
 
     // Renderer
-    this.renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     // Controles (para mouse y touch)
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.enableZoom = true; // Permite zoom
-    this.controls.autoRotate = true; // Rotación automática sutil
-    this.controls.autoRotateSpeed = 0.3;
-
-    // Geometría de la Red Neuronal (más optimizada)
-    const particleCount = 5000;
-    const positions = new Float32Array(particleCount * 3);
-    const geometry = new THREE.BufferGeometry();
-
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 500;
-      positions[i3 + 1] = (Math.random() - 0.5) * 500;
-      positions[i3 + 2] = (Math.random() - 0.5) * 500;
-    }
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    const material = new THREE.PointsMaterial({
-      color: 0x818cf8, // Un tono índigo claro
-      size: 0.5,
-      blending: THREE.AdditiveBlending,
-      transparent: true,
-      sizeAttenuation: true,
-    });
-
-    this.particles = new THREE.Points(geometry, material);
-    this.scene.add(this.particles);
+    this.controls.enableZoom = true;
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 0.2;
+    this.controls.maxDistance = 300;
+    this.controls.minDistance = 50;
+    this.createNeuralNetwork();
+    this.updateTheme(this.themeService.current() === 'dark');
   }
 
   private animate = (): void => {
     this.frameId = requestAnimationFrame(this.animate);
+    const time = Date.now() * 0.002;
 
-    // Actualiza los controles para el efecto de "damping" (suavizado)
+    // Animar neuronas
+    this.neuronLayers.forEach((layer, i) => {
+      layer.rotation.z = time * 0.1 * (i % 2 === 0 ? 1 : -1);
+      layer.children.forEach((neuron, j) => {
+        const scale = 1 + Math.sin(time * 0.5 + j) * 0.2;
+        neuron.scale.set(scale, scale, scale);
+      });
+    });
+
     this.controls.update();
-
     this.renderer.render(this.scene, this.camera);
   }
 
-  private onWindowResize = (): void => {
+  private createNeuralNetwork(): void {
+    const layerSizes = [10, 16, 12, 8]; // 4 capas de neuronas
+    const layerSpacing = 30;
+
+    // Crear capas de neuronas
+    layerSizes.forEach((size, i) => {
+      const layer = new THREE.Group();
+      const radius = size * 2.5;
+      for (let j = 0; j < size; j++) {
+        const angle = (j / size) * Math.PI * 2;
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        const neuronGeometry = new THREE.SphereGeometry(1, 16, 16);
+        const neuronMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const neuron = new THREE.Mesh(neuronGeometry, neuronMaterial);
+        neuron.position.set(x, y, 0);
+        layer.add(neuron);
+      }
+      layer.position.z = (i - (layerSizes.length - 1) / 2) * layerSpacing;
+      this.neuronLayers.push(layer);
+      this.scene.add(layer);
+    });
+
+    // Crear conexiones
+    const connectionPoints: THREE.Vector3[] = [];
+    for (let i = 0; i < this.neuronLayers.length - 1; i++) {
+      const currentLayer = this.neuronLayers[i];
+      const nextLayer = this.neuronLayers[i+1];
+      currentLayer.children.forEach(currentNeuron => {
+        nextLayer.children.forEach(nextNeuron => {
+          const start = currentLayer.localToWorld((currentNeuron as THREE.Mesh).position.clone());
+          const end = nextLayer.localToWorld((nextNeuron as THREE.Mesh).position.clone());
+          connectionPoints.push(start, end);
+        });
+      });
+    }
+    const connectionGeometry = new THREE.BufferGeometry().setFromPoints(connectionPoints);
+    const connectionMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+    this.connections = new THREE.LineSegments(connectionGeometry, connectionMaterial);
+    this.scene.add(this.connections);
+  }
+
+  private updateTheme(isDark: boolean): void {
+    const colors = isDark ? this.darkThemeColors : this.lightThemeColors;
+    this.scene.background = new THREE.Color(colors.bg);
+
+    this.neuronLayers.forEach(layer => {
+      layer.children.forEach(neuron => {
+        ((neuron as THREE.Mesh).material as THREE.MeshBasicMaterial).color.set(colors.neuron);
+      });
+    });
+
+    (this.connections.material as THREE.LineBasicMaterial).color.set(colors.connection);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);

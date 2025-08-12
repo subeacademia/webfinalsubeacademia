@@ -1,10 +1,36 @@
 {
   "home": {
     "hero": {
-      "title": "Transforme seu Futuro com Inteligência Artificial",
-      "subtitle": "Na SubeAcademia, oferecemos a formação mais avançada e prática para dominar as ferramentas de IA que estão redefinindo o mundo profissional.",
-      "cta": "Explorar Cursos",
-      "secondaryLink": "Ler o Blog"
+      "title": "Capacite seu Talento na Era da Inteligência Artificial",
+      "subtitle": "Desenvolvemos as 13 competências essenciais que empresas e profissionais precisam para liderar a transformação digital. Aprenda com nossa metodologia única de IA adaptativa: Ágil, Responsável, Ética e Sustentável.",
+      "cta": "Descubra seu Potencial",
+      "secondaryLink": "Explore Nossos Cursos"
+    },
+    "problem": {
+      "title": "A Lacuna de Habilidades é o Maior Desafio de Hoje",
+      "stat1_value": "60%",
+      "stat1_desc": "dos trabalhadores na América Latina não possuem habilidades digitais essenciais.",
+      "stat2_value": "44%",
+      "stat2_desc": "das habilidades de trabalho mudarão nos próximos 5 anos.",
+      "stat3_value": "5.6M",
+      "stat3_desc": "de trabalhadores no Chile precisam de treinamento em IA para se manterem competitivos."
+    },
+    "solution": {
+      "title": "Nossa Solução: Treinamento Inteligente para o Futuro do Trabalho",
+      "feature1_title": "Aprendizagem Adaptativa com AVE-AI",
+      "feature1_desc": "Nossa Sala de Aula Virtual Evolutiva personaliza o caminho de aprendizagem para cada usuário, garantindo um treinamento mais eficaz e eficiente.",
+      "feature2_title": "Metodologia ARES-AI",
+      "feature2_desc": "Implementamos uma abordagem única que é Ágil, Responsável, Ética e Sustentável, preparando os profissionais para os desafios reais do mundo corporativo.",
+      "feature3_title": "Desenvolvimento de 13 Competências Essenciais",
+      "feature3_desc": "Focamos nas habilidades mais demandadas pelo mercado, desde o pensamento crítico até o design tecnológico e a consciência ética."
+    },
+    "logos": {
+      "title": "Empresas que já Confiam em Nós"
+    },
+    "cta_final": {
+      "title": "Pronto para Liderar a Transformação?",
+      "subtitle": "Vamos conversar sobre como podemos capacitar sua equipe e preparar sua organização para o futuro da IA.",
+      "button": "Contatar um Consultor"
     }
   },
   "hero": {
@@ -46,5 +72,14 @@
       { "title": "Automação com IA", "text": "Integrações, agentes e eficiência." },
       { "title": "Prompt Engineering", "text": "Do iniciante ao profissional, passo a passo." }
     ]
+  },
+  "about": {
+    "title": "A Equipe por Trás da Revolução na Aprendizagem",
+    "subtitle": "Somos uma equipe multidisciplinar de inovadores, educadores e tecnólogos apaixonados por transformar o potencial humano através da Inteligência Artificial.",
+    "founders_title": "Equipe Fundadora",
+    "collaborators_title": "Parceiros Colaboradores",
+    "flip_prompt": "Vire para saber mais",
+    "see_more": "Ver CV Completo",
+    "go_back": "Voltar"
   }
 }

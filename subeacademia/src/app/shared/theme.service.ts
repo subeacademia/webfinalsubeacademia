@@ -1,9 +1,12 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly storageKey = 'theme'; // 'light' | 'dark'
+  // Observable de tema actual para reactividad en componentes (e.g., Three.js)
+  readonly isDarkTheme$ = new BehaviorSubject<boolean>(false);
   constructor(@Inject(PLATFORM_ID) private readonly platformId: Object) {}
 
   init(): void {
@@ -14,6 +17,7 @@ export class ThemeService {
         const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
         const theme: 'light' | 'dark' = saved ?? (prefersDark ? 'dark' : 'light');
         this.apply(theme);
+        this.isDarkTheme$.next(theme === 'dark');
       } catch {
         // noop
       }
@@ -38,6 +42,8 @@ export class ThemeService {
         localStorage.setItem(this.storageKey, theme);
         localStorage.setItem('pref-theme', theme);
       } catch {}
+      // Notificar a suscriptores
+      this.isDarkTheme$.next(theme === 'dark');
     }
   }
 
