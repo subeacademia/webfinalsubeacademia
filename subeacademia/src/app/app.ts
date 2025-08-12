@@ -24,7 +24,7 @@ export class App implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
-  private readonly data = inject(FirebaseDataService);
+  private readonly data = inject(FirebaseDataService, { optional: true } as any);
   private readonly unsubscribe$ = new Subject<void>();
   constructor() {}
   ngOnInit() {
@@ -33,9 +33,11 @@ export class App implements OnInit, OnDestroy {
     // ThemeService aplica el tema en el constructor (persistente)
     if (isDevMode()) {
       try {
-        const hints = this.data.getIndexHints();
-        // eslint-disable-next-line no-console
-        console.log('[Indices] Recomendados:', hints);
+        const hints = this.data?.getIndexHints?.();
+        if (hints) {
+          // eslint-disable-next-line no-console
+          console.log('[Indices] Recomendados:', hints);
+        }
       } catch {}
     }
     // Inicializar lang y SEO según ruta

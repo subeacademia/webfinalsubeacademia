@@ -116,25 +116,7 @@ export const appConfig: ApplicationConfig = {
       multi: true,
     },
     // ThemeService aplica el modo en su constructor; no necesitamos APP_INITIALIZER
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      deps: [FirebaseDataService],
-      useFactory: (data: FirebaseDataService) => () => {
-        try {
-          if (isDevMode()) {
-            const hints = data.getIndexHints?.();
-            if (Array.isArray(hints) && hints.length) {
-              // eslint-disable-next-line no-console
-              console.info('[Indices] Recomendados para Firestore:');
-              for (const h of hints) console.info(' -', h);
-            }
-          }
-        } catch {
-          // no-op
-        }
-      },
-    },
+    // Nota: quitamos APP_INITIALIZER que inyectaba FirebaseDataService para evitar inicializar Firestore en SSR
     // Nota: evitamos tocar Firebase en APP_INITIALIZER para no romper la hidración/SSR
   ],
 };

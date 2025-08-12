@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Firestore, doc, docData, setDoc } from '@angular/fire/firestore';
-import { Observable, from } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 
 export interface SiteSettings {
   brandName: string;
@@ -15,9 +16,13 @@ export interface SiteSettings {
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private readonly db = inject(Firestore);
+  private readonly platformId = inject(PLATFORM_ID);
   readonly ref = doc(this.db, 'settings/general');
 
   get(): Observable<SiteSettings | undefined> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(undefined);
+    }
     return docData(this.ref) as unknown as Observable<SiteSettings | undefined>;
   }
 

@@ -127,11 +127,13 @@ export class AppShellComponent {
 
   constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
-    this.settings.get().subscribe((s: SiteSettings | undefined) => {
-      if (!s) return;
-      if (s.brandName) this.brandName.set(s.brandName);
-      this.logoUrl.set(s.logoUrl || null);
-    });
+    try {
+      this.settings.get().subscribe((s: SiteSettings | undefined) => {
+        if (!s) return;
+        if (s.brandName) this.brandName.set(s.brandName);
+        this.logoUrl.set(s.logoUrl || null);
+      });
+    } catch {}
     // Theme se aplica vía ThemeService en App init; mantenemos señal para UI
   }
 

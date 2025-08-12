@@ -1,4 +1,12 @@
 {
+  "home": {
+    "hero": {
+      "title": "Transform Your Future with Artificial Intelligence",
+      "subtitle": "At SubeAcademia, we offer the most advanced and practical training to master the AI tools that are redefining the professional world.",
+      "cta": "Explore Courses",
+      "secondaryLink": "Read the Blog"
+    }
+  },
   "hero": {
     "title": "Sube Academ-IA",
     "subtitle": "Applied education + Artificial Intelligence for professionals and teams."

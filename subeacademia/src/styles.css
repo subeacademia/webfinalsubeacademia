@@ -273,3 +273,44 @@ select {
 /* Contraste básico global (inputs/selects/textarea)
    Nota: eliminamos el forzado de tema oscuro para permitir que el toggle funcione.
 */
+
+/* --- Ajustes de accesibilidad para NgxEditor (tamaño y contraste) --- */
+/* Contenedor del menú del editor */
+ngx-editor-menu {
+  display: block;
+  border: 1px solid var(--input-border);
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  border-radius: 12px;
+  padding: .4rem .5rem;
+  margin-bottom: .5rem;
+}
+/* Botones del toolbar: alto contraste y feedback de estado */
+ngx-editor-menu button {
+  color: var(--fg);
+  opacity: .95;
+}
+ngx-editor-menu button:hover { opacity: 1; }
+ngx-editor-menu button[aria-pressed="true"],
+ngx-editor-menu .is-active {
+  background: color-mix(in srgb, var(--ring) 18%, transparent);
+  color: #fff;
+  border-radius: .5rem;
+}
+
+/* Área editable: mayor altura mínima y estilos de foco consistentes */
+ngx-editor { display: block; }
+ngx-editor .NgxEditor__Content,
+ngx-editor [contenteditable="true"] {
+  min-height: 420px;           /* aumenta el alto del área de escritura */
+  padding: .85rem 1rem;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+}
+ngx-editor .NgxEditor__Content:focus,
+ngx-editor [contenteditable="true"]:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 35%, transparent);
+}

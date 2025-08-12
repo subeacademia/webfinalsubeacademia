@@ -1,4 +1,12 @@
 {
+  "home": {
+    "hero": {
+      "title": "Transforme seu Futuro com Inteligência Artificial",
+      "subtitle": "Na SubeAcademia, oferecemos a formação mais avançada e prática para dominar as ferramentas de IA que estão redefinindo o mundo profissional.",
+      "cta": "Explorar Cursos",
+      "secondaryLink": "Ler o Blog"
+    }
+  },
   "hero": {
     "title": "Sube Academ-IA",
     "subtitle": "Educação aplicada + Inteligência Artificial para profissionais e equipes."

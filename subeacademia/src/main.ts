@@ -1,3 +1,4 @@
+import '@angular/localize/init';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { isDevMode } from '@angular/core';
 import { appConfig } from './app/app.config';

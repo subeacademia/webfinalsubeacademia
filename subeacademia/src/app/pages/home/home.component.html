@@ -1,34 +1,53 @@
-<!-- HERO -->
-<section class="relative overflow-hidden">
-  <div class="mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
-    <div>
-      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-100">
-        {{ hero.title }}
-      </h1>
-      <p class="mt-6 text-lg md:text-xl text-slate-300 max-w-2xl">
-        {{ hero.subtitle }}
-      </p>
+<!-- Hero Section -->
+<div class="bg-white dark:bg-gray-900">
+  <main>
+    <div class="relative isolate">
+      <!-- Degradado de fondo -->
+      <div class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48" aria-hidden="true">
+        <div class="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#8080ff] to-[#4f46e5] opacity-30" style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.8%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)"></div>
+      </div>
 
-      <div class="mt-8 flex flex-wrap gap-4">
-        <a [href]="hero.ctaPrimary.href"
-           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-500 transition">
-          {{ hero.ctaPrimary.label }}
-        </a>
-        <a [href]="hero.ctaSecondary.href"
-           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-slate-200 ring-1 ring-white/15 hover:bg-white/5 transition">
-          {{ hero.ctaSecondary.label }}
-        </a>
+      <!-- Contenido Principal -->
+      <div class="overflow-hidden">
+        <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
+          <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
+            <!-- Columna de Texto -->
+            <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
+              <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl" i18n="@@home.hero.title">
+                Transforma tu Futuro con Inteligencia Artificial
+              </h1>
+              <p class="relative mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 sm:max-w-md lg:max-w-none" i18n="@@home.hero.subtitle">
+                En SubeAcademia, te ofrecemos la formación más avanzada y práctica para dominar las herramientas de IA que están redefiniendo el mundo profesional.
+              </p>
+              <div class="mt-10 flex items-center gap-x-6">
+                <a href="#" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" i18n="@@home.hero.cta">
+                  Explorar Cursos
+                </a>
+                <a href="/blog" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white" i18n="@@home.hero.secondaryLink">
+                  Leer el Blog <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Columna del Elemento Visual (Futuro 3D) -->
+            <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
+              <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
+                <div class="relative">
+                  <!-- Placeholder para el modelo 3D. Por ahora, una imagen estática. -->
+                  <div class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg flex items-center justify-center">
+                    <span class="text-gray-400 text-sm text-center p-2">Espacio para Modelo 3D</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Puedes añadir más elementos visuales aquí si lo deseas -->
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Visual placeholder (tarjeta “3D” suave) -->
-    <div class="rounded-3xl bg-gradient-to-br from-slate-900/40 to-slate-800/20 ring-1 ring-white/10 p-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
-      <div class="aspect-[4/3] w-full rounded-2xl bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/40 to-transparent ring-1 ring-white/10 flex items-center justify-center">
-        <span class="text-slate-400">[ Aquí va foto/video del equipo o capacitación ]</span>
-      </div>
-    </div>
-  </div>
-</section>
+  </main>
+</div>
 
 <!-- PROPUESTA DE VALOR -->
 <section class="border-t border-white/10">

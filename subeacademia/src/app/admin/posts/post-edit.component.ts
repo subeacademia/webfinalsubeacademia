@@ -11,12 +11,13 @@ import { Editor, NgxEditorModule, Toolbar } from 'ngx-editor';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer as AngularSanitizer } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
+import { MediaPickerComponent } from '../shared/media-picker.component';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
 @Component({
   standalone: true,
-  imports: [CommonModule, NgIf, ReactiveFormsModule, FormsModule, RouterLink, NgxEditorModule],
+  imports: [CommonModule, NgIf, ReactiveFormsModule, FormsModule, RouterLink, NgxEditorModule, MediaPickerComponent],
   template: `
   <div class="mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id() ? 'Editar Post' : 'Nuevo Post'}}
@@ -52,6 +53,51 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         <label class="block">Resumen
           <textarea class="w-full ui-input" rows="3" formControlName="summary"></textarea>
         </label>
+
+        <div class="grid gap-3 md:grid-cols-2 items-start">
+          <label class="block">Imagen de portada
+            <div class="flex items-center gap-2">
+              <input class="w-full ui-input" formControlName="coverUrl" placeholder="https://...">
+              <button class="btn" type="button" (click)="pickCover.set(true)">Elegir…</button>
+            </div>
+            <div class="mt-2" *ngIf="form.value.coverUrl as url">
+              <img [src]="url" alt="cover" class="max-h-40 rounded-xl border border-[var(--border)]">
+            </div>
+          </label>
+
+          <div class="grid gap-3">
+            <label class="block">Autor
+              <input class="w-full ui-input" placeholder="Nombre del autor" formControlName="authorName" />
+            </label>
+            <label class="block">URL del autor (opcional)
+              <input class="w-full ui-input" placeholder="https://mi-sitio" formControlName="authorUrl" />
+            </label>
+          </div>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2">
+          <label class="block">Categoría
+            <select class="w-full ui-input" formControlName="category">
+              <option value="">— Seleccionar —</option>
+              <option value="articulo">Artículo</option>
+              <option value="investigacion">Investigación</option>
+              <option value="opinion">Opinión</option>
+              <option value="tutorial">Tutorial</option>
+              <option value="noticia">Noticia</option>
+            </select>
+          </label>
+          <div></div>
+        </div>
+
+        <div *ngIf="pickCover()" class="fixed inset-0 bg-black/40 grid place-items-center p-4">
+          <div class="card max-w-3xl w-full p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="font-medium">Seleccionar imagen de portada</div>
+              <button type="button" class="btn" (click)="pickCover.set(false)">Cerrar</button>
+            </div>
+            <app-media-picker (chosen)="onPickCover($event)"></app-media-picker>
+          </div>
+        </div>
         <div formGroupName="translations">
           <div formGroupName="es">
             <label class="block">Contenido</label>
@@ -143,7 +189,10 @@ export class PostEditComponent implements OnDestroy, OnInit {
     publishedAt: [Date.now()],
     publishedAtLocal: [''],
     tags: [[] as string[]],
-    category: ['']
+    category: [''],
+    coverUrl: [''],
+    authorName: [''],
+    authorUrl: ['']
   });
 
   lockSlug = true;
@@ -195,6 +244,9 @@ export class PostEditComponent implements OnDestroy, OnInit {
           if (p)
             this.form.patchValue({
               ...(p as any),
+              authorName: (p as any)?.authors?.[0]?.name || '',
+              authorUrl: (p as any)?.authors?.[0]?.url || '',
+              category: ((p as any)?.categories || [])[0] || (p as any)?.category || '',
               publishedAtLocal: new Date((p as any).publishedAt || Date.now()).toISOString().slice(0, 16)
             });
           this.translationsReady.set(!!(p as any)?.translations?.en && !!(p as any)?.translations?.pt);
@@ -221,6 +273,12 @@ export class PostEditComponent implements OnDestroy, OnInit {
       v.translations.es.contentText = text;
     }
 
+    // Normalizar autores y categorías
+    const authorName = (v as any).authorName?.trim();
+    const authorUrl = (v as any).authorUrl?.trim();
+    v.authors = authorName ? [{ name: authorName, url: authorUrl || undefined }] : [];
+    if ((v as any).category) v.categories = [(v as any).category];
+
     v.updatedAt = Date.now();
     if (!this.id()) v.createdAt = Date.now();
 
@@ -231,6 +289,12 @@ export class PostEditComponent implements OnDestroy, OnInit {
   }
 
   translationsReady = signal(false);
+
+  pickCover = signal(false);
+  onPickCover(m:any){
+    this.form.patchValue({ coverUrl: m?.url || '' });
+    this.pickCover.set(false);
+  }
 
   showPreview = signal(false);
   previewHtml: SafeHtml = '';
