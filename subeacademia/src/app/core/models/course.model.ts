@@ -10,6 +10,11 @@ export interface CourseSeo {
   ogImage?: string;
 }
 
+export interface CourseModule {
+  title: string;
+  lessons: string[];
+}
+
 export interface Course {
   id: string;
   lang: 'es' | 'pt' | 'en';
@@ -34,6 +39,7 @@ export interface Course {
   topics: string[];
   coverUrl?: string;
   image?: string;
+  modules?: CourseModule[];
   resources: CourseResource[];
   price?: number;
   publishedAt: number;

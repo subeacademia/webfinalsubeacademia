@@ -20,10 +20,10 @@
                 En SubeAcademia, te ofrecemos la formación más avanzada y práctica para dominar las herramientas de IA que están redefiniendo el mundo profesional.
               </p>
               <div class="mt-10 flex items-center gap-x-6">
-                <a href="#" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" i18n="@@home.hero.cta">
+                <a href="#" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" i18n="@@home.hero.cta">
                   Explorar Cursos
                 </a>
-                <a href="/blog" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white" i18n="@@home.hero.secondaryLink">
+                <a href="/blog" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white transition-colors duration-200 hover:text-indigo-600 dark:hover:text-indigo-400" i18n="@@home.hero.secondaryLink">
                   Leer el Blog <span aria-hidden="true">→</span>
                 </a>
               </div>
@@ -33,9 +33,9 @@
             <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
               <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
                 <div class="relative">
-                  <!-- Placeholder para el modelo 3D. Por ahora, una imagen estática. -->
-                  <div class="aspect-[2/3] w-full rounded-xl bg-gray-900/5 object-cover shadow-lg flex items-center justify-center">
-                    <span class="text-gray-400 text-sm text-center p-2">Espacio para Modelo 3D</span>
+                  <!-- Escena 3D interactiva -->
+                  <div class="aspect-[1/1] w-full h-full">
+                    <app-hero-scene></app-hero-scene>
                   </div>
                 </div>
               </div>
@@ -54,7 +54,7 @@
   <div class="mx-auto max-w-7xl px-6 py-16">
     <div class="grid md:grid-cols-3 gap-6">
       <div *ngFor="let item of propuestaValor"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 hover:bg-white/[0.04] transition">
+           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
         <div class="text-2xl mb-3">{{ item.icon }}</div>
         <h3 class="text-xl font-semibold text-slate-100">{{ item.title }}</h3>
         <p class="mt-2 text-slate-300">{{ item.desc }}</p>
@@ -73,11 +73,11 @@
 
     <div class="mt-10 grid md:grid-cols-3 gap-6">
       <div *ngFor="let seg of segmentos"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 hover:bg-white/[0.04] transition">
+           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
         <div class="text-2xl mb-3">{{ seg.icon }}</div>
         <h3 class="text-xl font-semibold text-slate-100">{{ seg.title }}</h3>
         <p class="mt-2 text-slate-300">{{ seg.desc }}</p>
-        <a href="#contacto" class="mt-4 inline-flex text-blue-400 hover:text-blue-300">Conoce más →</a>
+        <a href="#contacto" class="mt-4 inline-flex text-blue-400 transition-colors duration-200 hover:text-blue-300">Conoce más →</a>
       </div>
     </div>
   </div>
@@ -95,7 +95,7 @@
       </figure>
     </div>
     <div class="mt-8">
-      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-500 transition">
+      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
         Agenda tu diagnóstico gratuito
       </a>
     </div>
@@ -110,12 +110,12 @@
       Nuestra oferta está pensada para que cada cliente reciba lo que realmente necesita.
     </p>
 
-    <div class="mt-10 grid md:grid-cols-2 gap-6">
+      <div class="mt-10 grid md:grid-cols-2 gap-6">
       <div *ngFor="let s of servicios"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 hover:bg-white/[0.04] transition">
+           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
         <h3 class="text-xl font-semibold text-slate-100">{{ s.title }}</h3>
         <p class="mt-2 text-slate-300">{{ s.desc }}</p>
-        <a href="/contacto" class="mt-4 inline-flex text-blue-400 hover:text-blue-300">Solicita reunión gratuita →</a>
+        <a href="/contacto" class="mt-4 inline-flex text-blue-400 transition-colors duration-200 hover:text-blue-300">Solicita reunión gratuita →</a>
       </div>
     </div>
   </div>
@@ -132,7 +132,7 @@
       </div>
     </div>
     <div class="mt-8">
-      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-500 transition">
+      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
         Conoce cómo aplicar ARES-AI en tu empresa
       </a>
     </div>
@@ -166,11 +166,11 @@
       <p class="mt-4 text-slate-300 max-w-3xl">{{ ctaFinal.desc }}</p>
       <div class="mt-8 flex flex-wrap gap-4">
         <a [href]="ctaFinal.primary.href"
-           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-500 transition">
+           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
           {{ ctaFinal.primary.label }}
         </a>
-        <a [href]="ctaFinal.secondary.href" target="_blank" rel="noopener"
-           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-slate-200 ring-1 ring-white/15 hover:bg-white/5 transition">
+         <a [href]="ctaFinal.secondary.href" target="_blank" rel="noopener"
+            class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-slate-200 ring-1 ring-white/15 transition-colors duration-200 hover:bg-white/5">
           {{ ctaFinal.secondary.label }}
         </a>
       </div>
