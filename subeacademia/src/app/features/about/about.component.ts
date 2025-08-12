@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
 
 interface TeamMember {
   name: string;
@@ -15,7 +16,7 @@ interface TeamMember {
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe],
+  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css']
 })

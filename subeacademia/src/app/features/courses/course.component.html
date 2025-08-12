@@ -36,10 +36,10 @@
         </ng-template>
 
         <!-- Recursos opcionales si existen -->
-        <section *ngIf="(course as any).resources?.length" class="mt-10">
+        <section *ngIf="$any(course).resources?.length" class="mt-10">
           <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recursos</h3>
           <ul class="list-disc pl-6 space-y-2">
-            <li *ngFor="let r of (course as any).resources">
+            <li *ngFor="let r of $any(course).resources">
               <a [href]="r.url" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors">
                 {{ r.title || r.type }}
               </a>
@@ -52,10 +52,10 @@
       <aside class="lg:col-span-4 mt-12 lg:mt-0">
         <div class="sticky top-24 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
           <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ 'course.details_title' | i18nTranslate }}</h3>
-          <ul class="space-y-3 text-gray-600 dark:text-gray-400">
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span><strong>{{ 'course.duration' | i18nTranslate }}:</strong> {{ (course as any).duration || ((course as any).durationHours ? (course as any).durationHours + ' h' : '—') }}</span></li>
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"></path></svg> <span><strong>{{ 'course.lessons' | i18nTranslate }}:</strong> {{ (course as any).lessonCount || '—' }}</span></li>
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg> <span><strong>{{ 'course.level' | i18nTranslate }}:</strong> {{ (course as any).level }}</span></li>
+            <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span><strong>{{ 'course.duration' | i18nTranslate }}:</strong> {{ $any(course).duration || ($any(course).durationHours ? $any(course).durationHours + ' h' : '—') }}</span></li>
+            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"></path></svg> <span><strong>{{ 'course.lessons' | i18nTranslate }}:</strong> {{ $any(course).lessonCount || '—' }}</span></li>
+            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg> <span><strong>{{ 'course.level' | i18nTranslate }}:</strong> {{ $any(course).level }}</span></li>
           </ul>
           <button class="mt-6 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">{{ 'course.enroll_button' | i18nTranslate }}</button>
         </div>

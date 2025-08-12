@@ -1,15 +1,9 @@
 <div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-  <!-- Encabezado -->
-  <div class="bg-white dark:bg-gray-800">
-    <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 text-center">
-      <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-        {{ 'about.title' | i18nTranslate }}
-      </h1>
-      <p class="mt-6 max-w-3xl mx-auto text-xl text-gray-500 dark:text-gray-400">
-        {{ 'about.subtitle' | i18nTranslate }}
-      </p>
-    </div>
-  </div>
+  <!-- Encabezado 3D reutilizable -->
+  <app-page-header
+    [title]="'about.title' | i18nTranslate"
+    [subtitle]="'about.subtitle' | i18nTranslate">
+  </app-page-header>
 
   <!-- Fundadores -->
   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -65,6 +65,11 @@
     "subtitle": "Ideias, guias práticos e tendências de IA aplicada.",
     "viewAll": "Ver tudo"
   },
+  "courses.header.title": "Explore Nossos Cursos",
+  "courses.header.subtitle": "Treinamento prático em Inteligência Artificial para levar sua carreira ao próximo nível.",
+  "blog.header.title": "Nosso Blog",
+  "blog.header.subtitle": "Ideias, tutoriais e notícias sobre Inteligência Artificial e tecnologia.",
+  "ia.header.title": "Assistente de IA",
   "courses": {
     "title": "Cursos em destaque",
     "items": [

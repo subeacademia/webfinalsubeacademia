@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { AsyncPipe, NgClass, NgFor, NgIf, TitleCasePipe } from '@angular/common';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { RouterLink } from '@angular/router';
 import { Course } from '../../core/models/course.model';
 import { I18nService } from '../../core/i18n/i18n.service';
@@ -11,7 +13,7 @@ import { map, switchMap } from 'rxjs/operators';
 @Component({
   selector: 'app-courses-list',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, AsyncPipe, NgClass, TitleCasePipe],
+  imports: [NgIf, NgFor, RouterLink, AsyncPipe, NgClass, TitleCasePipe, PageHeaderComponent, I18nTranslatePipe],
   templateUrl: './courses-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

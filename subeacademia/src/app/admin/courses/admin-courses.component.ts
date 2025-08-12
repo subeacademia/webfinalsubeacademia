@@ -281,7 +281,7 @@ export class AdminCoursesComponent {
   }
 
   startEdit(c: Course) {
-    this.editingId.set(c.id);
+    this.editingId.set((c.id || ''));
     this.form.reset({ ...c, resources: [] });
     this.setResources(c.resources || []);
   }
@@ -305,7 +305,7 @@ export class AdminCoursesComponent {
     if (this.editingId() === 'new') {
       await this.content.createCourse(value);
     } else {
-      await this.content.updateCourse(value.id, value);
+      await this.content.updateCourse(String(value.id || ''), value);
     }
     this.cancelEdit();
     this.load();
@@ -319,7 +319,7 @@ export class AdminCoursesComponent {
     if (this.editingId() === 'new') {
       await this.content.createCourse(value);
     } else {
-      await this.content.updateCourse(value.id, value);
+      await this.content.updateCourse(String(value.id || ''), value);
     }
     this.cancelEdit();
     this.load();
@@ -333,7 +333,7 @@ export class AdminCoursesComponent {
     if (this.editingId() === 'new') {
       await this.content.createCourse(value);
     } else {
-      await this.content.updateCourse(value.id, value);
+      await this.content.updateCourse(String(value.id || ''), value);
     }
     this.cancelEdit();
     this.load();
@@ -341,7 +341,7 @@ export class AdminCoursesComponent {
 
   async remove(c: Course) {
     if (!confirm('¿Eliminar este curso?')) return;
-    await this.content.deleteCourse(c.id);
+    await this.content.deleteCourse(String(c.id || ''));
     this.load();
   }
 }

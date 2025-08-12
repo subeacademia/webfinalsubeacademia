@@ -3,12 +3,17 @@ import { CommonModule, NgFor, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IaService } from './ia.service';
 import { SeoService } from '../../core/seo/seo.service';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-ia',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgFor],
+  imports: [CommonModule, FormsModule, NgFor, PageHeaderComponent, I18nTranslatePipe],
   template: `
+    <app-page-header [title]="'ia.header.title' | i18nTranslate"></app-page-header>
+
+    <!-- Contenido original de la página de IA -->
     <section class="container mx-auto p-0 md:p-6">
       <div class="mx-auto max-w-3xl rounded-lg border border-white/10 bg-[var(--panel)]/40 overflow-hidden">
         <header class="px-4 py-3 border-b border-white/10 flex items-center gap-2 bg-[var(--panel)]/60 backdrop-blur">

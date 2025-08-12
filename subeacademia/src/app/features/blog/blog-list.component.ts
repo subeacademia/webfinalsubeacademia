@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { NgFor, NgIf, DatePipe, NgTemplateOutlet } from '@angular/common';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ContentService } from '../../core/data/content.service';
 import { FirebaseDataService } from '../../core/firebase-data.service';
@@ -12,7 +14,7 @@ import { LogService } from '../../core/log.service';
 @Component({
   selector: 'app-blog-list',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, DatePipe, NgTemplateOutlet],
+  imports: [NgIf, NgFor, RouterLink, DatePipe, NgTemplateOutlet, PageHeaderComponent, I18nTranslatePipe],
   templateUrl: './blog-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -80,17 +80,18 @@ export class ContentService {
 
   createCourse(course: Course): Promise<void> {
     if (!course.slug) course.slug = generateSlug(course.title);
-    const ref = doc(this.firestore, 'courses', course.id);
-    return setDoc(ref, course as any, { merge: false });
+    const docId = course.id ?? generateSlug(course.title);
+    const ref = doc(this.firestore, 'courses', docId);
+    return setDoc(ref, { ...course, id: docId } as any, { merge: false });
   }
 
   updateCourse(id: string, data: Partial<Course>): Promise<void> {
-    const ref = doc(this.firestore, 'courses', id);
+    const ref = doc(this.firestore, 'courses', String(id || ''));
     return updateDoc(ref, data as any);
   }
 
   deleteCourse(id: string): Promise<void> {
-    const ref = doc(this.firestore, 'courses', id);
+    const ref = doc(this.firestore, 'courses', String(id || ''));
     return deleteDoc(ref);
   }
 }
