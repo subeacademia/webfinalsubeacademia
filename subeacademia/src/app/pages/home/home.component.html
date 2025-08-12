@@ -1,206 +1,31 @@
-<!-- Hero Section -->
-<div class="bg-white dark:bg-gray-900">
-  <main>
-    <div class="relative isolate">
-      <!-- Degradado de fondo -->
-      <div class="absolute left-1/2 right-0 top-0 -z-10 -ml-24 transform-gpu overflow-hidden blur-3xl lg:ml-24 xl:ml-48" aria-hidden="true">
-        <div class="aspect-[801/1036] w-[50.0625rem] bg-gradient-to-tr from-[#8080ff] to-[#4f46e5] opacity-30" style="clip-path: polygon(63.1% 29.5%, 100% 17.1%, 76.6% 3%, 48.4% 0%, 44.6% 4.7%, 54.5% 25.3%, 59.8% 49%, 55.2% 57.8%, 44.4% 57.2%, 27.8% 47.9%, 35.1% 81.5%, 0% 97.8%, 39.2% 100%, 35.2% 81.4%, 97.2% 52.8%, 63.1% 29.5%)"></div>
-      </div>
+<div class="relative w-full h-screen overflow-hidden">
+  <!-- El componente de la escena 3D ahora actúa como fondo -->
+  <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
 
-      <!-- Contenido Principal -->
-      <div class="overflow-hidden">
-        <div class="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
-          <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-            <!-- Columna de Texto -->
-            <div class="w-full max-w-xl lg:shrink-0 xl:max-w-2xl">
-              <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl" i18n="@@home.hero.title">
-                Transforma tu Futuro con Inteligencia Artificial
-              </h1>
-              <p class="relative mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300 sm:max-w-md lg:max-w-none" i18n="@@home.hero.subtitle">
-                En SubeAcademia, te ofrecemos la formación más avanzada y práctica para dominar las herramientas de IA que están redefiniendo el mundo profesional.
-              </p>
-              <div class="mt-10 flex items-center gap-x-6">
-                <a href="#" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" i18n="@@home.hero.cta">
-                  Explorar Cursos
-                </a>
-                <a href="/blog" class="text-sm font-semibold leading-6 text-gray-900 dark:text-white transition-colors duration-200 hover:text-indigo-600 dark:hover:text-indigo-400" i18n="@@home.hero.secondaryLink">
-                  Leer el Blog <span aria-hidden="true">→</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Columna del Elemento Visual (Futuro 3D) -->
-            <div class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
-              <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
-                <div class="relative">
-                  <!-- Escena 3D interactiva -->
-                  <div class="aspect-[1/1] w-full h-full">
-                    <app-hero-scene></app-hero-scene>
-                  </div>
-                </div>
-              </div>
-              <!-- Puedes añadir más elementos visuales aquí si lo deseas -->
-            </div>
-
-          </div>
-        </div>
-      </div>
+  <!-- Contenedor para el contenido de texto, centrado y sobre el fondo -->
+  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-6 bg-black bg-opacity-20 backdrop-blur-sm">
+    <h1 class="text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl" i18n="@@home.hero.title">
+      Transforma tu Futuro con Inteligencia Artificial
+    </h1>
+    <p class="mt-6 max-w-3xl text-lg leading-8 text-gray-200" i18n="@@home.hero.subtitle">
+      En SubeAcademia, te ofrecemos la formación más avanzada y práctica para dominar las herramientas de IA que están redefiniendo el mundo profesional.
+    </p>
+    <div class="mt-10 flex items-center gap-x-6">
+      <a routerLink="/cursos" class="rounded-md bg-indigo-500 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 transition-colors" i18n="@@home.hero.cta">
+        Explorar Cursos
+      </a>
+      <a routerLink="/blog" class="text-sm font-semibold leading-6 text-white hover:text-gray-300 transition-colors" i18n="@@home.hero.secondaryLink">
+        Leer el Blog <span aria-hidden="true">→</span>
+      </a>
     </div>
-  </main>
+  </div>
 </div>
 
-<!-- PROPUESTA DE VALOR -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-16">
-    <div class="grid md:grid-cols-3 gap-6">
-      <div *ngFor="let item of propuestaValor"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
-        <div class="text-2xl mb-3">{{ item.icon }}</div>
-        <h3 class="text-xl font-semibold text-slate-100">{{ item.title }}</h3>
-        <p class="mt-2 text-slate-300">{{ item.desc }}</p>
-      </div>
-    </div>
+<!-- Aquí puedes añadir el resto del contenido de tu página de inicio (secciones de "Acerca de", "Testimonios", etc.) -->
+<div class="bg-white dark:bg-gray-900">
+  <!-- Ejemplo de una sección posterior -->
+  <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+    <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white">Más contenido aquí</h2>
   </div>
-</section>
-
-<!-- A QUIÉN AYUDAMOS -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <h2 class="text-3xl md:text-4xl font-bold text-slate-100">A quién ayudamos</h2>
-    <p class="mt-4 text-slate-300 max-w-3xl">
-      Empresas, universidades y profesionales confían en SubecademIA para integrar la IA en su estrategia y operación diaria, asegurando una adopción efectiva y sostenible.
-    </p>
-
-    <div class="mt-10 grid md:grid-cols-3 gap-6">
-      <div *ngFor="let seg of segmentos"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
-        <div class="text-2xl mb-3">{{ seg.icon }}</div>
-        <h3 class="text-xl font-semibold text-slate-100">{{ seg.title }}</h3>
-        <p class="mt-2 text-slate-300">{{ seg.desc }}</p>
-        <a href="#contacto" class="mt-4 inline-flex text-blue-400 transition-colors duration-200 hover:text-blue-300">Conoce más →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIOS -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <h2 class="text-3xl md:text-4xl font-bold text-slate-100">Casos Reales y Testimonios</h2>
-    <div class="mt-10 grid md:grid-cols-2 gap-6">
-      <figure *ngFor="let t of testimonios"
-              class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6">
-        <blockquote class="text-slate-200">“{{ t.quote }}”</blockquote>
-        <figcaption class="mt-4 text-sm text-slate-400">— {{ t.author }}, <span class="text-slate-500">{{ t.org }}</span></figcaption>
-      </figure>
-    </div>
-    <div class="mt-8">
-      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
-        Agenda tu diagnóstico gratuito
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- SERVICIOS Y PAQUETES -->
-<section id="servicios" class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <h2 class="text-3xl md:text-4xl font-bold text-slate-100">Servicios y Paquetes</h2>
-    <p class="mt-4 text-slate-300 max-w-3xl">
-      Nuestra oferta está pensada para que cada cliente reciba lo que realmente necesita.
-    </p>
-
-      <div class="mt-10 grid md:grid-cols-2 gap-6">
-      <div *ngFor="let s of servicios"
-           class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 transition-all duration-300 hover:bg-white/[0.04] hover:shadow-xl hover:-translate-y-1">
-        <h3 class="text-xl font-semibold text-slate-100">{{ s.title }}</h3>
-        <p class="mt-2 text-slate-300">{{ s.desc }}</p>
-        <a href="/contacto" class="mt-4 inline-flex text-blue-400 transition-colors duration-200 hover:text-blue-300">Solicita reunión gratuita →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- METODOLOGÍA ARES-AI -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <h2 class="text-3xl md:text-4xl font-bold text-slate-100">Nuestra Metodología – ARES-AI</h2>
-    <div class="mt-10 grid md:grid-cols-5 gap-6">
-      <div *ngFor="let m of metodologia" class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6">
-        <div class="text-sm uppercase tracking-widest text-blue-300">{{ m.step }}</div>
-        <p class="mt-3 text-slate-300">{{ m.desc }}</p>
-      </div>
-    </div>
-    <div class="mt-8">
-      <a href="/contacto" class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
-        Conoce cómo aplicar ARES-AI en tu empresa
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- PRUEBA SOCIAL / LOGOS & CIFRAS -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <h2 class="text-3xl md:text-4xl font-bold text-slate-100">Han confiado en nosotros</h2>
-    <div class="mt-8 grid grid-cols-2 md:grid-cols-6 gap-4">
-      <div *ngFor="let l of logos" class="h-12 rounded-xl bg-white/[0.04] ring-1 ring-white/10 flex items-center justify-center text-slate-300">
-        {{ l }}
-      </div>
-    </div>
-
-    <div class="mt-12 grid md:grid-cols-3 gap-6">
-      <div *ngFor="let c of cifras" class="rounded-2xl bg-white/[0.02] ring-1 ring-white/10 p-6 text-center">
-        <div class="text-4xl font-extrabold text-slate-100">{{ c.k }}</div>
-        <div class="mt-2 text-slate-400">{{ c.label }}</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA FINAL -->
-<section class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-20">
-    <div class="rounded-3xl bg-gradient-to-br from-blue-950/40 to-blue-800/10 ring-1 ring-white/10 p-10">
-      <h2 class="text-3xl md:text-4xl font-bold text-slate-100">{{ ctaFinal.title }}</h2>
-      <p class="mt-4 text-slate-300 max-w-3xl">{{ ctaFinal.desc }}</p>
-      <div class="mt-8 flex flex-wrap gap-4">
-        <a [href]="ctaFinal.primary.href"
-           class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-white bg-blue-600 transition-colors duration-200 hover:bg-blue-700">
-          {{ ctaFinal.primary.label }}
-        </a>
-         <a [href]="ctaFinal.secondary.href" target="_blank" rel="noopener"
-            class="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold text-slate-200 ring-1 ring-white/15 transition-colors duration-200 hover:bg-white/5">
-          {{ ctaFinal.secondary.label }}
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer id="contacto" class="border-t border-white/10">
-  <div class="mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-3 gap-8">
-    <div>
-      <h3 class="text-lg font-semibold text-slate-100">Contacto</h3>
-      <ul class="mt-3 space-y-2 text-slate-300">
-        <li>📧 {{ contacto.email }}</li>
-        <li>📞 {{ contacto.phone }}</li>
-        <li>🌐 <a [href]="contacto.web" class="text-blue-400 hover:text-blue-300">{{ contacto.web }}</a></li>
-      </ul>
-    </div>
-    <div>
-      <h3 class="text-lg font-semibold text-slate-100">Links rápidos</h3>
-      <ul class="mt-3 space-y-2">
-        <li><a href="#servicios" class="text-slate-300 hover:text-slate-100">Servicios</a></li>
-        <li><a href="/blog" class="text-slate-300 hover:text-slate-100">Blog</a></li>
-        <li><a href="/cursos" class="text-slate-300 hover:text-slate-100">Cursos</a></li>
-        <li><a href="/certificaciones" class="text-slate-300 hover:text-slate-100">Certificaciones</a></li>
-      </ul>
-    </div>
-    <div class="text-slate-400">
-      <p>© {{ year }} SubecademIA. Todos los derechos reservados.</p>
-    </div>
-  </div>
-</footer>
+</div>
 
