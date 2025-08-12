@@ -9,6 +9,11 @@ export interface Translations {
 }
 
 function getNestedTranslation(dictionary: Translations, key: string): string | undefined {
+  // 1) Soporte para claves planas con puntos, ej: "chatbot.header_title"
+  const direct = dictionary[key];
+  if (typeof direct === 'string') return direct;
+
+  // 2) Búsqueda anidada por partes separadas por punto
   const parts = key.split('.');
   let current: unknown = dictionary;
   for (const part of parts) {
