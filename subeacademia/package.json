@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "dev": "concurrently \"npm:kill\" \"ng serve --port 4200 --open\"",
+    "dev:ssr": "ng run subeacademia:serve-ssr",
     "build": "ng build",
     "build:ssg": "ng build --configuration=production",
     "serve:ssg": "npx http-server dist/subeacademia/browser -p 4200",
@@ -12,7 +14,6 @@
     "deploy:db": "firebase deploy --only firestore",
     "dev:clean": "concurrently \"npm:kill\" \"ng cache clean\" \"rimraf dist\" && ng serve --port 4200 --open",
     "kill": "kill-port 4200 4300 || true",
-    "dev": "concurrently \"npm:kill\" \"ng serve --port 4200 --open\"",
     "dev:4300": "concurrently \"kill-port 4300 || true\" \"ng serve --port 4300 --open\"",
     "pwa:off": "node -e \"const fs=require('fs');const a=JSON.parse(fs.readFileSync('angular.json','utf8'));const p=Object.keys(a.projects)[0];a.projects[p].architect.build.options.serviceWorker=false;fs.writeFileSync('angular.json',JSON.stringify(a,null,2));console.log('serviceWorker=false');\""
   },

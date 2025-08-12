@@ -67,6 +67,25 @@
           },
           "defaultConfiguration": "production"
         },
+        "server": {
+          "builder": "@angular/build:server",
+          "options": {
+            "outputPath": "dist/subeacademia/server",
+            "main": "src/main.server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "media"
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true,
+              "extractLicenses": false
+            }
+          },
+          "defaultConfiguration": "production"
+        },
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
@@ -79,6 +98,20 @@
             },
             "development": {
               "buildTarget": "subeacademia:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve-ssr": {
+          "builder": "@angular/build:ssr-dev-server",
+          "configurations": {
+            "development": {
+              "buildTarget": "subeacademia:build:development",
+              "serverTarget": "subeacademia:server:development"
+            },
+            "production": {
+              "buildTarget": "subeacademia:build:production",
+              "serverTarget": "subeacademia:server:production"
             }
           },
           "defaultConfiguration": "development"
