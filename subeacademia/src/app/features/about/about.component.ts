@@ -25,7 +25,7 @@ export class AboutComponent {
   founders: TeamMember[] = [
     {
       name: 'Rodrigo Carrillo',
-      role: 'Cofundador y Gerente Sube AcademIA',
+      role: 'Cofundador y CEO',
       imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=RC',
       linkedinUrl: 'https://www.linkedin.com/in/rorrocarrillo/',
       bio: 'Experto en innovación y transferencia tecnológica con más de 15 años de experiencia. Autor y Speaker internacional enfocado en IA para el desarrollo sostenible.',
@@ -40,7 +40,7 @@ export class AboutComponent {
     },
     {
       name: 'Bruno Villalobos',
-      role: 'Cofundador y Director de IA',
+      role: 'Cofundador y CTO',
       imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=BV',
       linkedinUrl: 'https://www.linkedin.com/in/brunovillalobosmu%C3%B1oz/',
       bio: 'Especialista en IA y Big Data con una década de experiencia en tecnologías educativas. Creador de metodologías innovadoras para Prompt Engineering.',
@@ -56,7 +56,7 @@ export class AboutComponent {
     },
     {
       name: 'Mario Muñoz',
-      role: 'Director de Operaciones',
+      role: 'Cofundador y COO',
       imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=MM',
       linkedinUrl: 'https://www.linkedin.com/in/mariomunozvillalobos/',
       bio: 'Ingeniero Comercial experto en gestión de proyectos y negocios internacionales, liderando la expansión y operaciones de la academia.',
@@ -88,7 +88,7 @@ export class AboutComponent {
     { name: 'Carlos Baldovinos', role: 'Geógrafo' },
     { name: 'Jorge Vásquez', role: 'Historiador y experto en Robótica' },
     { name: 'Diego Ramirez', role: 'Psicólogo Organizacional' },
-    { name: 'Javier Escobar', role: 'Ingeniero de IA' },
+    { name: 'Nicolás Valenzuela', role: 'Ingeniero de IA' },
   ];
 
   toggleFlip(member: TeamMember): void {

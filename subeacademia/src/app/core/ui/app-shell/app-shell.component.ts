@@ -32,16 +32,22 @@ type Lang = 'es' | 'en' | 'pt';
                aria-label="Ir a Inicio">Home</a>
           </li>
           <li>
-            <a [routerLink]="['/', currentLang(), 'blog']"
-               routerLinkActive="text-[var(--accent)]"
-               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-               aria-label="Ir a Blog">Blog</a>
-          </li>
-          <li>
             <a [routerLink]="['/', currentLang(), 'cursos']"
                routerLinkActive="text-[var(--accent)]"
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                aria-label="Ir a Cursos">Cursos</a>
+          </li>
+          <li>
+            <a [routerLink]="['/', currentLang(), 'nosotros']"
+               routerLinkActive="text-[var(--accent)]"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+               aria-label="Ir a Nosotros">Nosotros</a>
+          </li>
+          <li>
+            <a [routerLink]="['/', currentLang(), 'blog']"
+               routerLinkActive="text-[var(--accent)]"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+               aria-label="Ir a Blog">Blog</a>
           </li>
           <li>
             <a [routerLink]="['/', currentLang(), 'ia']"
@@ -77,8 +83,9 @@ type Lang = 'es' | 'en' | 'pt';
       <div [class.nav--open]="navOpen()" class="md:hidden border-t border-white/10 bg-[var(--panel)]/90 nav" *ngIf="navOpen()">
         <div class="container py-3 space-y-2">
           <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Inicio">Home</a>
-          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Blog">Blog</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Cursos">Cursos</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'nosotros']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Nosotros">Nosotros</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Blog">Blog</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'ia']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a IA">IA</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Contacto">Contacto</a>
           <a (click)="closeNav()" routerLink="/admin" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Admin">Admin</a>
