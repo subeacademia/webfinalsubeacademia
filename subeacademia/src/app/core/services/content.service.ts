@@ -28,12 +28,19 @@ export class ContentService {
 
   getPostBySlug(_lang: 'es' | 'pt' | 'en', slug: string): Promise<Post | null> {
     const ref = collection(this.firestore, 'posts');
-    const q = query(ref, where('slug', '==', slug), limit(1));
-    return getDocs(q).then(snap => {
-      if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Post;
-      const fallback = getMockPosts('es').find((p) => p.slug === slug) || null;
-      return fallback;
-    }).catch(() => getMockPosts(_lang).find((p) => p.slug === slug) || null);
+    // Primario: filtra por status para cumplir reglas y evitar errores de permisos
+    const primary = query(ref, where('status','==','published'), where('slug', '==', slug), limit(1));
+    return getDocs(primary)
+      .then(snap => {
+        if (!snap.empty) return { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as Post;
+        // Fallback a consulta por slug solamente (menos restricciones de índice)
+        const alt = query(ref, where('slug','==', slug), limit(1));
+        return getDocs(alt).then(s2 => {
+          if (!s2.empty) return { id: s2.docs[0].id, ...(s2.docs[0].data() as any) } as Post;
+          return getMockPosts('es').find((p) => p.slug === slug) || null;
+        });
+      })
+      .catch(() => getMockPosts(_lang).find((p) => p.slug === slug) || null);
   }
 
   createPost(post: Post): Promise<void> {

@@ -37,8 +37,8 @@ export class FirebaseDataService {
     if (params?.lang) constraints.splice(1, 0, where('lang','==', params.lang)); // status + lang + orderBy => índice
     const primary$ = defer(() => collectionData(query(postsCol, ...constraints), { idField: 'id' }) as Observable<Post[]>);
 
-    // FALLBACK (sin índices): trae por fecha y filtra en memoria
-    const fbConstraints: any[] = [ orderBy('publishedAt','desc'), limit(n*3) ];
+    // FALLBACK (sin índices) compatible con reglas: filtra en server por status y ordena en cliente
+    const fbConstraints: any[] = [ where('status','==','published'), limit(n*3) ];
     const fallback$ = (defer(() => collectionData(query(postsCol, ...fbConstraints), { idField: 'id' }) as Observable<Post[]>))
       .pipe(
         map((rows: Post[]) => {
@@ -48,6 +48,11 @@ export class FirebaseDataService {
             const q = params.queryText.toLowerCase();
             r = r.filter(x => (x.title ?? '').toLowerCase().includes(q) || (x?.tags ?? []).some(t => t.toLowerCase().includes(q)));
           }
+          r.sort((a:any,b:any)=>{
+            const av = (a?.publishedAt?.toMillis?.() ?? a?.publishedAt ?? 0) as number;
+            const bv = (b?.publishedAt?.toMillis?.() ?? b?.publishedAt ?? 0) as number;
+            return bv - av;
+          });
           return r.slice(0, n);
         })
       );
@@ -66,14 +71,19 @@ export class FirebaseDataService {
     if (params?.topic) constraints.splice(1, 0, where('topic','==', params.topic)); // status + topic + orderBy => otro índice
     const primary$ = defer(() => collectionData(query(coursesCol, ...constraints), { idField: 'id' }) as Observable<Course[]>);
 
-    // FALLBACK (sin índices)
-    const fbConstraints: any[] = [ orderBy('publishedAt','desc'), limit(n*3) ];
+    // FALLBACK (sin índices) compatible con reglas
+    const fbConstraints: any[] = [ where('status','==','published'), limit(n*3) ];
     const fallback$ = (defer(() => collectionData(query(coursesCol, ...fbConstraints), { idField: 'id' }) as Observable<Course[]>))
       .pipe(
         map((rows: Course[]) => {
           let r = rows.filter(x => x?.status === 'published');
           if (params?.level) r = r.filter(x => x.level === params.level);
           if (params?.topic) r = r.filter(x => x.topic === params.topic);
+          r.sort((a:any,b:any)=>{
+            const av = (a?.publishedAt?.toMillis?.() ?? a?.publishedAt ?? 0) as number;
+            const bv = (b?.publishedAt?.toMillis?.() ?? b?.publishedAt ?? 0) as number;
+            return bv - av;
+          });
           return r.slice(0, n);
         })
       );
