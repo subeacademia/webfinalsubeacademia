@@ -44,6 +44,12 @@ type Lang = 'es' | 'en' | 'pt';
                aria-label="Ir a Nosotros">Nosotros</a>
           </li>
           <li>
+            <a [routerLink]="['/', currentLang(), 'metodologia']"
+               routerLinkActive="text-[var(--accent)]"
+               class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+               aria-label="Ir a Metodología">Metodología</a>
+          </li>
+          <li>
             <a [routerLink]="['/', currentLang(), 'blog']"
                routerLinkActive="text-[var(--accent)]"
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
@@ -80,6 +86,7 @@ type Lang = 'es' | 'en' | 'pt';
           <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Inicio">Home</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Cursos">Cursos</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'nosotros']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Nosotros">Nosotros</a>
+          <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'metodologia']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Metodología">Metodología</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'blog']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Blog">Blog</a>
           
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'contacto']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Contacto">Contacto</a>

@@ -94,9 +94,76 @@
     "collaborators_title": "Parceiros Colaboradores",
     "flip_prompt": "Vire para saber mais",
     "see_more": "Ver CV Completo",
-    "go_back": "Voltar"
-  }
-  ,
+    "go_back": "Voltar",
+    "history": {
+      "title": "Nossa História",
+      "subtitle": "De uma visão compartilhada a uma plataforma de aprendizagem com IA. Nascemos para reduzir a lacuna de habilidades digitais com formação prática, mensurável e responsável.",
+      "start_2023_title": "29 de abril de 2023 — nasce a Sube Academ-IA",
+      "start_2023_desc": "Demos o primeiro passo com o propósito de democratizar o conhecimento de IA para transformar a sociedade, ajudando as pessoas a se reinventarem com ferramentas concretas.",
+      "milestone_2023_title": "Padrões e ensino superior",
+      "milestone_2023_desc": "Fomos avaliadores externos do Ministério da Ciência e contribuímos para os perfis do ChileValora. Formamos mais de 10 universidades de prestígio desde 2023.",
+      "milestone_2024_title": "Escala e implantação em campo",
+      "milestone_2024_desc": "Vencemos a primeira licitação pública de IA do Estado do Chile, levamos IA à Rapa Nui e criamos nosso sistema de Competências para a Era da IA.",
+      "milestone_2025_title": "Ecossistema e governança",
+      "milestone_2025_desc": "Cofundadores da Primeira Associação Chilena de Inteligência Artificial para o Desenvolvimento Sustentável (ACHIADS). Integramos a mesa técnica do Ministério da Ciência para a Lei de IA e palestramos à Rede G9 de Universidades."
+    },
+    "mvv": {
+      "title": "Missão, Visão e Valores",
+      "subtitle": "Somos uma empresa AI-First pioneira na América Latina.",
+      "mission_title": "Nossa missão",
+      "mission_desc": "Transformar empresas, instituições e pessoas, elevando-as ao próximo nível por meio da combinação perfeita entre inteligência natural e inteligência artificial para alcançar inteligência aumentada.",
+      "vision_title": "Nossa visão",
+      "vision_desc": "Democratizar o conhecimento sobre IA para transformar a sociedade, oferecendo ferramentas concretas que permitam às pessoas se reinventarem e fazerem o que realmente amam.",
+      "values_title": "Nossos valores",
+      "values": {
+        "v1": "Impacto mensurável e sustentável",
+        "v2": "Ética, segurança e privacidade por design",
+        "v3": "Aprendizagem contínua e aberta",
+        "v4": "Colaboração interdisciplinar",
+        "v5": "Inovação com responsabilidade social"
+      }
+    }
+  },
+  "methodology": {
+    "header": {
+      "title": "Nossa Metodologia",
+      "subtitle": "ARES-AI e as 13 competências para a era da IA"
+    },
+    "ares": {
+      "title": "Framework ARES-AI",
+      "description": "Uma abordagem Ágil, Responsável, Ética e Sustentável para integrar a IA de forma eficaz em pessoas e organizações. Não se trata apenas de adotar ferramentas, mas de desenhar processos, capacidades e critérios de decisão que elevem a performance sem comprometer a segurança, a privacidade ou o impacto social. O ARES-AI orienta como prototipar rápido, medir valor, mitigar vieses e operar com governança."
+    },
+    "competencies": {
+      "title": "As 13 Competências-Chave",
+      "description": "Desenvolvemos um conjunto abrangente de competências para pensar, construir e liderar com IA, conectando fundamentos, ferramentas e práticas de negócio para resultados sustentáveis.",
+      "c1_title": "Pensamento crítico",
+      "c1_desc": "Analisar informações e tomar decisões baseadas em evidências. Contrastar fontes, reconhecer falácias e avaliar trade-offs com critérios explícitos.",
+      "c2_title": "Resolução de problemas",
+      "c2_desc": "Decompor desafios e desenhar soluções escaláveis. Definir hipóteses, experimentar e validar com dados e usuários reais.",
+      "c3_title": "Letramento de dados",
+      "c3_desc": "Compreender, analisar e comunicar com dados. Selecionar métricas, interpretar resultados e narrar achados com clareza.",
+      "c4_title": "Comunicação eficaz",
+      "c4_desc": "Expressar ideias técnicas com clareza para públicos diversos. Facilitar decisões alinhando contexto, riscos e benefícios.",
+      "c5_title": "Colaboração",
+      "c5_desc": "Trabalhar em equipe com papéis e objetivos claros. Coordenar com produto, dados, engenharia e negócio para entregar valor.",
+      "c6_title": "Criatividade",
+      "c6_desc": "Gerar ideias originais e protótipos de valor. Usar IA para ampliar alternativas, explorar estilos e acelerar iterações.",
+      "c7_title": "Design tecnológico",
+      "c7_desc": "Projetar sistemas e produtos centrados no usuário. Equilibrar viabilidade técnica, desejabilidade e viabilidade econômica.",
+      "c8_title": "Automação e agentes",
+      "c8_desc": "Orquestrar fluxos e agentes de IA para eficiência. Integrar APIs, RAG e ferramentas para tarefas autônomas com supervisão.",
+      "c9_title": "Segurança e privacidade",
+      "c9_desc": "Proteger dados e gerenciar riscos. Aplicar controles de acesso, anonimização e conformidade regulatória.",
+      "c10_title": "Ética e responsabilidade",
+      "c10_desc": "Avaliar impactos e mitigar vieses. Estabelecer limites de uso, rastreabilidade e critérios de aceitabilidade.",
+      "c11_title": "Sustentabilidade",
+      "c11_desc": "Otimizar recursos e reduzir a pegada ambiental. Desenhar processos eficientes e medir custos computacionais.",
+      "c12_title": "Aprendizagem contínua",
+      "c12_desc": "Atualizar habilidades e frameworks de trabalho. Criar hábitos de melhoria e portfólios de evidências.",
+      "c13_title": "Liderança com IA",
+      "c13_desc": "Guiar equipes e estratégias com visão e governança. Priorizar iniciativas, KPIs e adoção responsável em escala."
+    }
+  },
   "course": {
     "back_to_courses": "Voltar aos Cursos",
     "syllabus_title": "Ementa do Curso",

@@ -94,9 +94,76 @@
     "collaborators_title": "Collaborating Partners",
     "flip_prompt": "Flip to learn more",
     "see_more": "View Full CV",
-    "go_back": "Go Back"
-  }
-  ,
+    "go_back": "Go Back",
+    "history": {
+      "title": "Our Story",
+      "subtitle": "From a shared vision to an AI-powered learning platform. We were born to close the digital skills gap with practical, measurable, and responsible training.",
+      "start_2023_title": "April 29, 2023 — Sube Academ-IA is born",
+      "start_2023_desc": "We took the first step with the purpose of democratizing AI knowledge to transform society, helping people reinvent themselves with concrete tools.",
+      "milestone_2023_title": "Standards and higher education",
+      "milestone_2023_desc": "We served as external evaluators for the Ministry of Science and contributed to ChileValora roles. We have trained 10+ prestigious universities since 2023.",
+      "milestone_2024_title": "Scale and field deployments",
+      "milestone_2024_desc": "We won the first public AI tender from the State of Chile, brought AI to Rapa Nui, and created our Competencies for the AI Era system.",
+      "milestone_2025_title": "Ecosystem and governance",
+      "milestone_2025_desc": "Co-founders of the first Chilean Association of Artificial Intelligence for Sustainable Development (ACHIADS). Part of the Ministry of Science technical board for the AI Bill and speakers to the G9 University Network."
+    },
+    "mvv": {
+      "title": "Mission, Vision and Values",
+      "subtitle": "We are a pioneering AI-First company in LATAM.",
+      "mission_title": "Our mission",
+      "mission_desc": "Transform companies, institutions and people, elevating them to the next level through the perfect blend of natural intelligence and artificial intelligence to achieve augmented intelligence.",
+      "vision_title": "Our vision",
+      "vision_desc": "Democratize AI knowledge to change society, delivering concrete tools that allow people to reinvent themselves and do what they truly love.",
+      "values_title": "Our values",
+      "values": {
+        "v1": "Measurable and sustainable impact",
+        "v2": "Ethics, security and privacy by design",
+        "v3": "Continuous and open learning",
+        "v4": "Interdisciplinary collaboration",
+        "v5": "Innovation with social responsibility"
+      }
+    }
+  },
+  "methodology": {
+    "header": {
+      "title": "Our Methodology",
+      "subtitle": "ARES-AI and the 13 competencies for the AI era"
+    },
+    "ares": {
+      "title": "ARES-AI Framework",
+      "description": "An Agile, Responsible, Ethical, and Sustainable approach to effectively integrate AI into people and organizations. It's not just about adopting tools, but about designing processes, capabilities and decision criteria that raise performance without compromising security, privacy or social impact. ARES-AI guides how to prototype fast, measure value, mitigate bias and operate with governance."
+    },
+    "competencies": {
+      "title": "The 13 Key Competencies",
+      "description": "We develop a comprehensive set of competencies to think, build, and lead with AI, connecting foundations, tools and business practices for sustainable results.",
+      "c1_title": "Critical thinking",
+      "c1_desc": "Analyze information and make evidence-based decisions. Contrast sources, spot fallacies and evaluate trade-offs with explicit criteria.",
+      "c2_title": "Problem solving",
+      "c2_desc": "Break down challenges and design scalable solutions. Define hypotheses, experiment and validate with data and real users.",
+      "c3_title": "Data literacy",
+      "c3_desc": "Understand, analyze, and communicate with data. Select metrics, interpret results and narrate insights clearly.",
+      "c4_title": "Effective communication",
+      "c4_desc": "Express technical ideas clearly to diverse audiences. Enable decisions by aligning context, risks and benefits.",
+      "c5_title": "Collaboration",
+      "c5_desc": "Work in teams with clear roles and goals. Coordinate with product, data, engineering and business to deliver value.",
+      "c6_title": "Creativity",
+      "c6_desc": "Generate original ideas and valuable prototypes. Use AI to expand alternatives, explore styles and accelerate iterations.",
+      "c7_title": "Technology design",
+      "c7_desc": "Design user-centered systems and products. Balance technical feasibility, desirability and economic viability.",
+      "c8_title": "Automation and agents",
+      "c8_desc": "Orchestrate AI flows and agents for efficiency. Integrate APIs, RAG and tools for autonomous tasks with supervision.",
+      "c9_title": "Security and privacy",
+      "c9_desc": "Protect data and manage risks. Apply access controls, anonymization and regulatory compliance.",
+      "c10_title": "Ethics and responsibility",
+      "c10_desc": "Assess impacts and mitigate bias. Establish usage boundaries, traceability and acceptability criteria.",
+      "c11_title": "Sustainability",
+      "c11_desc": "Optimize resources and reduce environmental footprint. Design efficient processes and measure compute costs.",
+      "c12_title": "Continuous learning",
+      "c12_desc": "Update skills and working frameworks. Build improvement habits and evidence portfolios.",
+      "c13_title": "AI leadership",
+      "c13_desc": "Guide teams and strategies with vision and governance. Prioritize initiatives, KPIs and responsible adoption at scale."
+    }
+  },
   "course": {
     "back_to_courses": "Back to Courses",
     "syllabus_title": "Course Syllabus",
