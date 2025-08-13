@@ -1,106 +1,121 @@
-<!-- Hero Section con Fondo 3D -->
-<div class="relative w-full h-screen overflow-hidden">
+<!-- 1. HERO SECTION -->
+<section class="relative h-screen flex items-center justify-center text-center bg-gray-900 text-white">
   <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
-  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-6 bg-gradient-to-t from-black/50 to-transparent">
-    <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl drop-shadow-lg animate-fade-in-down">
-      {{ 'home.hero.title' | i18nTranslate }}
+  <div class="absolute inset-0 bg-black/50 z-0"></div>
+
+  <div class="relative z-10 p-4">
+    <h1 class="text-4xl md:text-6xl font-bold mb-4">
+      {{ tituloHome }}
     </h1>
-    <div class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-200 drop-shadow animate-fade-in-up">
+
+    <div class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-200 drop-shadow">
       <span id="typewriter"></span><span class="cursor ml-1">|</span>
     </div>
-    <p class="mt-6 max-w-3xl text-lg leading-8 text-gray-200 drop-shadow-md animate-fade-in-up">
-      {{ 'home.hero.subtitle' | i18nTranslate }}
-    </p>
-    <div class="mt-10 flex items-center gap-x-6 animate-fade-in-up">
-      <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="rounded-md bg-indigo-500 px-5 py-3 text-base font-semibold text-white shadow-lg hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 transition-all hover:scale-105">
-        {{ 'home.hero.cta' | i18nTranslate }}
-      </a>
-      <a [routerLink]="['/', i18n.currentLang(), 'blog']" class="text-base font-semibold leading-6 text-white hover:text-gray-300 transition-colors">
-        {{ 'home.hero.secondaryLink' | i18nTranslate }} <span aria-hidden="true">→</span>
-      </a>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <button (click)="iniciarDiagnostico()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
+        INICIAR DIAGNÓSTICO DE COMPETENCIAS IA
+      </button>
+      <button (click)="contactarAsesor()" class="bg-transparent border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
+        HABLAR CON UN ASESOR
+      </button>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Sección del Problema -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:max-w-none">
-      <div class="text-center">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'home.problem.title' | i18nTranslate }}</h2>
+<!-- 2. SECCIÓN "HOJA DE RUTA" -->
+<section class="py-16 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+  <div class="container mx-auto px-4 text-center">
+    <h2 class="text-3xl font-bold mb-2">Tu Hoja de Ruta hacia la Madurez en IA</h2>
+    <p class="text-gray-600 mb-12">Basado en nuestro Framework ARES-AI©</p>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">1. Diagnóstico Inicial</h3>
+        <p>Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente.</p>
       </div>
-      <dl class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-3">
-        <div class="flex flex-col bg-gray-400/5 dark:bg-white/5 p-8">
-          <dt class="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400">{{ 'home.problem.stat1_desc' | i18nTranslate }}</dt>
-          <dd class="order-first text-5xl font-semibold tracking-tight text-indigo-600 dark:text-indigo-400">{{ 'home.problem.stat1_value' | i18nTranslate }}</dd>
-        </div>
-        <div class="flex flex-col bg-gray-400/5 dark:bg-white/5 p-8">
-          <dt class="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400">{{ 'home.problem.stat2_desc' | i18nTranslate }}</dt>
-          <dd class="order-first text-5xl font-semibold tracking-tight text-indigo-600 dark:text-indigo-400">{{ 'home.problem.stat2_value' | i18nTranslate }}</dd>
-        </div>
-        <div class="flex flex-col bg-gray-400/5 dark:bg-white/5 p-8">
-          <dt class="text-sm font-semibold leading-6 text-gray-600 dark:text-gray-400">{{ 'home.problem.stat3_desc' | i18nTranslate }}</dt>
-          <dd class="order-first text-5xl font-semibold tracking-tight text-indigo-600 dark:text-indigo-400">{{ 'home.problem.stat3_value' | i18nTranslate }}</dd>
-        </div>
-      </dl>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">2. Plan de Capacitación</h3>
+        <p>Roadmap personalizado para desarrollar las 13 competencias clave.</p>
+      </div>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">3. Implementación Guiada</h3>
+        <p>Acompañamiento experto para aplicar IA de forma responsable.</p>
+      </div>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">4. Mejora Continua</h3>
+        <p>Métricas y seguimiento para asegurar impacto sostenible.</p>
+      </div>
+      <div class="p-6">
+        <h3 class="font-bold text-xl mb-2">5. Escalamiento y Gobierno</h3>
+        <p>Expansión, seguridad y gobierno de IA con prácticas responsables.</p>
+      </div>
     </div>
   </div>
   
-</div>
+</section>
 
-<!-- Sección de la Solución -->
-<div class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <div class="mx-auto max-w-2xl lg:text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'home.solution.title' | i18nTranslate }}</h2>
-    </div>
-    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-      <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-        <div class="flex flex-col">
-          <dt class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">{{ 'home.solution.feature1_title' | i18nTranslate }}</dt>
-          <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-            <p class="flex-auto">{{ 'home.solution.feature1_desc' | i18nTranslate }}</p>
-          </dd>
-        </div>
-        <div class="flex flex-col">
-          <dt class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">{{ 'home.solution.feature2_title' | i18nTranslate }}</dt>
-          <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-            <p class="flex-auto">{{ 'home.solution.feature2_desc' | i18nTranslate }}</p>
-          </dd>
-        </div>
-        <div class="flex flex-col">
-          <dt class="text-lg font-semibold leading-7 text-gray-900 dark:text-white">{{ 'home.solution.feature3_title' | i18nTranslate }}</dt>
-          <dd class="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600 dark:text-gray-300">
-            <p class="flex-auto">{{ 'home.solution.feature3_desc' | i18nTranslate }}</p>
-          </dd>
-        </div>
-      </dl>
+<!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" -->
+<section class="py-16 bg-gray-50 dark:bg-gray-950">
+  <div class="container mx-auto px-4 text-center">
+    <h2 class="text-3xl font-bold mb-12 text-gray-900 dark:text-white">Nuestras Soluciones para la Transformación Digital</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
+        <h3 class="font-bold text-2xl mb-4">Capacitación Adaptativa (AVE-AI)</h3>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave.</p>
+        <button (click)="iniciarDiagnostico()" class="text-blue-600 font-bold hover:underline">Realizar Diagnóstico →</button>
+      </div>
+      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
+        <h3 class="font-bold text-2xl mb-4">Consultoría Estratégica (ARES-AI)</h3>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio.</p>
+        <button (click)="contactarAsesor()" class="text-blue-600 font-bold hover:underline">Contactar un Asesor →</button>
+      </div>
+      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
+        <h3 class="font-bold text-2xl mb-4">Implementación de Proyectos</h3>
+        <p class="mb-4 text-gray-700 dark:text-gray-300">Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue.</p>
+        <a [routerLink]="['/', i18n.currentLang(), 'casos-de-exito']" class="text-blue-600 font-bold hover:underline">Ver Casos de Éxito →</a>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Sección de Logos (Prueba Social) -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <h2 class="text-center text-2xl font-semibold leading-8 text-gray-900 dark:text-white">{{ 'home.logos.title' | i18nTranslate }}</h2>
-    <div class="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-5">
-      <!-- Añade aquí los logos de tus clientes. Usa filter grayscale para un look uniforme -->
-      <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 filter grayscale hover:grayscale-0 transition-all" src="https://tailwindui.com/img/logos/158x48/transistor-logo-gray-900.svg" alt="Transistor" width="158" height="48">
-      <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 filter grayscale hover:grayscale-0 transition-all" src="https://tailwindui.com/img/logos/158x48/reform-logo-gray-900.svg" alt="Reform" width="158" height="48">
-      <img class="col-span-2 max-h-12 w-full object-contain lg:col-span-1 filter grayscale hover:grayscale-0 transition-all" src="https://tailwindui.com/img/logos/158x48/tuple-logo-gray-900.svg" alt="Tuple" width="158" height="48">
-      <img class="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1 filter grayscale hover:grayscale-0 transition-all" src="https://tailwindui.com/img/logos/158x48/savvycal-logo-gray-900.svg" alt="SavvyCal" width="158" height="48">
-      <img class="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1 filter grayscale hover:grayscale-0 transition-all" src="https://tailwindui.com/img/logos/158x48/statamic-logo-gray-900.svg" alt="Statamic" width="158" height="48">
+<!-- 4. HAN CONFIADO (Carrusel infinito 2 filas) -->
+<section class="py-16 bg-white dark:bg-gray-900">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">Han confiado</h2>
+    <div class="overflow-hidden">
+      <div class="animate-marquee flex gap-12 items-center will-change-transform" style="animation-duration: 30s">
+        <ng-container *ngFor="let i of [1,2]">
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+        </ng-container>
+      </div>
+      <div class="animate-marquee flex gap-12 items-center will-change-transform mt-8" style="animation-duration: 30s; animation-direction: reverse;">
+        <ng-container *ngFor="let i of [1,2]">
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
+        </ng-container>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Sección Final de CTA -->
-<div class="bg-gray-50 dark:bg-gray-950">
-  <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:justify-between lg:px-8">
-    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'home.cta_final.title' | i18nTranslate }}<br>{{ 'home.cta_final.subtitle' | i18nTranslate }}</h2>
-    <div class="mt-10 flex items-center gap-x-6 lg:mt-0 lg:flex-shrink-0">
-      <a [routerLink]="['/', i18n.currentLang(), 'contacto']" class="rounded-md bg-indigo-600 px-5 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all hover:scale-105">{{ 'home.cta_final.button' | i18nTranslate }}</a>
-    </div>
-  </div>
-</div>
+<!-- Sección de Logos podría mantenerse o reubicarse más adelante -->
+
+<!-- CTA Final opcional -->
 

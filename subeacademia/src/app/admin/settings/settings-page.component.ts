@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SettingsService, SiteSettings } from '../../core/data/settings.service';
+import { ToastService } from '../../core/ui/toast/toast.service';
 import { TypewriterManagerComponent } from './typewriter-manager.component';
 
 @Component({
@@ -55,6 +56,7 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
 export class SettingsPageComponent {
   private fb = inject(FormBuilder);
   private settings = inject(SettingsService);
+  private toast = inject(ToastService);
   saved = signal(false);
 
   form = this.fb.group({
@@ -88,17 +90,22 @@ export class SettingsPageComponent {
 
   async save(){
     const v = this.form.getRawValue();
-    await this.settings.save({
-      brandName: v.brandName!,
-      logoUrl: v.logoUrl!,
-      defaultLang: v.defaultLang as any,
-      contactEmail: v.contactEmail || undefined,
-      ga4MeasurementId: v.ga4MeasurementId || undefined,
-      searchConsoleVerification: v.searchConsoleVerification || undefined,
-      social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined }
-    });
-    this.saved.set(true);
-    setTimeout(()=> this.saved.set(false), 2000);
+    try {
+      await this.settings.save({
+        brandName: v.brandName!,
+        logoUrl: v.logoUrl!,
+        defaultLang: v.defaultLang as any,
+        contactEmail: v.contactEmail || undefined,
+        ga4MeasurementId: v.ga4MeasurementId || undefined,
+        searchConsoleVerification: v.searchConsoleVerification || undefined,
+        social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined }
+      });
+      this.toast.success('Ajustes guardados');
+      this.saved.set(true);
+      setTimeout(()=> this.saved.set(false), 2000);
+    } catch {
+      this.toast.error('No se pudieron guardar los ajustes');
+    }
   }
 }
 

@@ -1,24 +1,29 @@
-import { Component, OnDestroy, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.component';
+import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { SettingsService, HomePageContent } from '../../core/data/settings.service';
-import { Subscription } from 'rxjs';
+import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [RouterModule, HeroSceneComponent, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  constructor(public readonly i18n: I18nService, private readonly settings: SettingsService, @Inject(PLATFORM_ID) private platformId: object) {}
+  constructor(
+    public readonly i18n: I18nService,
+    private readonly settings: SettingsService,
+    private readonly router: Router,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {}
 
   private contentSub?: Subscription;
-  phrases: string[] = ['Cargando frases...'];
-
+  frasesDinamicas: string[] = [];
+  tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
   private typewriterElement?: HTMLElement | null;
   private phraseIndex = 0;
   private charIndex = 0;
@@ -26,17 +31,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   private timeoutId: any;
 
   ngOnInit(): void {
-    this.contentSub = this.settings.getHomePageContent().subscribe((c: HomePageContent | undefined) => {
-      this.phrases = c?.typewriterPhrases?.length ? c.typewriterPhrases : ['Transformar tu Empresa.'];
-      if (typeof document !== 'undefined') {
-        this.typewriterElement = document.getElementById('typewriter');
-        if (this.typewriterElement) {
-          clearTimeout(this.timeoutId);
-          this.resetTypewriterState();
-          this.type();
+    this.contentSub = this.i18n.currentLang$
+      .pipe(
+        distinctUntilChanged(),
+        switchMap((lang: any) => this.settings.getHomePageContent(lang as 'es'|'en'|'pt'))
+      )
+      .subscribe((c: HomePageContent | undefined) => {
+        this.frasesDinamicas = c?.typewriterPhrases?.length ? c.typewriterPhrases : [];
+        if (!this.frasesDinamicas.length) {
+          this.frasesDinamicas = [
+            'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
+            'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
+            'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
+          ];
         }
-      }
-    });
+        this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+        if (typeof document !== 'undefined') {
+          this.typewriterElement = document.getElementById('typewriter');
+          if (this.typewriterElement) {
+            clearTimeout(this.timeoutId);
+            this.resetTypewriterState();
+            this.type();
+          }
+        }
+      });
   }
 
   private resetTypewriterState() {
@@ -46,8 +64,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private type(): void {
-    if (!this.typewriterElement || !this.phrases?.length) return;
-    const current = this.phrases[this.phraseIndex % this.phrases.length];
+    if (!this.typewriterElement || !this.frasesDinamicas?.length) return;
+    const current = this.frasesDinamicas[this.phraseIndex % this.frasesDinamicas.length];
     const fullText = current;
     const displayed = this.isDeleting ? fullText.substring(0, this.charIndex - 1) : fullText.substring(0, this.charIndex + 1);
     this.typewriterElement.textContent = displayed;
@@ -63,11 +81,21 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     if (this.isDeleting && displayed === '') {
       this.isDeleting = false;
-      this.phraseIndex = (this.phraseIndex + 1) % this.phrases.length;
+      this.phraseIndex = (this.phraseIndex + 1) % this.frasesDinamicas.length;
     }
 
     this.charIndex = this.isDeleting ? Math.max(0, this.charIndex - 1) : Math.min(fullText.length, this.charIndex + 1);
     this.timeoutId = setTimeout(() => this.type(), typingSpeed);
+  }
+
+  iniciarDiagnostico(): void {
+    const lang = this.i18n.currentLang();
+    this.router.navigate(['/', lang, 'diagnostico']);
+  }
+
+  contactarAsesor(): void {
+    const lang = this.i18n.currentLang();
+    this.router.navigate(['/', lang, 'contacto']);
   }
 
   ngOnDestroy(): void {

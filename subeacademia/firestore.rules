@@ -34,8 +34,14 @@ service cloud.firestore {
 
     // Contenido público del sitio (home page)
     match /site_content/{doc} {
-      allow read: if true; // La home debe poder leer sin autenticación
-      allow write: if isAdmin(); // Solo admin puede gestionar frases
+      allow read: if true; // Legacy
+      allow write: if isAdmin();
+    }
+
+    // NUEVO: Configuración del sitio por idioma (textos de home)
+    match /configuracion_sitio/{doc} {
+      allow read: if true; // Home debe leer sin autenticación
+      allow write: if isAdmin(); // Solo admin escribe
     }
   }
 }

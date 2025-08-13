@@ -29,6 +29,7 @@ export const routes: Routes = [
     matcher: langMatcher,
     children: [
       { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
+      { path: 'diagnostico', loadChildren: () => import('./features/diagnostic/diagnostic.routes').then(m => m.DIAGNOSTIC_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'cursos', loadChildren: () => import('./features/courses/courses.routes').then(m => m.COURSES_ROUTES) },
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },

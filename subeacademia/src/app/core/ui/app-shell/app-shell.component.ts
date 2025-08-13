@@ -13,15 +13,20 @@ type Lang = 'es' | 'en' | 'pt';
   imports: [RouterLink, RouterLinkActive, NgIf],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <header class="sticky top-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
+    <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
         <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
-          <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
+           <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
           <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-7 w-7 md:h-8 md:w-8 rounded"/>
           <span>{{ brandName() }}</span>
         </a>
 
         <button class="md:hidden btn" (click)="toggleNav()" aria-label="Abrir menú">☰</button>
         <button class="md:hidden theme-toggle" (click)="toggleTheme()" aria-label="Cambiar tema">{{ themeDark() ? '🌙' : '☀️' }}</button>
+        <select class="md:hidden btn ml-2" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma móvil">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="pt">PT</option>
+        </select>
 
         <ul class="nav hidden md:flex items-center gap-2 flex-1 ml-4 md:ml-8">
           <li>
@@ -73,7 +78,7 @@ type Lang = 'es' | 'en' | 'pt';
             {{ themeDark() ? '🌙' : '☀️' }}
           </button>
           <label class="sr-only" for="langSelectDesktop">Cambiar idioma</label>
-          <select id="langSelectDesktop" class="btn" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
+           <select id="langSelectDesktop" class="btn" [value]="currentLang()" (change)="onChangeLang($any($event.target).value)" aria-label="Cambiar idioma">
             <option value="es">ES</option>
             <option value="en">EN</option>
             <option value="pt">PT</option>
@@ -103,7 +108,7 @@ type Lang = 'es' | 'en' | 'pt';
       </div>
     </header>
 
-    <main class="container py-8">
+    <main class="container pt-24 pb-8">
       <ng-content />
     </main>
 
