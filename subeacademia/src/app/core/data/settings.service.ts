@@ -13,11 +13,16 @@ export interface SiteSettings {
   searchConsoleVerification?: string;
 }
 
+export interface HomePageContent {
+  typewriterPhrases: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private readonly db = inject(Firestore);
   private readonly platformId = inject(PLATFORM_ID);
   readonly ref = doc(this.db, 'settings/general');
+  readonly homeRef = doc(this.db, 'site_content', 'home_page');
 
   get(): Observable<SiteSettings | undefined> {
     if (!isPlatformBrowser(this.platformId)) {
@@ -28,6 +33,24 @@ export class SettingsService {
 
   save(data: Partial<SiteSettings>) {
     return from(setDoc(this.ref, data, { merge: true }));
+  }
+
+  getHomePageContent(): Observable<HomePageContent | undefined> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return of(undefined);
+    }
+    return docData(this.homeRef) as unknown as Observable<HomePageContent | undefined>;
+  }
+
+  setTypewriterPhrases(phrases: string[]) {
+    return from(setDoc(this.homeRef, { typewriterPhrases: phrases }, { merge: true }));
+  }
+
+  async updateTypewriterPhrase(index: number, newValue: string, current: string[]) {
+    const copy = [...current];
+    if (index < 0 || index >= copy.length) return;
+    copy[index] = newValue;
+    return setDoc(this.homeRef, { typewriterPhrases: copy }, { merge: true });
   }
 }
 

@@ -2,11 +2,12 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SettingsService, SiteSettings } from '../../core/data/settings.service';
+import { TypewriterManagerComponent } from './typewriter-manager.component';
 
 @Component({
   selector: 'app-admin-settings-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TypewriterManagerComponent],
   template: `
   <h1 class="text-2xl font-semibold mb-3">Ajustes</h1>
   <form [formGroup]="form" class="grid gap-4 md:grid-cols-2" (ngSubmit)="save()">
@@ -47,6 +48,8 @@ import { SettingsService, SiteSettings } from '../../core/data/settings.service'
       <span *ngIf="saved()" class="text-green-500 ml-3">Guardado</span>
     </div>
   </form>
+
+  <app-typewriter-manager></app-typewriter-manager>
   `,
 })
 export class SettingsPageComponent {

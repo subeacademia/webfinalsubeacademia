@@ -8,3 +8,15 @@
 /* Ajustes finos opcionales */
 section { scroll-margin-top: 80px; }
 
+/* Typewriter cursor parpadeante */
+.cursor {
+  display: inline-block;
+  width: 1ch;
+  color: #c7d2fe; /* indigo-200 */
+  animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to { visibility: hidden; }
+}
+
