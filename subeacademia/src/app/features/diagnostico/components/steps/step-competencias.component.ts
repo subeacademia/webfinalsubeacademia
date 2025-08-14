@@ -17,8 +17,8 @@ import { StepNavComponent } from '../step-nav.component';
 export class StepCompetenciasComponent {
     readonly state = inject(DiagnosticStateService);
     readonly competenciasFiltradas = computed(() => {
-        const seg = this.state.form.controls['segmento'].value || 'startup';
-        const top = COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO[seg as any] || [];
+        const seg = this.state.form.controls['segmento'].value as keyof typeof COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO | null;
+        const top = seg ? COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO[seg] : [];
         return this.state.competencias.filter(c => top.includes(c.id));
     });
 }

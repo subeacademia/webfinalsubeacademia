@@ -16,8 +16,8 @@ export class DiagnosticStateService {
     readonly aresItems: AresItem[] = ARES_ITEMS;
     readonly competencias: { id: string; nameKey: string }[] = COMPETENCIAS;
 
-	readonly form: FormGroup = this.fb.group({
-		segmento: this.fb.control<Segment | null>(null, { validators: [Validators.required] }),
+    readonly form: FormGroup = this.fb.group({
+        segmento: this.fb.control<Segment | null>(null, { validators: [Validators.required] }),
 		// contexto: controles dinámicos se agregan según segmento
 		objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
 	});
@@ -111,16 +111,18 @@ export class DiagnosticStateService {
 		this.updateContextControls(segment);
 	}
 
-	updateContextControls(segment: Segment): void {
-		const controlsBySegment: Record<Segment, string[]> = {
-			startup: ['industria','tamanoEquipo','antiguedadMeses','modeloNegocio'],
-			pyme: ['industria','tamanoEmpresa','facturacionAnual','zonaOperacion'],
-			corporativo: ['industria','numEmpleados','presupuestoInnovacion','presenciaRegional'],
-		};
-		for (const key of controlsBySegment[segment]) {
-			this.ensureContextControl(key);
-		}
-	}
+    updateContextControls(segment: Segment): void {
+        const controlsBySegment: any = {
+            empresa: ['industria','tamanoEmpresa','facturacionAnual','zonaOperacion'],
+            educacion_superior: ['industria','numEstudiantes','numDocentes','tipoInstitucion'],
+            educacion_escolar: ['industria','numEstudiantes','niveles','dependencia'],
+            profesional_independiente: ['industria','especialidad','anosExperiencia','zonaOperacion'],
+        };
+        const list: string[] = controlsBySegment[segment] || [];
+        for (const key of list) {
+            this.ensureContextControl(key);
+        }
+    }
 
 	private resetContextControls(): void {
 		for (const key of Object.keys(this.contextoControls)) {

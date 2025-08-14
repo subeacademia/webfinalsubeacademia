@@ -2,7 +2,7 @@
 
 export type LanguageCode = 'es' | 'en' | 'pt';
 
-export type Segment = 'startup' | 'pyme' | 'corporativo';
+export type Segment = 'empresa' | 'educacion_superior' | 'educacion_escolar' | 'profesional_independiente';
 
 export interface SegmentSelectionForm {
 	segmento: Segment | null;
@@ -46,8 +46,10 @@ export type AresDimension = 'adopcion' | 'riesgos' | 'etica' | 'seguridad' | 'ca
 
 export interface AresItem {
 	id: string;
-	dimension: AresDimension;
-	labelKey: string; // clave i18n e.g. 'diagnostico.ares.item_01'
+    dimension: AresDimension;
+    labelKey: string; // clave i18n e.g. 'diagnostico.ares.item_01'
+    phase?: 'F1' | 'F2' | 'F3' | 'F4' | 'F5';
+    tooltip?: string;
 }
 
 export interface AresForm {

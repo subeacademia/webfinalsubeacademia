@@ -8,7 +8,11 @@
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.startup.industria' | i18nTranslate }}</span>
 					<select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']">
 						<option value="" disabled selected>Selecciona una industria</option>
-						<option *ngFor="let ind of industrias" [ngValue]="ind">{{ ind }}</option>
+						<ng-container *ngFor="let group of industries">
+							<optgroup [label]="group.category">
+								<option *ngFor="let ind of group.options" [ngValue]="ind">{{ ind }}</option>
+							</optgroup>
+						</ng-container>
 					</select>
 				</label>
 				<label class="block">
@@ -31,7 +35,11 @@
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.pyme.industria' | i18nTranslate }}</span>
 					<select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']">
 						<option value="" disabled selected>Selecciona una industria</option>
-						<option *ngFor="let ind of industrias" [ngValue]="ind">{{ ind }}</option>
+						<ng-container *ngFor="let group of industries">
+							<optgroup [label]="group.category">
+								<option *ngFor="let ind of group.options" [ngValue]="ind">{{ ind }}</option>
+							</optgroup>
+						</ng-container>
 					</select>
 				</label>
 				<label class="block">
@@ -54,7 +62,11 @@
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.corporativo.industria' | i18nTranslate }}</span>
 					<select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']">
 						<option value="" disabled selected>Selecciona una industria</option>
-						<option *ngFor="let ind of industrias" [ngValue]="ind">{{ ind }}</option>
+						<ng-container *ngFor="let group of industries">
+							<optgroup [label]="group.category">
+								<option *ngFor="let ind of group.options" [ngValue]="ind">{{ ind }}</option>
+							</optgroup>
+						</ng-container>
 					</select>
 				</label>
 				<label class="block">

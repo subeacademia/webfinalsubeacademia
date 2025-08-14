@@ -176,9 +176,10 @@
   "diagnostico": {
     "segmento": {
       "title": "Selecciona tu segmento",
-      "startup": "Startup o Emprendimiento",
-      "pyme": "Pequeña o Mediana Empresa (PyME)",
-      "corporativo": "Corporativo / Gran Empresa"
+      "empresa": "Empresa / Organización",
+      "educacion_superior": "Educación Superior",
+      "educacion_escolar": "Educación Escolar (Básica/Media)",
+      "profesional_independiente": "Profesional Independiente"
     },
     "contexto": {
       "title": "Contexto de tu organización",

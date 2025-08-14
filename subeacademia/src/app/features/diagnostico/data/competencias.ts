@@ -19,29 +19,37 @@ export const COMPETENCIAS: CompetenciaDef[] = [
 
 // Prioridades por segmento: top 6 sugeridas.
 export const COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO: Record<Segment, string[]> = {
-  startup: [
-    'c6_creatividad',
-    'c2_resolucion_problemas',
-    'c7_diseno_tecnologico',
-    'c8_automatizacion_agentes',
-    'c3_alfabetizacion_datos',
-    'c13_liderazgo_ia',
-  ],
-  pyme: [
+  empresa: [
     'c2_resolucion_problemas',
     'c3_alfabetizacion_datos',
     'c8_automatizacion_agentes',
     'c4_comunicacion',
-    'c5_colaboracion',
-    'c12_aprendizaje_continuo',
-  ],
-  corporativo: [
     'c13_liderazgo_ia',
-    'c9_seguridad_privacidad',
-    'c10_etica_responsabilidad',
     'c11_sostenibilidad',
+  ],
+  educacion_superior: [
     'c3_alfabetizacion_datos',
+    'c12_aprendizaje_continuo',
+    'c4_comunicacion',
+    'c7_diseno_tecnologico',
+    'c10_etica_responsabilidad',
     'c5_colaboracion',
+  ],
+  educacion_escolar: [
+    'c12_aprendizaje_continuo',
+    'c4_comunicacion',
+    'c5_colaboracion',
+    'c3_alfabetizacion_datos',
+    'c6_creatividad',
+    'c10_etica_responsabilidad',
+  ],
+  profesional_independiente: [
+    'c6_creatividad',
+    'c2_resolucion_problemas',
+    'c3_alfabetizacion_datos',
+    'c8_automatizacion_agentes',
+    'c12_aprendizaje_continuo',
+    'c4_comunicacion',
   ],
 };
 

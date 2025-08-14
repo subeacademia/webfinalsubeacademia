@@ -8,7 +8,7 @@ import { ScoringService, DiagnosticAnalysis } from '../../services/scoring.servi
 import { PdfService } from '../../services/pdf.service';
 import { DiagnosticsService } from '../../services/diagnostics.service';
 import { StepNavComponent } from '../step-nav.component';
-import { StepNavComponent } from '../step-nav.component';
+// (import repetido eliminado)
 
 @Component({
     selector: 'app-step-resumen',
