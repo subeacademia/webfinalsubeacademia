@@ -6,7 +6,7 @@
 			<div *ngSwitchCase="'startup'" class="grid gap-6">
                 <label class="block">
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.startup.industria' | i18nTranslate }}</span>
-                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="onIndustryChange($event.target.value)">
+                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="$event && onIndustryChange($any($event.target).value)">
 						<option value="" disabled selected>Selecciona una industria</option>
 						<ng-container *ngFor="let group of industries">
 							<optgroup [label]="group.category">
@@ -33,7 +33,7 @@
 			<div *ngSwitchCase="'pyme'" class="grid gap-6">
                 <label class="block">
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.pyme.industria' | i18nTranslate }}</span>
-                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="onIndustryChange($event.target.value)">
+                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="$event && onIndustryChange($any($event.target).value)">
 						<option value="" disabled selected>Selecciona una industria</option>
 						<ng-container *ngFor="let group of industries">
 							<optgroup [label]="group.category">
@@ -60,7 +60,7 @@
 			<div *ngSwitchCase="'corporativo'" class="grid gap-6">
                 <label class="block">
 					<span class="block mb-2 font-medium text-gray-700 dark:text-gray-300">{{ 'diagnostico.contexto.corporativo.industria' | i18nTranslate }}</span>
-                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="onIndustryChange($event.target.value)">
+                    <select class="select select-bordered w-full" [formControl]="state.contextoControls['industria']" (change)="$event && onIndustryChange($any($event.target).value)">
 						<option value="" disabled selected>Selecciona una industria</option>
 						<ng-container *ngFor="let group of industries">
 							<optgroup [label]="group.category">

@@ -6,6 +6,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { ThemeService } from './shared/theme.service';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -86,6 +87,7 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
+    provideCharts(withDefaultRegisterables()),
     provideFirebaseApp(() => initializeApp(runtimeEnv.firebase)),
     // Registrar Auth globalmente ahora que el resto de servicios no lo requieren al inicio
     provideAuth(() => {
