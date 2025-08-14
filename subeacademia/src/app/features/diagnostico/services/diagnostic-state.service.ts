@@ -1,8 +1,21 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AresItem, DiagnosticoFormValue, NivelCompetencia, Segment } from '../data/diagnostic.models';
 import { ARES_ITEMS } from '../data/ares-items';
-import { COMPETENCIAS } from '../data/competencias';
+import { COMPETENCIAS, COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO } from '../data/competencias';
+import { INDUSTRIES } from '../data/industries';
+
+export interface Question {
+    id: string;
+    type: 'select' | 'likert' | 'text';
+    label: string;
+    tooltip?: string;
+    control: FormControl<any>;
+    options?: any[];
+    phase?: string;
+    dimension?: string;
+    required?: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DiagnosticStateService {
@@ -12,18 +25,33 @@ export class DiagnosticStateService {
 
 	readonly nivelesCompetencia: NivelCompetencia[] = ['incipiente','basico','intermedio','avanzado','lider'];
 
-	// Datos base (se poblarán luego desde data files)
+	// Datos base
     readonly aresItems: AresItem[] = ARES_ITEMS;
     readonly competencias: { id: string; nameKey: string }[] = COMPETENCIAS;
+    readonly industries = INDUSTRIES;
 
+    // Estado reactivo del wizard
+    private readonly _currentQuestionIndex = signal(0);
+    private readonly _flatQuestions = signal<Question[]>([]);
+    private readonly _isCompleted = signal(false);
+
+    // Signals públicos
+    readonly currentQuestionIndex = this._currentQuestionIndex.asReadonly();
+    readonly flatQuestions = this._flatQuestions.asReadonly();
+    readonly isCompleted = this._isCompleted.asReadonly();
+    readonly totalQuestions = computed(() => this._flatQuestions().length);
+    readonly currentQuestion = computed(() => this._flatQuestions()[this._currentQuestionIndex()] || null);
+    readonly progress = computed(() => this.totalQuestions() ? (this._currentQuestionIndex() / this.totalQuestions()) * 100 : 0);
+    readonly canGoNext = computed(() => this._currentQuestionIndex() < this.totalQuestions() - 1);
+    readonly canGoPrevious = computed(() => this._currentQuestionIndex() > 0);
+
+    // Formularios
     readonly form: FormGroup = this.fb.group({
         segmento: this.fb.control<Segment | null>(null),
-		// contexto: controles dinámicos se agregan según industria/segmento
-		objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
-	});
+        objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
+    });
 
 	readonly contextoControls: Record<string, FormControl<any>> = {} as any;
-
     readonly aresForm: FormGroup = this.fb.group({});
     readonly competenciasForm: FormGroup = this.fb.group({});
 	readonly leadForm: FormGroup = this.fb.group({
@@ -34,6 +62,12 @@ export class DiagnosticStateService {
 	});
 
     constructor() {
+        this.initializeForms();
+        this.loadFromStorage();
+        this.setupFormSubscriptions();
+    }
+
+    private initializeForms(): void {
         // Construcción dinámica de controles base
         for (const item of this.aresItems) {
             this.ensureAresControl(item.id);
@@ -41,9 +75,9 @@ export class DiagnosticStateService {
         for (const comp of this.competencias) {
             this.ensureCompetenciaControl(comp.id);
         }
+    }
 
-        this.loadFromStorage();
-
+    private setupFormSubscriptions(): void {
         // Persistencia en localStorage
         this.form.valueChanges.subscribe(() => this.saveToStorage());
         this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
@@ -51,6 +85,190 @@ export class DiagnosticStateService {
         this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
     }
 
+    // Método principal para generar el cuestionario dinámico
+    setSegmentFromIndustry(industry: string): void {
+        const normalized = (industry || '').toLowerCase();
+        let seg: Segment = 'empresa';
+        
+        if (normalized.includes('educación superior')) seg = 'educacion_superior';
+        else if (normalized.includes('educación escolar')) seg = 'educacion_escolar';
+        else if (normalized.includes('capacitaci') || normalized.includes('profesional')) seg = 'profesional_independiente';
+        
+        this.form.controls['segmento'].setValue(seg);
+        this.updateContextControls(seg);
+        this.buildFlatQuestions(seg);
+        this._currentQuestionIndex.set(0);
+        this._isCompleted.set(false);
+    }
+
+    private buildFlatQuestions(segment: Segment): void {
+        const questions: Question[] = [];
+
+        // 1. Pregunta de industria (ya seleccionada, pero la mantenemos para mostrar)
+        questions.push({
+            id: 'industria',
+            type: 'select',
+            label: 'diagnostico.contexto.startup.industria',
+            control: this.contextoControls['industria'] || this.ensureContextControl('industria'),
+            options: this.industries,
+            required: true
+        });
+
+        // 2. Controles de contexto dinámicos (sin industria)
+        const ctxKeys = Object.keys(this.contextoControls).filter(k => k !== 'industria');
+        for (const key of ctxKeys) {
+            questions.push({
+                id: `contexto_${key}`,
+                type: 'text',
+                label: `diagnostico.contexto.${key}`,
+                control: this.contextoControls[key],
+                required: true
+            });
+        }
+
+        // 3. Preguntas ARES (una a la vez)
+        for (const item of this.aresItems) {
+            questions.push({
+                id: `ares_${item.id}`,
+                type: 'likert',
+                label: item.labelKey,
+                tooltip: item.tooltip,
+                control: this.ensureAresControl(item.id),
+                phase: item.phase,
+                dimension: item.dimension,
+                required: true
+            });
+        }
+
+        // 4. Competencias prioritarias por segmento (top 6)
+        const competenciasPrioritarias = COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO[segment] || [];
+        for (const compId of competenciasPrioritarias) {
+            const comp = this.competencias.find(c => c.id === compId);
+            if (comp) {
+                questions.push({
+                    id: `comp_${comp.id}`,
+                    type: 'likert',
+                    label: comp.nameKey,
+                    control: this.ensureCompetenciaControl(comp.id),
+                    required: true
+                });
+            }
+        }
+
+        // 5. Objetivo
+        questions.push({
+            id: 'objetivo',
+            type: 'likert',
+            label: 'diagnostico.objetivo.title',
+            control: this.form.controls['objetivo'] as FormControl<any>,
+            required: true
+        });
+
+        // 6. Lead form
+        questions.push(
+            {
+                id: 'lead_nombre',
+                type: 'text',
+                label: 'diagnostico.lead.nombre',
+                control: this.leadForm.controls['nombre'] as FormControl<any>,
+                required: true
+            },
+            {
+                id: 'lead_email',
+                type: 'text',
+                label: 'diagnostico.lead.email',
+                control: this.leadForm.controls['email'] as FormControl<any>,
+                required: true
+            },
+            {
+                id: 'lead_telefono',
+                type: 'text',
+                label: 'diagnostico.lead.telefono',
+                control: this.leadForm.controls['telefono'] as FormControl<any>,
+                required: false
+            }
+        );
+
+        this._flatQuestions.set(questions);
+    }
+
+    // Navegación del wizard
+    nextQuestion(): void {
+        const currentIndex = this._currentQuestionIndex();
+        if (currentIndex < this.totalQuestions() - 1) {
+            this._currentQuestionIndex.set(currentIndex + 1);
+        } else {
+            this._isCompleted.set(true);
+        }
+    }
+
+    previousQuestion(): void {
+        const currentIndex = this._currentQuestionIndex();
+        if (currentIndex > 0) {
+            this._currentQuestionIndex.set(currentIndex - 1);
+        }
+    }
+
+    goToQuestion(index: number): void {
+        if (index >= 0 && index < this.totalQuestions()) {
+            this._currentQuestionIndex.set(index);
+        }
+    }
+
+    // Métodos auxiliares
+    updateContextControls(segment: Segment): void {
+        const controlsBySegment: any = {
+            empresa: ['industria','tamanoEmpresa','facturacionAnual','zonaOperacion'],
+            educacion_superior: ['industria','numEstudiantes','numDocentes','tipoInstitucion'],
+            educacion_escolar: ['industria','numEstudiantes','niveles','dependencia'],
+            profesional_independiente: ['industria','especialidad','anosExperiencia','zonaOperacion'],
+        };
+        const list: string[] = controlsBySegment[segment] || [];
+        for (const key of list) {
+            this.ensureContextControl(key);
+        }
+    }
+
+	private resetContextControls(): void {
+		for (const key of Object.keys(this.contextoControls)) {
+			this.contextoControls[key].reset();
+			delete this.contextoControls[key];
+		}
+	}
+
+	private ensureContextControl(key: string): FormControl<any> {
+		if (!this.contextoControls[key]) {
+			this.contextoControls[key] = this.fb.control<any>(null);
+		}
+		return this.contextoControls[key];
+	}
+
+	private ensureAresControl(itemId: string): FormControl<any> {
+		if (!this.aresForm.contains(itemId)) {
+			this.aresForm.addControl(itemId, this.fb.control<number | null>(null));
+		}
+		return this.aresForm.controls[itemId] as FormControl<any>;
+	}
+
+	private ensureCompetenciaControl(compId: string): FormControl<any> {
+		if (!this.competenciasForm.contains(compId)) {
+			this.competenciasForm.addControl(compId, this.fb.control<NivelCompetencia | null>(null));
+		}
+		return this.competenciasForm.controls[compId] as FormControl<any>;
+	}
+
+    // Métodos de utilidad
+    setAresAnswer(itemId: string, value: number): void {
+        this.ensureAresControl(itemId);
+        this.aresForm.controls[itemId]?.setValue(value);
+    }
+
+    setCompetenciaNivel(compId: string, nivel: NivelCompetencia): void {
+        this.ensureCompetenciaControl(compId);
+        this.competenciasForm.controls[compId]?.setValue(nivel);
+    }
+
+    // Métodos de persistencia
 	private loadFromStorage(): void {
 		try {
 			const raw = localStorage.getItem(this.STORAGE_KEY);
@@ -105,71 +323,6 @@ export class DiagnosticStateService {
 		}
 	}
 
-	onSegmentChanged(segment: Segment): void {
-		this.form.controls['segmento'].setValue(segment);
-		this.resetContextControls();
-		this.updateContextControls(segment);
-	}
-
-    setSegmentFromIndustry(industry: string): void {
-        const normalized = (industry || '').toLowerCase();
-        let seg: Segment = 'empresa';
-        if (normalized.includes('educación superior')) seg = 'educacion_superior';
-        else if (normalized.includes('educación escolar')) seg = 'educacion_escolar';
-        else if (normalized.includes('capacitaci') || normalized.includes('profesional')) seg = 'profesional_independiente';
-        this.form.controls['segmento'].setValue(seg);
-        this.resetContextControls();
-        this.updateContextControls(seg);
-    }
-
-    updateContextControls(segment: Segment): void {
-        const controlsBySegment: any = {
-            empresa: ['industria','tamanoEmpresa','facturacionAnual','zonaOperacion'],
-            educacion_superior: ['industria','numEstudiantes','numDocentes','tipoInstitucion'],
-            educacion_escolar: ['industria','numEstudiantes','niveles','dependencia'],
-            profesional_independiente: ['industria','especialidad','anosExperiencia','zonaOperacion'],
-        };
-        const list: string[] = controlsBySegment[segment] || [];
-        for (const key of list) {
-            this.ensureContextControl(key);
-        }
-    }
-
-	private resetContextControls(): void {
-		for (const key of Object.keys(this.contextoControls)) {
-			this.contextoControls[key].reset();
-			delete this.contextoControls[key];
-		}
-	}
-
-	private ensureContextControl(key: string): void {
-		if (!this.contextoControls[key]) {
-			this.contextoControls[key] = this.fb.control<any>(null);
-		}
-	}
-
-	private ensureAresControl(itemId: string): void {
-		if (!this.aresForm.contains(itemId)) {
-			this.aresForm.addControl(itemId, this.fb.control<number | null>(null));
-		}
-	}
-
-	setAresAnswer(itemId: string, value: number): void {
-		this.ensureAresControl(itemId);
-		this.aresForm.controls[itemId]?.setValue(value);
-	}
-
-	private ensureCompetenciaControl(compId: string): void {
-		if (!this.competenciasForm.contains(compId)) {
-			this.competenciasForm.addControl(compId, this.fb.control<NivelCompetencia | null>(null));
-		}
-	}
-
-	setCompetenciaNivel(compId: string, nivel: NivelCompetencia): void {
-		this.ensureCompetenciaControl(compId);
-		this.competenciasForm.controls[compId]?.setValue(nivel);
-	}
-
     getFullValue(): DiagnosticoFormValue {
         return {
             segmento: this.form.controls['segmento'].value,
@@ -179,6 +332,34 @@ export class DiagnosticStateService {
             competencias: { niveles: Object.fromEntries(Object.keys(this.competenciasForm.controls).map(k => [k, this.competenciasForm.controls[k].value])) as any },
             lead: this.leadForm.value,
         };
+    }
+
+    // Método para obtener respuestas ARES agrupadas por fase
+    getAresByPhase(): Record<string, { score: number; total: number; items: AresItem[] }> {
+        const result: Record<string, { score: number; total: number; items: AresItem[] }> = {};
+        
+        for (const item of this.aresItems) {
+            const phase = item.phase || 'F1';
+            if (!result[phase]) {
+                result[phase] = { score: 0, total: 0, items: [] };
+            }
+            
+            const value = this.aresForm.controls[item.id]?.value || 0;
+            result[phase].score += value;
+            result[phase].total += 1;
+            result[phase].items.push(item);
+        }
+        
+        return result;
+    }
+
+    // Método para obtener competencias con scores
+    getCompetenciasScores(): { id: string; nameKey: string; score: number }[] {
+        return this.competencias.map(comp => ({
+            id: comp.id,
+            nameKey: comp.nameKey,
+            score: this.competenciasForm.controls[comp.id]?.value || 0
+        }));
     }
 }
 
