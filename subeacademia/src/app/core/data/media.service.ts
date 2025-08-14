@@ -92,6 +92,58 @@ export class MediaService {
     return results;
   }
 
+  /**
+   * Normaliza una imagen de logo a una altura fija, centrada, con padding lateral y fondo opcional.
+   * Devuelve un File PNG/WebP manteniendo transparencia.
+   */
+  async normalizeLogoImage(file: File, options?: { targetHeight?: number; maxWidth?: number; paddingX?: number; background?: string | null; format?: 'image/png' | 'image/webp'; quality?: number; }): Promise<File | null> {
+    try {
+      const targetHeight = options?.targetHeight ?? 64;
+      const maxWidth = options?.maxWidth ?? 220;
+      const paddingX = options?.paddingX ?? 12;
+      const bg = options?.background ?? 'transparent';
+      const format = options?.format ?? 'image/png';
+      const quality = options?.quality ?? 0.92;
+
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = (e) => reject(e);
+        i.src = URL.createObjectURL(file);
+      });
+
+      const ratio = img.width / img.height;
+      const scaledWidth = Math.min(Math.round(targetHeight * ratio), maxWidth - paddingX * 2);
+      const canvasWidth = Math.min(Math.max(scaledWidth + paddingX * 2, targetHeight), maxWidth);
+      const canvasHeight = targetHeight + 0; // sin padding vertical
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      if (bg && bg !== 'transparent') {
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      } else {
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      }
+      const dx = Math.floor((canvasWidth - scaledWidth) / 2);
+      const dy = Math.floor((canvasHeight - targetHeight) / 2);
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, scaledWidth, targetHeight);
+
+      const blob: Blob | null = await new Promise(resolve => canvas.toBlob(b => resolve(b), format, quality));
+      if (!blob) return null;
+      const ext = format === 'image/webp' ? '.webp' : '.png';
+      const normalized = new File([blob], file.name.replace(/\.[^.]+$/, ext), { type: format });
+      return normalized;
+    } catch {
+      return null;
+    }
+  }
+
   private async convertImageToWebP(file: File): Promise<File | null> {
     return new Promise<File | null>((resolve) => {
       const img = new Image();

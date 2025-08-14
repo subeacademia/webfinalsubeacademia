@@ -83,33 +83,11 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">Han confiado</h2>
     <div class="overflow-hidden">
-      <div class="animate-marquee flex gap-12 items-center will-change-transform" style="animation-duration: 30s">
-        <ng-container *ngFor="let i of [1,2]">
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-        </ng-container>
+      <div class="flex gap-8 items-center justify-center flex-wrap mb-6">
+        <img *ngFor="let l of logosEmpresas" [src]="l.url" [alt]="l.name || 'logo'" class="h-12 md:h-14 object-contain opacity-80 hover:opacity-100 transition" />
       </div>
-      <div class="animate-marquee flex gap-12 items-center will-change-transform mt-8" style="animation-duration: 30s; animation-direction: reverse;">
-        <ng-container *ngFor="let i of [1,2]">
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-          <img src="/assets/og-placeholder.svg" alt="logo" class="h-12 opacity-80 hover:opacity-100 transition" />
-        </ng-container>
+      <div class="flex gap-8 items-center justify-center flex-wrap">
+        <img *ngFor="let l of logosEducacion" [src]="l.url" [alt]="l.name || 'logo'" class="h-12 md:h-14 object-contain opacity-80 hover:opacity-100 transition" />
       </div>
     </div>
   </div>

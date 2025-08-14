@@ -26,6 +26,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Logos de clientes (empresas e instituciones)
+    match /logos/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     // Settings del sitio
     match /settings/{doc} {
       allow read: if true;

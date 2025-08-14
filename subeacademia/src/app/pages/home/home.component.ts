@@ -5,6 +5,8 @@ import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsService, HomePageContent } from '../../core/data/settings.service';
 import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
+import { LogosService } from '../../core/data/logos.service';
+import { ClientLogo } from '../../core/models/logo.model';
 
 @Component({
   standalone: true,
@@ -18,7 +20,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     public readonly i18n: I18nService,
     private readonly settings: SettingsService,
     private readonly router: Router,
-    @Inject(PLATFORM_ID) private platformId: object
+    @Inject(PLATFORM_ID) private platformId: object,
+    private readonly logos: LogosService
   ) {}
 
   private contentSub?: Subscription;
@@ -29,6 +32,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private charIndex = 0;
   private isDeleting = false;
   private timeoutId: any;
+  logosEmpresas: ClientLogo[] = [];
+  logosEducacion: ClientLogo[] = [];
 
   ngOnInit(): void {
     this.contentSub = this.i18n.currentLang$
@@ -55,6 +60,10 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
         }
       });
+
+    // Logos
+    this.logos.listByType('empresa').subscribe(v => this.logosEmpresas = v);
+    this.logos.listByType('educacion').subscribe(v => this.logosEducacion = v);
   }
 
   private resetTypewriterState() {

@@ -50,5 +50,22 @@ export class StorageService {
   deletePublic(path: string) {
     return deleteObject(ref(this.storage, path));
   }
+
+  /** Sube un archivo a un prefijo específico, retornando path y URL pública */
+  uploadTo(pathPrefix: string, file: File): Promise<{ url: string; path: string; }> {
+    const safePrefix = pathPrefix.replace(/\/$/, '');
+    const safeName = file.name.replace(/\s+/g, '-');
+    const path = `${safePrefix}/${Date.now()}-${safeName}`;
+    const storageRef = ref(this.storage, path);
+    const task = uploadBytesResumable(storageRef, file, { contentType: file.type, cacheControl: 'public,max-age=31536000' });
+    return new Promise((resolve, reject) => {
+      task.on('state_changed', undefined, reject, async () => {
+        try {
+          const url = await getDownloadURL(task.snapshot.ref);
+          resolve({ url, path });
+        } catch (e) { reject(e); }
+      });
+    });
+  }
 }
 

@@ -21,6 +21,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'courses/:id', loadComponent: () => import('./courses/course-edit.component').then(m => m.CourseEditComponent), canActivate: [AdminGuard] },
 
       { path: 'media', loadComponent: () => import('./media/media-page.component').then(m => m.MediaPageComponent), canActivate: [AdminGuard] },
+      { path: 'logos', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
       { path: 'settings', loadComponent: () => import('./settings/settings-page.component').then(m => m.SettingsPageComponent), canActivate: [AdminGuard] },
       { path: '**', redirectTo: 'posts' }
     ]
