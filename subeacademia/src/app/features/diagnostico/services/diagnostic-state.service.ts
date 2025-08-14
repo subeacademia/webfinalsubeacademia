@@ -10,7 +10,7 @@ export interface Question {
     type: 'select' | 'likert' | 'text';
     label: string;
     tooltip?: string;
-    control: FormControl<any>;
+    controlName: string;
     options?: any[];
     phase?: string;
     dimension?: string;
@@ -109,7 +109,7 @@ export class DiagnosticStateService {
             id: 'industria',
             type: 'select',
             label: 'diagnostico.contexto.startup.industria',
-            control: this.contextoControls['industria'] || this.ensureContextControl('industria'),
+            controlName: 'industria',
             options: this.industries,
             required: true
         });
@@ -121,7 +121,7 @@ export class DiagnosticStateService {
                 id: `contexto_${key}`,
                 type: 'text',
                 label: `diagnostico.contexto.${key}`,
-                control: this.contextoControls[key],
+                controlName: key,
                 required: true
             });
         }
@@ -133,7 +133,7 @@ export class DiagnosticStateService {
                 type: 'likert',
                 label: item.labelKey,
                 tooltip: item.tooltip,
-                control: this.ensureAresControl(item.id),
+                controlName: item.id,
                 phase: item.phase,
                 dimension: item.dimension,
                 required: true
@@ -149,7 +149,7 @@ export class DiagnosticStateService {
                     id: `comp_${comp.id}`,
                     type: 'likert',
                     label: comp.nameKey,
-                    control: this.ensureCompetenciaControl(comp.id),
+                    controlName: compId,
                     required: true
                 });
             }
@@ -160,7 +160,7 @@ export class DiagnosticStateService {
             id: 'objetivo',
             type: 'likert',
             label: 'diagnostico.objetivo.title',
-            control: this.form.controls['objetivo'] as FormControl<any>,
+            controlName: 'objetivo',
             required: true
         });
 
@@ -170,21 +170,21 @@ export class DiagnosticStateService {
                 id: 'lead_nombre',
                 type: 'text',
                 label: 'diagnostico.lead.nombre',
-                control: this.leadForm.controls['nombre'] as FormControl<any>,
+                controlName: 'nombre',
                 required: true
             },
             {
                 id: 'lead_email',
                 type: 'text',
                 label: 'diagnostico.lead.email',
-                control: this.leadForm.controls['email'] as FormControl<any>,
+                controlName: 'email',
                 required: true
             },
             {
                 id: 'lead_telefono',
                 type: 'text',
                 label: 'diagnostico.lead.telefono',
-                control: this.leadForm.controls['telefono'] as FormControl<any>,
+                controlName: 'telefono',
                 required: false
             }
         );

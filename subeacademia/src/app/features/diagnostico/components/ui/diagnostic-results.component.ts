@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SemaforoAresComponent, AresPhaseScore } from './semaforo-ares.component';
 import { RadarChartComponent } from './radar-chart.component';
@@ -6,7 +6,7 @@ import { RadarChartComponent } from './radar-chart.component';
 @Component({
 	selector: 'app-diagnostic-results',
 	standalone: true,
-	    imports: [CommonModule, SemaforoAresComponent, RadarChartComponent],
+	imports: [CommonModule, SemaforoAresComponent, RadarChartComponent],
     template: `
         <div class="min-h-screen bg-gray-900 text-white p-6">
             <div class="max-w-7xl mx-auto">
@@ -16,24 +16,28 @@ import { RadarChartComponent } from './radar-chart.component';
                     <p class="text-xl text-gray-300">Análisis completo de tu madurez en IA y competencias digitales</p>
                 </div>
 
-                <!-- Resumen ejecutivo -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-                    <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
-                        <h3 class="text-lg font-semibold text-blue-400 mb-2">Score ARES General</h3>
-                        <div class="text-3xl font-bold text-white">{{ overallAresScore() }}%</div>
-                        <p class="text-gray-400 text-sm mt-2">Madurez en adopción de IA</p>
+                <!-- Tarjeta Principal - Tu Nivel de Madurez General (2 columnas) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-slate-800 rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-bold text-blue-400 mb-4">Score ARES General</h3>
+                        <div class="text-5xl font-bold text-white mb-4">{{ overallAresScore() }}%</div>
+                        <p class="text-gray-300 text-lg">Madurez en adopción de IA</p>
+                        <div class="mt-6">
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-blue-500 h-4 rounded-full transition-all duration-1000" [style.width.%]="overallAresScore()"></div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
-                        <h3 class="text-lg font-semibold text-green-400 mb-2">Competencias Promedio</h3>
-                        <div class="text-3xl font-bold text-white">{{ averageCompetencyScore() }}/5</div>
-                        <p class="text-gray-400 text-sm mt-2">Nivel de competencias digitales</p>
-                    </div>
-                    
-                    <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
-                        <h3 class="text-lg font-semibold text-purple-400 mb-2">Segmento</h3>
-                        <div class="text-xl font-semibold text-white">{{ segmentLabel() }}</div>
-                        <p class="text-gray-400 text-sm mt-2">Tipo de organización</p>
+                    <div class="bg-slate-800 rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-bold text-green-400 mb-4">Competencias Promedio</h3>
+                        <div class="text-5xl font-bold text-white mb-4">{{ averageCompetencyScore() }}/5</div>
+                        <p class="text-gray-300 text-lg">Nivel de competencias digitales</p>
+                        <div class="mt-6">
+                            <div class="w-full bg-gray-700 rounded-full h-4">
+                                <div class="bg-green-500 h-4 rounded-full transition-all duration-1000" [style.width.%]="competencyProgress()"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -42,54 +46,60 @@ import { RadarChartComponent } from './radar-chart.component';
                     <!-- Radar de competencias -->
                     <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
                         <app-radar-chart 
-                            [labels]="competencyLabels"
-                            [data]="competencyScores">
+                            [labels]="competencyLabels()"
+                            [data]="competencyScores()">
                         </app-radar-chart>
                     </div>
 
                     <!-- Semaforo ARES -->
                     <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
                         <app-semaforo-ares 
-                            [aresByPhase]="aresByPhase">
+                            [aresByPhase]="aresByPhase()">
                         </app-semaforo-ares>
                     </div>
                 </div>
 
-                <!-- Detalle por dimensiones ARES -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-xl mb-12">
-                    <h3 class="text-2xl font-bold text-white mb-6 text-center">Análisis por Dimensiones ARES</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div *ngFor="let dimension of aresDimensions" class="text-center">
-                            <div class="w-20 h-20 mx-auto mb-3 rounded-full flex items-center justify-center text-white font-bold text-lg"
-                                 [ngClass]="getDimensionColor(dimension.score)">
-                                {{ dimension.score }}%
+                <!-- Fortalezas y Oportunidades (1 columna cada una) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <div class="bg-slate-800 rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-bold text-green-400 mb-6">Fortalezas Principales</h3>
+                        <div class="space-y-4">
+                            <div *ngFor="let strength of topStrengths()" class="flex items-center gap-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-gray-200">{{ strength }}</span>
                             </div>
-                            <h4 class="font-semibold text-gray-200 mb-2">{{ dimension.name }}</h4>
-                            <p class="text-sm text-gray-400">{{ dimension.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800 rounded-lg p-8 shadow-xl">
+                        <h3 class="text-2xl font-bold text-orange-400 mb-6">Oportunidades de Mejora</h3>
+                        <div class="space-y-4">
+                            <div *ngFor="let opportunity of topOpportunities()" class="flex items-center gap-3">
+                                <div class="w-3 h-3 bg-orange-500 rounded-full"></div>
+                                <span class="text-gray-200">{{ opportunity }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recomendaciones -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-xl mb-12">
-                    <h3 class="text-2xl font-bold text-white mb-6 text-center">Recomendaciones Prioritarias</h3>
-                    <div class="space-y-4">
-                        <div *ngFor="let rec of topRecommendations; let i = index" 
-                             class="flex items-start gap-4 p-4 bg-slate-700 rounded-lg">
-                            <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                                {{ i + 1 }}
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-white mb-1">{{ rec.title }}</h4>
-                                <p class="text-gray-300 text-sm">{{ rec.description }}</p>
-                                <div class="flex items-center gap-2 mt-2">
-                                    <span class="text-xs px-2 py-1 rounded-full" 
-                                          [ngClass]="getPriorityClass(rec.priority)">
-                                        {{ rec.priority }}
-                                    </span>
-                                    <span class="text-xs text-gray-400">{{ rec.impact }}</span>
-                                </div>
-                            </div>
+                <!-- Plan de Inicio (3 columnas) -->
+                <div class="bg-slate-800 rounded-lg p-8 shadow-xl mb-12">
+                    <h3 class="text-2xl font-bold text-white mb-6 text-center">Plan de Inicio Recomendado</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-4">1</div>
+                            <h4 class="font-semibold text-gray-200 mb-2">Inmediato (0-30 días)</h4>
+                            <p class="text-sm text-gray-400">Implementar controles básicos de seguridad y ética</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-yellow-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-4">2</div>
+                            <h4 class="font-semibold text-gray-200 mb-2">Corto Plazo (1-3 meses)</h4>
+                            <p class="text-sm text-gray-400">Desarrollar framework de gobernanza y políticas</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-4">3</div>
+                            <h4 class="font-semibold text-gray-200 mb-2">Mediano Plazo (3-6 meses)</h4>
+                            <p class="text-sm text-gray-400">Capacitación del equipo y pilotos de IA</p>
                         </div>
                     </div>
                 </div>
@@ -109,80 +119,51 @@ import { RadarChartComponent } from './radar-chart.component';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiagnosticResultsComponent {
-    @Input() aresByPhase: Record<string, AresPhaseScore> = {};
-    @Input() competencyScores: number[] = [];
-    @Input() competencyLabels: string[] = [];
-    @Input() segment: string = '';
+    // Datos de ejemplo para demostración
+    readonly aresByPhase = computed(() => ({
+        'F1': { score: 15, total: 20, items: [] },
+        'F2': { score: 12, total: 20, items: [] },
+        'F3': { score: 18, total: 20, items: [] },
+        'F4': { score: 14, total: 20, items: [] },
+        'F5': { score: 10, total: 20, items: [] }
+    }));
 
-    // Datos de ejemplo para las dimensiones ARES
-    readonly aresDimensions = [
-        { name: 'Adopción', score: 65, description: 'Estrategia y roadmap de IA' },
-        { name: 'Riesgos', score: 45, description: 'Gestión de riesgos y controles' },
-        { name: 'Ética', score: 70, description: 'Principios éticos y sesgos' },
-        { name: 'Seguridad', score: 55, description: 'Privacidad y protección de datos' },
-        { name: 'Capacidad', score: 60, description: 'Desarrollo y operación de IA' },
-        { name: 'Datos', score: 75, description: 'Calidad y gobierno de datos' }
-    ];
+    readonly competencyScores = computed(() => [4, 3, 5, 2, 4, 3, 4, 5, 3, 4, 3, 4, 3]);
+    readonly competencyLabels = computed(() => [
+        'Pensamiento Crítico', 'Resolución de Problemas', 'Alfabetización de Datos',
+        'Comunicación', 'Colaboración', 'Creatividad', 'Diseño Tecnológico',
+        'Automatización', 'Seguridad', 'Ética', 'Sostenibilidad', 'Aprendizaje', 'Liderazgo'
+    ]);
 
-    // Recomendaciones de ejemplo
-    readonly topRecommendations = [
-        {
-            title: 'Implementar Framework de Gobernanza',
-            description: 'Establecer roles claros y políticas para la toma de decisiones en IA',
-            priority: 'Alta',
-            impact: 'Impacto Alto'
-        },
-        {
-            title: 'Capacitación en Ética de IA',
-            description: 'Desarrollar programas de formación sobre principios éticos y sesgos',
-            priority: 'Media',
-            impact: 'Impacto Medio'
-        },
-        {
-            title: 'Mejorar Seguridad de Datos',
-            description: 'Implementar controles de privacidad y acceso a datos',
-            priority: 'Alta',
-            impact: 'Impacto Alto'
-        }
-    ];
+    readonly topStrengths = computed(() => [
+        'Alfabetización de Datos',
+        'Diseño Tecnológico',
+        'Automatización',
+        'Liderazgo en IA'
+    ]);
+
+    readonly topOpportunities = computed(() => [
+        'Resolución de Problemas',
+        'Creatividad',
+        'Sostenibilidad',
+        'Aprendizaje Continuo'
+    ]);
 
     // Computed properties
     readonly overallAresScore = computed(() => {
-        const totalScore = Object.values(this.aresByPhase).reduce((sum, phase) => sum + phase.score, 0);
-        const totalMax = Object.values(this.aresByPhase).reduce((sum, phase) => sum + phase.total, 0);
+        const totalScore = Object.values(this.aresByPhase()).reduce((sum, phase) => sum + phase.score, 0);
+        const totalMax = Object.values(this.aresByPhase()).reduce((sum, phase) => sum + phase.total, 0);
         return totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
     });
 
     readonly averageCompetencyScore = computed(() => {
-        if (this.competencyScores.length === 0) return 0;
-        const sum = this.competencyScores.reduce((acc, score) => acc + score, 0);
-        return (sum / this.competencyScores.length).toFixed(1);
+        if (this.competencyScores().length === 0) return 0;
+        const sum = this.competencyScores().reduce((acc, score) => acc + score, 0);
+        return (sum / this.competencyScores().length).toFixed(1);
     });
 
-    readonly segmentLabel = computed(() => {
-        const segmentMap: Record<string, string> = {
-            'empresa': 'Empresa Privada',
-            'educacion_superior': 'Educación Superior',
-            'educacion_escolar': 'Educación Escolar',
-            'profesional_independiente': 'Profesional Independiente'
-        };
-        return segmentMap[this.segment] || this.segment;
+    readonly competencyProgress = computed(() => {
+        const avg = parseFloat(this.averageCompetencyScore() as string);
+        return (avg / 5) * 100;
     });
-
-    getDimensionColor(score: number): string {
-        if (score >= 80) return 'bg-green-500';
-        if (score >= 60) return 'bg-blue-500';
-        if (score >= 40) return 'bg-yellow-500';
-        if (score >= 20) return 'bg-orange-500';
-        return 'bg-red-500';
-    }
-
-    getPriorityClass(priority: string): string {
-        const classes = {
-            'Alta': 'bg-red-600 text-white',
-            'Media': 'bg-yellow-600 text-white',
-            'Baja': 'bg-green-600 text-white'
-        };
-        return classes[priority as keyof typeof classes] || 'bg-gray-600 text-white';
-    }
 }

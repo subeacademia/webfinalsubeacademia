@@ -1,212 +1,109 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { DiagnosticStateService, Question } from './services/diagnostic-state.service';
-import { InfoModalComponent } from './components/ui/info-modal/info-modal.component';
-import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
+import { ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { DiagnosticStateService } from './services/diagnostic-state.service';
+import { QuestionCardComponent, Question } from './components/ui/question-card/question-card.component';
 import { StepNavComponent } from './components/step-nav.component';
-import { DiagnosticResultsComponent } from './components/ui/diagnostic-results.component';
 
 @Component({
-	selector: 'app-diagnostico',
+    selector: 'app-diagnostico',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, InfoModalComponent, I18nTranslatePipe, StepNavComponent, DiagnosticResultsComponent],
+    imports: [CommonModule, ReactiveFormsModule, QuestionCardComponent, StepNavComponent],
     template: `
-        <!-- Mostrar resultados si está completado -->
-        <ng-container *ngIf="isCompleted(); else wizardView">
-            <app-diagnostic-results
-                [aresByPhase]="aresByPhase()"
-                [competencyScores]="competencyScores()"
-                [competencyLabels]="competencyLabels()"
-                [segment]="segment()">
-            </app-diagnostic-results>
-        </ng-container>
-
-        <!-- Wizard de preguntas -->
-        <ng-template #wizardView>
-            <div class="flex flex-col items-center justify-start min-h-screen bg-gray-900 text-white p-4 pt-24">
-                <!-- Barra de progreso -->
-                <div class="w-full max-w-3xl mb-8">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm text-gray-300">Progreso del diagnóstico</span>
-                        <span class="text-sm text-gray-300">{{ currentQuestionIndex() + 1 }} / {{ totalQuestions() }}</span>
-                    </div>
-                    <div class="h-3 w-full bg-gray-700 rounded-full overflow-hidden">
-                        <div class="h-3 bg-blue-500 transition-all duration-500 ease-out" [style.width.%]="progress()"></div>
-                    </div>
-                </div>
-
-                <!-- Pregunta actual -->
-                <div class="w-full max-w-3xl">
-                    <ng-container *ngIf="currentQuestion(); else loading">
-                        <!-- Pregunta de selección -->
-                        <ng-container *ngSwitch="currentQuestion()?.type">
-                            <div *ngSwitchCase="'select'" class="bg-slate-800 rounded-lg p-8 shadow-xl">
-                                <div class="text-2xl font-semibold mb-6 text-center">
-                                    {{ currentQuestion()?.label | i18nTranslate }}
-                                </div>
-                                <select 
-                                    class="w-full p-4 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    [formControl]="currentQuestion()?.control!"
-                                    (change)="onSelectChanged($event)">
-                                    <option value="" disabled selected class="text-gray-400">
-                                        {{ 'Selecciona una opción' | i18nTranslate }}
-                                    </option>
-                                    <ng-container *ngFor="let group of currentQuestion()?.options">
-                                        <optgroup [label]="group.category" class="text-gray-300">
-                                            <option *ngFor="let o of group.options" [ngValue]="o" class="text-white bg-slate-700">
-                                                {{ o }}
-                                            </option>
-                                        </optgroup>
-                                    </ng-container>
-                                </select>
-                            </div>
-
-                            <!-- Pregunta Likert -->
-                            <div *ngSwitchCase="'likert'" class="bg-slate-800 rounded-lg p-8 shadow-xl">
-                                <div class="flex items-center justify-between mb-6">
-                                    <div class="text-2xl font-semibold text-center flex-1">
-                                        {{ currentQuestion()?.label | i18nTranslate }}
-                                    </div>
-                                    <button 
-                                        *ngIf="currentQuestion()?.tooltip"
-                                        type="button" 
-                                        class="btn btn-ghost btn-circle btn-sm ml-4" 
-                                        (click)="openInfo(currentQuestion()?.tooltip)">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                
-                                <!-- Escala Likert -->
-                                <div class="flex flex-wrap gap-3 justify-center">
-                                    <button 
-                                        *ngFor="let v of [0,1,2,3,4,5]" 
-                                        class="px-6 py-3 rounded-lg font-medium transition-all duration-200 min-w-[80px]"
-                                        [class]="getLikertButtonClass(v)"
-                                        (click)="setLikertValue(v)">
-                                        {{ ('diagnostico.ares.likert.' + v) | i18nTranslate }}
-                                    </button>
-                                </div>
-
-                                <!-- Etiquetas de la escala -->
-                                <div class="flex justify-between mt-4 text-sm text-gray-400">
-                                    <span>Nada</span>
-                                    <span>Completamente</span>
-                                </div>
-                            </div>
-
-                            <!-- Pregunta de texto -->
-                            <div *ngSwitchCase="'text'" class="bg-slate-800 rounded-lg p-8 shadow-xl">
-                                <div class="text-2xl font-semibold mb-6 text-center">
-                                    {{ currentQuestion()?.label | i18nTranslate }}
-                                </div>
-                                <input 
-                                    class="w-full p-4 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    [formControl]="currentQuestion()?.control!"
-                                    [placeholder]="'Escribe tu respuesta aquí...'"
-                                    type="text" />
-                            </div>
-                        </ng-container>
-                    </ng-container>
-
-                    <!-- Estado de carga -->
-                    <ng-template #loading>
-                        <div class="bg-slate-800 rounded-lg p-8 shadow-xl text-center">
-                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                            <p class="text-gray-300">Preparando diagnóstico...</p>
-                        </div>
-                    </ng-template>
-                </div>
-
-                <!-- Navegación -->
-                <div class="w-full max-w-3xl mt-8">
-                    <app-step-nav 
-                        [currentStep]="currentQuestionIndex()"
-                        [totalSteps]="totalQuestions()"
-                        [canGoPrevious]="canGoPrevious()"
-                        [canGoNext]="canGoNext()"
-                        [isCompleted]="isCompleted()"
-                        (previous)="previousQuestion()"
-                        (next)="nextQuestion()"
-                        (complete)="onComplete()">
-                    </app-step-nav>
-                </div>
+        <div class="flex flex-col items-center justify-start min-h-screen bg-gray-900 text-white p-4 pt-24">
+            <!-- Barra de progreso -->
+            <app-step-nav 
+                [progress]="progress()" 
+                [currentStep]="currentQuestionIndex()" 
+                [totalSteps]="flatQuestions().length">
+            </app-step-nav>
+            
+            <!-- Contenido principal -->
+            <div class="w-full max-w-3xl mt-10">
+                <!-- Muestra la pregunta actual usando el componente unificado -->
+                <app-question-card
+                    *ngIf="currentQuestion()"
+                    [question]="currentQuestion()"
+                    [form]="getFormForQuestion()"
+                ></app-question-card>
             </div>
-        </ng-template>
-
-        <!-- Modal de información -->
-        <app-info-modal [open]="modalOpen" [content]="modalText" (close)="modalOpen=false"></app-info-modal>
+            
+            <!-- Navegación -->
+            <div class="mt-8 flex justify-between w-full max-w-3xl">
+                <button 
+                    class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    (click)="previousQuestion()" 
+                    [disabled]="currentQuestionIndex() === 0">
+                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Anterior
+                </button>
+                
+                <button 
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
+                    (click)="nextQuestion()">
+                    Siguiente
+                    <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
     `,
-	changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiagnosticoComponent {
-    private readonly state = inject(DiagnosticStateService);
+    readonly diagnosticState = inject(DiagnosticStateService);
+    private readonly router = inject(Router);
 
-    // Signals del servicio
-    readonly currentQuestionIndex = this.state.currentQuestionIndex;
-    readonly totalQuestions = this.state.totalQuestions;
-    readonly currentQuestion = this.state.currentQuestion;
-    readonly progress = this.state.progress;
-    readonly canGoNext = this.state.canGoNext;
-    readonly canGoPrevious = this.state.canGoPrevious;
-    readonly isCompleted = this.state.isCompleted;
+    // Estado del wizard
+    flatQuestions = computed(() => this.diagnosticState.flatQuestions());
+    currentQuestionIndex = signal(0);
+    currentQuestion = computed(() => this.flatQuestions()[this.currentQuestionIndex()]);
+    progress = computed(() => {
+        const total = this.flatQuestions().length;
+        return total > 0 ? (this.currentQuestionIndex() / total) * 100 : 0;
+    });
 
-    // Signals para los resultados
-    readonly aresByPhase = computed(() => this.state.getAresByPhase());
-    readonly competencyScores = computed(() => this.state.getCompetenciasScores().map(c => c.score));
-    readonly competencyLabels = computed(() => this.state.getCompetenciasScores().map(c => c.nameKey));
-    readonly segment = computed(() => this.state.form.controls['segmento'].value);
-
-    modalOpen = false;
-    modalText = '';
-
-    onSelectChanged(ev: Event): void {
-        const target = ev.target as HTMLSelectElement | null;
-        const value = target?.value || '';
+    nextQuestion(): void {
+        const currentIndex = this.currentQuestionIndex();
+        const totalQuestions = this.flatQuestions().length;
         
-        if (value && this.currentQuestion()?.id === 'industria') {
-            // Solo procesar si es la pregunta de industria
-            this.state.setSegmentFromIndustry(value);
+        if (currentIndex < totalQuestions - 1) {
+            this.currentQuestionIndex.set(currentIndex + 1);
+        } else {
+            // Navegar al resumen cuando se llegue al final
+            this.router.navigate(['/diagnostico/resumen']);
         }
-    }
-
-    setLikertValue(value: number): void {
-        const question = this.currentQuestion();
-        if (question?.control) {
-            question.control.setValue(value);
-        }
-    }
-
-    getLikertButtonClass(value: number): string {
-        const question = this.currentQuestion();
-        const isSelected = question?.control?.value === value;
-        
-        if (isSelected) {
-            return 'bg-blue-600 text-white shadow-lg scale-105';
-        }
-        
-        return 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:text-white';
     }
 
     previousQuestion(): void {
-        this.state.previousQuestion();
+        const currentIndex = this.currentQuestionIndex();
+        if (currentIndex > 0) {
+            this.currentQuestionIndex.set(currentIndex - 1);
+        }
     }
 
-    nextQuestion(): void {
-        this.state.nextQuestion();
-    }
-
-    onComplete(): void {
-        // El diagnóstico ya está marcado como completado en el servicio
-        console.log('Diagnóstico completado:', this.state.getFullValue());
-    }
-
-    openInfo(text?: string): void {
-        if (!text) return;
-        this.modalText = text;
-        this.modalOpen = true;
+    getFormForQuestion(): FormGroup {
+        const question = this.currentQuestion();
+        if (!question) return this.diagnosticState.form;
+        
+        // Determinar qué formulario usar basado en el tipo de pregunta
+        if (question.controlName === 'industria' || question.controlName.startsWith('contexto_')) {
+            return this.diagnosticState.contextoControls as any;
+        } else if (question.controlName.startsWith('ares_')) {
+            return this.diagnosticState.aresForm;
+        } else if (question.controlName.startsWith('comp_')) {
+            return this.diagnosticState.competenciasForm;
+        } else if (question.controlName === 'objetivo') {
+            return this.diagnosticState.form;
+        } else if (question.controlName.startsWith('lead_')) {
+            return this.diagnosticState.leadForm;
+        }
+        
+        return this.diagnosticState.form;
     }
 }
 
