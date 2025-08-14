@@ -1,0 +1,31 @@
+<div class="max-w-3xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+	<h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{{ 'diagnostico.segmento.title' | i18nTranslate }}</h2>
+	<form [formGroup]="state.form" class="space-y-6">
+		<div class="space-y-4">
+			<label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+				<input type="radio" class="w-5 h-5" formControlName="segmento" [value]="'startup'" (change)="state.onSegmentChanged('startup')" />
+				<div>
+					<div class="font-medium text-gray-900 dark:text-white">{{ 'diagnostico.segmento.startup' | i18nTranslate }}</div>
+					<div class="text-sm text-gray-500 dark:text-gray-400">{{ 'diagnostico.segmento.startup' | i18nTranslate }}</div>
+				</div>
+			</label>
+			<label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+				<input type="radio" class="w-5 h-5" formControlName="segmento" [value]="'pyme'" (change)="state.onSegmentChanged('pyme')" />
+				<div>
+					<div class="font-medium text-gray-900 dark:text-white">{{ 'diagnostico.segmento.pyme' | i18nTranslate }}</div>
+					<div class="text-sm text-gray-500 dark:text-gray-400">{{ 'diagnostico.segmento.pyme' | i18nTranslate }}</div>
+				</div>
+			</label>
+			<label class="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700">
+				<input type="radio" class="w-5 h-5" formControlName="segmento" [value]="'corporativo'" (change)="state.onSegmentChanged('corporativo')" />
+				<div>
+					<div class="font-medium text-gray-900 dark:text-white">{{ 'diagnostico.segmento.corporativo' | i18nTranslate }}</div>
+					<div class="text-sm text-gray-500 dark:text-gray-400">{{ 'diagnostico.segmento.corporativo' | i18nTranslate }}</div>
+				</div>
+			</label>
+		</div>
+	</form>
+	<app-step-nav class="mt-8" [prev]="null" next="contexto" [nextDisabled]="!state.form.controls['segmento'].value"></app-step-nav>
+</div>
+
+

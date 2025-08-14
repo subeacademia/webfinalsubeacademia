@@ -5,10 +5,12 @@ import { CommonModule } from '@angular/common';
 	selector: 'app-radar-chart',
 	standalone: true,
 	imports: [CommonModule],
-	template: `
-		<!-- Placeholder. Se implementará en Parte 5 con ng2-charts -->
-		<div class="p-6 border rounded-lg text-sm text-gray-500">Radar chart</div>
-	`,
+    template: `
+        <div class="p-6 border rounded-lg">
+            <div class="text-sm text-gray-500">Radar chart (placeholder)</div>
+            <pre class="text-xs mt-2 overflow-auto">{{ data | json }}</pre>
+        </div>
+    `,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RadarChartComponent {

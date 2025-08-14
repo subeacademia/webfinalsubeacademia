@@ -217,6 +217,42 @@
         "3": "Medio",
         "4": "Alto",
         "5": "Muy alto"
+      },
+      "items": {
+        "adopcion_01": "Nivel de adopción de herramientas de IA en procesos clave",
+        "adopcion_02": "Existencia de estrategia y roadmap de adopción de IA",
+        "riesgos_01": "Identificación y gestión de riesgos de IA",
+        "etica_01": "Prácticas de ética y sesgos en IA",
+        "seguridad_01": "Controles de seguridad y privacidad por diseño",
+        "capacidad_01": "Capacidades internas para operar IA",
+        "datos_01": "Calidad y disponibilidad de datos",
+        "gobernanza_01": "Gobernanza y roles ARES",
+        "valor_01": "Métricas de valor de iniciativas IA",
+        "operacion_01": "Operación y monitoreo de modelos",
+        "talento_01": "Atracción y desarrollo de talento IA",
+        "tecnologia_01": "Arquitectura y herramientas tecnológicas",
+        "integracion_01": "Integración de IA en sistemas y procesos",
+        "cumplimiento_01": "Cumplimiento regulatorio aplicable",
+        "transparencia_01": "Transparencia y explicabilidad",
+        "sostenibilidad_01": "Sostenibilidad y eficiencia de recursos"
+      },
+      "desc": {
+        "adopcion_01": "Se evalúa cuánto se usan soluciones de IA en procesos críticos del negocio (no solo pruebas aisladas).",
+        "adopcion_02": "Se evalúa si existe un plan/roadmap con priorización e hitos para desplegar IA.",
+        "riesgos_01": "Se evalúa si se identifican, mitigan y monitorean riesgos asociados a IA.",
+        "etica_01": "Se evalúa si existen prácticas para evitar sesgos, daño y uso responsable.",
+        "seguridad_01": "Se evalúa privacidad por diseño, controles de acceso y protección de datos.",
+        "capacidad_01": "Se evalúa la preparación del equipo para operar y mantener soluciones IA.",
+        "datos_01": "Se evalúa la calidad, gobierno y acceso a datos necesarios para IA.",
+        "gobernanza_01": "Se evalúa si existen roles, políticas y comités que guíen IA.",
+        "valor_01": "Se evalúa si se definen KPIs de valor y se miden resultados.",
+        "operacion_01": "Se evalúa el monitoreo, retraining y observabilidad de modelos.",
+        "talento_01": "Se evalúa la disponibilidad de talento y planes de upskilling.",
+        "tecnologia_01": "Se evalúa la idoneidad de la plataforma, herramientas y MLOps.",
+        "integracion_01": "Se evalúa cuán bien se integran las soluciones IA al stack y procesos.",
+        "cumplimiento_01": "Se evalúa el cumplimiento con normas y estándares relevantes.",
+        "transparencia_01": "Se evalúa la explicabilidad y trazabilidad en decisiones de IA.",
+        "sostenibilidad_01": "Se evalúa el uso eficiente de recursos y el impacto ambiental."
       }
     },
     "competencias": {

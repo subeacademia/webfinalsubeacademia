@@ -1,0 +1,21 @@
+<div class="max-w-3xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+	<h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{{ 'diagnostico.ares.title' | i18nTranslate }}</h2>
+	<form [formGroup]="state.aresForm" class="space-y-6">
+		<div class="space-y-6">
+			<div *ngFor="let item of state.aresItems" class="p-4 border rounded-lg">
+				<div class="mb-3 font-medium text-gray-900 dark:text-white flex items-center gap-3">
+					<span>{{ item.labelKey | i18nTranslate }}</span>
+					<button type="button" class="btn btn-ghost btn-xs" (click)="openInfo(item)">i</button>
+				</div>
+				<div class="flex flex-wrap gap-2">
+					<button type="button" class="btn btn-sm" *ngFor="let v of [0,1,2,3,4,5]" (click)="state.setAresAnswer(item.id, v)" [class.btn-primary]="state.aresForm.controls[item.id].value === v">
+						{{ ('diagnostico.ares.likert.' + v) | i18nTranslate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+	<app-step-nav class="mt-8" prev="objetivo" next="competencias"></app-step-nav>
+</div>
+
+

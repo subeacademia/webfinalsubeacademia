@@ -1,0 +1,18 @@
+<div class="max-w-3xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+	<h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{{ 'diagnostico.competencias.title' | i18nTranslate }}</h2>
+	<form [formGroup]="state.competenciasForm" class="space-y-6">
+		<div class="space-y-6">
+			<div *ngFor="let comp of competenciasFiltradas()" class="p-4 border rounded-lg">
+				<div class="mb-3 font-medium text-gray-900 dark:text-white">{{ comp.nameKey | i18nTranslate }}</div>
+				<div class="flex flex-wrap gap-2">
+					<button type="button" class="btn btn-sm" *ngFor="let nivel of state.nivelesCompetencia" (click)="state.setCompetenciaNivel(comp.id, nivel)" [class.btn-primary]="state.competenciasForm.controls[comp.id].value === nivel">
+						{{ ('diagnostico.competencias.nivel.' + nivel) | i18nTranslate }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+	<app-step-nav class="mt-8" prev="ares" next="lead"></app-step-nav>
+</div>
+
+

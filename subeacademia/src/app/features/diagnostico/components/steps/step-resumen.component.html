@@ -1,0 +1,36 @@
+<div class="max-w-3xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md" id="pdf-report">
+	<h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{{ 'diagnostico.resumen.title' | i18nTranslate }}</h2>
+	<p class="text-sm text-gray-600 dark:text-gray-300 mb-6">{{ 'diagnostico.resumen.descripcion' | i18nTranslate }}</p>
+
+	<div class="grid gap-6">
+		<div>
+			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">ARES</h3>
+			<app-semaforo-ares [level]="'mid'">Promedio ARES: {{ aresPromedio }}%</app-semaforo-ares>
+			<app-radar-chart [data]="aresChartData"></app-radar-chart>
+		</div>
+
+		<div>
+			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Competencias</h3>
+			<div class="grid md:grid-cols-2 gap-3 text-sm">
+				<div *ngFor="let c of compScores" class="flex items-center justify-between p-3 border rounded">
+					<span>{{ c.competenciaId }}</span>
+					<span class="font-medium">{{ c.puntaje }}%</span>
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Quick Start Plan</h3>
+			<ul class="list-disc pl-6 text-sm text-gray-700 dark:text-gray-300">
+				<li *ngFor="let r of quickWins">{{ r }}</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="mt-8 flex gap-4">
+		<button type="button" class="btn btn-primary" (click)="onSubmit()">Generar PDF y Enviar</button>
+		<app-step-nav prev="lead" [next]="null"></app-step-nav>
+	</div>
+</div>
+
+

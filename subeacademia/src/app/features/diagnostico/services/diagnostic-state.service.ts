@@ -1,6 +1,8 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AresItem, DiagnosticoFormValue, NivelCompetencia, Segment } from '../data/diagnostic.models';
+import { ARES_ITEMS } from '../data/ares-items';
+import { COMPETENCIAS } from '../data/competencias';
 
 @Injectable({ providedIn: 'root' })
 export class DiagnosticStateService {
@@ -11,8 +13,8 @@ export class DiagnosticStateService {
 	readonly nivelesCompetencia: NivelCompetencia[] = ['incipiente','basico','intermedio','avanzado','lider'];
 
 	// Datos base (se poblarán luego desde data files)
-	readonly aresItems: AresItem[] = [];
-	readonly competencias: { id: string; nameKey: string }[] = [];
+    readonly aresItems: AresItem[] = ARES_ITEMS;
+    readonly competencias: { id: string; nameKey: string }[] = COMPETENCIAS;
 
 	readonly form: FormGroup = this.fb.group({
 		segmento: this.fb.control<Segment | null>(null, { validators: [Validators.required] }),
@@ -22,8 +24,8 @@ export class DiagnosticStateService {
 
 	readonly contextoControls: Record<string, FormControl<any>> = {} as any;
 
-	readonly aresForm: FormGroup = this.fb.group({});
-	readonly competenciasForm: FormGroup = this.fb.group({});
+    readonly aresForm: FormGroup = this.fb.group({});
+    readonly competenciasForm: FormGroup = this.fb.group({});
 	readonly leadForm: FormGroup = this.fb.group({
 		nombre: this.fb.control<string | null>(null, { validators: [Validators.required] }),
 		email: this.fb.control<string | null>(null, { validators: [Validators.required, Validators.email] }),
@@ -31,15 +33,23 @@ export class DiagnosticStateService {
 		aceptaComunicaciones: this.fb.control<boolean | null>(false),
 	});
 
-	constructor() {
-		this.loadFromStorage();
+    constructor() {
+        // Construcción dinámica de controles base
+        for (const item of this.aresItems) {
+            this.ensureAresControl(item.id);
+        }
+        for (const comp of this.competencias) {
+            this.ensureCompetenciaControl(comp.id);
+        }
 
-		// Persistencia en localStorage
-		this.form.valueChanges.subscribe(() => this.saveToStorage());
-		this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
-		this.competenciasForm.valueChanges.subscribe(() => this.saveToStorage());
-		this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
-	}
+        this.loadFromStorage();
+
+        // Persistencia en localStorage
+        this.form.valueChanges.subscribe(() => this.saveToStorage());
+        this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
+        this.competenciasForm.valueChanges.subscribe(() => this.saveToStorage());
+        this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
+    }
 
 	private loadFromStorage(): void {
 		try {
@@ -146,6 +156,17 @@ export class DiagnosticStateService {
 		this.ensureCompetenciaControl(compId);
 		this.competenciasForm.controls[compId]?.setValue(nivel);
 	}
+
+    getFullValue(): DiagnosticoFormValue {
+        return {
+            segmento: this.form.controls['segmento'].value,
+            contexto: Object.fromEntries(Object.keys(this.contextoControls).map(k => [k, this.contextoControls[k].value])) as any,
+            objetivo: this.form.controls['objetivo'].value,
+            ares: { respuestas: Object.fromEntries(Object.keys(this.aresForm.controls).map(k => [k, this.aresForm.controls[k].value])) as any },
+            competencias: { niveles: Object.fromEntries(Object.keys(this.competenciasForm.controls).map(k => [k, this.competenciasForm.controls[k].value])) as any },
+            lead: this.leadForm.value,
+        };
+    }
 }
 
 
