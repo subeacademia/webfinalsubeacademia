@@ -172,5 +172,73 @@
     "lessons": "Lecciones",
     "level": "Nivel",
     "enroll_button": "Inscribirse Ahora"
+  },
+  "diagnostico": {
+    "segmento": {
+      "title": "Selecciona tu segmento",
+      "startup": "Startup o Emprendimiento",
+      "pyme": "Pequeña o Mediana Empresa (PyME)",
+      "corporativo": "Corporativo / Gran Empresa"
+    },
+    "contexto": {
+      "title": "Contexto de tu organización",
+      "startup": {
+        "industria": "Industria",
+        "tamanoEquipo": "Tamaño del equipo",
+        "antiguedadMeses": "Antigüedad (meses)",
+        "modeloNegocio": "Modelo de negocio"
+      },
+      "pyme": {
+        "industria": "Industria",
+        "tamanoEmpresa": "Tamaño de la empresa",
+        "facturacionAnual": "Facturación anual (USD)",
+        "zonaOperacion": "Zona de operación"
+      },
+      "corporativo": {
+        "industria": "Industria",
+        "numEmpleados": "Número de empleados",
+        "presupuestoInnovacion": "Presupuesto anual de innovación (USD)",
+        "presenciaRegional": "¿Presencia regional/internacional?"
+      }
+    },
+    "objetivo": {
+      "title": "Objetivo estratégico principal",
+      "eficiencia": "Eficiencia operativa",
+      "crecimiento": "Crecimiento",
+      "innovacion": "Innovación",
+      "experienciaCliente": "Experiencia de cliente"
+    },
+    "ares": {
+      "title": "Evaluación ARES-AI",
+      "likert": {
+        "0": "N/A",
+        "1": "Muy bajo",
+        "2": "Bajo",
+        "3": "Medio",
+        "4": "Alto",
+        "5": "Muy alto"
+      }
+    },
+    "competencias": {
+      "title": "Autoevaluación de competencias",
+      "nivel": {
+        "incipiente": "Incipiente",
+        "basico": "Básico",
+        "intermedio": "Intermedio",
+        "avanzado": "Avanzado",
+        "lider": "Líder"
+      }
+    },
+    "lead": {
+      "title": "Déjanos tus datos para enviarte el reporte",
+      "nombre": "Nombre",
+      "email": "Correo electrónico",
+      "telefono": "Teléfono",
+      "aceptaComunicaciones": "Acepto recibir comunicaciones de Sube Academ-IA"
+    },
+    "resumen": {
+      "title": "Resumen del diagnóstico",
+      "descripcion": "Revisa tus respuestas antes de continuar."
+    }
   }
 }

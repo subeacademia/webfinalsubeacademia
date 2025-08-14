@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { langMatcher } from './core/routing/lang.matcher';
+import { languageGuard } from './core/i18n/language.guard';
 import { HomeComponent } from './pages/home/home.component';
 import { LanguageGuard } from './core/i18n/language.guard';
 
@@ -27,9 +28,10 @@ export const routes: Routes = [
   // Público con idioma restringido
   {
     matcher: langMatcher,
+    canMatch: [languageGuard],
     children: [
       { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
-      { path: 'diagnostico', loadChildren: () => import('./features/diagnostic/diagnostic.routes').then(m => m.DIAGNOSTIC_ROUTES) },
+      { path: 'diagnostico', loadChildren: () => import('./features/diagnostico/diagnostico.routes').then(m => m.DIAGNOSTICO_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'cursos', loadChildren: () => import('./features/courses/courses.routes').then(m => m.COURSES_ROUTES) },
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
