@@ -17,8 +17,8 @@ export class DiagnosticStateService {
     readonly competencias: { id: string; nameKey: string }[] = COMPETENCIAS;
 
     readonly form: FormGroup = this.fb.group({
-        segmento: this.fb.control<Segment | null>(null, { validators: [Validators.required] }),
-		// contexto: controles dinámicos se agregan según segmento
+        segmento: this.fb.control<Segment | null>(null),
+		// contexto: controles dinámicos se agregan según industria/segmento
 		objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
 	});
 
@@ -110,6 +110,17 @@ export class DiagnosticStateService {
 		this.resetContextControls();
 		this.updateContextControls(segment);
 	}
+
+    setSegmentFromIndustry(industry: string): void {
+        const normalized = (industry || '').toLowerCase();
+        let seg: Segment = 'empresa';
+        if (normalized.includes('educación superior')) seg = 'educacion_superior';
+        else if (normalized.includes('educación escolar')) seg = 'educacion_escolar';
+        else if (normalized.includes('capacitaci') || normalized.includes('profesional')) seg = 'profesional_independiente';
+        this.form.controls['segmento'].setValue(seg);
+        this.resetContextControls();
+        this.updateContextControls(seg);
+    }
 
     updateContextControls(segment: Segment): void {
         const controlsBySegment: any = {

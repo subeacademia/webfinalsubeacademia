@@ -16,6 +16,10 @@ import { StepNavComponent } from '../step-nav.component';
 export class StepContextoComponent {
 	readonly state = inject(DiagnosticStateService);
     industries = INDUSTRIES;
+
+    onIndustryChange(value: string): void {
+        this.state.setSegmentFromIndustry(value);
+    }
 }
 
 
