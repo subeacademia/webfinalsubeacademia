@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
 import { DiagnosticStateService } from '../../services/diagnostic-state.service';
 import { RadarChartComponent } from '../ui/radar-chart.component';
 import { SemaforoAresComponent } from '../ui/semaforo-ares.component';
-import { ScoringService } from '../../services/scoring.service';
+import { ScoringService, DiagnosticAnalysis } from '../../services/scoring.service';
 import { PdfService } from '../../services/pdf.service';
 import { DiagnosticsService } from '../../services/diagnostics.service';
 import { StepNavComponent } from '../step-nav.component';
@@ -27,6 +27,8 @@ export class StepResumenComponent {
     aresChartData: any = {};
     compScores: any[] = [];
     quickWins: string[] = [];
+    analysisResult = signal<DiagnosticAnalysis | null>(null);
+    today = new Date();
 
     ngOnInit(): void {
         const form = this.state.getFullValue();
@@ -42,20 +44,9 @@ export class StepResumenComponent {
             ],
         };
         this.compScores = competencias;
-        this.quickWins = this.buildQuickWins(form.segmento || 'startup', form.objetivo || 'eficiencia');
-    }
-
-    private buildQuickWins(segmento: any, objetivo: any): string[] {
-        const base = [
-            'Definir un backlog de pilotos IA priorizados por impacto y esfuerzo',
-            'Establecer métricas de valor claras y un tablero de seguimiento',
-            'Alinear un comité ARES con roles y responsables',
-        ];
-        if (objetivo === 'eficiencia') base.unshift('Automatizar 1-2 procesos repetitivos con agentes');
-        if (objetivo === 'crecimiento') base.unshift('Lanzar experimentos de growth con IA generativa');
-        if (objetivo === 'innovacion') base.unshift('Prototipar una PoC de alto valor de negocio');
-        if (objetivo === 'experienciaCliente') base.unshift('Implementar un asistente de soporte con IA y feedback loop');
-        return base.slice(0, 4);
+        const analysis = this.scoring.generateDiagnosticAnalysis(form);
+        this.analysisResult.set(analysis);
+        this.quickWins = analysis.quickStartPlan.map(p => `${p.day}: ${p.task}`);
     }
 
     async onSubmit(): Promise<void> {

@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Estilos para la generación de PDF */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #report-container, #report-container * {
+    visibility: visible;
+  }
+  #report-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
+.pdf-render-mode {
+  background: #fff !important;
+  padding: 1rem;
+}
+.pdf-render-mode .no-print, .pdf-render-mode button {
+  display: none !important;
+}
+.pdf-render-mode .card {
+  box-shadow: none !important;
+  border: 1px solid #e2e8f0;
+  break-inside: avoid;
+}
+.pdf-render-mode h1, .pdf-render-mode h2, .pdf-render-mode h3 {
+  color: #000 !important;
+}
+
 /* ----- UI base (variables y utilidades .ui-*) ----- */
 :root {
   --radius: 16px;

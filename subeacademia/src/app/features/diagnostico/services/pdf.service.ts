@@ -10,6 +10,7 @@ export class PdfService {
 			import('html2canvas'),
 			import('jspdf'),
 		]);
+		el.classList.add('pdf-render-mode');
 		const canvas = await html2canvas(el, {
 			scale: 2,
 			backgroundColor: '#ffffff',
@@ -32,6 +33,7 @@ export class PdfService {
 				y -= pageHeight;
 			}
 		}
+		el.classList.remove('pdf-render-mode');
 		const blob = pdf.output('blob');
 		return blob as Blob;
 	}

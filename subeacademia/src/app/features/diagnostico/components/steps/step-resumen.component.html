@@ -1,36 +1,109 @@
-<div class="max-w-3xl mx-auto p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md" id="pdf-report">
-	<h2 class="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{{ 'diagnostico.resumen.title' | i18nTranslate }}</h2>
-	<p class="text-sm text-gray-600 dark:text-gray-300 mb-6">{{ 'diagnostico.resumen.descripcion' | i18nTranslate }}</p>
+<div class="mx-auto max-w-6xl p-8" id="report-container">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">Tu Diagnóstico de Madurez ARES-AI</h1>
+    <div class="text-sm text-gray-600 dark:text-gray-300 mt-2">
+      {{ (analysisResult()?.mainLevel || '—') }} · {{ (state.leadForm.value?.nombre || 'Usuario') }} · {{ today | date:'mediumDate' }}
+    </div>
+  </div>
 
-	<div class="grid gap-6">
-		<div>
-			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">ARES</h3>
-			<app-semaforo-ares [level]="'mid'">Promedio ARES: {{ aresPromedio }}%</app-semaforo-ares>
-			<app-radar-chart [data]="aresChartData"></app-radar-chart>
-		</div>
+  <!-- Grid 2 cols -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Nivel General de Competencias -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Nivel General de Competencias</h2>
+        <div class="text-3xl font-extrabold text-primary-600 mb-2">{{ analysisResult()?.mainLevel }}</div>
+        <p class="text-sm text-gray-600 dark:text-gray-300">Este nivel resume tu posición global considerando tus competencias y desempeño ARES.</p>
+      </div>
 
-		<div>
-			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Competencias</h3>
-			<div class="grid md:grid-cols-2 gap-3 text-sm">
-				<div *ngFor="let c of compScores" class="flex items-center justify-between p-3 border rounded">
-					<span>{{ c.competenciaId }}</span>
-					<span class="font-medium">{{ c.puntaje }}%</span>
-				</div>
-			</div>
-		</div>
+      <!-- Radar de Competencias -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Radar de Competencias</h2>
+        <app-radar-chart [data]="aresChartData"></app-radar-chart>
+      </div>
 
-		<div>
-			<h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Quick Start Plan</h3>
-			<ul class="list-disc pl-6 text-sm text-gray-700 dark:text-gray-300">
-				<li *ngFor="let r of quickWins">{{ r }}</li>
-			</ul>
-		</div>
-	</div>
+      <!-- Quick Start Plan -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Plan de Inicio Rápido - 14 Días</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-600 dark:text-gray-300 border-b">
+                <th class="py-2 pr-4">Días</th>
+                <th class="py-2 pr-4">Tarea Recomendada</th>
+                <th class="py-2">Fase ARES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of analysisResult()?.quickStartPlan" class="border-b last:border-0">
+                <td class="py-2 pr-4 font-medium">{{ row.day }}</td>
+                <td class="py-2 pr-4">{{ row.task }}</td>
+                <td class="py-2">{{ row.focus }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-	<div class="mt-8 flex gap-4">
-		<button type="button" class="btn btn-primary" (click)="onSubmit()">Generar PDF y Enviar</button>
-		<app-step-nav prev="lead" [next]="null"></app-step-nav>
-	</div>
+    <!-- Side column -->
+    <div class="space-y-6">
+      <!-- Fortalezas y Oportunidades -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Fortalezas y Oportunidades</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <h3 class="text-sm font-semibold text-green-600 mb-2">Fortalezas</h3>
+            <ul class="space-y-2">
+              <li *ngFor="let s of analysisResult()?.topStrengths" class="flex items-center gap-2">
+                <span class="text-green-600">▲</span>
+                <span class="flex-1">{{ s.name | i18nTranslate }}</span>
+                <span class="text-xs text-gray-500">{{ s.level }}</span>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-amber-600 mb-2">Oportunidades</h3>
+            <ul class="space-y-2">
+              <li *ngFor="let o of analysisResult()?.topOpportunities" class="flex items-center gap-2">
+                <span class="text-amber-600">◆</span>
+                <span class="flex-1">{{ o.name | i18nTranslate }}</span>
+                <span class="text-xs text-gray-500">{{ o.level }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Madurez por Fase ARES -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Madurez por Fase ARES</h2>
+        <div class="space-y-3">
+          <div *ngFor="let a of analysisResult()?.aresAnalysis" class="p-3 border rounded">
+            <div class="flex items-center justify-between">
+              <div class="font-medium">{{ a.phase }}</div>
+              <app-semaforo-ares [level]="a.score >= 70 ? 'high' : a.score >= 50 ? 'mid' : 'low'"></app-semaforo-ares>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-300 mt-2">{{ a.interpretation }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="card p-6 bg-white dark:bg-gray-800 rounded-lg shadow no-print">
+        <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">¿Listo para acelerar?</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Agenda una sesión estratégica gratuita para revisar tu diagnóstico y priorizar tu roadmap.</p>
+        <a class="btn btn-primary w-full" href="https://calendly.com/" target="_blank" rel="noopener">Agenda tu Sesión Estratégica Gratuita</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-8 flex gap-4 no-print">
+    <button type="button" class="btn btn-primary" (click)="onSubmit()">Generar PDF y Enviar</button>
+    <app-step-nav prev="lead" [next]="null"></app-step-nav>
+  </div>
 </div>
 
 
