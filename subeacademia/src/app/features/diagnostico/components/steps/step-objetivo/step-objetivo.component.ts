@@ -157,7 +157,7 @@ export class StepObjetivoComponent {
   }
 
   anterior(): void {
-    this.router.navigate(['/diagnostico/competencias/3']);
+    this.router.navigate(['/es', 'diagnostico', 'competencias', '3']);
   }
 
   siguiente(): void {
@@ -168,7 +168,7 @@ export class StepObjetivoComponent {
       });
       
       // Navegar al siguiente paso
-      this.router.navigate(['/diagnostico/lead']);
+      this.router.navigate(['/es', 'diagnostico', 'lead']);
     }
   }
 }

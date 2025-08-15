@@ -145,19 +145,19 @@ export class StepAresComponent implements OnInit {
 
   anterior(): void {
     if (this.currentPhase === 'F1') {
-      this.router.navigate(['/diagnostico/contexto']);
+      this.router.navigate(['/es', 'diagnostico', 'contexto']);
     } else {
       const prevPhase = this.getPreviousPhase();
-      this.router.navigate(['/diagnostico/ares', prevPhase]);
+      this.router.navigate(['/es', 'diagnostico', 'ares', prevPhase]);
     }
   }
 
   siguiente(): void {
     if (this.isLastPhase()) {
-      this.router.navigate(['/diagnostico/competencias/1']);
+      this.router.navigate(['/es', 'diagnostico', 'competencias', '1']);
     } else {
       const nextPhase = this.getNextPhase();
-      this.router.navigate(['/diagnostico/ares', nextPhase]);
+      this.router.navigate(['/es', 'diagnostico', 'ares', nextPhase]);
     }
   }
 

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-step-start',
@@ -58,13 +58,25 @@ import { Router } from '@angular/router';
 })
 export class StepStartComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   comenzarDiagnostico(): void {
-    console.log('Navegando a /es/diagnostico/contexto');
-    this.router.navigate(['/es', 'diagnostico', 'contexto']).then(() => {
-      console.log('Navegación completada');
+    console.log('Navegando al siguiente paso del diagnóstico');
+    
+    // Obtener la ruta base del diagnóstico desde la ruta actual
+    const currentUrl = this.router.url;
+    const baseUrl = currentUrl.split('/').slice(0, -1).join('/'); // Remover 'inicio'
+    
+    // Navegar al siguiente paso
+    const nextStepUrl = `${baseUrl}/contexto`;
+    console.log('URL de destino:', nextStepUrl);
+    
+    this.router.navigate([nextStepUrl]).then(() => {
+      console.log('Navegación completada exitosamente');
     }).catch(error => {
       console.error('Error en navegación:', error);
+      // Fallback: navegar usando la ruta completa
+      this.router.navigate(['/es', 'diagnostico', 'contexto']);
     });
   }
 }

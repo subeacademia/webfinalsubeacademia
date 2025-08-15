@@ -156,17 +156,17 @@ export class StepCompetenciasComponent implements OnInit {
 
   anterior(): void {
     if (this.currentGroup === 1) {
-      this.router.navigate(['/diagnostico/ares/F4']);
+      this.router.navigate(['/es', 'diagnostico', 'ares', 'F4']);
     } else {
-      this.router.navigate(['/diagnostico/competencias', this.currentGroup - 1]);
+      this.router.navigate(['/es', 'diagnostico', 'competencias', this.currentGroup - 1]);
     }
   }
 
   siguiente(): void {
     if (this.isLastGroup()) {
-      this.router.navigate(['/diagnostico/objetivo']);
+      this.router.navigate(['/es', 'diagnostico', 'objetivo']);
     } else {
-      this.router.navigate(['/diagnostico/competencias', this.currentGroup + 1]);
+      this.router.navigate(['/es', 'diagnostico', 'competencias', this.currentGroup + 1]);
     }
   }
 }

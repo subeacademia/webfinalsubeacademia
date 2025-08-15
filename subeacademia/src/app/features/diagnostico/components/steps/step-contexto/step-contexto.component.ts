@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -29,6 +29,9 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
               {{ industry.category }}
             </option>
           </select>
+          <div *ngIf="industriaControl.invalid && industriaControl.touched" class="text-red-400 text-sm mt-1">
+            Por favor selecciona una industria
+          </div>
         </div>
 
         <!-- Tamaño de la empresa -->
@@ -69,6 +72,9 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
                    [class.border-gray-400]="tamanoControl.value !== 'grande'"></div>
               <span class="text-white">Grande (500+ empleados)</span>
             </label>
+          </div>
+          <div *ngIf="tamanoControl.invalid && tamanoControl.touched" class="text-red-400 text-sm mt-1">
+            Por favor selecciona el tamaño de tu organización
           </div>
         </div>
 
@@ -122,6 +128,20 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
               <span class="text-white text-sm">Premium</span>
             </label>
           </div>
+          <div *ngIf="presupuestoControl.invalid && presupuestoControl.touched" class="text-red-400 text-sm mt-1">
+            Por favor selecciona tu presupuesto de TI
+          </div>
+        </div>
+      </div>
+
+      <!-- Debug info -->
+      <div class="mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-600">
+        <h4 class="text-sm font-medium text-gray-300 mb-2">Estado del formulario (Debug):</h4>
+        <div class="text-xs text-gray-400 space-y-1">
+          <div>Industria: "{{ industriaControl.value }}"</div>
+          <div>Tamaño: "{{ tamanoControl.value }}"</div>
+          <div>Presupuesto: "{{ presupuestoControl.value }}"</div>
+          <div>Formulario válido: {{ isFormValid() ? 'SÍ' : 'NO' }}</div>
         </div>
       </div>
 
@@ -167,27 +187,49 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
     }
   `]
 })
-export class StepContextoComponent {
+export class StepContextoComponent implements OnInit {
   private readonly diagnosticState = inject(DiagnosticStateService);
   private readonly router = inject(Router);
 
   // Controles del formulario
-  industriaControl = new FormControl('');
-  tamanoControl = new FormControl('');
-  presupuestoControl = new FormControl('');
+  industriaControl = new FormControl('', { validators: [] });
+  tamanoControl = new FormControl('', { validators: [] });
+  presupuestoControl = new FormControl('', { validators: [] });
 
   // Datos disponibles
   industries = this.diagnosticState.industries;
 
-  // Validación del formulario
-  isFormValid = computed(() => {
-    return this.industriaControl.value && 
-           this.tamanoControl.value && 
-           this.presupuestoControl.value;
-  });
-
-  constructor() {
+  ngOnInit(): void {
     this.loadSavedData();
+    
+    // Suscribirse a cambios para debugging
+    this.industriaControl.valueChanges.subscribe(value => {
+      console.log('Industria cambiada:', value);
+    });
+    
+    this.tamanoControl.valueChanges.subscribe(value => {
+      console.log('Tamaño cambiado:', value);
+    });
+    
+    this.presupuestoControl.valueChanges.subscribe(value => {
+      console.log('Presupuesto cambiado:', value);
+    });
+  }
+
+  // Validación del formulario
+  isFormValid(): boolean {
+    const isValid = !!this.industriaControl.value && 
+                   !!this.tamanoControl.value && 
+                   !!this.presupuestoControl.value;
+    
+    console.log('Validando formulario:', {
+      industria: this.industriaControl.value,
+      tamano: this.tamanoControl.value,
+      presupuesto: this.presupuestoControl.value,
+      isValid: isValid
+    });
+    
+    return isValid;
   }
 
   private loadSavedData(): void {
@@ -200,7 +242,7 @@ export class StepContextoComponent {
   }
 
   anterior(): void {
-    this.router.navigate(['/diagnostico/inicio']);
+    this.router.navigate(['/es', 'diagnostico', 'inicio']);
   }
 
   siguiente(): void {
@@ -223,7 +265,7 @@ export class StepContextoComponent {
       
       console.log('Datos guardados, navegando a ARES F1...');
       // Navegar al siguiente paso
-      this.router.navigate(['/diagnostico/ares/F1']).then(() => {
+      this.router.navigate(['/es', 'diagnostico', 'ares', 'F1']).then(() => {
         console.log('Navegación exitosa a ARES F1');
       }).catch(error => {
         console.error('Error en navegación:', error);

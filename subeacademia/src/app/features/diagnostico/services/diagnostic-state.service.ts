@@ -212,22 +212,99 @@ export class DiagnosticStateService {
 
     // Método para calcular el progreso basado en la ruta
     getProgressForRoute(currentRoute: string): number {
+        // Extraer la parte del diagnóstico de la ruta
+        const diagnosticoMatch = currentRoute.match(/\/diagnostico(\/.*)?$/);
+        if (!diagnosticoMatch) return 0;
+        
+        const path = diagnosticoMatch[1] || '';
+        
         const routeProgress: Record<string, number> = {
-            '/diagnostico/inicio': 0,
-            '/diagnostico/contexto': 16.67,
-            '/diagnostico/ares/F1': 33.33,
-            '/diagnostico/ares/F2': 41.67,
-            '/diagnostico/ares/F3': 50,
-            '/diagnostico/ares/F4': 58.33,
-            '/diagnostico/competencias/1': 66.67,
-            '/diagnostico/competencias/2': 75,
-            '/diagnostico/competencias/3': 83.33,
-            '/diagnostico/objetivo': 91.67,
-            '/diagnostico/lead': 95.83,
-            '/diagnostico/resultados': 100
+            '': 0,
+            '/inicio': 0,
+            '/contexto': 16.67,
+            '/ares/F1': 33.33,
+            '/ares/F2': 41.67,
+            '/ares/F3': 50,
+            '/ares/F4': 58.33,
+            '/competencias/1': 66.67,
+            '/competencias/2': 75,
+            '/competencias/3': 83.33,
+            '/objetivo': 91.67,
+            '/lead': 95.83,
+            '/resultados': 100
         };
         
-        return routeProgress[currentRoute] || 0;
+        return routeProgress[path] || 0;
+    }
+
+    // Métodos para navegación entre pasos
+    getNextStepLink(currentRoute: string): string | null {
+        const path = this.extractDiagnosticoPath(currentRoute);
+        
+        const stepFlow: Record<string, string> = {
+            'inicio': 'contexto',
+            'contexto': 'ares/F1',
+            'ares/F1': 'ares/F2',
+            'ares/F2': 'ares/F3',
+            'ares/F3': 'ares/F4',
+            'ares/F4': 'competencias/1',
+            'competencias/1': 'competencias/2',
+            'competencias/2': 'competencias/3',
+            'competencias/3': 'objetivo',
+            'objetivo': 'lead',
+            'lead': 'resultados'
+        };
+        
+        return stepFlow[path] || null;
+    }
+
+    getPreviousStepLink(currentRoute: string): string | null {
+        const path = this.extractDiagnosticoPath(currentRoute);
+        
+        const stepFlow: Record<string, string> = {
+            'contexto': 'inicio',
+            'ares/F1': 'contexto',
+            'ares/F2': 'ares/F1',
+            'ares/F3': 'ares/F2',
+            'ares/F4': 'ares/F3',
+            'competencias/1': 'ares/F4',
+            'competencias/2': 'competencias/1',
+            'competencias/3': 'competencias/2',
+            'objetivo': 'competencias/3',
+            'lead': 'objetivo',
+            'resultados': 'lead'
+        };
+        
+        return stepFlow[path] || null;
+    }
+
+    private extractDiagnosticoPath(route: string): string {
+        const match = route.match(/\/diagnostico(\/.*)?$/);
+        if (!match) return '';
+        return match[1] || '';
+    }
+
+    // Método para verificar si un paso está completo
+    isStepComplete(step: string): boolean {
+        switch (step) {
+            case 'contexto':
+                return !!this.getContextoData();
+            case 'ares':
+                const aresData = this.aresForm.value;
+                return Object.keys(aresData).length > 0 && 
+                       Object.values(aresData).every(value => value !== null && value !== undefined && value !== '');
+            case 'competencias':
+                const competenciasData = this.competenciasForm.value;
+                return Object.keys(competenciasData).length > 0 && 
+                       Object.values(competenciasData).every(value => value !== null && value !== undefined && value !== '');
+            case 'objetivo':
+                return !!this.form.get('objetivo')?.value;
+            case 'lead':
+                const leadData = this.leadForm.value;
+                return leadData.nombre && leadData.email;
+            default:
+                return false;
+        }
     }
 
     // Métodos de persistencia

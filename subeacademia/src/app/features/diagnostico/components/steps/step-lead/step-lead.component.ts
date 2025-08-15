@@ -171,7 +171,7 @@ export class StepLeadComponent {
   }
 
   anterior(): void {
-    this.router.navigate(['/diagnostico/objetivo']);
+    this.router.navigate(['/es', 'diagnostico', 'objetivo']);
   }
 
   finalizar(): void {
@@ -186,7 +186,7 @@ export class StepLeadComponent {
 
       // Marcar como completado y navegar a resultados
       this.diagnosticState.markAsCompleted();
-      this.router.navigate(['/diagnostico/resultados']);
+      this.router.navigate(['/es', 'diagnostico', 'resultados']);
     }
   }
 }
