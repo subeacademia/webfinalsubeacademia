@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
 import { StepNavComponent } from './components/step-nav.component';
+import { ThemeService } from '../../shared/theme.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -10,8 +11,8 @@ import { filter } from 'rxjs/operators';
     standalone: true,
     imports: [CommonModule, RouterOutlet, StepNavComponent],
     template: `
-        <div class="flex flex-col items-center justify-start min-h-screen bg-gray-900 text-white p-4 pt-24">
-            <div class="w-full max-w-4xl">
+        <div class="flex flex-col items-center justify-start min-h-screen bg-gray-900 dark:bg-gray-900 text-white p-4 pt-24 transition-colors duration-300">
+            <div class="w-full max-w-6xl">
                 <app-step-nav [progress]="progress()"></app-step-nav>
                 <main class="mt-10">
                     <router-outlet></router-outlet>
@@ -19,15 +20,19 @@ import { filter } from 'rxjs/operators';
             </div>
         </div>
     `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.Default,
 })
 export class DiagnosticoComponent implements OnInit {
     private readonly diagnosticState = inject(DiagnosticStateService);
     private readonly router = inject(Router);
+    private readonly themeService = inject(ThemeService);
 
-    // Señal de progreso basada en la ruta actual
+    // Señal de progreso basada en la ruta actual y cambios en formularios
     progress = computed(() => {
         const currentRoute = this.router.url;
+        // Forzar recálculo cuando cambien los formularios
+        this.diagnosticState.aresForm.value;
+        this.diagnosticState.competenciasForm.value;
         return this.diagnosticState.getProgressForRoute(currentRoute);
     });
 

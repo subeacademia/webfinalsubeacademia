@@ -1,0 +1,98 @@
+{
+  "diagnostico": {
+    "ares": {
+      "likert": {
+        "0": "Incipient",
+        "1": "Basic", 
+        "2": "Intermediate",
+        "3": "Advanced",
+        "4": "Leader"
+      }
+    },
+    "adopcion": "Transversal AI Adoption",
+    "estrategia": "Adoption Strategy",
+    "gestion_riesgos": "Risk Management",
+    "principios_eticos": "Ethical Principles",
+    "seguridad_privacidad": "Security and Privacy",
+    "capacidades_desarrollo": "Development Capabilities",
+    "gobierno_datos": "Data Governance",
+    "gobernanza_ares": "ARES Governance",
+    "metricas_valor": "Value Metrics",
+    "operacion_monitoreo": "Operation and Monitoring",
+    "gestion_talento": "Talent Management",
+    "arquitectura_tecnologica": "Technology Architecture",
+    "integracion_sistemas": "System Integration",
+    "cumplimiento_normativo": "Regulatory Compliance",
+    "transparencia_explicabilidad": "Transparency and Explainability",
+    "sostenibilidad": "Sustainability"
+  },
+  "competencias": {
+    "pensamiento_critico": "Critical Thinking",
+    "resolucion_problemas": "Problem Solving",
+    "alfabetizacion_datos": "Data Literacy",
+    "comunicacion": "Communication",
+    "colaboracion": "Collaboration",
+    "creatividad": "Creativity",
+    "diseno_tecnologico": "Technology Design",
+    "automatizacion": "Automation",
+    "seguridad": "Security",
+    "etica": "Ethics",
+    "sostenibilidad": "Sustainability",
+    "aprendizaje": "Learning",
+    "liderazgo": "Leadership"
+  },
+  "niveles": {
+    "incipiente": "Incipient",
+    "basico": "Basic",
+    "intermedio": "Intermediate",
+    "avanzado": "Advanced",
+    "lider": "Leader"
+  },
+  "descripciones": {
+    "nivel_muy_basico": "Very basic level, requires fundamental development",
+    "nivel_basico": "Basic level, with some initial capabilities",
+    "nivel_intermedio": "Intermediate level, with partial implementation",
+    "nivel_avanzado": "Advanced level, with solid implementation",
+    "nivel_lider": "Leader level, with operational excellence"
+  },
+  "fortalezas": {
+    "compromiso_transformacion": "Commitment to Transformation",
+    "infraestructura_tecnologica": "Solid Technology Infrastructure",
+    "talento_conocimientos_basicos": "Talent with Basic Knowledge"
+  },
+  "oportunidades": {
+    "desarrollo_competencias_avanzadas": "Advanced Competency Development",
+    "establecimiento_procesos_gobernanza": "Establishment of Governance Processes",
+    "implementacion_metricas_valor": "Value Metrics Implementation"
+  },
+  "acciones": {
+    "inmediatas": "Immediate Actions",
+    "mediano_plazo": "Medium Term",
+    "largo_plazo": "Long Term",
+    "capacitacion_basica": "Basic Team Training",
+    "auditoria_seguridad": "Security Audit",
+    "definicion_politicas_eticas": "Ethical Policy Definition",
+    "implementacion_mlops": "MLOps Implementation",
+    "pilotos_ia": "AI Pilots by Department",
+    "desarrollo_competencias": "Advanced Competency Development",
+    "transformacion_digital": "Complete Digital Transformation",
+    "centro_excelencia": "AI Excellence Center",
+    "expansion_mercados": "Market Expansion"
+  },
+  "riesgos": {
+    "seguridad_datos": "Data Security Risk",
+    "resistencia_cambio": "Change Resistance",
+    "dependencia_proveedores": "Vendor Dependency"
+  },
+  "mitigaciones": {
+    "seguridad_por_diseno": "Security by Design Implementation",
+    "programa_cambio": "Change Management Program",
+    "arquitectura_abierta": "Open Architecture Strategy"
+  },
+  "metricas": {
+    "adopcion_ia": "AI Adoption",
+    "roi_proyectos": "Project ROI",
+    "competencias_equipo": "Team Competencies",
+    "velocidad_implementacion": "Implementation Speed"
+  }
+}

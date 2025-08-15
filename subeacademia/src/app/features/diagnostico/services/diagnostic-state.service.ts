@@ -133,13 +133,13 @@ export class DiagnosticStateService {
 
     private ensureAresControl(itemId: string): void {
         if (!this.aresForm.contains(itemId)) {
-            this.aresForm.addControl(itemId, this.fb.control<number | null>(null, { validators: [Validators.required] }));
+            this.aresForm.addControl(itemId, this.fb.control<number>(1, { validators: [Validators.required] }));
         }
     }
 
     private ensureCompetenciaControl(compId: string): void {
         if (!this.competenciasForm.contains(compId)) {
-            this.competenciasForm.addControl(compId, this.fb.control<number | null>(null, { validators: [Validators.required] }));
+            this.competenciasForm.addControl(compId, this.fb.control<number>(1, { validators: [Validators.required] }));
         }
     }
 
@@ -210,7 +210,7 @@ export class DiagnosticStateService {
         this.saveToStorage();
     }
 
-    // Método para calcular el progreso basado en la ruta
+    // Método para calcular el progreso basado en la ruta y el estado de los formularios
     getProgressForRoute(currentRoute: string): number {
         // Extraer la parte del diagnóstico de la ruta
         const diagnosticoMatch = currentRoute.match(/\/diagnostico(\/.*)?$/);
@@ -218,6 +218,7 @@ export class DiagnosticStateService {
         
         const path = diagnosticoMatch[1] || '';
         
+        // Calcular progreso base por ruta
         const routeProgress: Record<string, number> = {
             '': 0,
             '/inicio': 0,
@@ -236,7 +237,44 @@ export class DiagnosticStateService {
             '/resultados': 100
         };
         
-        return routeProgress[path] || 0;
+        let baseProgress = routeProgress[path] || 0;
+        
+        // Ajustar progreso basado en el estado de los formularios
+        if (path === '/ares' || path.startsWith('/ares/')) {
+            const aresCompletion = this.getAresFormCompletion();
+            baseProgress = 33.33 + (aresCompletion * 25); // 33.33% base + hasta 25% por completitud
+        } else if (path === '/competencias' || path.startsWith('/competencias/')) {
+            const competenciasCompletion = this.getCompetenciasFormCompletion();
+            baseProgress = 66.67 + (competenciasCompletion * 16.67); // 66.67% base + hasta 16.67% por completitud
+        }
+        
+        return Math.min(baseProgress, 100);
+    }
+    
+    // Método para calcular la completitud del formulario ARES
+    private getAresFormCompletion(): number {
+        const aresData = this.aresForm.value;
+        const totalItems = this.aresItems.length;
+        if (totalItems === 0) return 0;
+        
+        const completedItems = Object.values(aresData).filter(value => 
+            value !== null && value !== undefined && value !== '' && typeof value === 'number' && value > 0
+        ).length;
+        
+        return completedItems / totalItems;
+    }
+    
+    // Método para calcular la completitud del formulario de competencias
+    private getCompetenciasFormCompletion(): number {
+        const competenciasData = this.competenciasForm.value;
+        const totalCompetencias = this.competencias.length;
+        if (totalCompetencias === 0) return 0;
+        
+        const completedCompetencias = Object.values(competenciasData).filter(value => 
+            value !== null && value !== undefined && value !== '' && typeof value === 'number' && value > 0
+        ).length;
+        
+        return completedCompetencias / totalCompetencias;
     }
 
     // Métodos para navegación entre pasos
@@ -294,11 +332,17 @@ export class DiagnosticStateService {
             case 'ares':
                 const aresData = this.aresForm.value;
                 return Object.keys(aresData).length > 0 && 
-                       Object.values(aresData).every(value => value !== null && value !== undefined && value !== '');
+                       Object.values(aresData).every(value => 
+                           value !== null && value !== undefined && value !== '' && 
+                           typeof value === 'number' && value >= 1 && value <= 5
+                       );
             case 'competencias':
                 const competenciasData = this.competenciasForm.value;
                 return Object.keys(competenciasData).length > 0 && 
-                       Object.values(competenciasData).every(value => value !== null && value !== undefined && value !== '');
+                       Object.values(competenciasData).every(value => 
+                           value !== null && value !== undefined && value !== '' && 
+                           typeof value === 'number' && value >= 1 && value <= 5
+                       );
             case 'objetivo':
                 return !!this.form.get('objetivo')?.value;
             case 'lead':
@@ -333,8 +377,33 @@ export class DiagnosticStateService {
                 const data = JSON.parse(stored);
                 
                 if (data.form) this.form.patchValue(data.form);
-                if (data.aresForm) this.aresForm.patchValue(data.aresForm);
-                if (data.competenciasForm) this.competenciasForm.patchValue(data.competenciasForm);
+                
+                // Cargar datos ARES con validación de valores
+                if (data.aresForm) {
+                    Object.keys(data.aresForm).forEach(key => {
+                        const value = data.aresForm[key];
+                        if (value !== null && value !== undefined && typeof value === 'number' && value >= 1 && value <= 5) {
+                            this.aresForm.patchValue({ [key]: value });
+                        } else {
+                            // Si el valor no es válido, establecer el valor por defecto
+                            this.aresForm.patchValue({ [key]: 1 });
+                        }
+                    });
+                }
+                
+                // Cargar datos de competencias con validación de valores
+                if (data.competenciasForm) {
+                    Object.keys(data.competenciasForm).forEach(key => {
+                        const value = data.competenciasForm[key];
+                        if (value !== null && value !== undefined && typeof value === 'number' && value >= 1 && value <= 5) {
+                            this.competenciasForm.patchValue({ [key]: value });
+                        } else {
+                            // Si el valor no es válido, establecer el valor por defecto
+                            this.competenciasForm.patchValue({ [key]: 1 });
+                        }
+                    });
+                }
+                
                 if (data.leadForm) this.leadForm.patchValue(data.leadForm);
                 if (data.isCompleted) this._isCompleted.set(data.isCompleted);
                 

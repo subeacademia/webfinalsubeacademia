@@ -1,0 +1,98 @@
+{
+  "diagnostico": {
+    "ares": {
+      "likert": {
+        "0": "Incipiente",
+        "1": "Básico", 
+        "2": "Intermediário",
+        "3": "Avançado",
+        "4": "Líder"
+      }
+    },
+    "adopcion": "Adoção Transversal de IA",
+    "estrategia": "Estratégia de Adoção",
+    "gestion_riesgos": "Gestão de Riscos",
+    "principios_eticos": "Princípios Éticos",
+    "seguridad_privacidad": "Segurança e Privacidade",
+    "capacidades_desarrollo": "Capacidades de Desenvolvimento",
+    "gobierno_datos": "Governança de Dados",
+    "gobernanza_ares": "Governança ARES",
+    "metricas_valor": "Métricas de Valor",
+    "operacion_monitoreo": "Operação e Monitoramento",
+    "gestion_talento": "Gestão de Talento",
+    "arquitectura_tecnologica": "Arquitetura Tecnológica",
+    "integracion_sistemas": "Integração de Sistemas",
+    "cumplimiento_normativo": "Conformidade Regulatória",
+    "transparencia_explicabilidad": "Transparência e Explicabilidade",
+    "sostenibilidad": "Sustentabilidade"
+  },
+  "competencias": {
+    "pensamiento_critico": "Pensamento Crítico",
+    "resolucion_problemas": "Resolução de Problemas",
+    "alfabetizacion_datos": "Alfabetização de Dados",
+    "comunicacion": "Comunicação",
+    "colaboracion": "Colaboração",
+    "creatividad": "Criatividade",
+    "diseno_tecnologico": "Design Tecnológico",
+    "automatizacion": "Automação",
+    "seguridad": "Segurança",
+    "etica": "Ética",
+    "sostenibilidad": "Sustentabilidade",
+    "aprendizaje": "Aprendizagem",
+    "liderazgo": "Liderança"
+  },
+  "niveles": {
+    "incipiente": "Incipiente",
+    "basico": "Básico",
+    "intermedio": "Intermediário",
+    "avanzado": "Avançado",
+    "lider": "Líder"
+  },
+  "descripciones": {
+    "nivel_muy_basico": "Nível muito básico, requer desenvolvimento fundamental",
+    "nivel_basico": "Nível básico, com algumas capacidades iniciais",
+    "nivel_intermedio": "Nível intermediário, com implementação parcial",
+    "nivel_avanzado": "Nível avançado, com implementação sólida",
+    "nivel_lider": "Nível líder, com excelência operacional"
+  },
+  "fortalezas": {
+    "compromiso_transformacion": "Compromisso com a Transformação",
+    "infraestructura_tecnologica": "Infraestrutura Tecnológica Sólida",
+    "talento_conocimientos_basicos": "Talento com Conhecimentos Básicos"
+  },
+  "oportunidades": {
+    "desarrollo_competencias_avanzadas": "Desenvolvimento de Competências Avançadas",
+    "establecimiento_procesos_gobernanza": "Estabelecimento de Processos de Governança",
+    "implementacion_metricas_valor": "Implementação de Métricas de Valor"
+  },
+  "acciones": {
+    "inmediatas": "Ações Imediatas",
+    "mediano_plazo": "Médio Prazo",
+    "largo_plazo": "Longo Prazo",
+    "capacitacion_basica": "Capacitação Básica da Equipe",
+    "auditoria_seguridad": "Auditoria de Segurança",
+    "definicion_politicas_eticas": "Definição de Políticas Éticas",
+    "implementacion_mlops": "Implementação de MLOps",
+    "pilotos_ia": "Pilotos de IA por Departamento",
+    "desarrollo_competencias": "Desenvolvimento de Competências Avançadas",
+    "transformacion_digital": "Transformação Digital Completa",
+    "centro_excelencia": "Centro de Excelência em IA",
+    "expansion_mercados": "Expansão para Novos Mercados"
+  },
+  "riesgos": {
+    "seguridad_datos": "Risco de Segurança de Dados",
+    "resistencia_cambio": "Resistência à Mudança",
+    "dependencia_proveedores": "Dependência de Fornecedores"
+  },
+  "mitigaciones": {
+    "seguridad_por_diseno": "Implementação de Segurança por Design",
+    "programa_cambio": "Programa de Gestão de Mudanças",
+    "arquitectura_abierta": "Estratégia de Arquitetura Aberta"
+  },
+  "metricas": {
+    "adopcion_ia": "Adoção de IA",
+    "roi_proyectos": "ROI dos Projetos",
+    "competencias_equipo": "Competências da Equipe",
+    "velocidad_implementacion": "Velocidade de Implementação"
+  }
+}
