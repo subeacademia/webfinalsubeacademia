@@ -98,6 +98,33 @@
   background: color-mix(in srgb, var(--fg) 6%, transparent);
 }
 
+/* ----- Estilos para el módulo de diagnóstico ----- */
+
+/* Botones reusables para la navegación */
+.btn-primary {
+  @apply px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Animación de fade-in para transiciones suaves */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
 /* ----- Tokens de color (AA) ----- */
 :root {
   /* Tema CLARO por defecto */

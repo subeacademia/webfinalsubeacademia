@@ -65,6 +65,8 @@ export class DiagnosticStateService {
         this.initializeForms();
         this.loadFromStorage();
         this.setupFormSubscriptions();
+        // Inicializar con preguntas por defecto para empresa
+        this.initializeDefaultQuestions();
     }
 
     private initializeForms(): void {
@@ -83,6 +85,12 @@ export class DiagnosticStateService {
         this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
         this.competenciasForm.valueChanges.subscribe(() => this.saveToStorage());
         this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
+    }
+
+    private initializeDefaultQuestions(): void {
+        // Inicializar con preguntas por defecto para empresa
+        this.updateContextControls('empresa');
+        this.buildFlatQuestions('empresa');
     }
 
     // Método principal para generar el cuestionario dinámico

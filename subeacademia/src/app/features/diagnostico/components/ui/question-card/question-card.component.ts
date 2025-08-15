@@ -28,7 +28,7 @@ export interface Question {
                 <button 
                     *ngIf="question.tooltip"
                     type="button" 
-                    class="btn btn-ghost btn-circle btn-sm ml-4 text-blue-400 hover:text-blue-300" 
+                    class="ml-4 p-2 text-blue-400 hover:text-blue-300 rounded-full hover:bg-slate-700 transition-colors duration-200" 
                     (click)="openInfo(question.tooltip)">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -45,8 +45,8 @@ export interface Question {
                     <div class="flex flex-wrap gap-3 justify-center">
                         <button 
                             *ngFor="let value of [0,1,2,3,4,5]" 
-                            class="px-6 py-3 rounded-lg font-medium transition-all duration-200 min-w-[80px] text-lg"
-                            [class]="getLikertButtonClass(value)"
+                            class="px-6 py-3 rounded-lg font-medium transition-all duration-200 min-w-[80px] text-lg border-2"
+                            [ngClass]="getLikertButtonClass(value)"
                             (click)="setLikertValue(value)">
                             {{ ('diagnostico.ares.likert.' + value) | i18nTranslate }}
                         </button>
@@ -113,10 +113,10 @@ export class QuestionCardComponent {
         const isSelected = control?.value === value;
         
         if (isSelected) {
-            return 'bg-blue-600 text-white shadow-lg scale-105';
+            return 'bg-blue-600 text-white border-blue-400 shadow-lg scale-105';
         }
         
-        return 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:text-white';
+        return 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:text-white border-slate-600';
     }
 
     openInfo(text?: string): void {

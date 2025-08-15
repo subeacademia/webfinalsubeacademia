@@ -1,98 +1,108 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
-import { QuestionCardComponent, Question } from './components/ui/question-card/question-card.component';
+import { QuestionCardComponent } from './components/ui/question-card/question-card.component';
 import { StepNavComponent } from './components/step-nav.component';
+import { DiagnosticResultsComponent } from './components/ui/diagnostic-results.component';
 
 @Component({
     selector: 'app-diagnostico',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, QuestionCardComponent, StepNavComponent],
+    imports: [CommonModule, ReactiveFormsModule, QuestionCardComponent, StepNavComponent, DiagnosticResultsComponent],
     template: `
-        <div class="flex flex-col items-center justify-start min-h-screen bg-gray-900 text-white p-4 pt-24">
-            <!-- Barra de progreso -->
-            <app-step-nav 
-                [progress]="progress()" 
-                [currentStep]="currentQuestionIndex()" 
-                [totalSteps]="flatQuestions().length">
-            </app-step-nav>
-            
-            <!-- Contenido principal -->
-            <div class="w-full max-w-3xl mt-10">
-                <!-- Muestra la pregunta actual usando el componente unificado -->
-                <app-question-card
-                    *ngIf="currentQuestion()"
-                    [question]="currentQuestion()"
-                    [form]="getFormForQuestion()"
-                ></app-question-card>
-            </div>
-            
-            <!-- Navegación -->
-            <div class="mt-8 flex justify-between w-full max-w-3xl">
-                <button 
-                    class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    (click)="previousQuestion()" 
-                    [disabled]="currentQuestionIndex() === 0">
-                    <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                    Anterior
-                </button>
-                
-                <button 
-                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200"
-                    (click)="nextQuestion()">
-                    Siguiente
-                    <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </button>
-            </div>
+        <div class="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
+            <ng-container *ngIf="!isCompleted(); else results">
+                <div class="w-full max-w-3xl">
+                    <app-step-nav [progress]="progress()"></app-step-nav>
+
+                    <div class="mt-10 animate-fade-in">
+                        <app-question-card
+                            *ngIf="currentQuestion()"
+                            [question]="currentQuestion()"
+                            [form]="getFormForQuestion()"
+                        ></app-question-card>
+                    </div>
+
+                    <div class="mt-8 flex justify-between w-full">
+                        <button 
+                            (click)="previousQuestion()" 
+                            [disabled]="currentQuestionIndex() === 0" 
+                            class="btn-secondary">
+                            Anterior
+                        </button>
+                        <button 
+                            (click)="nextQuestion()" 
+                            [disabled]="!isCurrentQuestionValid()" 
+                            class="btn-primary">
+                            {{ (currentQuestionIndex() === questions().length - 1) ? 'Finalizar' : 'Siguiente' }}
+                        </button>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-template #results>
+                <app-diagnostic-results></app-diagnostic-results>
+            </ng-template>
         </div>
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiagnosticoComponent {
-    readonly diagnosticState = inject(DiagnosticStateService);
-    private readonly router = inject(Router);
+    private readonly diagnosticState = inject(DiagnosticStateService);
 
-    // Estado del wizard
-    flatQuestions = computed(() => this.diagnosticState.flatQuestions());
+    // Estado del Wizard - Señales principales
     currentQuestionIndex = signal(0);
-    currentQuestion = computed(() => this.flatQuestions()[this.currentQuestionIndex()]);
+    isCompleted = signal(false);
+
+    // Señales computadas que manejan todo el estado
+    questions = computed(() => this.diagnosticState.flatQuestions());
+    currentQuestion = computed(() => this.questions()[this.currentQuestionIndex()]);
     progress = computed(() => {
-        const total = this.flatQuestions().length;
+        const total = this.questions().length;
         return total > 0 ? (this.currentQuestionIndex() / total) * 100 : 0;
     });
 
+    // Lógica de navegación
     nextQuestion(): void {
-        const currentIndex = this.currentQuestionIndex();
-        const totalQuestions = this.flatQuestions().length;
-        
-        if (currentIndex < totalQuestions - 1) {
-            this.currentQuestionIndex.set(currentIndex + 1);
+        if (this.currentQuestionIndex() < this.questions().length - 1) {
+            this.currentQuestionIndex.update(i => i + 1);
         } else {
-            // Navegar al resumen cuando se llegue al final
-            this.router.navigate(['/diagnostico/resumen']);
+            this.isCompleted.set(true); // Muestra la pantalla de resultados
         }
     }
 
     previousQuestion(): void {
-        const currentIndex = this.currentQuestionIndex();
-        if (currentIndex > 0) {
-            this.currentQuestionIndex.set(currentIndex - 1);
+        if (this.currentQuestionIndex() > 0) {
+            this.currentQuestionIndex.update(i => i - 1);
         }
     }
 
-    getFormForQuestion(): FormGroup {
+    // Validación de la pregunta actual
+    isCurrentQuestionValid(): boolean {
+        const question = this.currentQuestion();
+        if (!question) return false;
+
+        const form = this.getFormForQuestion();
+        const control = form.get(question.controlName);
+        
+        if (!control) return true; // Si no hay control, consideramos válido
+        
+        if (question.required) {
+            return control.value !== null && control.value !== undefined && control.value !== '';
+        }
+        
+        return true;
+    }
+
+    // Determinar qué formulario usar basado en el tipo de pregunta
+    getFormForQuestion(): any {
         const question = this.currentQuestion();
         if (!question) return this.diagnosticState.form;
         
         // Determinar qué formulario usar basado en el tipo de pregunta
         if (question.controlName === 'industria' || question.controlName.startsWith('contexto_')) {
-            return this.diagnosticState.contextoControls as any;
+            return this.diagnosticState.contextoControls;
         } else if (question.controlName.startsWith('ares_')) {
             return this.diagnosticState.aresForm;
         } else if (question.controlName.startsWith('comp_')) {

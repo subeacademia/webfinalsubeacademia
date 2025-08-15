@@ -45,6 +45,7 @@ import { RadarChartComponent } from './radar-chart.component';
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
                     <!-- Radar de competencias -->
                     <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
+                        <h3 class="text-xl font-semibold text-center text-gray-200 mb-4">Perfil de Competencias</h3>
                         <app-radar-chart 
                             [labels]="competencyLabels()"
                             [data]="competencyScores()">
@@ -53,6 +54,7 @@ import { RadarChartComponent } from './radar-chart.component';
 
                     <!-- Semaforo ARES -->
                     <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
+                        <h3 class="text-xl font-semibold text-center text-gray-200 mb-4">Estado ARES por Fase</h3>
                         <app-semaforo-ares 
                             [aresByPhase]="aresByPhase()">
                         </app-semaforo-ares>
@@ -106,10 +108,10 @@ import { RadarChartComponent } from './radar-chart.component';
 
                 <!-- Acciones -->
                 <div class="text-center">
-                    <button class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-lg transition-colors duration-200 mr-4">
+                    <button class="btn-primary mr-4">
                         Descargar Reporte PDF
                     </button>
-                    <button class="px-8 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold text-lg transition-colors duration-200">
+                    <button class="btn-secondary">
                         Agendar Consultoría
                     </button>
                 </div>
