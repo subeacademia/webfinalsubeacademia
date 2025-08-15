@@ -6,6 +6,8 @@ import { ScoringService } from '../../../services/scoring.service';
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import 'chart.js/auto';
 import { ARES_ITEMS } from '../../../data/ares-items';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -241,6 +243,66 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     // Inicialización del componente
+    this.debugDiagnosticState();
+    
+    // Forzar recarga de datos desde localStorage
+    setTimeout(() => {
+      this.reloadDiagnosticData();
+    }, 100);
+  }
+
+  private reloadDiagnosticData(): void {
+    console.log('=== RELOADING DIAGNOSTIC DATA ===');
+    
+    // Forzar recarga desde localStorage
+    const stored = localStorage.getItem('diagnostico.aresai.v1');
+    console.log('Stored Data:', stored);
+    
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        console.log('Parsed Data:', data);
+        
+        // Actualizar formularios si es necesario
+        if (data.aresForm) {
+          this.diagnosticState.aresForm.patchValue(data.aresForm);
+          console.log('ARES Form updated with:', data.aresForm);
+        }
+        
+        if (data.competenciasForm) {
+          this.diagnosticState.competenciasForm.patchValue(data.competenciasForm);
+          console.log('Competencias Form updated with:', data.competenciasForm);
+        }
+        
+        // Forzar actualización del gráfico
+        setTimeout(() => {
+          if (this.aresChart) {
+            this.aresChart.destroy();
+            this.aresChart = null;
+          }
+          this.initializeAresChart();
+        }, 200);
+        
+      } catch (error) {
+        console.error('Error parsing stored data:', error);
+      }
+    }
+    
+    console.log('=== END RELOAD ===');
+  }
+
+  private debugDiagnosticState(): void {
+    console.log('=== DEBUG DIAGNOSTIC STATE ===');
+    console.log('ARES Form:', this.diagnosticState.aresForm);
+    console.log('ARES Form Value:', this.diagnosticState.aresForm.value);
+    console.log('Competencias Form:', this.diagnosticState.competenciasForm);
+    console.log('Competencias Form Value:', this.diagnosticState.competenciasForm.value);
+    console.log('Contexto Controls:', this.diagnosticState.contextoControls);
+    console.log('Lead Form:', this.diagnosticState.leadForm.value);
+    console.log('Main Form:', this.diagnosticState.form.value);
+    console.log('ARES Items:', this.diagnosticState.aresItems);
+    console.log('Competencias:', this.diagnosticState.competencias);
+    console.log('=== END DEBUG ===');
   }
 
   ngAfterViewInit(): void {
@@ -316,44 +378,72 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   getOverallScore(): number {
     const aresScore = this.getAresScore();
     const competenciasScore = this.getCompetenciasScore();
-    return Math.round((aresScore + competenciasScore) / 2);
+    const overall = Math.round((aresScore + competenciasScore) / 2);
+    console.log('Overall Score:', { aresScore, competenciasScore, overall });
+    return overall;
   }
 
   getAresScore(): number {
     const aresData = this.diagnosticState.aresForm.value;
+    console.log('ARES Form Data:', aresData);
+    
     if (!aresData) return 0;
     
     const totalItems = Object.keys(aresData).length;
     if (totalItems === 0) return 0;
     
-    const totalScore = Object.values(aresData).reduce((sum: number, value: any) => sum + (value || 0), 0);
-    return Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
+    const totalScore = Object.values(aresData).reduce((sum: number, value: any) => {
+      const numValue = Number(value) || 0;
+      console.log('ARES Item Score:', { value, numValue });
+      return sum + numValue;
+    }, 0);
+    
+    const score = Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
+    console.log('ARES Score Calculation:', { totalItems, totalScore, score });
+    return score;
   }
 
   getCompetenciasScore(): number {
     const competenciasData = this.diagnosticState.competenciasForm.value;
+    console.log('Competencias Form Data:', competenciasData);
+    
     if (!competenciasData) return 0;
     
     const totalItems = Object.keys(competenciasData).length;
     if (totalItems === 0) return 0;
     
-    const totalScore = Object.values(competenciasData).reduce((sum: number, value: any) => sum + (value || 0), 0);
-    return Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
+    const totalScore = Object.values(competenciasData).reduce((sum: number, value: any) => {
+      const numValue = Number(value) || 0;
+      console.log('Competencia Score:', { value, numValue });
+      return sum + numValue;
+    }, 0);
+    
+    const score = Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
+    console.log('Competencias Score Calculation:', { totalItems, totalScore, score });
+    return score;
   }
 
   getPhaseScore(phase: string): number {
     const aresData = this.diagnosticState.aresForm.value;
+    console.log(`Getting Phase Score for ${phase}:`, aresData);
+    
     if (!aresData) return 0;
     
     const phaseItems = ARES_ITEMS.filter(item => item.phase === phase);
+    console.log(`Phase ${phase} items:`, phaseItems);
+    
     if (phaseItems.length === 0) return 0;
     
     const phaseScore = phaseItems.reduce((sum, item) => {
       const value = aresData[item.id];
-      return sum + (value || 0);
+      const numValue = Number(value) || 0;
+      console.log(`Phase ${phase} item ${item.id}:`, { value, numValue });
+      return sum + numValue;
     }, 0);
     
-    return Math.round((phaseScore / (phaseItems.length * 4)) * 100); // Escala 0-4
+    const score = Math.round((phaseScore / (phaseItems.length * 4)) * 100); // Escala 0-4
+    console.log(`Phase ${phase} Score:`, { phaseItems: phaseItems.length, phaseScore, score });
+    return score;
   }
 
   getPhaseStatusClass(phase: string): string {
@@ -445,10 +535,243 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   }
 
   downloadPDF(): void {
-    // Implementar descarga de PDF
-    console.log('Descargando PDF...');
-    // Aquí iría la lógica real de generación y descarga
-    alert('Funcionalidad de descarga de PDF en desarrollo');
+    console.log('Generando PDF del diagnóstico...');
+    
+    // Mostrar indicador de carga
+    const button = event?.target as HTMLButtonElement;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Generando PDF...';
+    button.disabled = true;
+
+    try {
+      this.generateDiagnosticPDF().then(() => {
+        console.log('PDF generado exitosamente');
+        // Restaurar botón
+        button.innerHTML = originalText;
+        button.disabled = false;
+      }).catch(error => {
+        console.error('Error generando PDF:', error);
+        alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+        // Restaurar botón
+        button.innerHTML = originalText;
+        button.disabled = false;
+      });
+    } catch (error) {
+      console.error('Error en downloadPDF:', error);
+      alert('Error al generar el PDF. Por favor, inténtalo de nuevo.');
+      // Restaurar botón
+      button.innerHTML = originalText;
+      button.disabled = false;
+    }
+  }
+
+  private async generateDiagnosticPDF(): Promise<void> {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (2 * margin);
+    
+    let yPosition = margin;
+    
+    // Título principal
+    pdf.setFontSize(24);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(59, 130, 246); // Azul
+    pdf.text('Diagnóstico ARES-AI Completado', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+    
+    // Fecha
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(107, 114, 128); // Gris
+    const fecha = new Date().toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    pdf.text(`Generado el: ${fecha}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 20;
+    
+    // Resumen Ejecutivo
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Resumen Ejecutivo', margin, yPosition);
+    yPosition += 10;
+    
+    // Métricas principales
+    const overallScore = this.getOverallScore();
+    const aresScore = this.getAresScore();
+    const competenciasScore = this.getCompetenciasScore();
+    
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    
+    // Madurez General
+    pdf.setTextColor(59, 130, 246); // Azul
+    pdf.text(`Madurez General: ${overallScore}%`, margin, yPosition);
+    yPosition += 8;
+    
+    // Madurez ARES
+    pdf.setTextColor(34, 197, 94); // Verde
+    pdf.text(`Madurez ARES: ${aresScore}%`, margin, yPosition);
+    yPosition += 8;
+    
+    // Competencias
+    pdf.setTextColor(147, 51, 234); // Púrpura
+    pdf.text(`Competencias: ${competenciasScore}%`, margin, yPosition);
+    yPosition += 15;
+    
+    // Evaluación por Fases ARES
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Evaluación por Fases ARES', margin, yPosition);
+    yPosition += 10;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    
+    const fases = ['F1', 'F2', 'F3', 'F4', 'F5'];
+    const nombresFases = ['Fundamentos', 'Estrategia', 'Capacidades', 'Operación', 'Transformación'];
+    
+    fases.forEach((fase, index) => {
+      const score = this.getPhaseScore(fase);
+      const nombre = nombresFases[index];
+      
+      // Color según el score
+      if (score >= 61) pdf.setTextColor(34, 197, 94); // Verde
+      else if (score >= 41) pdf.setTextColor(59, 130, 246); // Azul
+      else if (score >= 21) pdf.setTextColor(245, 158, 11); // Amarillo
+      else pdf.setTextColor(239, 68, 68); // Rojo
+      
+      pdf.text(`${fase}: ${nombre} - ${score}%`, margin, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 10;
+    
+    // Fortalezas y Oportunidades
+    if (yPosition > pageHeight - 80) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Análisis de Resultados', margin, yPosition);
+    yPosition += 10;
+    
+    // Fortalezas
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(34, 197, 94); // Verde
+    pdf.text('Fortalezas Principales:', margin, yPosition);
+    yPosition += 8;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 0, 0);
+    
+    const fortalezas = this.getFortalezas();
+    fortalezas.forEach(fortaleza => {
+      pdf.text(`• ${fortaleza}`, margin + 5, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 5;
+    
+    // Oportunidades
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(245, 158, 11); // Amarillo
+    pdf.text('Oportunidades de Mejora:', margin, yPosition);
+    yPosition += 8;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 0, 0);
+    
+    const oportunidades = this.getOportunidades();
+    oportunidades.forEach(oportunidad => {
+      pdf.text(`• ${oportunidad}`, margin + 5, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 10;
+    
+    // Plan de Acción
+    if (yPosition > pageHeight - 100) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Plan de Acción Recomendado', margin, yPosition);
+    yPosition += 10;
+    
+    // Acciones Inmediatas
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(59, 130, 246); // Azul
+    pdf.text('Acciones Inmediatas (0-3 meses):', margin, yPosition);
+    yPosition += 8;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 0, 0);
+    
+    const accionesInmediatas = this.getAccionesInmediatas();
+    accionesInmediatas.forEach(accion => {
+      pdf.text(`• ${accion}`, margin + 5, yPosition);
+      yPosition += 6;
+    });
+    
+    yPosition += 5;
+    
+    // Acciones a Mediano Plazo
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(147, 51, 234); // Púrpura
+    pdf.text('Acciones a Mediano Plazo (3-12 meses):', margin, yPosition);
+    yPosition += 8;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(0, 0, 0);
+    
+    const accionesMedioPlazo = this.getAccionesMedioPlazo();
+    accionesMedioPlazo.forEach(accion => {
+      pdf.text(`• ${accion}`, margin + 5, yPosition);
+      yPosition += 6;
+    });
+    
+    // Pie de página
+    if (yPosition > pageHeight - 30) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    yPosition += 20;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'italic');
+    pdf.setTextColor(107, 114, 128); // Gris
+    pdf.text('Este reporte fue generado automáticamente por el sistema de diagnóstico ARES-AI.', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 8;
+    pdf.text('Para más información o consultoría personalizada, contacta con nuestro equipo.', pageWidth / 2, yPosition, { align: 'center' });
+    
+    // Generar nombre del archivo
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `diagnostico-ares-ai-${timestamp}.pdf`;
+    
+    // Guardar PDF
+    pdf.save(filename);
+    
+    console.log('PDF generado y descargado:', filename);
   }
 
   scheduleConsulting(): void {
