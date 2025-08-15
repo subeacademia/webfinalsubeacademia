@@ -1,72 +1,141 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { AresItem } from '../../../data/diagnostic.models';
+import { ARES_ITEMS } from '../../../data/ares-items';
 
 @Component({
   selector: 'app-step-ares',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="animate-fade-in">
+    <div class="max-w-4xl mx-auto animate-fade-in">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-white mb-4">
-          Evaluación ARES-AI: Fase {{ currentPhase }}
+          Evaluación ARES-AI
         </h2>
-        <p class="text-lg text-gray-300">{{ getPhaseDescription() }}</p>
+        <p class="text-lg text-gray-300">
+          Evalúa la madurez de tu organización en las dimensiones clave del modelo ARES-AI
+        </p>
       </div>
 
-      <div class="space-y-6">
-        <div *ngFor="let item of currentPhaseItems" class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-          <div class="mb-4">
-            <h3 class="text-xl font-semibold text-white mb-2">{{ item.labelKey }}</h3>
-            <p class="text-gray-300">{{ item.tooltip || 'Evaluación de madurez en ' + item.dimension }}</p>
-          </div>
-          
-          <div class="space-y-3">
-            <label class="block text-sm font-medium text-gray-200 mb-2">
-              Nivel de madurez actual:
-            </label>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-              <label *ngFor="let nivel of niveles" 
-                     class="flex flex-col items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                     [class.border-blue-500]="getAresControl(item.id).value === nivel.value"
-                     [class.border-gray-600]="getAresControl(item.id).value !== nivel.value">
-                <input type="radio" [formControl]="getAresControl(item.id)" [value]="nivel.value" class="sr-only">
-                <div class="w-4 h-4 rounded-full border-2 mb-2"
-                     [class.bg-blue-500]="getAresControl(item.id).value === nivel.value"
-                     [class.border-blue-500]="getAresControl(item.id).value === nivel.value"
-                     [class.border-gray-400]="getAresControl(item.id).value !== nivel.value"></div>
-                <span class="text-white text-sm text-center">{{ nivel.label }}</span>
-              </label>
+      <form [formGroup]="aresForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Información sobre la escala al comienzo -->
+        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+          <h4 class="text-blue-200 font-medium mb-2">Escala de Evaluación:</h4>
+          <div class="grid grid-cols-5 gap-2 text-sm text-blue-100">
+            <div class="text-center">
+              <div class="font-medium">Incipiente</div>
+              <div class="text-xs">Sin implementación</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">Básico</div>
+              <div class="text-xs">Implementación inicial</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">Intermedio</div>
+              <div class="text-xs">Implementación parcial</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">Avanzado</div>
+              <div class="text-xs">Implementación sólida</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">Líder</div>
+              <div class="text-xs">Excelencia operativa</div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Botones de navegación -->
-      <div class="flex justify-between mt-8">
-        <button 
-          (click)="anterior()"
-          class="btn-secondary">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Anterior
-        </button>
-        
-        <button 
-          (click)="siguiente()"
-          [disabled]="!isPhaseComplete()"
-          class="btn-primary">
-          {{ isLastPhase() ? 'Siguiente Sección' : 'Siguiente Fase' }}
-          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
-      </div>
+        <!-- Información sobre fases -->
+        <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+          <h4 class="text-purple-200 font-medium mb-2">Fases del Modelo ARES-AI:</h4>
+          <div class="grid grid-cols-5 gap-2 text-sm text-purple-100">
+            <div class="text-center">
+              <div class="font-medium">F1</div>
+              <div class="text-xs">Fundamentos</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">F2</div>
+              <div class="text-xs">Estrategia</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">F3</div>
+              <div class="text-xs">Capacidades</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">F4</div>
+              <div class="text-xs">Operación</div>
+            </div>
+            <div class="text-center">
+              <div class="font-medium">F5</div>
+              <div class="text-xs">Transformación</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de elementos ARES -->
+        <div class="space-y-6">
+          <div *ngFor="let item of aresItems" 
+               class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-semibold text-white">
+                  {{ item.labelKey }}
+                </h3>
+                <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                  {{ item.phase }}
+                </span>
+              </div>
+              <p class="text-gray-300 text-sm mb-3">
+                {{ item.tooltip }}
+              </p>
+              <div class="text-xs text-gray-400">
+                Dimensión: <span class="text-blue-300">{{ item.dimension }}</span>
+              </div>
+            </div>
+
+            <!-- Escala de evaluación -->
+            <div class="grid grid-cols-5 gap-3">
+              <label *ngFor="let nivel of nivelesCompetencia; let j = index" 
+                     class="flex flex-col items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
+                     [class.border-blue-500]="getAresControl(item.id).value === j"
+                     [class.border-gray-600]="getAresControl(item.id).value !== j">
+                <input type="radio" 
+                       [formControl]="getAresControl(item.id)" 
+                       [value]="j" 
+                       class="sr-only">
+                <div class="w-4 h-4 rounded-full border-2 mb-2"
+                     [class.bg-blue-500]="getAresControl(item.id).value === j"
+                     [class.border-blue-500]="getAresControl(item.id).value === j"
+                     [class.border-gray-400]="getAresControl(item.id).value !== j">
+                </div>
+                <span class="text-white text-xs text-center">{{ nivel }}</span>
+              </label>
+            </div>
+
+            <!-- Validación -->
+            <div *ngIf="getAresControl(item.id).invalid && getAresControl(item.id).touched" 
+                 class="mt-2 text-red-400 text-sm">
+              Por favor evalúa tu nivel en esta dimensión
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <div class="pt-4">
+          <button 
+            type="submit" 
+            [disabled]="aresForm.invalid"
+            class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+            Siguiente
+          </button>
+        </div>
+      </form>
     </div>
   `,
   styles: [`
@@ -80,96 +149,63 @@ import { AresItem } from '../../../data/diagnostic.models';
     }
     
     .btn-primary {
-      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200;
+      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg;
     }
-    
-    .btn-secondary {
-      @apply bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+
+    .form-group {
+      @apply space-y-2;
     }
   `]
 })
 export class StepAresComponent implements OnInit {
-  private readonly diagnosticState = inject(DiagnosticStateService);
+  private readonly fb = inject(FormBuilder);
+  private readonly stateService = inject(DiagnosticStateService);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
 
-  currentPhase = '';
-  currentPhaseItems: AresItem[] = [];
-
-  // Niveles de madurez
-  niveles = [
-    { value: 1, label: 'Incipiente' },
-    { value: 2, label: 'Básico' },
-    { value: 3, label: 'Intermedio' },
-    { value: 4, label: 'Avanzado' },
-    { value: 5, label: 'Líder' }
-  ];
+  aresForm!: FormGroup;
+  aresItems = ARES_ITEMS;
+  nivelesCompetencia = ['Incipiente', 'Básico', 'Intermedio', 'Avanzado', 'Líder'];
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      this.currentPhase = params['phase'];
-      this.loadPhaseItems();
+    this.initializeForm();
+    this.loadExistingData();
+  }
+
+  private initializeForm(): void {
+    this.aresForm = this.stateService.aresForm;
+    
+    // Asegurar que todos los controles estén inicializados
+    this.aresItems.forEach(item => {
+      this.stateService.getAresControl(item.id);
     });
   }
 
-  private loadPhaseItems(): void {
-    this.currentPhaseItems = this.diagnosticState.aresItems.filter(item => 
-      item.phase === this.currentPhase
-    );
+  private loadExistingData(): void {
+    // Los datos se cargan automáticamente desde el servicio
+    // que ya tiene la lógica de persistencia
   }
 
-  getPhaseDescription(): string {
-    const descriptions: Record<string, string> = {
-      'F1': 'Fundamentos: Evaluación de la infraestructura básica y capacidades iniciales',
-      'F2': 'Desarrollo: Análisis de la implementación y madurez de procesos',
-      'F3': 'Optimización: Evaluación de la excelencia operativa y mejora continua',
-      'F4': 'Innovación: Análisis de capacidades avanzadas y liderazgo en el mercado'
-    };
-    return descriptions[this.currentPhase] || '';
+  getAresControl(itemId: string) {
+    return this.stateService.getAresControl(itemId);
   }
 
-  getAresControl(itemId: string): FormControl {
-    return this.diagnosticState.getAresControl(itemId);
+  onSubmit(): void {
+    if (this.aresForm.valid) {
+      // Los datos ya están guardados en el servicio
+      // Solo necesitamos navegar al siguiente paso
+      this.navigateToNextStep();
+    }
   }
 
-  isPhaseComplete(): boolean {
-    return this.currentPhaseItems.every(item => {
-      const control = this.getAresControl(item.id);
-      return control.value !== null && control.value !== undefined && control.value !== '';
+  private navigateToNextStep(): void {
+    const currentUrl = this.router.url;
+    const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+    const nextStepUrl = `${baseUrl}/competencias`;
+    
+    this.router.navigate([nextStepUrl]).catch(error => {
+      console.error('Error en navegación:', error);
+      // Fallback: navegar usando la ruta completa
+      this.router.navigate(['/es', 'diagnostico', 'competencias']);
     });
-  }
-
-  isLastPhase(): boolean {
-    return this.currentPhase === 'F4';
-  }
-
-  anterior(): void {
-    if (this.currentPhase === 'F1') {
-      this.router.navigate(['/es', 'diagnostico', 'contexto']);
-    } else {
-      const prevPhase = this.getPreviousPhase();
-      this.router.navigate(['/es', 'diagnostico', 'ares', prevPhase]);
-    }
-  }
-
-  siguiente(): void {
-    if (this.isLastPhase()) {
-      this.router.navigate(['/es', 'diagnostico', 'competencias', '1']);
-    } else {
-      const nextPhase = this.getNextPhase();
-      this.router.navigate(['/es', 'diagnostico', 'ares', nextPhase]);
-    }
-  }
-
-  private getPreviousPhase(): string {
-    const phases = ['F1', 'F2', 'F3', 'F4'];
-    const currentIndex = phases.indexOf(this.currentPhase);
-    return phases[Math.max(0, currentIndex - 1)];
-  }
-
-  private getNextPhase(): string {
-    const phases = ['F1', 'F2', 'F3', 'F4'];
-    const currentIndex = phases.indexOf(this.currentPhase);
-    return phases[Math.min(phases.length - 1, currentIndex + 1)];
   }
 }

@@ -2,19 +2,19 @@ import { CompetenciaDef, Segment } from './diagnostic.models';
 
 // Asunción: mapeo de 13 competencias con claves i18n asociadas a methodology.competencies
 export const COMPETENCIAS: CompetenciaDef[] = [
-  { id: 'c1_pensamiento_critico', nameKey: 'methodology.competencies.c1_title' },
-  { id: 'c2_resolucion_problemas', nameKey: 'methodology.competencies.c2_title' },
-  { id: 'c3_alfabetizacion_datos', nameKey: 'methodology.competencies.c3_title' },
-  { id: 'c4_comunicacion', nameKey: 'methodology.competencies.c4_title' },
-  { id: 'c5_colaboracion', nameKey: 'methodology.competencies.c5_title' },
-  { id: 'c6_creatividad', nameKey: 'methodology.competencies.c6_title' },
-  { id: 'c7_diseno_tecnologico', nameKey: 'methodology.competencies.c7_title' },
-  { id: 'c8_automatizacion_agentes', nameKey: 'methodology.competencies.c8_title' },
-  { id: 'c9_seguridad_privacidad', nameKey: 'methodology.competencies.c9_title' },
-  { id: 'c10_etica_responsabilidad', nameKey: 'methodology.competencies.c10_title' },
-  { id: 'c11_sostenibilidad', nameKey: 'methodology.competencies.c11_title' },
-  { id: 'c12_aprendizaje_continuo', nameKey: 'methodology.competencies.c12_title' },
-  { id: 'c13_liderazgo_ia', nameKey: 'methodology.competencies.c13_title' },
+  { id: 'c1_pensamiento_critico', nameKey: 'Pensamiento Crítico y Análisis' },
+  { id: 'c2_resolucion_problemas', nameKey: 'Resolución de Problemas Complejos' },
+  { id: 'c3_alfabetizacion_datos', nameKey: 'Alfabetización de Datos' },
+  { id: 'c4_comunicacion', nameKey: 'Comunicación Efectiva' },
+  { id: 'c5_colaboracion', nameKey: 'Colaboración y Trabajo en Equipo' },
+  { id: 'c6_creatividad', nameKey: 'Creatividad e Innovación' },
+  { id: 'c7_diseno_tecnologico', nameKey: 'Diseño Tecnológico' },
+  { id: 'c8_automatizacion_agentes', nameKey: 'Automatización y Agentes IA' },
+  { id: 'c9_seguridad_privacidad', nameKey: 'Seguridad y Privacidad' },
+  { id: 'c10_etica_responsabilidad', nameKey: 'Ética y Responsabilidad' },
+  { id: 'c11_sostenibilidad', nameKey: 'Sostenibilidad' },
+  { id: 'c12_aprendizaje_continuo', nameKey: 'Aprendizaje Continuo' },
+  { id: 'c13_liderazgo_ia', nameKey: 'Liderazgo en IA' },
 ];
 
 // Prioridades por segmento: top 6 sugeridas.

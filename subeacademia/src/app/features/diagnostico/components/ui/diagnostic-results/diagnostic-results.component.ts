@@ -1,8 +1,11 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
+import { Chart, ChartConfiguration, ChartData } from 'chart.js';
+import 'chart.js/auto';
+import { ARES_ITEMS } from '../../../data/ares-items';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -45,35 +48,86 @@ import { ScoringService } from '../../../services/scoring.service';
         <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
           <h3 class="text-xl font-semibold text-white mb-4">Evaluación ARES por Fase</h3>
           <div class="h-64 flex items-center justify-center">
-            <div class="text-center text-gray-400">
-              <svg class="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-              </svg>
-              <p>Gráfico de Radar ARES</p>
-              <p class="text-sm">Implementar con ng2-charts</p>
-            </div>
+            <canvas #aresChart width="300" height="300"></canvas>
           </div>
         </div>
 
-        <!-- Semáforo ARES -->
+        <!-- Semáforo ARES Mejorado -->
         <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
           <h3 class="text-xl font-semibold text-white mb-4">Estado por Fase ARES</h3>
           <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-gray-300">Fase 1: Fundamentos</span>
-              <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F1')"></div>
+            <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+              <div>
+                <span class="text-gray-300 font-medium">Fase 1: Fundamentos</span>
+                <p class="text-xs text-gray-400">Infraestructura básica y capacidades iniciales</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F1')"></div>
+                <span class="text-xs text-gray-400">{{ getPhaseScore('F1') }}%</span>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-300">Fase 2: Desarrollo</span>
-              <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F2')"></div>
+            <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+              <div>
+                <span class="text-gray-300 font-medium">Fase 2: Estrategia</span>
+                <p class="text-xs text-gray-400">Planificación y gobernanza</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F2')"></div>
+                <span class="text-xs text-gray-400">{{ getPhaseScore('F2') }}%</span>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-300">Fase 3: Optimización</span>
-              <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F3')"></div>
+            <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+              <div>
+                <span class="text-gray-300 font-medium">Fase 3: Capacidades</span>
+                <p class="text-xs text-gray-400">Desarrollo y tecnología</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F3')"></div>
+                <span class="text-xs text-gray-400">{{ getPhaseScore('F3') }}%</span>
+              </div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-300">Fase 4: Innovación</span>
-              <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F4')"></div>
+            <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+              <div>
+                <span class="text-gray-300 font-medium">Fase 4: Operación</span>
+                <p class="text-xs text-gray-400">Monitoreo y mejora continua</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F4')"></div>
+                <span class="text-xs text-gray-400">{{ getPhaseScore('F4') }}%</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+              <div>
+                <span class="text-gray-300 font-medium">Fase 5: Transformación</span>
+                <p class="text-xs text-gray-400">Innovación y liderazgo</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-4 h-4 rounded-full" [class]="getPhaseStatusClass('F5')"></div>
+                <span class="text-xs text-gray-400">{{ getPhaseScore('F5') }}%</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Leyenda del Semáforo -->
+          <div class="mt-4 p-3 bg-gray-700/30 rounded-lg">
+            <h4 class="text-sm font-medium text-gray-200 mb-2">Leyenda:</h4>
+            <div class="flex items-center space-x-4 text-xs">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <span class="text-gray-400">0-20% (Crítico)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span class="text-gray-400">21-40% (Bajo)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span class="text-gray-400">41-60% (Medio)</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-gray-400">61-100% (Alto)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -98,7 +152,7 @@ import { ScoringService } from '../../../services/scoring.service';
           <ul class="space-y-2 text-yellow-100">
             <li *ngFor="let oportunidad of getOportunidades()" class="flex items-center">
               <svg class="w-5 h-5 mr-2 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path>
               </svg>
               {{ oportunidad }}
             </li>
@@ -106,24 +160,31 @@ import { ScoringService } from '../../../services/scoring.service';
         </div>
       </div>
 
-      <!-- Plan de Inicio Rápido -->
+      <!-- Plan de Acción -->
       <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
-        <h3 class="text-xl font-semibold text-blue-200 mb-4">Plan de Inicio Rápido</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="text-center p-4 bg-blue-800/30 rounded-lg">
-            <div class="text-2xl font-bold text-blue-400 mb-2">1</div>
-            <h4 class="font-medium text-white mb-2">Priorizar Competencias</h4>
-            <p class="text-sm text-blue-200">Enfócate en las áreas con mayor impacto</p>
+        <h3 class="text-2xl font-bold text-white mb-4">Plan de Acción Recomendado</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-lg font-semibold text-blue-200 mb-3">Acciones Inmediatas (0-3 meses)</h4>
+            <ul class="space-y-2 text-blue-100">
+              <li *ngFor="let accion of getAccionesInmediatas()" class="flex items-start">
+                <svg class="w-4 h-4 mr-2 mt-1 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ accion }}
+              </li>
+            </ul>
           </div>
-          <div class="text-center p-4 bg-blue-800/30 rounded-lg">
-            <div class="text-2xl font-bold text-blue-400 mb-2">2</div>
-            <h4 class="font-medium text-white mb-2">Capacitar Equipo</h4>
-            <p class="text-sm text-blue-200">Invierte en formación y desarrollo</p>
-          </div>
-          <div class="text-center p-4 bg-blue-800/30 rounded-lg">
-            <div class="text-2xl font-bold text-blue-400 mb-2">3</div>
-            <h4 class="font-medium text-white mb-2">Implementar Pilotos</h4>
-            <p class="text-sm text-blue-200">Comienza con proyectos pequeños</p>
+          <div>
+            <h4 class="text-lg font-semibold text-blue-200 mb-3">Acciones a Mediano Plazo (3-12 meses)</h4>
+            <ul class="space-y-2 text-blue-100">
+              <li *ngFor="let accion of getAccionesMedioPlazo()" class="flex items-start">
+                <svg class="w-4 h-4 mr-2 mt-1 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ accion }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -131,8 +192,8 @@ import { ScoringService } from '../../../services/scoring.service';
       <!-- Botones de Acción -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button 
-          (click)="descargarPDF()"
-          class="btn-primary flex items-center justify-center">
+          (click)="downloadPDF()"
+          class="btn-primary flex items-center justify-center px-6 py-3 text-lg font-semibold">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
@@ -140,38 +201,13 @@ import { ScoringService } from '../../../services/scoring.service';
         </button>
         
         <button 
-          (click)="agendarSesion()"
-          class="btn-secondary flex items-center justify-center">
+          (click)="scheduleConsulting()"
+          class="btn-secondary flex items-center justify-center px-6 py-3 text-lg font-semibold">
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
           Agendar Sesión de Consultoría
         </button>
-      </div>
-
-      <!-- Información de Contacto -->
-      <div class="mt-8 bg-gray-800/50 border border-gray-700 rounded-lg p-6">
-        <div class="text-center">
-          <h3 class="text-lg font-semibold text-white mb-2">¿Necesitas Ayuda?</h3>
-          <p class="text-gray-300 mb-4">
-            Nuestro equipo de expertos está listo para ayudarte a implementar tu plan de transformación digital
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <div class="flex items-center text-blue-400">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-              </svg>
-              <span>consultoria@subeacademia.com</span>
-            </div>
-            <div class="flex items-center text-blue-400">
-              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 011.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-              </svg>
-              <span>+1 (555) 123-4567</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   `,
@@ -186,24 +222,95 @@ import { ScoringService } from '../../../services/scoring.service';
     }
     
     .btn-primary {
-      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transform hover:scale-105 transition-all duration-200;
     }
     
     .btn-secondary {
-      @apply bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+      @apply bg-gray-700 hover:bg-gray-600 text-white rounded-lg transform hover:scale-105 transition-all duration-200;
     }
   `]
 })
-export class DiagnosticResultsComponent implements OnInit {
+export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
+  @ViewChild('aresChart', { static: false }) aresChartRef!: ElementRef<HTMLCanvasElement>;
+  
   private readonly diagnosticState = inject(DiagnosticStateService);
   private readonly scoringService = inject(ScoringService);
   private readonly router = inject(Router);
 
+  private aresChart: Chart | null = null;
+
   ngOnInit(): void {
-    // Verificar que el diagnóstico esté completado
-    if (!this.diagnosticState.isCompleted()) {
-      this.router.navigate(['/es', 'diagnostico', 'inicio']);
-    }
+    // Inicialización del componente
+  }
+
+  ngAfterViewInit(): void {
+    this.initializeAresChart();
+  }
+
+  private initializeAresChart(): void {
+    if (!this.aresChartRef) return;
+
+    const ctx = this.aresChartRef.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    const chartData: ChartData<'radar'> = {
+      labels: ['Fundamentos', 'Estrategia', 'Capacidades', 'Operación', 'Transformación'],
+      datasets: [{
+        label: 'Madurez ARES',
+        data: [
+          this.getPhaseScore('F1'),
+          this.getPhaseScore('F2'),
+          this.getPhaseScore('F3'),
+          this.getPhaseScore('F4'),
+          this.getPhaseScore('F5')
+        ],
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+      }]
+    };
+
+    const config: ChartConfiguration<'radar'> = {
+      type: 'radar',
+      data: chartData,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              color: '#9CA3AF',
+              backdropColor: 'transparent'
+            },
+            grid: {
+              color: '#374151'
+            },
+            pointLabels: {
+              color: '#E5E7EB',
+              font: {
+                size: 12
+              }
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#E5E7EB'
+            }
+          }
+        }
+      }
+    };
+
+    this.aresChart = new Chart(ctx, config);
   }
 
   getOverallScore(): number {
@@ -217,8 +324,10 @@ export class DiagnosticResultsComponent implements OnInit {
     if (!aresData) return 0;
     
     const totalItems = Object.keys(aresData).length;
+    if (totalItems === 0) return 0;
+    
     const totalScore = Object.values(aresData).reduce((sum: number, value: any) => sum + (value || 0), 0);
-    return Math.round((totalScore / (totalItems * 5)) * 100);
+    return Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
   }
 
   getCompetenciasScore(): number {
@@ -226,21 +335,32 @@ export class DiagnosticResultsComponent implements OnInit {
     if (!competenciasData) return 0;
     
     const totalItems = Object.keys(competenciasData).length;
+    if (totalItems === 0) return 0;
+    
     const totalScore = Object.values(competenciasData).reduce((sum: number, value: any) => sum + (value || 0), 0);
-    return Math.round((totalScore / (totalItems * 5)) * 100);
+    return Math.round((totalScore / (totalItems * 4)) * 100); // Escala 0-4
   }
 
-  getPhaseStatusClass(phase: string): string {
+  getPhaseScore(phase: string): number {
     const aresData = this.diagnosticState.aresForm.value;
-    const phaseItems = this.diagnosticState.aresItems.filter(item => item.phase === phase);
+    if (!aresData) return 0;
+    
+    const phaseItems = ARES_ITEMS.filter(item => item.phase === phase);
+    if (phaseItems.length === 0) return 0;
+    
     const phaseScore = phaseItems.reduce((sum, item) => {
       const value = aresData[item.id];
       return sum + (value || 0);
     }, 0);
-    const avgScore = phaseScore / phaseItems.length;
     
-    if (avgScore >= 4) return 'bg-green-500';
-    if (avgScore >= 3) return 'bg-yellow-500';
+    return Math.round((phaseScore / (phaseItems.length * 4)) * 100); // Escala 0-4
+  }
+
+  getPhaseStatusClass(phase: string): string {
+    const score = this.getPhaseScore(phase);
+    if (score >= 61) return 'bg-green-500';
+    if (score >= 41) return 'bg-blue-500';
+    if (score >= 21) return 'bg-yellow-500';
     return 'bg-red-500';
   }
 
@@ -290,15 +410,51 @@ export class DiagnosticResultsComponent implements OnInit {
     }
   }
 
-  descargarPDF(): void {
-    // Implementar descarga de PDF
-    console.log('Descargando PDF...');
-    // this.scoringService.generatePDF();
+  getAccionesInmediatas(): string[] {
+    const score = this.getOverallScore();
+    if (score >= 60) {
+      return [
+        'Optimizar procesos existentes',
+        'Capacitar equipo en nuevas tecnologías',
+        'Implementar pilotos de mejora'
+      ];
+    } else {
+      return [
+        'Desarrollar competencias básicas del equipo',
+        'Establecer procesos fundamentales',
+        'Invertir en infraestructura básica'
+      ];
+    }
   }
 
-  agendarSesion(): void {
-    // Implementar agendamiento de sesión
-    console.log('Agendando sesión de consultoría...');
-    // Redirigir a formulario de contacto o calendario
+  getAccionesMedioPlazo(): string[] {
+    const score = this.getOverallScore();
+    if (score >= 60) {
+      return [
+        'Escalar soluciones exitosas',
+        'Implementar gobernanza avanzada',
+        'Explorar tecnologías emergentes'
+      ];
+    } else {
+      return [
+        'Fortalecer competencias del equipo',
+        'Implementar mejores prácticas',
+        'Desarrollar capacidades de innovación'
+      ];
+    }
+  }
+
+  downloadPDF(): void {
+    // Implementar descarga de PDF
+    console.log('Descargando PDF...');
+    // Aquí iría la lógica real de generación y descarga
+    alert('Funcionalidad de descarga de PDF en desarrollo');
+  }
+
+  scheduleConsulting(): void {
+    // Implementar agendamiento de consultoría
+    console.log('Agendando consultoría...');
+    // Aquí iría la lógica real de agendamiento
+    alert('Funcionalidad de agendamiento en desarrollo');
   }
 }

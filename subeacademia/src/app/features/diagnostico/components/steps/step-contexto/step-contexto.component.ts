@@ -1,171 +1,108 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { INDUSTRIES } from '../../../data/industries';
 
 @Component({
   selector: 'app-step-contexto',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="animate-fade-in">
+    <div class="max-w-2xl mx-auto animate-fade-in">
       <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-white mb-4">Contexto de tu Organización</h2>
-        <p class="text-lg text-gray-300">Ayúdanos a entender mejor tu empresa para personalizar el diagnóstico</p>
+        <h2 class="text-3xl font-bold text-white mb-4">
+          Contexto de tu Organización
+        </h2>
+        <p class="text-lg text-gray-300">
+          Ayúdanos a entender mejor tu contexto para personalizar el diagnóstico
+        </p>
       </div>
 
-      <div class="space-y-6">
+      <form [formGroup]="contextForm" (ngSubmit)="onSubmit()" class="space-y-6">
         <!-- Industria -->
-        <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-          <label class="block text-lg font-medium text-white mb-3">
-            ¿En qué industria opera tu organización?
+        <div class="form-group">
+          <label for="industria" class="block text-sm font-medium text-gray-200 mb-2">
+            ¿En qué industria opera tu organización? *
           </label>
           <select 
-            [formControl]="industriaControl"
-            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            id="industria" 
+            formControlName="industria"
+            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
             <option value="">Selecciona una industria</option>
-            <option *ngFor="let industry of industries" [value]="industry.category">
-              {{ industry.category }}
-            </option>
+            <ng-container *ngFor="let category of industries">
+              <optgroup [label]="category.category" class="text-gray-400">
+                <option 
+                  *ngFor="let option of category.options" 
+                  [value]="option"
+                  class="text-white">
+                  {{ option }}
+                </option>
+              </optgroup>
+            </ng-container>
           </select>
-          <div *ngIf="industriaControl.invalid && industriaControl.touched" class="text-red-400 text-sm mt-1">
+          <div *ngIf="contextForm.get('industria')?.invalid && contextForm.get('industria')?.touched" 
+               class="mt-1 text-red-400 text-sm">
             Por favor selecciona una industria
           </div>
         </div>
 
-        <!-- Tamaño de la empresa -->
-        <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-          <label class="block text-lg font-medium text-white mb-3">
-            ¿Cuál es el tamaño de tu organización?
+        <!-- Tamaño -->
+        <div class="form-group">
+          <label for="tamano" class="block text-sm font-medium text-gray-200 mb-2">
+            ¿Cuál es el tamaño de tu organización? *
           </label>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label class="flex items-center p-4 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="tamanoControl.value === 'pequena'"
-                   [class.border-gray-600]="tamanoControl.value !== 'pequena'">
-              <input type="radio" [formControl]="tamanoControl" value="pequena" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-3"
-                   [class.bg-blue-500]="tamanoControl.value === 'pequena'"
-                   [class.border-blue-500]="tamanoControl.value === 'pequena'"
-                   [class.border-gray-400]="tamanoControl.value !== 'pequena'"></div>
-              <span class="text-white">Pequeña (1-50 empleados)</span>
-            </label>
-            
-            <label class="flex items-center p-4 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="tamanoControl.value === 'mediana'"
-                   [class.border-gray-600]="tamanoControl.value !== 'mediana'">
-              <input type="radio" [formControl]="tamanoControl" value="mediana" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-3"
-                   [class.bg-blue-500]="tamanoControl.value === 'mediana'"
-                   [class.border-blue-500]="tamanoControl.value === 'mediana'"
-                   [class.border-gray-400]="tamanoControl.value !== 'mediana'"></div>
-              <span class="text-white">Mediana (51-500 empleados)</span>
-            </label>
-            
-            <label class="flex items-center p-4 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="tamanoControl.value === 'grande'"
-                   [class.border-gray-600]="tamanoControl.value !== 'grande'">
-              <input type="radio" [formControl]="tamanoControl" value="grande" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-3"
-                   [class.bg-blue-500]="tamanoControl.value === 'grande'"
-                   [class.border-blue-500]="tamanoControl.value === 'grande'"
-                   [class.border-gray-400]="tamanoControl.value !== 'grande'"></div>
-              <span class="text-white">Grande (500+ empleados)</span>
-            </label>
-          </div>
-          <div *ngIf="tamanoControl.invalid && tamanoControl.touched" class="text-red-400 text-sm mt-1">
-            Por favor selecciona el tamaño de tu organización
+          <select 
+            id="tamano" 
+            formControlName="tamano"
+            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+            <option value="">Selecciona el tamaño</option>
+            <option value="micro">Micro (1-10 empleados)</option>
+            <option value="pequena">Pequeña (11-50 empleados)</option>
+            <option value="mediana">Mediana (51-250 empleados)</option>
+            <option value="grande">Grande (251+ empleados)</option>
+          </select>
+          <div *ngIf="contextForm.get('tamano')?.invalid && contextForm.get('tamano')?.touched" 
+               class="mt-1 text-red-400 text-sm">
+            Por favor selecciona el tamaño
           </div>
         </div>
 
-        <!-- Presupuesto de TI -->
-        <div class="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
-          <label class="block text-lg font-medium text-white mb-3">
-            ¿Cuál es tu presupuesto anual para tecnologías de la información?
+        <!-- Presupuesto -->
+        <div class="form-group">
+          <label for="presupuesto" class="block text-sm font-medium text-gray-200 mb-2">
+            ¿Cuál es tu presupuesto anual para proyectos de IA? *
           </label>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <label class="flex items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="presupuestoControl.value === 'bajo'"
-                   [class.border-gray-600]="presupuestoControl.value !== 'bajo'">
-              <input type="radio" [formControl]="presupuestoControl" value="bajo" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-2"
-                   [class.bg-blue-500]="presupuestoControl.value === 'bajo'"
-                   [class.border-blue-500]="presupuestoControl.value === 'bajo'"
-                   [class.border-gray-400]="presupuestoControl.value !== 'bajo'"></div>
-              <span class="text-white text-sm">Bajo</span>
-            </label>
-            
-            <label class="flex items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="presupuestoControl.value === 'medio'"
-                   [class.border-gray-600]="presupuestoControl.value !== 'medio'">
-              <input type="radio" [formControl]="presupuestoControl" value="medio" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-2"
-                   [class.bg-blue-500]="presupuestoControl.value === 'medio'"
-                   [class.border-blue-500]="presupuestoControl.value === 'medio'"
-                   [class.border-gray-400]="presupuestoControl.value !== 'medio'"></div>
-              <span class="text-white text-sm">Medio</span>
-            </label>
-            
-            <label class="flex items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="presupuestoControl.value === 'alto'"
-                   [class.border-gray-600]="presupuestoControl.value !== 'alto'">
-              <input type="radio" [formControl]="presupuestoControl" value="alto" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-2"
-                   [class.bg-blue-500]="presupuestoControl.value === 'alto'"
-                   [class.border-blue-500]="presupuestoControl.value === 'alto'"
-                   [class.border-gray-400]="presupuestoControl.value !== 'alto'"></div>
-              <span class="text-white text-sm">Alto</span>
-            </label>
-            
-            <label class="flex items-center p-3 bg-gray-700 rounded-lg border-2 cursor-pointer hover:bg-gray-600 transition-colors"
-                   [class.border-blue-500]="presupuestoControl.value === 'premium'"
-                   [class.border-gray-600]="presupuestoControl.value !== 'premium'">
-              <input type="radio" [formControl]="presupuestoControl" value="premium" class="sr-only">
-              <div class="w-4 h-4 rounded-full border-2 mr-2"
-                   [class.bg-blue-500]="presupuestoControl.value === 'premium'"
-                   [class.border-blue-500]="presupuestoControl.value === 'premium'"
-                   [class.border-gray-400]="presupuestoControl.value !== 'premium'"></div>
-              <span class="text-white text-sm">Premium</span>
-            </label>
-          </div>
-          <div *ngIf="presupuestoControl.invalid && presupuestoControl.touched" class="text-red-400 text-sm mt-1">
-            Por favor selecciona tu presupuesto de TI
+          <select 
+            id="presupuesto" 
+            formControlName="presupuesto"
+            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+            <option value="">Selecciona el presupuesto</option>
+            <option value="bajo">Bajo (menos de $50K USD)</option>
+            <option value="medio">Medio ($50K - $500K USD)</option>
+            <option value="alto">Alto ($500K - $5M USD)</option>
+            <option value="muy-alto">Muy alto (más de $5M USD)</option>
+          </select>
+          <div *ngIf="contextForm.get('presupuesto')?.invalid && contextForm.get('presupuesto')?.touched" 
+               class="mt-1 text-red-400 text-sm">
+            Por favor selecciona el presupuesto
           </div>
         </div>
-      </div>
 
-      <!-- Debug info -->
-      <div class="mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-600">
-        <h4 class="text-sm font-medium text-gray-300 mb-2">Estado del formulario (Debug):</h4>
-        <div class="text-xs text-gray-400 space-y-1">
-          <div>Industria: "{{ industriaControl.value }}"</div>
-          <div>Tamaño: "{{ tamanoControl.value }}"</div>
-          <div>Presupuesto: "{{ presupuestoControl.value }}"</div>
-          <div>Formulario válido: {{ isFormValid() ? 'SÍ' : 'NO' }}</div>
+        <!-- Botón de envío -->
+        <div class="pt-4">
+          <button 
+            type="submit" 
+            [disabled]="contextForm.invalid"
+            class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
+            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+            Siguiente
+          </button>
         </div>
-      </div>
-
-      <!-- Botones de navegación -->
-      <div class="flex justify-between mt-8">
-        <button 
-          (click)="anterior()"
-          class="btn-secondary">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-          Anterior
-        </button>
-        
-        <button 
-          (click)="siguiente()"
-          [disabled]="!isFormValid()"
-          class="btn-primary">
-          Siguiente
-          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
-      </div>
+      </form>
     </div>
   `,
   styles: [`
@@ -179,99 +116,79 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
     }
     
     .btn-primary {
-      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200;
+      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg;
     }
-    
-    .btn-secondary {
-      @apply bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200;
+
+    .form-group {
+      @apply space-y-2;
+    }
+
+    select option {
+      @apply bg-gray-800 text-white;
+    }
+
+    select optgroup {
+      @apply bg-gray-700 text-gray-300;
     }
   `]
 })
 export class StepContextoComponent implements OnInit {
-  private readonly diagnosticState = inject(DiagnosticStateService);
+  private readonly fb = inject(FormBuilder);
+  private readonly stateService = inject(DiagnosticStateService);
   private readonly router = inject(Router);
 
-  // Controles del formulario
-  industriaControl = new FormControl('', { validators: [] });
-  tamanoControl = new FormControl('', { validators: [] });
-  presupuestoControl = new FormControl('', { validators: [] });
-
-  // Datos disponibles
-  industries = this.diagnosticState.industries;
+  contextForm!: FormGroup;
+  industries = INDUSTRIES;
 
   ngOnInit(): void {
-    this.loadSavedData();
-    
-    // Suscribirse a cambios para debugging
-    this.industriaControl.valueChanges.subscribe(value => {
-      console.log('Industria cambiada:', value);
-    });
-    
-    this.tamanoControl.valueChanges.subscribe(value => {
-      console.log('Tamaño cambiado:', value);
-    });
-    
-    this.presupuestoControl.valueChanges.subscribe(value => {
-      console.log('Presupuesto cambiado:', value);
+    this.initializeForm();
+    this.loadExistingData();
+  }
+
+  private initializeForm(): void {
+    this.contextForm = this.fb.group({
+      industria: ['', [Validators.required]],
+      tamano: ['', [Validators.required]],
+      presupuesto: ['', [Validators.required]]
     });
   }
 
-  // Validación del formulario
-  isFormValid(): boolean {
-    const isValid = !!this.industriaControl.value && 
-                   !!this.tamanoControl.value && 
-                   !!this.presupuestoControl.value;
-    
-    console.log('Validando formulario:', {
-      industria: this.industriaControl.value,
-      tamano: this.tamanoControl.value,
-      presupuesto: this.presupuestoControl.value,
-      isValid: isValid
-    });
-    
-    return isValid;
-  }
-
-  private loadSavedData(): void {
-    const savedData = this.diagnosticState.getContextoData();
-    if (savedData) {
-      this.industriaControl.setValue(savedData.industria || '');
-      this.tamanoControl.setValue(savedData.tamano || '');
-      this.presupuestoControl.setValue(savedData.presupuesto || '');
+  private loadExistingData(): void {
+    const existingData = this.stateService.getContextoData();
+    if (existingData) {
+      this.contextForm.patchValue({
+        industria: existingData.industria || '',
+        tamano: existingData.tamano || '',
+        presupuesto: existingData.presupuesto || ''
+      });
     }
   }
 
-  anterior(): void {
-    this.router.navigate(['/es', 'diagnostico', 'inicio']);
-  }
-
-  siguiente(): void {
-    console.log('Botón siguiente clickeado');
-    console.log('Estado del formulario:', {
-      industria: this.industriaControl.value,
-      tamano: this.tamanoControl.value,
-      presupuesto: this.presupuestoControl.value
-    });
-    console.log('¿Formulario válido?', this.isFormValid());
-    
-    if (this.isFormValid()) {
-      console.log('Formulario válido, guardando datos...');
-      // Guardar datos
-      this.diagnosticState.saveContextoData({
-        industria: this.industriaControl.value,
-        tamano: this.tamanoControl.value,
-        presupuesto: this.presupuestoControl.value
-      });
+  onSubmit(): void {
+    if (this.contextForm.valid) {
+      const formData = this.contextForm.value;
       
-      console.log('Datos guardados, navegando a ARES F1...');
-      // Navegar al siguiente paso
-      this.router.navigate(['/es', 'diagnostico', 'ares', 'F1']).then(() => {
-        console.log('Navegación exitosa a ARES F1');
-      }).catch(error => {
-        console.error('Error en navegación:', error);
+      // Guardar en el servicio de estado
+      this.stateService.saveContextoData({
+        industria: formData.industria,
+        tamano: formData.tamano,
+        presupuesto: formData.presupuesto
       });
-    } else {
-      console.log('Formulario no válido, no se puede avanzar');
+
+      // Navegar al siguiente paso
+      this.navigateToNextStep();
     }
+  }
+
+  private navigateToNextStep(): void {
+    const currentUrl = this.router.url;
+    const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+    const nextStepUrl = `${baseUrl}/ares`;
+    
+    this.router.navigate([nextStepUrl]).catch(error => {
+      console.error('Error en navegación:', error);
+      // Fallback: navegar usando la ruta completa
+      this.router.navigate(['/es', 'diagnostico', 'ares']);
+    });
   }
 }
