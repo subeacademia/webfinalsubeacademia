@@ -17,6 +17,12 @@ export interface Question {
     required?: boolean;
 }
 
+export interface ContextoData {
+    industria: string | null;
+    tamano: string | null;
+    presupuesto: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DiagnosticStateService {
 	private readonly fb = inject(FormBuilder);
@@ -31,19 +37,10 @@ export class DiagnosticStateService {
     readonly industries = INDUSTRIES;
 
     // Estado reactivo del wizard
-    private readonly _currentQuestionIndex = signal(0);
-    private readonly _flatQuestions = signal<Question[]>([]);
     private readonly _isCompleted = signal(false);
 
     // Signals públicos
-    readonly currentQuestionIndex = this._currentQuestionIndex.asReadonly();
-    readonly flatQuestions = this._flatQuestions.asReadonly();
     readonly isCompleted = this._isCompleted.asReadonly();
-    readonly totalQuestions = computed(() => this._flatQuestions().length);
-    readonly currentQuestion = computed(() => this._flatQuestions()[this._currentQuestionIndex()] || null);
-    readonly progress = computed(() => this.totalQuestions() ? (this._currentQuestionIndex() / this.totalQuestions()) * 100 : 0);
-    readonly canGoNext = computed(() => this._currentQuestionIndex() < this.totalQuestions() - 1);
-    readonly canGoPrevious = computed(() => this._currentQuestionIndex() > 0);
 
     // Formularios
     readonly form: FormGroup = this.fb.group({
@@ -65,8 +62,6 @@ export class DiagnosticStateService {
         this.initializeForms();
         this.loadFromStorage();
         this.setupFormSubscriptions();
-        // Inicializar con preguntas por defecto para empresa
-        this.initializeDefaultQuestions();
     }
 
     private initializeForms(): void {
@@ -87,287 +82,185 @@ export class DiagnosticStateService {
         this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
     }
 
-    private initializeDefaultQuestions(): void {
-        // Inicializar con preguntas por defecto para empresa
-        this.updateContextControls('empresa');
-        this.buildFlatQuestions('empresa');
-    }
-
     // Método principal para generar el cuestionario dinámico
     setSegmentFromIndustry(industry: string): void {
         const normalized = (industry || '').toLowerCase();
         let seg: Segment = 'empresa';
         
-        if (normalized.includes('educación superior')) seg = 'educacion_superior';
-        else if (normalized.includes('educación escolar')) seg = 'educacion_escolar';
-        else if (normalized.includes('capacitaci') || normalized.includes('profesional')) seg = 'profesional_independiente';
+        if (normalized.includes('educacion') || normalized.includes('education') || normalized.includes('academico')) {
+            seg = 'educacion_superior';
+        } else if (normalized.includes('escolar') || normalized.includes('school')) {
+            seg = 'educacion_escolar';
+        } else if (normalized.includes('consultoria') || normalized.includes('consulting') || normalized.includes('servicios') || 
+                   normalized.includes('profesional') || normalized.includes('independiente')) {
+            seg = 'profesional_independiente';
+        }
+        // Por defecto usa 'empresa' para otros casos
         
-        this.form.controls['segmento'].setValue(seg);
+        this.form.patchValue({ segmento: seg });
         this.updateContextControls(seg);
-        this.buildFlatQuestions(seg);
-        this._currentQuestionIndex.set(0);
-        this._isCompleted.set(false);
     }
 
-    private buildFlatQuestions(segment: Segment): void {
-        const questions: Question[] = [];
-
-        // 1. Pregunta de industria (ya seleccionada, pero la mantenemos para mostrar)
-        questions.push({
-            id: 'industria',
-            type: 'select',
-            label: 'diagnostico.contexto.startup.industria',
-            controlName: 'industria',
-            options: this.industries,
-            required: true
+    private updateContextControls(segment: Segment): void {
+        // Limpiar controles existentes
+        Object.keys(this.contextoControls).forEach(key => {
+            delete this.contextoControls[key];
         });
 
-        // 2. Controles de contexto dinámicos (sin industria)
-        const ctxKeys = Object.keys(this.contextoControls).filter(k => k !== 'industria');
-        for (const key of ctxKeys) {
-            questions.push({
-                id: `contexto_${key}`,
-                type: 'text',
-                label: `diagnostico.contexto.${key}`,
-                controlName: key,
-                required: true
-            });
-        }
-
-        // 3. Preguntas ARES (una a la vez)
-        for (const item of this.aresItems) {
-            questions.push({
-                id: `ares_${item.id}`,
-                type: 'likert',
-                label: item.labelKey,
-                tooltip: item.tooltip,
-                controlName: item.id,
-                phase: item.phase,
-                dimension: item.dimension,
-                required: true
-            });
-        }
-
-        // 4. Competencias prioritarias por segmento (top 6)
-        const competenciasPrioritarias = COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO[segment] || [];
-        for (const compId of competenciasPrioritarias) {
-            const comp = this.competencias.find(c => c.id === compId);
-            if (comp) {
-                questions.push({
-                    id: `comp_${comp.id}`,
-                    type: 'likert',
-                    label: comp.nameKey,
-                    controlName: compId,
-                    required: true
-                });
-            }
-        }
-
-        // 5. Objetivo
-        questions.push({
-            id: 'objetivo',
-            type: 'likert',
-            label: 'diagnostico.objetivo.title',
-            controlName: 'objetivo',
-            required: true
+        // Agregar controles específicos del segmento
+        const segmentControls = COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO[segment] || [];
+        
+        segmentControls.forEach(compId => {
+            this.contextoControls[compId] = this.fb.control<number | null>(null, { validators: [Validators.required] });
         });
 
-        // 6. Lead form
-        questions.push(
-            {
-                id: 'lead_nombre',
-                type: 'text',
-                label: 'diagnostico.lead.nombre',
-                controlName: 'nombre',
-                required: true
-            },
-            {
-                id: 'lead_email',
-                type: 'text',
-                label: 'diagnostico.lead.email',
-                controlName: 'email',
-                required: true
-            },
-            {
-                id: 'lead_telefono',
-                type: 'text',
-                label: 'diagnostico.lead.telefono',
-                controlName: 'telefono',
-                required: false
-            }
-        );
-
-        this._flatQuestions.set(questions);
+        // Agregar controles de contexto general
+        this.contextoControls['industria'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        this.contextoControls['tamano'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        this.contextoControls['presupuesto'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
     }
 
-    // Navegación del wizard
-    nextQuestion(): void {
-        const currentIndex = this._currentQuestionIndex();
-        if (currentIndex < this.totalQuestions() - 1) {
-            this._currentQuestionIndex.set(currentIndex + 1);
-        } else {
-            this._isCompleted.set(true);
+    private ensureAresControl(itemId: string): void {
+        if (!this.aresForm.contains(itemId)) {
+            this.aresForm.addControl(itemId, this.fb.control<number | null>(null, { validators: [Validators.required] }));
         }
     }
 
-    previousQuestion(): void {
-        const currentIndex = this._currentQuestionIndex();
-        if (currentIndex > 0) {
-            this._currentQuestionIndex.set(currentIndex - 1);
+    private ensureCompetenciaControl(compId: string): void {
+        if (!this.competenciasForm.contains(compId)) {
+            this.competenciasForm.addControl(compId, this.fb.control<number | null>(null, { validators: [Validators.required] }));
         }
     }
 
-    goToQuestion(index: number): void {
-        if (index >= 0 && index < this.totalQuestions()) {
-            this._currentQuestionIndex.set(index);
-        }
-    }
-
-    // Métodos auxiliares
-    updateContextControls(segment: Segment): void {
-        const controlsBySegment: any = {
-            empresa: ['industria','tamanoEmpresa','facturacionAnual','zonaOperacion'],
-            educacion_superior: ['industria','numEstudiantes','numDocentes','tipoInstitucion'],
-            educacion_escolar: ['industria','numEstudiantes','niveles','dependencia'],
-            profesional_independiente: ['industria','especialidad','anosExperiencia','zonaOperacion'],
-        };
-        const list: string[] = controlsBySegment[segment] || [];
-        for (const key of list) {
-            this.ensureContextControl(key);
-        }
-    }
-
-	private resetContextControls(): void {
-		for (const key of Object.keys(this.contextoControls)) {
-			this.contextoControls[key].reset();
-			delete this.contextoControls[key];
-		}
-	}
-
-	private ensureContextControl(key: string): FormControl<any> {
-		if (!this.contextoControls[key]) {
-			this.contextoControls[key] = this.fb.control<any>(null);
-		}
-		return this.contextoControls[key];
-	}
-
-	private ensureAresControl(itemId: string): FormControl<any> {
-		if (!this.aresForm.contains(itemId)) {
-			this.aresForm.addControl(itemId, this.fb.control<number | null>(null));
-		}
-		return this.aresForm.controls[itemId] as FormControl<any>;
-	}
-
-	private ensureCompetenciaControl(compId: string): FormControl<any> {
-		if (!this.competenciasForm.contains(compId)) {
-			this.competenciasForm.addControl(compId, this.fb.control<NivelCompetencia | null>(null));
-		}
-		return this.competenciasForm.controls[compId] as FormControl<any>;
-	}
-
-    // Métodos de utilidad
-    setAresAnswer(itemId: string, value: number): void {
+    // Métodos para obtener controles específicos
+    getAresControl(itemId: string): FormControl {
         this.ensureAresControl(itemId);
-        this.aresForm.controls[itemId]?.setValue(value);
+        return this.aresForm.get(itemId) as FormControl;
     }
 
-    setCompetenciaNivel(compId: string, nivel: NivelCompetencia): void {
+    getCompetenciaControl(compId: string): FormControl {
         this.ensureCompetenciaControl(compId);
-        this.competenciasForm.controls[compId]?.setValue(nivel);
+        return this.competenciasForm.get(compId) as FormControl;
+    }
+
+    // Métodos para el contexto
+    saveContextoData(data: ContextoData): void {
+        this.contextoControls['industria']?.setValue(data.industria);
+        this.contextoControls['tamano']?.setValue(data.tamano);
+        this.contextoControls['presupuesto']?.setValue(data.presupuesto);
+        
+        // Actualizar el segmento basado en la industria
+        if (data.industria) {
+            this.setSegmentFromIndustry(data.industria);
+        }
+    }
+
+    getContextoData(): ContextoData | null {
+        const industria = this.contextoControls['industria']?.value;
+        const tamano = this.contextoControls['tamano']?.value;
+        const presupuesto = this.contextoControls['presupuesto']?.value;
+        
+        if (industria && tamano && presupuesto) {
+            return { industria, tamano, presupuesto };
+        }
+        return null;
+    }
+
+    // Método para marcar como completado
+    markAsCompleted(): void {
+        this._isCompleted.set(true);
+        this.saveToStorage();
+    }
+
+    // Método para calcular el progreso basado en la ruta
+    getProgressForRoute(currentRoute: string): number {
+        const routeProgress: Record<string, number> = {
+            '/diagnostico/inicio': 0,
+            '/diagnostico/contexto': 16.67,
+            '/diagnostico/ares/F1': 33.33,
+            '/diagnostico/ares/F2': 41.67,
+            '/diagnostico/ares/F3': 50,
+            '/diagnostico/ares/F4': 58.33,
+            '/diagnostico/competencias/1': 66.67,
+            '/diagnostico/competencias/2': 75,
+            '/diagnostico/competencias/3': 83.33,
+            '/diagnostico/objetivo': 91.67,
+            '/diagnostico/lead': 95.83,
+            '/diagnostico/resultados': 100
+        };
+        
+        return routeProgress[currentRoute] || 0;
     }
 
     // Métodos de persistencia
-	private loadFromStorage(): void {
-		try {
-			const raw = localStorage.getItem(this.STORAGE_KEY);
-			if (!raw) return;
-			const parsed = JSON.parse(raw) as Partial<DiagnosticoFormValue>;
-			if (parsed.segmento) {
-				this.form.controls['segmento'].setValue(parsed.segmento);
-				this.updateContextControls(parsed.segmento);
-			}
-			if (parsed.contexto) {
-				for (const [k, v] of Object.entries(parsed.contexto)) {
-					this.ensureContextControl(k);
-					this.contextoControls[k]?.setValue(v);
-				}
-			}
-			if (parsed.objetivo) {
-				this.form.controls['objetivo'].setValue(parsed.objetivo);
-			}
-			if (parsed.ares?.respuestas) {
-				for (const [itemId, value] of Object.entries(parsed.ares.respuestas)) {
-					this.ensureAresControl(itemId);
-					this.aresForm.controls[itemId]?.setValue(value);
-				}
-			}
-			if (parsed.competencias?.niveles) {
-				for (const [compId, nivel] of Object.entries(parsed.competencias.niveles)) {
-					this.ensureCompetenciaControl(compId);
-					this.competenciasForm.controls[compId]?.setValue(nivel);
-				}
-			}
-			if (parsed.lead) {
-				this.leadForm.patchValue(parsed.lead);
-			}
-		} catch {
-			// no-op
-		}
-	}
-
-	private saveToStorage(): void {
-		try {
-			const payload: DiagnosticoFormValue = {
-				segmento: this.form.controls['segmento'].value,
-				contexto: Object.fromEntries(Object.keys(this.contextoControls).map(k => [k, this.contextoControls[k].value])),
-				objetivo: this.form.controls['objetivo'].value,
-				ares: { respuestas: Object.fromEntries(Object.keys(this.aresForm.controls).map(k => [k, this.aresForm.controls[k].value])) as any },
-				competencias: { niveles: Object.fromEntries(Object.keys(this.competenciasForm.controls).map(k => [k, this.competenciasForm.controls[k].value])) as any },
-				lead: this.leadForm.value,
-			};
-			localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
-		} catch {
-			// no-op
-		}
-	}
-
-    getFullValue(): DiagnosticoFormValue {
-        return {
-            segmento: this.form.controls['segmento'].value,
-            contexto: Object.fromEntries(Object.keys(this.contextoControls).map(k => [k, this.contextoControls[k].value])) as any,
-            objetivo: this.form.controls['objetivo'].value,
-            ares: { respuestas: Object.fromEntries(Object.keys(this.aresForm.controls).map(k => [k, this.aresForm.controls[k].value])) as any },
-            competencias: { niveles: Object.fromEntries(Object.keys(this.competenciasForm.controls).map(k => [k, this.competenciasForm.controls[k].value])) as any },
-            lead: this.leadForm.value,
-        };
-    }
-
-    // Método para obtener respuestas ARES agrupadas por fase
-    getAresByPhase(): Record<string, { score: number; total: number; items: AresItem[] }> {
-        const result: Record<string, { score: number; total: number; items: AresItem[] }> = {};
-        
-        for (const item of this.aresItems) {
-            const phase = item.phase || 'F1';
-            if (!result[phase]) {
-                result[phase] = { score: 0, total: 0, items: [] };
-            }
-            
-            const value = this.aresForm.controls[item.id]?.value || 0;
-            result[phase].score += value;
-            result[phase].total += 1;
-            result[phase].items.push(item);
+    private saveToStorage(): void {
+        try {
+            const data = {
+                form: this.form.value,
+                aresForm: this.aresForm.value,
+                competenciasForm: this.competenciasForm.value,
+                leadForm: this.leadForm.value,
+                contextoControls: this.contextoControls,
+                isCompleted: this._isCompleted()
+            };
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+        } catch (error) {
+            console.warn('No se pudo guardar en localStorage:', error);
         }
-        
-        return result;
     }
 
-    // Método para obtener competencias con scores
-    getCompetenciasScores(): { id: string; nameKey: string; score: number }[] {
-        return this.competencias.map(comp => ({
-            id: comp.id,
-            nameKey: comp.nameKey,
-            score: this.competenciasForm.controls[comp.id]?.value || 0
-        }));
+    private loadFromStorage(): void {
+        try {
+            const stored = localStorage.getItem(this.STORAGE_KEY);
+            if (stored) {
+                const data = JSON.parse(stored);
+                
+                if (data.form) this.form.patchValue(data.form);
+                if (data.aresForm) this.aresForm.patchValue(data.aresForm);
+                if (data.competenciasForm) this.competenciasForm.patchValue(data.competenciasForm);
+                if (data.leadForm) this.leadForm.patchValue(data.leadForm);
+                if (data.isCompleted) this._isCompleted.set(data.isCompleted);
+                
+                // Restaurar controles de contexto si existen
+                if (data.contextoControls) {
+                    Object.keys(data.contextoControls).forEach(key => {
+                        if (data.contextoControls[key] && !this.contextoControls[key]) {
+                            this.contextoControls[key] = this.fb.control(data.contextoControls[key]);
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn('No se pudo cargar desde localStorage:', error);
+        }
+    }
+
+    // Método para limpiar el estado
+    clearState(): void {
+        this.form.reset();
+        this.aresForm.reset();
+        this.competenciasForm.reset();
+        this.leadForm.reset();
+        this._isCompleted.set(false);
+        
+        // Limpiar controles de contexto
+        Object.keys(this.contextoControls).forEach(key => {
+            delete this.contextoControls[key];
+        });
+        
+        localStorage.removeItem(this.STORAGE_KEY);
+    }
+
+    // Método para obtener todos los datos del diagnóstico
+    getDiagnosticData(): any {
+        return {
+            contexto: this.getContextoData(),
+            ares: this.aresForm.value,
+            competencias: this.competenciasForm.value,
+            objetivo: this.form.get('objetivo')?.value,
+            lead: this.leadForm.value,
+            segmento: this.form.get('segmento')?.value
+        };
     }
 }
 
