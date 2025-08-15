@@ -72,6 +72,11 @@ export class DiagnosticStateService {
         for (const comp of this.competencias) {
             this.ensureCompetenciaControl(comp.id);
         }
+        
+        // Inicializar controles de contexto general
+        this.contextoControls['industria'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        this.contextoControls['tamano'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        this.contextoControls['presupuesto'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
     }
 
     private setupFormSubscriptions(): void {
@@ -80,6 +85,13 @@ export class DiagnosticStateService {
         this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
         this.competenciasForm.valueChanges.subscribe(() => this.saveToStorage());
         this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
+        
+        // Suscripción a los controles de contexto
+        Object.values(this.contextoControls).forEach(control => {
+            if (control instanceof FormControl) {
+                control.valueChanges.subscribe(() => this.saveToStorage());
+            }
+        });
     }
 
     // Método principal para generar el cuestionario dinámico
@@ -102,8 +114,12 @@ export class DiagnosticStateService {
     }
 
     private updateContextControls(segment: Segment): void {
-        // Limpiar controles existentes
-        Object.keys(this.contextoControls).forEach(key => {
+        // Limpiar solo los controles específicos del segmento, no los de contexto general
+        const segmentControlKeys = Object.keys(this.contextoControls).filter(key => 
+            key !== 'industria' && key !== 'tamano' && key !== 'presupuesto'
+        );
+        
+        segmentControlKeys.forEach(key => {
             delete this.contextoControls[key];
         });
 
@@ -113,11 +129,6 @@ export class DiagnosticStateService {
         segmentControls.forEach(compId => {
             this.contextoControls[compId] = this.fb.control<number | null>(null, { validators: [Validators.required] });
         });
-
-        // Agregar controles de contexto general
-        this.contextoControls['industria'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
-        this.contextoControls['tamano'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
-        this.contextoControls['presupuesto'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
     }
 
     private ensureAresControl(itemId: string): void {
@@ -145,14 +156,41 @@ export class DiagnosticStateService {
 
     // Métodos para el contexto
     saveContextoData(data: ContextoData): void {
-        this.contextoControls['industria']?.setValue(data.industria);
-        this.contextoControls['tamano']?.setValue(data.tamano);
-        this.contextoControls['presupuesto']?.setValue(data.presupuesto);
+        console.log('saveContextoData llamado con:', data);
+        console.log('Controles de contexto disponibles:', Object.keys(this.contextoControls));
+        
+        if (this.contextoControls['industria']) {
+            console.log('Estableciendo industria:', data.industria);
+            this.contextoControls['industria'].setValue(data.industria);
+        } else {
+            console.error('Control industria no encontrado!');
+        }
+        
+        if (this.contextoControls['tamano']) {
+            console.log('Estableciendo tamano:', data.tamano);
+            this.contextoControls['tamano'].setValue(data.tamano);
+        } else {
+            console.error('Control tamano no encontrado!');
+        }
+        
+        if (this.contextoControls['presupuesto']) {
+            console.log('Estableciendo presupuesto:', data.presupuesto);
+            this.contextoControls['presupuesto'].setValue(data.presupuesto);
+        } else {
+            console.error('Control presupuesto no encontrado!');
+        }
         
         // Actualizar el segmento basado en la industria
         if (data.industria) {
+            console.log('Actualizando segmento basado en industria:', data.industria);
             this.setSegmentFromIndustry(data.industria);
         }
+        
+        console.log('Estado final de controles de contexto:', {
+            industria: this.contextoControls['industria']?.value,
+            tamano: this.contextoControls['tamano']?.value,
+            presupuesto: this.contextoControls['presupuesto']?.value
+        });
     }
 
     getContextoData(): ContextoData | null {

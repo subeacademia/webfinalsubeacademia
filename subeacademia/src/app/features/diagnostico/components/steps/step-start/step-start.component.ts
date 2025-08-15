@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -57,9 +57,14 @@ import { Router } from '@angular/router';
   `]
 })
 export class StepStartComponent {
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
 
   comenzarDiagnostico(): void {
-    this.router.navigate(['/diagnostico/contexto']);
+    console.log('Navegando a /es/diagnostico/contexto');
+    this.router.navigate(['/es', 'diagnostico', 'contexto']).then(() => {
+      console.log('Navegación completada');
+    }).catch(error => {
+      console.error('Error en navegación:', error);
+    });
   }
 }

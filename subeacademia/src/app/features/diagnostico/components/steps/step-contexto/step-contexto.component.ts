@@ -204,7 +204,16 @@ export class StepContextoComponent {
   }
 
   siguiente(): void {
+    console.log('Botón siguiente clickeado');
+    console.log('Estado del formulario:', {
+      industria: this.industriaControl.value,
+      tamano: this.tamanoControl.value,
+      presupuesto: this.presupuestoControl.value
+    });
+    console.log('¿Formulario válido?', this.isFormValid());
+    
     if (this.isFormValid()) {
+      console.log('Formulario válido, guardando datos...');
       // Guardar datos
       this.diagnosticState.saveContextoData({
         industria: this.industriaControl.value,
@@ -212,8 +221,15 @@ export class StepContextoComponent {
         presupuesto: this.presupuestoControl.value
       });
       
+      console.log('Datos guardados, navegando a ARES F1...');
       // Navegar al siguiente paso
-      this.router.navigate(['/diagnostico/ares/F1']);
+      this.router.navigate(['/diagnostico/ares/F1']).then(() => {
+        console.log('Navegación exitosa a ARES F1');
+      }).catch(error => {
+        console.error('Error en navegación:', error);
+      });
+    } else {
+      console.log('Formulario no válido, no se puede avanzar');
     }
   }
 }
