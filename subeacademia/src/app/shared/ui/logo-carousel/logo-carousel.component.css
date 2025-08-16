@@ -1,0 +1,53 @@
+.logo-carousel-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.logo-carousel-track {
+  display: flex;
+  animation: scroll 35s linear infinite;
+  width: max-content;
+}
+
+.logo-carousel-track.reverse {
+  animation-direction: reverse;
+}
+
+.logo-item {
+  flex-shrink: 0;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-image {
+  height: 60px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.logo-image:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pausar animación en hover */
+.logo-carousel-container:hover .logo-carousel-track {
+  animation-play-state: paused;
+}

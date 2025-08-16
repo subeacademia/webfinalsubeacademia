@@ -6,12 +6,13 @@ import { I18nService } from '../../core/i18n/i18n.service';
 import { SettingsService, HomePageContent } from '../../core/data/settings.service';
 import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
-import { ClientLogo } from '../../core/models/logo.model';
+import { Logo } from '../../core/models/logo.model';
+import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -32,8 +33,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private charIndex = 0;
   private isDeleting = false;
   private timeoutId: any;
-  logosEmpresas: ClientLogo[] = [];
-  logosEducacion: ClientLogo[] = [];
+  companyLogos: Logo[] = [];
+  educationLogos: Logo[] = [];
 
   ngOnInit(): void {
     this.contentSub = this.i18n.currentLang$
@@ -62,8 +63,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
 
     // Logos
-    this.logos.listByType('empresa').subscribe(v => this.logosEmpresas = v);
-    this.logos.listByType('educacion').subscribe(v => this.logosEducacion = v);
+    this.logos.listByType('Empresa').subscribe(v => this.companyLogos = v);
+    this.logos.listByType('Institución Educativa').subscribe(v => this.educationLogos = v);
   }
 
   private resetTypewriterState() {
