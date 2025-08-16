@@ -5,7 +5,7 @@
     <div class="text-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-8">
       <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Tus Resultados del Diagnóstico</h2>
       <p class="mt-2 text-lg text-gray-600 dark:text-gray-400" *ngIf="diagnosticData">
-        Análisis para {{ diagnosticData.lead?.nombre || 'Usuario' }}
+        Análisis para {{ diagnosticData.lead.name }}
       </p>
     </div>
 

@@ -5,10 +5,16 @@ import { getMockCourses, getMockPosts } from './mock-content';
 import { Post } from '../models/post.model';
 import { Course } from '../models/course.model';
 import { generateSlug } from '../utils/slug.util';
+import { COMPETENCIAS_COMPLETAS, Competency } from '../../features/diagnostico/data/competencias';
 
 @Injectable({ providedIn: 'root' })
 export class ContentService {
   private readonly firestore: Firestore = inject(Firestore);
+
+  // Competencias del diagnóstico
+  getCompetencies(): Competency[] {
+    return COMPETENCIAS_COMPLETAS;
+  }
 
   // Posts
   getPostById(id: string): Observable<Post | undefined> {

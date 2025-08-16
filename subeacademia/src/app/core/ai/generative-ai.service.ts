@@ -3,13 +3,12 @@ import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { AsistenteIaService } from '../../shared/ui/chatbot/asistente-ia.service';
 
-// Interfaz para los datos de entrada
 export interface DiagnosticAnalysisData {
   userName: string;
   userRole: string;
   userIndustry: string;
-  topCompetencies: { name: string; score: number }[];
-  lowestCompetencies: { name: string; score: number }[];
+  topCompetencies: { name: string; score: number; description: string }[];
+  lowestCompetencies: { name: string; score: number; description: string }[];
 }
 
 @Injectable({
@@ -19,53 +18,47 @@ export class GenerativeAiService {
 
   constructor(private asistenteIaService: AsistenteIaService) {}
 
-  /**
-   * Genera un análisis de diagnóstico personalizado llamando a la API de Azure.
-   * Construye un payload conversacional (system + user) que es el formato esperado por la API.
-   */
   generateDiagnosticAnalysis(data: DiagnosticAnalysisData): Observable<string> {
-    // 1. Prompt de Sistema: Define el rol y el formato de salida de la IA.
+    
+    // MEGA PROMPT DE SISTEMA V2 - MÁS DETALLADO Y CONTEXTUAL
     const systemPrompt = `
-      Actúa como un coach ejecutivo y experto en desarrollo de talento para la empresa Sube Academia.
-      Tu tono debe ser inspirador, profesional, constructivo y altamente personalizado.
-      Tu misión es analizar los datos del diagnóstico de un usuario y generar un informe narrativo conciso y poderoso en formato Markdown.
-      El informe debe tener exactamente 3 secciones con los siguientes títulos en negrita:
-      **1. Tus Superpoderes: Análisis de Fortalezas**
-      **2. Tu Próximo Nivel: Oportunidades de Crecimiento**
-      **3. Plan de Acción Estratégico**
-      Utiliza negritas para resaltar conceptos clave dentro de cada párrafo.
+      Actúa como un estratega de talento y coach ejecutivo de Sube Academia, con un doctorado en psicología organizacional y más de 15 años de experiencia en el desarrollo de líderes en la era de la IA. Tu tono es experto, empático, y visionario. Tu objetivo es entregar un análisis profundo y accionable que inspire al usuario a tomar control de su desarrollo profesional.
+
+      La respuesta DEBE estar en formato Markdown y seguir estrictamente esta estructura de 4 secciones:
+
+      ### 💡 Resumen Ejecutivo
+      Un párrafo inicial que resuma el perfil de ${data.userName}, conectando sus fortalezas y oportunidades con su contexto profesional (rol de ${data.userRole} en la industria de ${data.userIndustry}).
+
+      ### 🚀 Tus Superpoderes: Análisis de Fortalezas
+      Para CADA UNA de las 3 competencias destacadas, crea un subtítulo en negrita (ej. **Fortaleza: Liderazgo e Influencia Social**). Luego, en un párrafo, explica por qué esta competencia, cuya definición es "${data.topCompetencies[0]?.description || 'Descripción no disponible'}", es un diferenciador clave en su rol. Proporciona un ejemplo táctico y concreto de cómo puede apalancar esta fortaleza en un proyecto real esta semana.
+
+      ### 🌱 Tu Próximo Nivel: Oportunidades de Crecimiento
+      Para CADA UNA de las 3 áreas de oportunidad, crea un subtítulo en negrita (ej. **Oportunidad: Pensamiento Analítico**). En un párrafo, replantea esta área no como una debilidad, sino como una palanca de crecimiento estratégico. Explica el "costo de oportunidad" de no desarrollarla, basándote en su definición ("${data.lowestCompetencies[0]?.description || 'Descripción no disponible'}"), y el impacto positivo que tendría si la mejorara.
+
+      ### 🎯 Plan de Acción Estratégico (Próximos 30 Días)
+      Crea una lista numerada con 3 acciones concretas, accionables y de alto impacto. Cada acción debe combinar una fortaleza con un área de oportunidad de forma inteligente y sinérgica. Sé específico.
+      Ejemplo de acción: "1. **Lidera con Datos:** En tu próxima reunión de equipo, utiliza tu fortaleza en **${data.topCompetencies[0]?.name || 'Competencia'}** para presentar una decisión clave, pero fundamenta tu argumento principal usando un análisis de datos simple (ej. un gráfico de Excel), practicando así tu **${data.lowestCompetencies[0]?.name || 'Área de oportunidad'}**."
     `;
 
-    // 2. Prompt de Usuario: Contiene los datos específicos del diagnóstico a analizar.
+    // Prompt de Usuario con contexto completo
     const userPrompt = `
-      Por favor, genera el informe de diagnóstico para el siguiente perfil:
-
-      **Datos del Usuario:**
+      Analiza mi perfil y genera mi informe de desarrollo profesional. Los datos completos son:
       - Nombre: ${data.userName}
-      - Rol Actual: ${data.userRole}
+      - Rol: ${data.userRole}
       - Industria: ${data.userIndustry}
-
-      **Resultados del Diagnóstico:**
-      - Competencias Destacadas (Fortalezas):
-        ${data.topCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
-      
-      - Áreas de Oportunidad (Para Crecer):
-        ${data.lowestCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
-
-      Genera el informe siguiendo estrictamente las 3 secciones y el tono definidos en tus instrucciones de sistema.
+      - Fortalezas: ${JSON.stringify(data.topCompetencies)}
+      - Oportunidades: ${JSON.stringify(data.lowestCompetencies)}
     `;
 
-    // 3. Payload para la API: La estructura conversacional correcta.
     const payload = {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      maxTokens: 1200,
-      temperature: 0.7
+      maxTokens: 1500,
+      temperature: 0.75
     };
 
-    // 4. Llamada a la API y Manejo de Respuesta
     return this.asistenteIaService.generarTextoAzure(payload).pipe(
       map((res: any) => {
         if (res?.choices?.[0]?.message?.content) {
@@ -75,7 +68,7 @@ export class GenerativeAiService {
       }),
       catchError(err => {
         console.error('Error en GenerativeAiService:', err);
-        return of('Lo sentimos, ha ocurrido un error al generar tu análisis personalizado. Por favor, intenta recargar la página.');
+        return of('### Error en el Análisis\n\nLo sentimos, no hemos podido generar tu análisis personalizado en este momento. Por favor, intenta recargar la página o contacta con soporte si el problema persiste.');
       })
     );
   }

@@ -6,8 +6,7 @@ import { takeUntil, finalize, switchMap, tap } from 'rxjs/operators';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
 import { GenerativeAiService, DiagnosticAnalysisData } from '../../../../../core/ai/generative-ai.service';
-import { DiagnosticoFormValue } from '../../../data/diagnostic.models';
-import { Competency } from '../../../data/competencias';
+import { Competency, DiagnosticData } from '../../../data/diagnostic.models';
 import { RadarChartComponent } from '../radar-chart.component';
 import { CardComponent } from '../../../../../shared/ui-kit/card/card.component';
 import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
@@ -21,7 +20,7 @@ import { PdfService } from '../../../services/pdf.service';
   templateUrl: './diagnostic-results.component.html',
 })
 export class DiagnosticResultsComponent implements OnInit, OnDestroy {
-  diagnosticData: DiagnosticoFormValue | null = null;
+  diagnosticData: DiagnosticData | null = null;
   competencyResults: { name: string; score: number }[] = [];
   topCompetencies: { name: string; score: number; description: string }[] = [];
   lowestCompetencies: { name: string; score: number; description: string }[] = [];
@@ -58,21 +57,28 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.allCompetencies = this.contentService.getCompetencies();
 
-    // Obtener datos del formulario del servicio
-    const currentData = this.diagnosticStateService.getDiagnosticData();
-    if (currentData && currentData.competencias && Object.keys(currentData.competencias).length > 0) {
-      this.diagnosticData = currentData as DiagnosticoFormValue;
-      this.calculateResults();
-      this.cdr.detectChanges();
-      
-      // Solo llamamos a la IA si tenemos los datos necesarios
-      if (this.topCompetencies.length > 0 && this.lowestCompetencies.length > 0) {
-        this.fetchGenerativeAnalysis();
-      }
-    } else {
-      console.error("Datos de diagnóstico inválidos o incompletos recibidos.");
-      this.isLoadingAnalysis = false;
-    }
+    this.diagnosticStateService.currentData$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(data => {
+          if (!data || !data.competencyAnswers || data.competencyAnswers.length === 0) {
+            console.error("Datos de diagnóstico inválidos o incompletos recibidos.");
+            this.isLoadingAnalysis = false;
+            // Opcional: manejar el error en la UI, ej. mostrando un mensaje.
+            return;
+          }
+          this.diagnosticData = data;
+          this.calculateResults();
+          this.cdr.detectChanges(); // Actualizar la vista con los resultados numéricos
+        }),
+        switchMap(data => {
+          if (this.topCompetencies.length > 0 && this.lowestCompetencies.length > 0) {
+            return this.fetchGenerativeAnalysis();
+          }
+          return of('No se pudo generar el análisis por falta de datos.');
+        })
+      )
+      .subscribe();
   }
 
   private calculateResults(): void {
@@ -81,7 +87,7 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
     const scores = this.scoringService.calculateScores(this.diagnosticData);
     
     const resultsWithDetails = scores.map(score => {
-      const competencyData = this.allCompetencies.find(c => c.id === score.name);
+      const competencyData = this.allCompetencies.find(c => c.name === score.name);
       return {
         ...score,
         description: competencyData?.description || 'Descripción no disponible'
@@ -100,9 +106,9 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
     this.startLoadingMessages();
 
     const analysisData: DiagnosticAnalysisData = {
-      userName: this.diagnosticData.lead?.nombre || 'Usuario',
-      userRole: 'Profesional',
-      userIndustry: this.diagnosticData.contexto?.industria || 'General',
+      userName: this.diagnosticData.lead.name,
+      userRole: this.diagnosticData.context.role,
+      userIndustry: this.diagnosticData.context.industry,
       topCompetencies: this.topCompetencies,
       lowestCompetencies: this.lowestCompetencies,
     };
@@ -120,13 +126,7 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
   generateAndDownloadPdf(): void {
     const element = document.getElementById('pdf-content');
     if (element && this.diagnosticData) {
-      // Convertir los resultados para que coincidan con el tipo esperado por el PDF service
-      const pdfCompetencyResults = this.competencyResults.map(result => ({
-        name: result.name,
-        score: result.score
-      }));
-      
-      this.pdfService.generatePdf(element, this.diagnosticData, pdfCompetencyResults, '');
+      this.pdfService.generatePdf(element, this.diagnosticData, this.competencyResults, '');
     } else {
       console.error('No se encontró el elemento #pdf-content o faltan datos para generar el PDF.');
     }

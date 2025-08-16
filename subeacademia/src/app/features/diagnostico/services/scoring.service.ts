@@ -59,6 +59,25 @@ export class ScoringService {
         private postsService: PostsService
     ) {}
 
+    // Método principal para calcular puntajes de competencias
+    calculateScores(diagnosticData: DiagnosticData): { name: string; score: number }[] {
+        if (!diagnosticData.competencias?.niveles) {
+            return [];
+        }
+
+        const scores = Object.entries(diagnosticData.competencias.niveles)
+            .filter(([_, level]) => level !== null)
+            .map(([competencyId, level]) => {
+                const score = this.getCompetencyScore(level as string);
+                return {
+                    name: competencyId,
+                    score: score
+                };
+            });
+
+        return scores;
+    }
+
     // Método eliminado para evitar confusión en el flujo de datos
     // La lógica de IA ahora se maneja directamente en el componente
 
@@ -171,17 +190,6 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         });
         // Ordenar desc por puntaje para consistencia
         return out.sort((a, b) => b.puntaje - a.puntaje);
-    }
-
-    /**
-     * Calcula los puntajes de competencias en el formato requerido por el componente de resultados
-     */
-    calculateScores(data: DiagnosticData): { name: string; score: number }[] {
-        const competencias = this.computeCompetencyScores(data);
-        return competencias.map(comp => ({
-            name: comp.competenciaId,
-            score: comp.puntaje
-        }));
     }
 
     generateDiagnosticAnalysis(data: DiagnosticData): DiagnosticAnalysis {

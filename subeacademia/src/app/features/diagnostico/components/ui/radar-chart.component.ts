@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 
+interface CompetencyScore {
+  name: string;
+  score: number;
+}
+
 @Component({
 	selector: 'app-radar-chart',
     standalone: true,
@@ -22,8 +27,7 @@ import { ChartConfiguration, ChartData } from 'chart.js';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RadarChartComponent implements OnChanges {
-    @Input() data: number[] = [];
-    @Input() labels: string[] = [];
+    @Input() data: CompetencyScore[] = [];
 
     public radarChartOptions: ChartConfiguration<'radar'>['options'] = {
         responsive: true,
@@ -39,7 +43,9 @@ export class RadarChartComponent implements OnChanges {
                 ticks: {
                     color: '#9CA3AF',
                     backdropColor: 'transparent',
-                    stepSize: 1
+                    stepSize: 20,
+                    max: 100,
+                    min: 0
                 }
             }
         },
@@ -49,10 +55,10 @@ export class RadarChartComponent implements OnChanges {
     };
 
     public radarChartData: ChartData<'radar'> = {
-        labels: this.labels,
+        labels: [],
         datasets: [
             {
-                data: this.data,
+                data: [],
                 label: 'Competencias',
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 borderColor: '#3B82F6',
@@ -68,17 +74,24 @@ export class RadarChartComponent implements OnChanges {
     };
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['data'] || changes['labels']) {
+        if (changes['data']) {
             this.updateChartData();
         }
     }
 
     private updateChartData(): void {
+        if (!this.data || this.data.length === 0) {
+            return;
+        }
+
+        const labels = this.data.map(item => item.name);
+        const scores = this.data.map(item => item.score);
+
         this.radarChartData = {
-            labels: this.labels,
+            labels: labels,
             datasets: [
                 {
-                    data: this.data,
+                    data: scores,
                     label: 'Competencias',
                     backgroundColor: 'rgba(59, 130, 246, 0.2)',
                     borderColor: '#3B82F6',

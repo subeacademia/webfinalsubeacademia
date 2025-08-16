@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DiagnosticoFormValue } from '../data/diagnostic.models';
 
 @Injectable({ providedIn: 'root' })
 export class PdfService {
@@ -19,7 +20,7 @@ export class PdfService {
 		const imgData = canvas.toDataURL('image/png');
 		const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
 		const pageWidth = pdf.internal.pageSize.getWidth();
-		const pageHeight = pdf.internal.pageSize.getHeight();
+		const pageHeight = pdf.internal.pageSize.getPageHeight();
 		const imgWidth = pageWidth;
 		const imgHeight = (canvas.height * imgWidth) / canvas.width;
 		let y = 0;
@@ -36,6 +37,34 @@ export class PdfService {
 		el.classList.remove('pdf-render-mode');
 		const blob = pdf.output('blob');
 		return blob as Blob;
+	}
+
+	async generatePdf(
+		element: HTMLElement, 
+		diagnosticData: DiagnosticoFormValue, 
+		competencyResults: { name: string; score: number }[], 
+		analysis: string
+	): Promise<void> {
+		try {
+			const blob = await this.renderReport('pdf-content');
+			
+			// Crear enlace de descarga
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = `diagnostico-${diagnosticData.lead?.nombre || 'usuario'}-${new Date().toISOString().split('T')[0]}.pdf`;
+			
+			// Descargar automáticamente
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			
+			// Limpiar URL
+			window.URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Error generando PDF:', error);
+			alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+		}
 	}
 }
 

@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { AsistenteIaService } from '../../shared/ui/chatbot/asistente-ia.service';
 
 export interface DiagnosticAnalysisData {
   userName: string;
   userRole: string;
   userIndustry: string;
-  topCompetencies: { name: string; score: number }[];
-  lowestCompetencies: { name: string; score: number }[];
+  topCompetencies: { name: string; score: number; description: string }[];
+  lowestCompetencies: { name: string; score: number; description: string }[];
 }
 
 @Injectable({
@@ -16,34 +16,59 @@ export interface DiagnosticAnalysisData {
 })
 export class GenerativeAiService {
 
-  constructor(private asistenteIaService: AsistenteIaService) { }
+  constructor(private asistenteIaService: AsistenteIaService) {}
 
   generateDiagnosticAnalysis(data: DiagnosticAnalysisData): Observable<string> {
-    const systemPrompt = `Actúa como un coach ejecutivo y experto en desarrollo de talento para la empresa Sube Academia. Tu tono debe ser inspirador, profesional y constructivo. Genera un informe narrativo en 3 secciones, en formato Markdown, basado en los datos del usuario.
+    
+    // MEGA PROMPT DE SISTEMA V2 - MÁS DETALLADO Y CONTEXTUAL
+    const systemPrompt = `
+      Actúa como un estratega de talento y coach ejecutivo de Sube Academia, con un doctorado en psicología organizacional y más de 15 años de experiencia en el desarrollo de líderes en la era de la IA. Tu tono es experto, empático, y visionario. Tu objetivo es entregar un análisis profundo y accionable que inspire al usuario a tomar control de su desarrollo profesional.
 
-**Informe a Generar:**
+      La respuesta DEBE estar en formato Markdown y seguir estrictamente esta estructura de 4 secciones:
 
-### 1. Tus Superpoderes: Análisis de Fortalezas
-Escribe un párrafo reconociendo las fortalezas de ${data.userName}. Explica cómo sus competencias destacadas (ej. ${data.topCompetencies[0]?.name || 'Liderazgo'}) son un activo invaluable en su rol de ${data.userRole} dentro de la industria de ${data.userIndustry}. Ofrece una sugerencia concreta sobre cómo puede utilizar una de estas fortalezas para liderar o innovar en su trabajo esta misma semana.
+      ### 💡 Resumen Ejecutivo
+      Un párrafo inicial que resuma el perfil de ${data.userName}, conectando sus fortalezas y oportunidades con su contexto profesional (rol de ${data.userRole} en la industria de ${data.userIndustry}).
 
-### 2. Tu Próximo Nivel: Oportunidades de Crecimiento
-Escribe un párrafo empático y motivador sobre las áreas de oportunidad. Presenta estas competencias (ej. ${data.lowestCompetencies[0]?.name || 'Colaboración'}) no como debilidades, sino como las "llaves" que desbloquearán su siguiente nivel de crecimiento profesional. Explica brevemente un escenario laboral común donde mejorar esta área podría marcar una gran diferencia.
+      ### 🚀 Tus Superpoderes: Análisis de Fortalezas
+      Para CADA UNA de las 3 competencias destacadas, crea un subtítulo en negrita (ej. **Fortaleza: Liderazgo e Influencia Social**). Luego, en un párrafo, explica por qué esta competencia, cuya definición es "${data.topCompetencies[0].description}", es un diferenciador clave en su rol. Proporciona un ejemplo táctico y concreto de cómo puede apalancar esta fortaleza en un proyecto real esta semana.
 
-### 3. Plan de Acción Estratégico
-Crea una lista con viñetas de 3 "micro-acciones" personalizadas y accionables para la próxima semana. Cada acción debe ser una combinación inteligente de sus fortalezas y áreas de oportunidad. Deben ser específicas y medibles. Por ejemplo: "Usa tu fortaleza en 'Pensamiento Analítico' para estructurar la agenda de una reunión, dedicando 10 minutos específicos a fomentar la 'Colaboración', tu área de oportunidad, pidiendo activamente la opinión de cada miembro."`;
+      ### 🌱 Tu Próximo Nivel: Oportunidades de Crecimiento
+      Para CADA UNA de las 3 áreas de oportunidad, crea un subtítulo en negrita (ej. **Oportunidad: Pensamiento Analítico**). En un párrafo, replantea esta área no como una debilidad, sino como una palanca de crecimiento estratégico. Explica el "costo de oportunidad" de no desarrollarla, basándote en su definición ("${data.lowestCompetencies[0].description}"), y el impacto positivo que tendría si la mejorara.
+
+      ### 🎯 Plan de Acción Estratégico (Próximos 30 Días)
+      Crea una lista numerada con 3 acciones concretas, accionables y de alto impacto. Cada acción debe combinar una fortaleza con un área de oportunidad de forma inteligente y sinérgica. Sé específico.
+      Ejemplo de acción: "1. **Lidera con Datos:** En tu próxima reunión de equipo, utiliza tu fortaleza en **${data.topCompetencies[0].name}** para presentar una decisión clave, pero fundamenta tu argumento principal usando un análisis de datos simple (ej. un gráfico de Excel), practicando así tu **${data.lowestCompetencies[0].name}**."
+    `;
+
+    // Prompt de Usuario con contexto completo
+    const userPrompt = `
+      Analiza mi perfil y genera mi informe de desarrollo profesional. Los datos completos son:
+      - Nombre: ${data.userName}
+      - Rol: ${data.userRole}
+      - Industria: ${data.userIndustry}
+      - Fortalezas: ${JSON.stringify(data.topCompetencies)}
+      - Oportunidades: ${JSON.stringify(data.lowestCompetencies)}
+    `;
 
     const payload = {
-      messages: [{ role: 'system', content: systemPrompt }],
-      maxTokens: 1024,
-      temperature: 0.7
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      maxTokens: 1500,
+      temperature: 0.75
     };
 
     return this.asistenteIaService.generarTextoAzure(payload).pipe(
       map(res => {
-        if (res && res.choices && res.choices[0]?.message?.content) {
+        if (res?.choices?.[0]?.message?.content) {
           return res.choices[0].message.content;
         }
-        return 'No se pudo generar el análisis en este momento. Por favor, inténtalo de nuevo más tarde.';
+        throw new Error('Respuesta de la IA con formato inesperado.');
+      }),
+      catchError(err => {
+        console.error('Error en GenerativeAiService:', err);
+        return of('### Error en el Análisis\n\nLo sentimos, no hemos podido generar tu análisis personalizado en este momento. Por favor, intenta recargar la página o contacta con soporte si el problema persiste.');
       })
     );
   }
