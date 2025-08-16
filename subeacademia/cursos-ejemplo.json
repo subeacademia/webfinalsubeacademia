@@ -1,0 +1,127 @@
+[
+  {
+    "id": "curso-1",
+    "slug": "introduccion-ia",
+    "title": "Introducción a la Inteligencia Artificial",
+    "title_en": "Introduction to Artificial Intelligence",
+    "title_pt": "Introdução à Inteligência Artificial",
+    "description": "Curso básico sobre los fundamentos de la IA",
+    "description_en": "Basic course on AI fundamentals",
+    "description_pt": "Curso básico sobre os fundamentos da IA",
+    "summary": "Aprende los conceptos básicos de la IA",
+    "level": "Principiante",
+    "duration": "10 horas",
+    "durationHours": 10,
+    "lessonCount": 15,
+    "price": 49.99,
+    "paymentLink": "https://ejemplo.com/pago/curso-1",
+    "status": "published",
+    "publishedAt": 1704067200000,
+    "topics": ["IA", "Machine Learning", "Algoritmos"],
+    "modules": [
+      {
+        "title": "Fundamentos de IA",
+        "title_en": "AI Fundamentals",
+        "title_pt": "Fundamentos da IA",
+        "lessons": [
+          "¿Qué es la IA?",
+          "Historia de la IA",
+          "Tipos de IA"
+        ],
+        "lessons_en": [
+          "What is AI?",
+          "AI History",
+          "Types of AI"
+        ],
+        "lessons_pt": [
+          "O que é IA?",
+          "História da IA",
+          "Tipos de IA"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "curso-2",
+    "slug": "machine-learning-avanzado",
+    "title": "Machine Learning Avanzado",
+    "title_en": "Advanced Machine Learning",
+    "title_pt": "Machine Learning Avançado",
+    "description": "Curso avanzado de machine learning",
+    "description_en": "Advanced machine learning course",
+    "description_pt": "Curso avançado de machine learning",
+    "summary": "Domina las técnicas avanzadas de ML",
+    "level": "Avanzado",
+    "duration": "20 horas",
+    "durationHours": 20,
+    "lessonCount": 25,
+    "price": 99.99,
+    "paymentLink": "https://ejemplo.com/pago/curso-2",
+    "status": "published",
+    "publishedAt": 1704067200000,
+    "topics": ["Machine Learning", "Deep Learning", "Neural Networks"],
+    "modules": [
+      {
+        "title": "Algoritmos Avanzados",
+        "title_en": "Advanced Algorithms",
+        "title_pt": "Algoritmos Avançados",
+        "lessons": [
+          "Redes Neuronales",
+          "Deep Learning",
+          "Optimización"
+        ],
+        "lessons_en": [
+          "Neural Networks",
+          "Deep Learning",
+          "Optimization"
+        ],
+        "lessons_pt": [
+          "Redes Neurais",
+          "Deep Learning",
+          "Otimização"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "curso-3",
+    "slug": "python-para-ia",
+    "title": "Python para IA",
+    "title_en": "Python for AI",
+    "title_pt": "Python para IA",
+    "description": "Aprende Python aplicado a la IA",
+    "description_en": "Learn Python applied to AI",
+    "description_pt": "Aprenda Python aplicado à IA",
+    "summary": "Programa en Python para proyectos de IA",
+    "level": "Intermedio",
+    "duration": "15 horas",
+    "durationHours": 15,
+    "lessonCount": 20,
+    "price": 0,
+    "status": "published",
+    "publishedAt": 1704067200000,
+    "topics": ["Python", "IA", "Programación"],
+    "modules": [
+      {
+        "title": "Python Básico",
+        "title_en": "Basic Python",
+        "title_pt": "Python Básico",
+        "lessons": [
+          "Variables y tipos",
+          "Estructuras de datos",
+          "Funciones"
+        ],
+        "lessons_en": [
+          "Variables and types",
+          "Data structures",
+          "Functions"
+        ],
+        "lessons_pt": [
+          "Variáveis e tipos",
+          "Estruturas de dados",
+          "Funções"
+        ]
+      }
+    ]
+  }
+]

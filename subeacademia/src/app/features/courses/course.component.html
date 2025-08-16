@@ -57,7 +57,31 @@
             <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"></path></svg> <span><strong>{{ 'course.lessons' | i18nTranslate }}:</strong> {{ $any(course).lessonCount || '—' }}</span></li>
             <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg> <span><strong>{{ 'course.level' | i18nTranslate }}:</strong> {{ $any(course).level }}</span></li>
           </ul>
-          <button class="mt-6 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">{{ 'course.enroll_button' | i18nTranslate }}</button>
+          <!-- Información de Precio -->
+          <div *ngIf="course.price !== undefined && course.price !== null" class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                {{ formatPrice(course.price, course.currency) }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400">
+                {{ course.currency === 'CLP' ? 'Peso Chileno' : course.currency === 'EUR' ? 'Euro' : 'Dólar' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de Compra/Acceso -->
+          <ng-container *ngIf="course.price && course.price > 0 && course.paymentLink; else freeAccess">
+            <button 
+              (click)="goToPayment()"
+              class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">
+              Comprar Curso por {{ formatPrice(course.price, course.currency) }}
+            </button>
+          </ng-container>
+          <ng-template #freeAccess>
+            <button class="mt-6 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
+              Acceder Gratis
+            </button>
+          </ng-template>
         </div>
       </aside>
     </div>

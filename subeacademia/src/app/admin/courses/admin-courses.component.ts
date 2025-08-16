@@ -16,7 +16,13 @@ import { Course } from '../../core/models/course.model';
   template: `
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-semibold">Admin · Courses</h1>
-      <button mat-flat-button color="primary" (click)="newCourse()">Nuevo</button>
+      <div class="flex gap-2">
+        <button mat-stroked-button color="accent" (click)="openBulkUpload()">
+          <mat-icon>upload</mat-icon>
+          Cargar Cursos desde JSON
+        </button>
+        <button mat-flat-button color="primary" (click)="newCourse()">Nuevo</button>
+      </div>
     </div>
 
     <section *ngIf="!editingId(); else editTpl" class="space-y-4">
@@ -118,8 +124,16 @@ import { Course } from '../../core/models/course.model';
               </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
-              <mat-label>Precio (opcional)</mat-label>
-              <input matInput type="number" formControlName="price" />
+              <mat-label>Precio</mat-label>
+              <input matInput type="number" formControlName="price" min="0" step="0.01" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Moneda</mat-label>
+              <mat-select formControlName="currency">
+                <mat-option value="CLP">Peso Chileno (CLP)</mat-option>
+                <mat-option value="EUR">Euro (€)</mat-option>
+                <mat-option value="USD">Dólar ($)</mat-option>
+              </mat-select>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Fecha publicación (epoch ms)</mat-label>
@@ -130,6 +144,11 @@ import { Course } from '../../core/models/course.model';
               <input matInput type="number" formControlName="scheduledAt" />
             </mat-form-field>
           </div>
+          
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Enlace de Pago (opcional)</mat-label>
+            <input matInput type="url" formControlName="paymentLink" placeholder="https://..." />
+          </mat-form-field>
           <div class="flex gap-2">
             <button mat-flat-button color="primary" (click)="saveDraft()" type="button">Guardar borrador</button>
             <button mat-stroked-button color="accent" (click)="publish()" type="button">Publicar</button>
@@ -170,6 +189,47 @@ import { Course } from '../../core/models/course.model';
         </div>
       </form>
     </ng-template>
+
+    <!-- Modal de Carga Masiva -->
+    <div *ngIf="showBulkUpload()" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
+        <h3 class="text-lg font-semibold mb-4">Cargar Cursos desde JSON</h3>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Seleccionar archivo JSON:</label>
+          <input 
+            type="file" 
+            accept=".json"
+            (change)="onFileSelected($event)"
+            class="w-full p-2 border border-gray-300 rounded-md"
+          >
+        </div>
+
+        <div *ngIf="uploadStatus()" class="mb-4 p-3 rounded-md" 
+             [class]="uploadStatus()?.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+          {{ uploadStatus()?.message }}
+        </div>
+
+        <div *ngIf="uploadProgress() > 0 && uploadProgress() < 100" class="mb-4">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                 [style.width.%]="uploadProgress()"></div>
+          </div>
+          <p class="text-sm text-gray-600 mt-1">Progreso: {{ uploadProgress() }}%</p>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button mat-stroked-button (click)="closeBulkUpload()">Cancelar</button>
+          <button 
+            mat-flat-button 
+            color="primary" 
+            (click)="processBulkUpload()"
+            [disabled]="!selectedFile() || uploading()">
+            {{ uploading() ? 'Procesando...' : 'Procesar' }}
+          </button>
+        </div>
+      </div>
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -209,6 +269,8 @@ export class AdminCoursesComponent {
     coverUrl: [''],
     resources: this.fb.array([] as any[]),
     price: [null as number | null],
+    currency: ['CLP'],
+    paymentLink: [''],
     publishedAt: [Date.now()],
     updatedAt: [null as number | null],
     status: ['draft' as 'draft' | 'published' | 'scheduled'],
@@ -221,6 +283,13 @@ export class AdminCoursesComponent {
   });
 
   editingId = signal<string | null>(null);
+
+  // Propiedades para carga masiva
+  showBulkUpload = signal(false);
+  selectedFile = signal<File | null>(null);
+  uploading = signal(false);
+  uploadProgress = signal(0);
+  uploadStatus = signal<{success: boolean; message: string} | null>(null);
 
   constructor() {
     effect(() => {
@@ -251,6 +320,8 @@ export class AdminCoursesComponent {
       coverUrl: '',
       resources: [],
       price: null,
+      currency: 'CLP',
+      paymentLink: '',
       publishedAt: Date.now(),
       updatedAt: null,
       status: 'draft',
@@ -343,6 +414,104 @@ export class AdminCoursesComponent {
     if (!confirm('¿Eliminar este curso?')) return;
     await this.content.deleteCourse(String(c.id || ''));
     this.load();
+  }
+
+  // Métodos para carga masiva
+  openBulkUpload() {
+    this.showBulkUpload.set(true);
+    this.uploadStatus.set(null);
+    this.uploadProgress.set(0);
+    this.selectedFile.set(null);
+  }
+
+  closeBulkUpload() {
+    this.showBulkUpload.set(false);
+    this.uploadStatus.set(null);
+    this.uploadProgress.set(0);
+    this.selectedFile.set(null);
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/json') {
+      this.selectedFile.set(file);
+      this.uploadStatus.set(null);
+    } else {
+      this.uploadStatus.set({
+        success: false,
+        message: 'Por favor selecciona un archivo JSON válido'
+      });
+    }
+  }
+
+  async processBulkUpload() {
+    const file = this.selectedFile();
+    if (!file) return;
+
+    this.uploading.set(true);
+    this.uploadProgress.set(0);
+    this.uploadStatus.set(null);
+
+    try {
+      const text = await file.text();
+      const courses = JSON.parse(text);
+
+      if (!Array.isArray(courses)) {
+        throw new Error('El archivo debe contener un array de cursos');
+      }
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 0; i < courses.length; i++) {
+        try {
+          const course = courses[i];
+          
+          // Validar que el curso tenga los campos mínimos requeridos
+          if (!course.title || !course.slug) {
+            throw new Error(`Curso ${i + 1}: título y slug son obligatorios`);
+          }
+
+          // Si el curso ya existe, actualizarlo; si no, crearlo
+          if (course.id) {
+            await this.content.updateCourse(course.id, course);
+          } else {
+            await this.content.createCourse(course);
+          }
+          
+          successCount++;
+        } catch (error: any) {
+          errorCount++;
+          console.error(`Error procesando curso ${i + 1}:`, error);
+        }
+
+        // Actualizar progreso
+        this.uploadProgress.set(Math.round(((i + 1) / courses.length) * 100));
+      }
+
+      if (errorCount === 0) {
+        this.uploadStatus.set({
+          success: true,
+          message: `✅ ${successCount} cursos procesados exitosamente`
+        });
+      } else {
+        this.uploadStatus.set({
+          success: false,
+          message: `⚠️ ${successCount} cursos exitosos, ${errorCount} errores`
+        });
+      }
+
+      // Recargar la lista de cursos
+      this.load();
+
+    } catch (error: any) {
+      this.uploadStatus.set({
+        success: false,
+        message: `❌ Error: ${error.message}`
+      });
+    } finally {
+      this.uploading.set(false);
+    }
   }
 }
 

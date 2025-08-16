@@ -45,6 +45,8 @@ export interface Course {
   coverUrl?: string;
   resources?: CourseResource[];
   price?: number;
+  currency?: 'CLP' | 'EUR' | 'USD';
+  paymentLink?: string;
   publishedAt?: number | any;
   updatedAt?: number;
   status?: 'draft' | 'published' | 'scheduled';

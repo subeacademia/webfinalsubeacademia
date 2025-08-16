@@ -39,6 +39,17 @@
               <p class="text-sm font-semibold text-indigo-500 dark:text-indigo-400">{{ course.category || 'General' }}</p>
               <h3 class="mt-2 text-lg font-bold text-gray-900 dark:text-white flex-grow">{{ getTranslatedCourse(course).title }}</h3>
               <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ getTranslatedCourse(course).description }}</p>
+              
+              <!-- Precio del Curso -->
+              <div *ngIf="course.price !== undefined && course.price !== null" class="mt-3">
+                <div class="text-lg font-bold text-green-600 dark:text-green-400">
+                  {{ formatPrice(course.price, course.currency) }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ course.currency === 'CLP' ? 'Peso Chileno' : course.currency === 'EUR' ? 'Euro' : 'Dólar' }}
+                </div>
+              </div>
+              
               <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> {{ (getTranslatedCourse(course).duration || '—') }}</span>
                 <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg> {{ getTranslatedCourse(course).lessonCount }} <ng-container i18n>Lecciones</ng-container></span>

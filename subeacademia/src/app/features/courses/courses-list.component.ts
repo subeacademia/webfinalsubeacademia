@@ -96,5 +96,17 @@ export class CoursesListComponent implements OnInit {
     const level = levelRaw === 'intro' ? 'Principiante' : levelRaw === 'intermedio' ? 'Intermedio' : levelRaw === 'avanzado' ? 'Avanzado' : levelRaw;
     return { ...course, title, description, image, duration, lessonCount, level };
   }
+
+  formatPrice(price: number, currency?: string): string {
+    if (!price) return 'Gratis';
+    
+    const currencySymbol = currency === 'CLP' ? 'CLP ' : currency === 'EUR' ? '€' : '$';
+    
+    if (currency === 'CLP') {
+      return `CLP ${price.toLocaleString('es-CL')}`;
+    } else {
+      return `${currencySymbol}${price.toFixed(2)}`;
+    }
+  }
 }
 

@@ -28,6 +28,25 @@ export class CourseComponent implements OnInit {
     this.activeModule = this.activeModule === index ? null : index;
   }
 
+  goToPayment(): void {
+    const course = this.course();
+    if (course?.paymentLink) {
+      window.open(course.paymentLink, '_blank');
+    }
+  }
+
+  formatPrice(price: number, currency?: string): string {
+    if (!price) return 'Gratis';
+    
+    const currencySymbol = currency === 'CLP' ? 'CLP ' : currency === 'EUR' ? '€' : '$';
+    
+    if (currency === 'CLP') {
+      return `CLP ${price.toLocaleString('es-CL')}`;
+    } else {
+      return `${currencySymbol}${price.toFixed(2)}`;
+    }
+  }
+
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     const lang = this.i18n.currentLang();

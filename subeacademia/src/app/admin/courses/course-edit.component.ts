@@ -18,6 +18,14 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
   template: `
   <div class="max-w-3xl mx-auto space-y-4">
     <h1 class="text-2xl font-semibold">{{id()? 'Editar Curso' : 'Nuevo Curso'}}</h1>
+    
+    <!-- Notificaciones -->
+    <div *ngIf="showNotification()" class="p-4 rounded-md" 
+         [class]="showNotification()?.type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'">
+      {{ showNotification()?.message }}
+      <button class="float-right font-bold" (click)="showNotification.set(null)">×</button>
+    </div>
+    
     <form [formGroup]="form" (ngSubmit)="save()" class="card p-4 space-y-4 max-w-full">
       <div *ngIf="translationsReady()" class="text-xs inline-flex items-center gap-2 px-2 py-1 rounded bg-emerald-50 text-emerald-700">
         Traducciones listas ✓
@@ -84,6 +92,22 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
         </label>
         <label class="block">Fecha publicación
           <input class="w-full ui-input" type="datetime-local" formControlName="publishedAtLocal">
+        </label>
+      </div>
+
+      <div class="grid gap-3 md:grid-cols-3">
+        <label class="block">Precio
+          <input class="w-full ui-input" type="number" formControlName="price" min="0" step="0.01" placeholder="0.00">
+        </label>
+        <label class="block">Moneda
+          <select class="w-full ui-input" formControlName="currency">
+            <option value="CLP">Peso Chileno (CLP)</option>
+            <option value="EUR">Euro (€)</option>
+            <option value="USD">Dólar ($)</option>
+          </select>
+        </label>
+        <label class="block">Enlace de Pago (opcional)
+          <input class="w-full ui-input" type="url" formControlName="paymentLink" placeholder="https://...">
         </label>
       </div>
 
@@ -188,6 +212,9 @@ export class CourseEditComponent implements OnInit, OnDestroy {
     status: ['draft'],
     publishedAt: [Date.now()],
     publishedAtLocal: [''],
+    price: [0],
+    currency: ['CLP'],
+    paymentLink: [''],
     modules: this.fb.array([] as any[]),
   });
 
@@ -253,6 +280,8 @@ export class CourseEditComponent implements OnInit, OnDestroy {
   error = signal<string|null>(null);
 
   translationsReady = signal(false);
+  // Notificaciones
+  showNotification = signal<{type: 'success' | 'error', message: string} | null>(null);
   // Mini-dialogo recurso
   showResDlg = signal(false);
   resKind: 'video'|'pdf'|'zip'|'link' = 'pdf';
@@ -295,10 +324,25 @@ export class CourseEditComponent implements OnInit, OnDestroy {
   syncSlug(){ const t = this.form.value.title || ''; this.form.patchValue({ slug: slugify(t as string) }, {emitEvent:false}); }
 
   async save(){
-    const v:any = this.form.value;
-    if(v.publishedAtLocal){ v.publishedAt = new Date(v.publishedAtLocal).getTime(); delete v.publishedAtLocal; }
-    if(this.id()) await this.courses.update(this.id()!, v); else await this.courses.create(v);
-    this.router.navigate(['/admin/courses']);
+    try {
+      const v:any = this.form.value;
+      if(v.publishedAtLocal){ v.publishedAt = new Date(v.publishedAtLocal).getTime(); delete v.publishedAtLocal; }
+      
+      if(this.id()) {
+        await this.courses.update(this.id()!, v);
+        this.showNotification.set({type: 'success', message: 'Curso actualizado exitosamente'});
+      } else {
+        await this.courses.create(v);
+        this.showNotification.set({type: 'success', message: 'Curso creado exitosamente'});
+      }
+      
+      // Esperar 2 segundos antes de redirigir para que se vea la notificación
+      setTimeout(() => {
+        this.router.navigate(['/admin/courses']);
+      }, 2000);
+    } catch (error: any) {
+      this.showNotification.set({type: 'error', message: `Error: ${error.message}`});
+    }
   }
 
   goBack(){ this.router.navigate(['/admin/courses']); }
