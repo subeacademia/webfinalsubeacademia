@@ -49,5 +49,11 @@ service cloud.firestore {
       allow read: if true; // Home debe leer sin autenticación
       allow write: if isAdmin(); // Solo admin escribe
     }
+
+    // NUEVO: Frases del typewriter (públicas para lectura, solo admin para escritura)
+    match /typewriter_phrases/{id} {
+      allow read: if true; // Home debe leer sin autenticación
+      allow create, update, delete: if isAdmin(); // Solo admin escribe
+    }
   }
 }

@@ -12,6 +12,30 @@ export interface DiagnosticAnalysis {
     quickStartPlan: { day: string; task: string; focus: string }[];
 }
 
+export interface ActionPlan {
+    reconocimientoFortalezas: string;
+    areasDesarrollo: AreaDesarrollo[];
+    recursos: RecursosRecomendados;
+}
+
+export interface AreaDesarrollo {
+    competencia: string;
+    importancia: string;
+    acciones: string[];
+}
+
+export interface RecursosRecomendados {
+    cursos: CursoRecomendado[];
+    lectura: string;
+}
+
+export interface CursoRecomendado {
+    titulo: string;
+    descripcion: string;
+    competenciasRelacionadas: string[];
+    duracion: string;
+}
+
 export type DiagnosticData = DiagnosticoFormValue;
 
 @Injectable({ providedIn: 'root' })
@@ -90,6 +114,33 @@ export class ScoringService {
         return { mainLevel, topStrengths, topOpportunities, aresAnalysis, quickStartPlan };
     }
 
+    generateActionPlan(data: DiagnosticData): ActionPlan {
+        const competencias = this.computeCompetencyScores(data);
+        
+        // Obtener las 3 competencias con mayor puntaje (fortalezas)
+        const topStrengths = competencias.slice(0, 3);
+        
+        // Obtener las 3 competencias con menor puntaje (áreas de desarrollo)
+        const areasDesarrollo = [...competencias].sort((a, b) => a.puntaje - b.puntaje).slice(0, 3);
+        
+        // Generar reconocimiento de fortalezas
+        const reconocimientoFortalezas = this.generateReconocimientoFortalezas(topStrengths, areasDesarrollo, data);
+        
+        // Generar áreas de desarrollo con acciones específicas
+        const areasDesarrolloDetalladas = areasDesarrollo.map(area => 
+            this.generateAreaDesarrollo(area, data)
+        );
+        
+        // Generar recursos recomendados
+        const recursos = this.generateRecursosRecomendados(areasDesarrollo, data);
+        
+        return {
+            reconocimientoFortalezas,
+            areasDesarrollo: areasDesarrolloDetalladas,
+            recursos
+        };
+    }
+
     private mapScoreToLevel(score: number): string {
         if (score >= 85) return 'Líder';
         if (score >= 70) return 'Avanzado';
@@ -137,6 +188,205 @@ export class ScoringService {
             base[1].task = base[1].task + ' Alinear con compliance y seguridad.';
         }
         return base;
+    }
+
+    private generateReconocimientoFortalezas(
+        fortalezas: any[], 
+        areasDesarrollo: any[], 
+        data: DiagnosticData
+    ): string {
+        const fortalezaNames = fortalezas.map(f => 
+            COMPETENCIAS.find(c => c.id === f.competenciaId)?.nameKey || f.competenciaId
+        );
+        
+        const areaNames = areasDesarrollo.map(a => 
+            COMPETENCIAS.find(c => c.id === a.competenciaId)?.nameKey || a.competenciaId
+        );
+        
+        const segmento = data.segmento || 'empresa';
+        const industria = data.contexto?.industria || 'General';
+        
+        return `Tus fortalezas en ${fortalezaNames.join(', ')} te posicionan de manera excepcional para liderar la transformación digital en ${industria}. Estas competencias sólidas pueden ser utilizadas como palancas estratégicas para desarrollar ${areaNames.join(', ')}, creando un círculo virtuoso de crecimiento profesional y organizacional. Tu perfil ${segmento} te permite aprovechar estas fortalezas de manera única, combinando experiencia práctica con visión estratégica.`;
+    }
+
+    private generateAreaDesarrollo(area: any, data: DiagnosticData): AreaDesarrollo {
+        const competenciaName = COMPETENCIAS.find(c => c.id === area.competenciaId)?.nameKey || area.competenciaId;
+        const segmento = data.segmento || 'empresa';
+        const industria = data.contexto?.industria || 'General';
+        
+        const importancia = this.generateImportanciaCompetencia(area.competenciaId, segmento, industria);
+        const acciones = this.generateAccionesCompetencia(area.competenciaId, segmento);
+        
+        return {
+            competencia: competenciaName,
+            importancia,
+            acciones
+        };
+    }
+
+    private generateImportanciaCompetencia(competenciaId: string, segmento: string, industria: string): string {
+        const contextos = {
+            'c1_pensamiento_critico': `En ${industria}, el pensamiento crítico es fundamental para analizar datos complejos, evaluar riesgos y tomar decisiones estratégicas que impacten positivamente en los resultados del negocio.`,
+            'c2_resolucion_problemas': `La resolución de problemas complejos es clave para identificar oportunidades de mejora, optimizar procesos y desarrollar soluciones innovadoras que diferencien a tu organización en ${industria}.`,
+            'c3_alfabetizacion_datos': `En la era de la IA, la alfabetización de datos es esencial para interpretar métricas, identificar patrones y tomar decisiones basadas en evidencia que impulsen el crecimiento en ${industria}.`,
+            'c4_comunicacion': `La comunicación efectiva es vital para alinear equipos, presentar propuestas a stakeholders y transmitir la visión estratégica de transformación digital en ${industria}.`,
+            'c5_colaboracion': `La colaboración efectiva permite aprovechar la diversidad de talentos, fomentar la innovación y crear sinergias que aceleren la adopción de IA en ${industria}.`,
+            'c6_creatividad': `La creatividad e innovación son fundamentales para identificar nuevas oportunidades de negocio, diseñar soluciones disruptivas y mantener la competitividad en ${industria}.`,
+            'c7_diseno_tecnologico': `El diseño tecnológico es crucial para crear soluciones de IA que sean escalables, mantenibles y que generen valor real para los usuarios y la organización en ${industria}.`,
+            'c8_automatizacion_agentes': `La automatización y los agentes de IA son palancas clave para mejorar la eficiencia operativa, reducir costos y liberar talento humano para tareas de mayor valor en ${industria}.`,
+            'c9_seguridad_privacidad': `En ${industria}, la seguridad y privacidad son fundamentales para proteger datos sensibles, cumplir regulaciones y mantener la confianza de clientes y stakeholders.`,
+            'c10_etica_responsabilidad': `La ética y responsabilidad en IA son esenciales para asegurar que las soluciones tecnológicas beneficien a la sociedad y mantengan la reputación de la organización en ${industria}.`,
+            'c11_sostenibilidad': `La sostenibilidad es clave para crear valor a largo plazo, reducir el impacto ambiental y asegurar la viabilidad futura del negocio en ${industria}.`,
+            'c12_aprendizaje_continuo': `El aprendizaje continuo es fundamental para mantenerse actualizado con las últimas tecnologías y tendencias que transforman ${industria}.`,
+            'c13_liderazgo_ia': `El liderazgo en IA es crucial para guiar equipos, inspirar la innovación y crear una cultura organizacional que abrace la transformación digital en ${industria}.`
+        };
+        
+        return contextos[competenciaId as keyof typeof contextos] || `Esta competencia es fundamental para el éxito en ${industria} y el desarrollo profesional en el contexto actual.`;
+    }
+
+    private generateAccionesCompetencia(competenciaId: string, segmento: string): string[] {
+        const acciones = {
+            'c1_pensamiento_critico': [
+                'Dedica 15 minutos diarios a analizar críticamente una decisión o problema del día. Escribe tus reflexiones y alternativas consideradas.',
+                'Al final de cada semana, revisa 3 decisiones tomadas y evalúa qué podrías haber hecho diferente basándote en nueva información.',
+                'Practica el método de los "5 por qué" en situaciones complejas para llegar a la raíz del problema antes de proponer soluciones.'
+            ],
+            'c2_resolucion_problemas': [
+                'Implementa un sistema de registro de problemas que incluya contexto, impacto, soluciones intentadas y resultados obtenidos.',
+                'Dedica 30 minutos semanales a resolver un problema complejo usando técnicas como lluvia de ideas, mapas mentales o análisis de causa-efecto.',
+                'Colabora con colegas de diferentes áreas para abordar problemas desde múltiples perspectivas y generar soluciones más robustas.'
+            ],
+            'c3_alfabetizacion_datos': [
+                'Crea un dashboard personal con 3-5 métricas clave de tu área de trabajo. Revisa y actualiza diariamente durante 21 días.',
+                'Analiza un conjunto de datos semanalmente usando herramientas básicas como Excel o Google Sheets. Identifica al menos 3 insights.',
+                'Participa en sesiones de análisis de datos con tu equipo, preguntando sobre metodologías, fuentes de datos y validez de conclusiones.'
+            ],
+            'c4_comunicacion': [
+                'Al final de cada reunión, dedica 2 minutos para resumir los puntos clave y las acciones a seguir. Pide feedback sobre tu claridad.',
+                'Practica la comunicación asertiva: expresa tus ideas de manera clara, respeta las opiniones de otros y busca puntos de encuentro.',
+                'Desarrolla presentaciones de 5 minutos sobre temas de tu expertise. Graba y revisa para identificar áreas de mejora.'
+            ],
+            'c5_colaboracion': [
+                'Inicia al menos una colaboración interdepartamental por mes. Documenta aprendizajes y mejores prácticas identificadas.',
+                'Organiza sesiones de brainstorming semanales con tu equipo usando técnicas como "6-3-5" o "brainwriting" para fomentar la participación.',
+                'Implementa un sistema de reconocimiento de contribuciones del equipo, destacando el trabajo colaborativo y los logros compartidos.'
+            ],
+            'c6_creatividad': [
+                'Dedica 20 minutos diarios a explorar nuevas ideas o soluciones. Mantén un "diario de creatividad" con tus reflexiones.',
+                'Participa en sesiones de innovación donde se generen al menos 10 ideas locas antes de evaluar su viabilidad.',
+                'Experimenta con técnicas de pensamiento lateral como analogías, inversión de problemas o cambio de perspectiva.'
+            ],
+            'c7_diseno_tecnologico': [
+                'Diseña un prototipo de baja fidelidad para una solución tecnológica que resuelva un problema real de tu organización.',
+                'Participa en hackathons o sesiones de diseño de soluciones tecnológicas con equipos multidisciplinarios.',
+                'Documenta el proceso de diseño de una solución tecnológica, incluyendo requisitos, alternativas consideradas y decisiones de diseño.'
+            ],
+            'c8_automatizacion_agentes': [
+                'Identifica 3 procesos repetitivos en tu trabajo diario y diseña un plan de automatización usando herramientas disponibles.',
+                'Experimenta con chatbots o agentes de IA para automatizar respuestas frecuentes o tareas de soporte básico.',
+                'Implementa un piloto de automatización en un proceso de bajo riesgo y documenta aprendizajes y métricas de mejora.'
+            ],
+            'c9_seguridad_privacidad': [
+                'Revisa y actualiza las políticas de seguridad de tu área de trabajo. Identifica al menos 3 mejoras implementables.',
+                'Participa en simulacros de incidentes de seguridad para familiarizarte con protocolos de respuesta y recuperación.',
+                'Implementa controles de acceso y auditoría en al menos un sistema o proceso crítico de tu responsabilidad.'
+            ],
+            'c10_etica_responsabilidad': [
+                'Desarrolla una guía ética para el uso de IA en tu organización, considerando principios de transparencia, equidad y responsabilidad.',
+                'Organiza sesiones de discusión sobre dilemas éticos relacionados con la tecnología en tu industria.',
+                'Implementa un proceso de revisión ética para nuevas iniciativas tecnológicas, incluyendo evaluación de impacto y mitigación de riesgos.'
+            ],
+            'c11_sostenibilidad': [
+                'Conducta una auditoría de sostenibilidad en tu área de trabajo, identificando al menos 5 oportunidades de mejora.',
+                'Implementa al menos una iniciativa de sostenibilidad por trimestre, midiendo impacto y documentando aprendizajes.',
+                'Desarrolla un plan de acción de sostenibilidad a 12 meses para tu área, incluyendo objetivos medibles y responsables.'
+            ],
+            'c12_aprendizaje_continuo': [
+                'Dedica 30 minutos diarios al aprendizaje estructurado. Usa plataformas como Coursera, edX o recursos internos de tu organización.',
+                'Participa en al menos una comunidad de práctica o grupo de interés relacionado con tu campo profesional.',
+                'Documenta tu aprendizaje en un portafolio digital que incluya proyectos, certificaciones y reflexiones sobre tu desarrollo profesional.'
+            ],
+            'c13_liderazgo_ia': [
+                'Lidera al menos una iniciativa de transformación digital en tu equipo, estableciendo visión, objetivos y métricas de éxito.',
+                'Mentorea a colegas en el desarrollo de competencias de IA, creando un plan de desarrollo personalizado para cada uno.',
+                'Desarrolla y presenta una estrategia de adopción de IA para tu área de trabajo, incluyendo roadmap, recursos necesarios y plan de cambio.'
+            ]
+        };
+        
+        return acciones[competenciaId as keyof typeof acciones] || [
+            'Identifica 3 oportunidades específicas para desarrollar esta competencia en tu contexto actual.',
+            'Busca un mentor o coach que te ayude a crear un plan de desarrollo personalizado.',
+            'Establece métricas mensurables para evaluar tu progreso en esta competencia.'
+        ];
+    }
+
+    private generateRecursosRecomendados(areasDesarrollo: any[], data: DiagnosticData): RecursosRecomendados {
+        const cursos = this.generateCursosRecomendados(areasDesarrollo);
+        const lectura = this.generateLecturaRecomendada(areasDesarrollo, data);
+        
+        return { cursos, lectura };
+    }
+
+    private generateCursosRecomendados(areasDesarrollo: any[]): CursoRecomendado[] {
+        const competenciasIds = areasDesarrollo.map(a => a.competenciaId);
+        
+        const cursosDisponibles: CursoRecomendado[] = [
+            {
+                titulo: 'Fundamentos de IA para Líderes',
+                descripcion: 'Curso introductorio que cubre conceptos básicos de IA, casos de uso empresariales y estrategias de implementación.',
+                competenciasRelacionadas: ['c13_liderazgo_ia', 'c3_alfabetizacion_datos', 'c8_automatizacion_agentes'],
+                duracion: '8 semanas'
+            },
+            {
+                titulo: 'Transformación Digital y Cambio Organizacional',
+                descripcion: 'Programa integral que aborda la gestión del cambio, liderazgo transformacional y desarrollo de competencias digitales.',
+                competenciasRelacionadas: ['c13_liderazgo_ia', 'c4_comunicacion', 'c5_colaboracion'],
+                duracion: '12 semanas'
+            },
+            {
+                titulo: 'Ética y Gobernanza en IA',
+                descripcion: 'Curso especializado en principios éticos, marcos regulatorios y mejores prácticas para el uso responsable de IA.',
+                competenciasRelacionadas: ['c10_etica_responsabilidad', 'c9_seguridad_privacidad', 'c1_pensamiento_critico'],
+                duracion: '6 semanas'
+            },
+            {
+                titulo: 'Innovación y Creatividad en la Era Digital',
+                descripcion: 'Programa que desarrolla habilidades de pensamiento creativo, resolución de problemas y diseño de soluciones innovadoras.',
+                competenciasRelacionadas: ['c6_creatividad', 'c2_resolucion_problemas', 'c7_diseno_tecnologico'],
+                duracion: '10 semanas'
+            },
+            {
+                titulo: 'Sostenibilidad y Tecnología Verde',
+                descripcion: 'Curso que explora cómo la tecnología puede contribuir a la sostenibilidad y el desarrollo de soluciones eco-eficientes.',
+                competenciasRelacionadas: ['c11_sostenibilidad', 'c7_diseno_tecnologico', 'c1_pensamiento_critico'],
+                duracion: '8 semanas'
+            }
+        ];
+        
+        // Filtrar cursos más relevantes basados en las competencias a desarrollar
+        const cursosRelevantes = cursosDisponibles.filter(curso => 
+            curso.competenciasRelacionadas.some(comp => competenciasIds.includes(comp))
+        );
+        
+        // Retornar los 2 cursos más relevantes
+        return cursosRelevantes.slice(0, 2);
+    }
+
+    private generateLecturaRecomendada(areasDesarrollo: any[], data: DiagnosticData): string {
+        const competenciasIds = areasDesarrollo.map(a => a.competenciaId);
+        const segmento = data.segmento || 'empresa';
+        
+        if (competenciasIds.includes('c13_liderazgo_ia') || competenciasIds.includes('c4_comunicacion')) {
+            return 'Libro: "Leading Digital" de George Westerman - Estrategias para liderar la transformación digital en organizaciones.';
+        } else if (competenciasIds.includes('c3_alfabetizacion_datos') || competenciasIds.includes('c8_automatizacion_agentes')) {
+            return 'Artículo: "The AI-Powered Organization" de Harvard Business Review - Cómo estructurar organizaciones para maximizar el valor de la IA.';
+        } else if (competenciasIds.includes('c10_etica_responsabilidad') || competenciasIds.includes('c9_seguridad_privacidad')) {
+            return 'Libro: "Weapons of Math Destruction" de Cathy O\'Neil - Análisis crítico sobre el uso ético de algoritmos y datos.';
+        } else if (competenciasIds.includes('c6_creatividad') || competenciasIds.includes('c2_resolucion_problemas')) {
+            return 'Artículo: "Design Thinking for Innovation" de MIT Sloan - Metodologías para fomentar la creatividad y resolución de problemas complejos.';
+        } else {
+            return 'Libro: "The Fourth Industrial Revolution" de Klaus Schwab - Visión integral sobre la transformación tecnológica y sus implicaciones.';
+        }
     }
 }
 

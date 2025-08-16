@@ -2,7 +2,7 @@ import { Component, computed, inject, OnInit, ElementRef, ViewChild, AfterViewIn
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { ScoringService } from '../../../services/scoring.service';
+import { ScoringService, ActionPlan } from '../../../services/scoring.service';
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import 'chart.js/auto';
 import { ARES_ITEMS } from '../../../data/ares-items';
@@ -162,31 +162,78 @@ import html2canvas from 'html2canvas';
         </div>
       </div>
 
-      <!-- Plan de Acción -->
-      <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
-        <h3 class="text-2xl font-bold text-white mb-4">Plan de Acción Recomendado</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 class="text-lg font-semibold text-blue-200 mb-3">Acciones Inmediatas (0-3 meses)</h4>
-            <ul class="space-y-2 text-blue-100">
-              <li *ngFor="let accion of getAccionesInmediatas()" class="flex items-start">
-                <svg class="w-4 h-4 mr-2 mt-1 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                {{ accion }}
-              </li>
-            </ul>
+      <!-- Plan de Acción Recomendado Mejorado -->
+      <div class="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-lg p-8 mb-8">
+        <h3 class="text-3xl font-bold text-white mb-6 text-center">Plan de Acción Recomendado</h3>
+        
+        <!-- Reconocimiento de Fortalezas -->
+        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-6">
+          <h4 class="text-xl font-semibold text-green-200 mb-3 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            Reconocimiento de Fortalezas
+          </h4>
+          <p class="text-green-100 leading-relaxed">{{ getActionPlan().reconocimientoFortalezas }}</p>
+        </div>
+
+        <!-- Áreas de Desarrollo Clave -->
+        <div class="mb-6">
+          <h4 class="text-xl font-semibold text-blue-200 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            Áreas de Desarrollo Clave
+          </h4>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div *ngFor="let area of getActionPlan().areasDesarrollo" class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-5">
+              <h5 class="text-lg font-semibold text-yellow-200 mb-3">{{ area.competencia }}</h5>
+              <p class="text-yellow-100 text-sm mb-4 leading-relaxed">{{ area.importancia }}</p>
+              <div class="space-y-2">
+                <h6 class="text-sm font-medium text-yellow-300">Acciones Específicas:</h6>
+                <ul class="space-y-2">
+                  <li *ngFor="let accion of area.acciones" class="flex items-start text-sm text-yellow-100">
+                    <svg class="w-3 h-3 mr-2 mt-1 text-yellow-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{ accion }}
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- Recursos Recomendados -->
+        <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6">
+          <h4 class="text-xl font-semibold text-purple-200 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.591a1 1 0 00.941 0l6-1.75A1 1 0 0019 12V6a1 1 0 00-.606-.92l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9 12v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1zm5-1a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-6z"></path>
+            </svg>
+            Recursos Recomendados
+          </h4>
+          
+          <!-- Cursos Recomendados -->
+          <div class="mb-6">
+            <h5 class="text-lg font-medium text-purple-300 mb-3">Cursos de la Plataforma</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div *ngFor="let curso of getActionPlan().recursos.cursos" class="bg-purple-800/20 border border-purple-400/30 rounded-lg p-4">
+                <h6 class="font-semibold text-purple-200 mb-2">{{ curso.titulo }}</h6>
+                <p class="text-purple-100 text-sm mb-2">{{ curso.descripcion }}</p>
+                <div class="flex items-center justify-between text-xs text-purple-300">
+                  <span>Duración: {{ curso.duracion }}</span>
+                  <span class="bg-purple-600/50 px-2 py-1 rounded">Recomendado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lectura Recomendada -->
           <div>
-            <h4 class="text-lg font-semibold text-blue-200 mb-3">Acciones a Mediano Plazo (3-12 meses)</h4>
-            <ul class="space-y-2 text-blue-100">
-              <li *ngFor="let accion of getAccionesMedioPlazo()" class="flex items-start">
-                <svg class="w-4 h-4 mr-2 mt-1 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                {{ accion }}
-              </li>
-            </ul>
+            <h5 class="text-lg font-medium text-purple-300 mb-3">Lectura Complementaria</h5>
+            <div class="bg-purple-800/20 border border-purple-400/30 rounded-lg p-4">
+              <p class="text-purple-100">{{ getActionPlan().recursos.lectura }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -534,6 +581,19 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  getActionPlan(): ActionPlan {
+    const formData = {
+      segmento: this.diagnosticState.form.value.segmento,
+      contexto: this.diagnosticState.form.value.contexto,
+      objetivo: this.diagnosticState.form.value.objetivo,
+      ares: this.diagnosticState.form.value.ares,
+      competencias: this.diagnosticState.form.value.competencias,
+      lead: this.diagnosticState.form.value.lead
+    };
+    
+    return this.scoringService.generateActionPlan(formData);
+  }
+
   downloadPDF(): void {
     console.log('Generando PDF del diagnóstico...');
     
@@ -702,8 +762,8 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     
     yPosition += 10;
     
-    // Plan de Acción
-    if (yPosition > pageHeight - 100) {
+    // Plan de Acción Recomendado Mejorado
+    if (yPosition > pageHeight - 120) {
       pdf.addPage();
       yPosition = margin;
     }
@@ -714,39 +774,158 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     pdf.text('Plan de Acción Recomendado', margin, yPosition);
     yPosition += 10;
     
-    // Acciones Inmediatas
+    // Reconocimiento de Fortalezas
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(59, 130, 246); // Azul
-    pdf.text('Acciones Inmediatas (0-3 meses):', margin, yPosition);
+    pdf.setTextColor(34, 197, 94); // Verde
+    pdf.text('Reconocimiento de Fortalezas:', margin, yPosition);
     yPosition += 8;
     
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(0, 0, 0);
     
-    const accionesInmediatas = this.getAccionesInmediatas();
-    accionesInmediatas.forEach(accion => {
-      pdf.text(`• ${accion}`, margin + 5, yPosition);
+    const actionPlan = this.getActionPlan();
+    const reconocimientoText = actionPlan.reconocimientoFortalezas;
+    
+    // Dividir el texto en líneas que quepan en la página
+    const maxWidth = contentWidth - 10;
+    const lines = this.splitTextIntoLines(reconocimientoText, maxWidth, pdf);
+    lines.forEach(line => {
+      pdf.text(line, margin + 5, yPosition);
       yPosition += 6;
     });
     
-    yPosition += 5;
+    yPosition += 10;
     
-    // Acciones a Mediano Plazo
+    // Áreas de Desarrollo Clave
+    if (yPosition > pageHeight - 150) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(245, 158, 11); // Amarillo
+    pdf.text('Áreas de Desarrollo Clave:', margin, yPosition);
+    yPosition += 8;
+    
+    actionPlan.areasDesarrollo.forEach((area, index) => {
+      if (yPosition > pageHeight - 100) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      
+      // Nombre de la competencia
+      pdf.setFontSize(13);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`${index + 1}. ${area.competencia}:`, margin, yPosition);
+      yPosition += 8;
+      
+      // Importancia
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      
+      const importanciaLines = this.splitTextIntoLines(area.importancia, maxWidth, pdf);
+      importanciaLines.forEach(line => {
+        pdf.text(line, margin + 5, yPosition);
+        yPosition += 6;
+      });
+      
+      yPosition += 5;
+      
+      // Acciones específicas
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(59, 130, 246); // Azul
+      pdf.text('Acciones Específicas:', margin + 5, yPosition);
+      yPosition += 6;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      
+      area.acciones.forEach((accion, accionIndex) => {
+        const accionText = `${accionIndex + 1}. ${accion}`;
+        const accionLines = this.splitTextIntoLines(accionText, maxWidth - 10, pdf);
+        accionLines.forEach(line => {
+          pdf.text(line, margin + 10, yPosition);
+          yPosition += 5;
+        });
+        yPosition += 2;
+      });
+      
+      yPosition += 8;
+    });
+    
+    // Recursos Recomendados
+    if (yPosition > pageHeight - 120) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
     pdf.setFontSize(14);
     pdf.setFont('helvetica', 'bold');
     pdf.setTextColor(147, 51, 234); // Púrpura
-    pdf.text('Acciones a Mediano Plazo (3-12 meses):', margin, yPosition);
+    pdf.text('Recursos Recomendados:', margin, yPosition);
     yPosition += 8;
+    
+    // Cursos recomendados
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Cursos de la Plataforma:', margin + 5, yPosition);
+    yPosition += 6;
     
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(0, 0, 0);
     
-    const accionesMedioPlazo = this.getAccionesMedioPlazo();
-    accionesMedioPlazo.forEach(accion => {
-      pdf.text(`• ${accion}`, margin + 5, yPosition);
+    actionPlan.recursos.cursos.forEach((curso, index) => {
+      if (yPosition > pageHeight - 80) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(147, 51, 234); // Púrpura
+      pdf.text(`${index + 1}. ${curso.titulo}`, margin + 10, yPosition);
+      yPosition += 6;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+      
+      const descripcionLines = this.splitTextIntoLines(curso.descripcion, maxWidth - 15, pdf);
+      descripcionLines.forEach(line => {
+        pdf.text(line, margin + 15, yPosition);
+        yPosition += 5;
+      });
+      
+      pdf.text(`Duración: ${curso.duracion}`, margin + 15, yPosition);
+      yPosition += 8;
+    });
+    
+    // Lectura recomendada
+    if (yPosition > pageHeight - 60) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+    
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Lectura Complementaria:', margin + 5, yPosition);
+    yPosition += 6;
+    
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    
+    const lecturaLines = this.splitTextIntoLines(actionPlan.recursos.lectura, maxWidth - 10, pdf);
+    lecturaLines.forEach(line => {
+      pdf.text(line, margin + 10, yPosition);
       yPosition += 6;
     });
     
@@ -779,5 +958,31 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     console.log('Agendando consultoría...');
     // Aquí iría la lógica real de agendamiento
     alert('Funcionalidad de agendamiento en desarrollo');
+  }
+
+  private splitTextIntoLines(text: string, maxWidth: number, pdf: jsPDF): string[] {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+    
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = pdf.getTextWidth(testLine);
+      
+      if (testWidth <= maxWidth) {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        currentLine = word;
+      }
+    }
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    
+    return lines;
   }
 }
