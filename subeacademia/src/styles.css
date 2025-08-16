@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Importación de fuentes web */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 /* Estilos para la generación de PDF */
 @media print {
   body * {
@@ -33,49 +36,248 @@
   color: #000 !important;
 }
 
-/* ----- UI base (variables y utilidades .ui-*) ----- */
+/* ----- Sistema de Diseño Base ----- */
 :root {
+  /* Variables CSS del sistema */
   --radius: 16px;
   --shadow: 0 8px 30px rgba(2,6,23,.35);
-}
-.theme-light {
-  --bg: #f7fafc;
-  --card: #ffffff;
-  --muted: #475569;
-  --fg: #0f172a;
-  --accent: #0ea5e9;
-  --ring: rgba(14,165,233,.45);
-  --shadow: 0 10px 25px rgba(0,0,0,.08);
+  --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-large: 0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+  
+  /* Espaciado del sistema */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  
+  /* Bordes redondeados */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
 }
 
-/* Inputs contrastados (opt-in) */
-.ui-input {
+/* Tema claro por defecto */
+:root {
+  --bg: #ffffff;
+  --fg: #0b1220;
+  --fg-muted: #5a6577;
+  --surface-1: #f7f9fc;
+  --surface-2: #ffffff;
+  --surface-3: #f1f5f9;
+  
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-fg: var(--fg);
+  --input-placeholder: color-mix(in srgb, var(--fg-muted) 80%, transparent);
+  --input-border: #d7dbe2;
+  --input-border-focus: #3b82f6;
+  
+  /* Accesibilidad / interacción */
+  --ring: #2563eb;
+  --link: var(--ring);
+  
+  /* Compatibilidad con estilos existentes */
+  --muted: var(--fg-muted);
+  --border: var(--input-border);
+  --card: var(--surface-1);
+  --panel: var(--surface-2);
+  --accent: var(--ring);
+}
+
+/* Tema oscuro */
+:root.dark,
+:root[data-theme="dark"],
+.theme-dark {
+  --bg: #0b1220;
+  --fg: #E6EDF3;
+  --fg-muted: #9FB1C1;
+  --surface-1: #111827;
+  --surface-2: #0b1220;
+  --surface-3: #1e293b;
+  
+  --input-bg: var(--surface-1);
+  --input-fg: var(--fg);
+  --input-placeholder: #9FB1C180;
+  --input-border: #2b3a4b;
+  --input-border-focus: #60a5fa;
+  
+  --ring: #3b82f6;
+  --link: var(--ring);
+  
+  /* Compatibilidad */
+  --muted: var(--fg-muted);
+  --border: var(--input-border);
+  --card: var(--surface-1);
+  --panel: var(--surface-2);
+  --accent: var(--ring);
+}
+
+/* ----- Base HTML ----- */
+html, body { 
+  height: 100%; 
+  background: var(--bg); 
+  color: var(--fg); 
+}
+
+/* Anti-alias y scroll suave */
+html { 
+  -webkit-font-smoothing: antialiased; 
+  -moz-osx-font-smoothing: grayscale; 
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { 
+  scroll-behavior: smooth; 
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+/* ----- Tipografía del Sistema ----- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 2.5rem; margin-bottom: 1.5rem; }
+h2 { font-size: 2rem; margin-bottom: 1.25rem; }
+h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+h4 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+h5 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+h6 { font-size: 1rem; margin-bottom: 0.5rem; }
+
+p {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+  color: var(--fg-muted);
+}
+
+/* Enlaces accesibles */
+a { 
+  color: var(--link); 
+  text-decoration: none; 
+  transition: all 0.2s ease;
+}
+
+a:hover { 
+  text-decoration: underline; 
+  text-underline-offset: 3px; 
+  color: color-mix(in srgb, var(--link) 80%, black);
+}
+
+/* ----- Componentes del Sistema ----- */
+
+/* Botones del sistema */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
   width: 100%;
-  background: color-mix(in srgb, var(--card) 70%, transparent);
-  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
-  border-radius: 12px;
-  padding: .85rem 1rem;
-  transition: border-color .2s, box-shadow .2s, background .2s;
-}
-.ui-input::placeholder { color: color-mix(in srgb, var(--fg) 50%, transparent); }
-.ui-input:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 4px var(--ring);
-  background: color-mix(in srgb, var(--card) 85%, transparent);
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
 }
 
-/* Botón primario (opt-in, no afecta Angular Material) */
-.ui-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .75rem 1.5rem; border-radius: 12px; font-weight: 500;
-  transition: all .2s; cursor: pointer; border: none; text-decoration: none;
-  background: var(--accent); color: white; font-size: .875rem;
+.btn:hover::before {
+  left: 100%;
 }
-.ui-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-.ui-btn:active { transform: translateY(0); }
-.ui-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
-/* Botones del diagnóstico */
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-error {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-error:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+.btn-outline:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Botones del diagnóstico (mantener compatibilidad) */
 .btn-primary {
   @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
 }
@@ -88,154 +290,186 @@
   @apply bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
 }
 
-/* Animaciones */
+/* Inputs del sistema */
+.input {
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--input-fg);
+  border: 2px solid var(--input-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.input::placeholder { 
+  color: var(--input-placeholder); 
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--input-border-focus) 20%, transparent);
+  transform: translateY(-1px);
+}
+
+/* Cards del sistema */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.card-interactive {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-large);
+}
+
+/* Badges del sistema */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-primary {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.badge-success {
+  background: color-mix(in srgb, #10b981 10%, transparent);
+  color: #10b981;
+  border: 1px solid color-mix(in srgb, #10b981 20%, transparent);
+}
+
+.badge-warning {
+  background: color-mix(in srgb, #f59e0b 10%, transparent);
+  color: #f59e0b;
+  border: 1px solid color-mix(in srgb, #f59e0b 20%, transparent);
+}
+
+.badge-error {
+  background: color-mix(in srgb, #ef4444 10%, transparent);
+  color: #ef4444;
+  border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+}
+
+/* ----- Animaciones del Sistema ----- */
 .animate-fade-in {
   animation: fadeIn 0.5s ease-in-out;
 }
 
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.8s ease-out;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Nueva animación shimmer para efectos de brillo */
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ----- Tokens de color (AA) ----- */
-:root {
-  /* Tema CLARO por defecto */
-  --bg: #ffffff;
-  --fg: #0b1220;              /* texto principal */
-  --fg-muted: #5a6577;        /* texto secundario/placeholder */
-  --surface-1: #f7f9fc;       /* superficies elevadas */
-  --surface-2: #ffffff;       /* superficie base */
-
-  /* Inputs */
-  --input-bg: #ffffff;
-  --input-fg: var(--fg);
-  --input-placeholder: color-mix(in srgb, var(--fg-muted) 80%, transparent);
-  --input-border: #d7dbe2;
-
-  /* Accesibilidad / interacción */
-  --ring: #2563eb;            /* focus ring */
-  --link: var(--ring);
-
-  /* Compatibilidad con estilos existentes */
-  --muted: var(--fg-muted);
-  --border: var(--input-border);
-  --card: var(--surface-1);
-  --panel: var(--surface-2);
-  --accent: var(--ring);
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Tema oscuro explícito (compatibilidad con .dark, .theme-dark y [data-theme="dark"]) */
-:root.dark,
-:root[data-theme="dark"],
-.theme-dark {
-  /* Tema OSCURO cuando existe la clase .dark en <html> */
-  --bg: #0b1220;
-  --fg: #E6EDF3;
-  --fg-muted: #9FB1C1;
-  --surface-1: #111827;
-  --surface-2: #0b1220;
-
-  --input-bg: var(--surface-1);
-  --input-fg: var(--fg);
-  --input-placeholder: #9FB1C180;
-  --input-border: #2b3a4b;
-
-  --ring: #3b82f6;
-  --link: var(--ring);
-
-  /* Compatibilidad */
-  --muted: var(--fg-muted);
-  --border: var(--input-border);
-  --card: var(--surface-1);
-  --panel: var(--surface-2);
-  --accent: var(--ring);
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--fg); }
-/* Anti-alias y scroll suave */
-html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-* { scroll-behavior: smooth; }
-
-/* Reset tipografía base y enlaces accesibles */
-html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-a { color: var(--link); text-decoration: none; }
-a:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-/* Controles de formulario accesibles */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-textarea,
-select {
-  background: var(--input-bg);
-  color: var(--input-fg);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-input[type="search"]:focus,
-input[type="tel"]:focus,
-input[type="url"]:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
 
-input[type="text"]::placeholder,
-input[type="email"]::placeholder,
-input[type="password"]::placeholder,
-input[type="number"]::placeholder,
-input[type="search"]::placeholder,
-input[type="tel"]::placeholder,
-input[type="url"]::placeholder,
-textarea::placeholder {
-  color: var(--input-placeholder);
+@keyframes glow {
+  0% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  100% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
 }
 
-/* Botones base accesibles */
-button {
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
 }
 
-button:hover {
-  background: color-mix(in srgb, var(--accent) 90%, black);
-  transform: translateY(-1px);
+/* ----- Utilidades del Sistema ----- */
+.glass {
+  background: color-mix(in srgb, var(--card) 80%, transparent);
+  backdrop-filter: blur(20px);
+  border: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
 }
 
-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+.gradient-text {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.text-balance {
+  text-wrap: balance;
 }
 
-/* Estilos para el slider personalizado */
+/* ----- Estilos para el slider personalizado ----- */
 .slider {
   -webkit-appearance: none;
   appearance: none;
@@ -295,12 +529,7 @@ button:disabled {
   border-color: #1f2937;
 }
 
-/* Transiciones suaves para cambios de tema */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Estilos para componentes del diagnóstico */
+/* ----- Estilos para componentes del diagnóstico ----- */
 .diagnostic-card {
   @apply bg-slate-800 dark:bg-slate-900 rounded-lg p-6 shadow-xl border border-slate-700 dark:border-slate-600;
 }
@@ -317,7 +546,7 @@ button:disabled {
   @apply text-blue-400 dark:text-blue-300;
 }
 
-/* Responsive design para el diagnóstico */
+/* ----- Responsive design ----- */
 @media (max-width: 768px) {
   .diagnostic-card {
     @apply p-4;
@@ -340,4 +569,54 @@ button:disabled {
     width: 16px;
     height: 16px;
   }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.25rem; }
+  
+  .btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ----- Utilidades de accesibilidad ----- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible para mejor accesibilidad */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ----- Estados de carga ----- */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }

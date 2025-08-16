@@ -1,99 +1,301 @@
-<!-- 1. HERO SECTION -->
-<section class="relative h-screen flex items-center justify-center text-center bg-gray-900 text-white">
-  <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
-  <div class="absolute inset-0 bg-black/50 z-0"></div>
+<!-- 1. HERO SECTION TRANSFORMADO -->
+<section class="relative min-h-screen flex items-center justify-center text-center bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
+  <!-- Fondo animado con partículas -->
+  <div class="absolute inset-0 bg-black/30 z-0"></div>
+  
+  <!-- Elementos de fondo animados -->
+  <div class="absolute inset-0 z-0">
+    <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
+  </div>
 
-  <div class="relative z-10 p-4">
-    <h1 class="text-4xl md:text-6xl font-bold mb-4">
-      {{ tituloHome }}
+  <!-- Hero Scene mejorado -->
+  <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
+
+  <!-- Contenido principal con animaciones -->
+  <div class="relative z-10 p-4 max-w-6xl mx-auto">
+    <!-- Título principal con efecto de aparición -->
+    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up text-balance">
+      <span class="gradient-text">{{ tituloHome }}</span>
     </h1>
 
-    <div class="mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-200 drop-shadow">
-      <span id="typewriter"></span><span class="cursor ml-1">|</span>
+    <!-- Subtítulo con typewriter mejorado -->
+    <div class="mt-6 text-2xl sm:text-3xl lg:text-4xl font-medium text-blue-100 drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.3s;">
+      <span id="typewriter" class="inline-block"></span>
+      <span class="cursor ml-1 animate-pulse">|</span>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <button (click)="iniciarDiagnostico()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
-        INICIAR DIAGNÓSTICO DE COMPETENCIAS IA
+    <!-- Descripción con animación -->
+    <p class="mt-8 text-lg md:text-xl text-blue-200 max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.6s;">
+      Descubre tu nivel de madurez en IA y transforma tu organización con nuestro diagnóstico inteligente basado en el Framework ARES-AI©
+    </p>
+
+    <!-- Botones de acción con efectos -->
+    <div class="flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up" style="animation-delay: 0.9s;">
+      <button (click)="iniciarDiagnostico()" 
+              class="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg">
+        <span class="relative z-10 flex items-center gap-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          INICIAR DIAGNÓSTICO DE COMPETENCIAS IA
+        </span>
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </button>
-      <button (click)="contactarAsesor()" class="bg-transparent border-2 border-white hover:bg-white hover:text-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300">
-        HABLAR CON UN ASESOR
+      
+      <button (click)="contactarAsesor()" 
+              class="group relative overflow-hidden bg-transparent border-2 border-white/50 hover:border-white text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm hover:bg-white/10">
+        <span class="relative z-10 flex items-center gap-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+          HABLAR CON UN ASESOR
+        </span>
       </button>
+    </div>
+
+    <!-- Indicador de scroll -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+        <div class="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 2. SECCIÓN "HOJA DE RUTA" -->
-<section class="py-16 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-  <div class="container mx-auto px-4 text-center">
-    <h2 class="text-3xl font-bold mb-2">Tu Hoja de Ruta hacia la Madurez en IA</h2>
-    <p class="text-gray-600 mb-12">Basado en nuestro Framework ARES-AI©</p>
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
-      <div class="p-6">
-        <h3 class="font-bold text-xl mb-2">1. Diagnóstico Inicial</h3>
-        <p>Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente.</p>
-      </div>
-      <div class="p-6">
-        <h3 class="font-bold text-xl mb-2">2. Plan de Capacitación</h3>
-        <p>Roadmap personalizado para desarrollar las 13 competencias clave.</p>
-      </div>
-      <div class="p-6">
-        <h3 class="font-bold text-xl mb-2">3. Implementación Guiada</h3>
-        <p>Acompañamiento experto para aplicar IA de forma responsable.</p>
-      </div>
-      <div class="p-6">
-        <h3 class="font-bold text-xl mb-2">4. Mejora Continua</h3>
-        <p>Métricas y seguimiento para asegurar impacto sostenible.</p>
-      </div>
-      <div class="p-6">
-        <h3 class="font-bold text-xl mb-2">5. Escalamiento y Gobierno</h3>
-        <p>Expansión, seguridad y gobierno de IA con prácticas responsables.</p>
-      </div>
-    </div>
+<!-- 2. SECCIÓN "HOJA DE RUTA" REDISEÑADA -->
+<section class="py-24 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-white relative overflow-hidden">
+  <!-- Elementos de fondo decorativos -->
+  <div class="absolute inset-0">
+    <div class="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-5"></div>
   </div>
   
+  <div class="container mx-auto px-4 text-center relative z-10">
+    <div class="max-w-4xl mx-auto mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
+        Tu Hoja de Ruta hacia la 
+        <span class="gradient-text">Madurez en IA</span>
+      </h2>
+      <p class="text-xl text-slate-600 dark:text-slate-400 animate-fade-in-up" style="animation-delay: 0.2s;">
+        Basado en nuestro Framework ARES-AI© probado y validado
+      </p>
+    </div>
+    
+    <!-- Pasos del proceso con diseño de tarjetas -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+      <div class="group relative">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            1
+          </div>
+          <div class="pt-20 pb-6 px-6">
+            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Diagnóstico Inicial</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente y personalizado.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="group relative">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.1s;">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            2
+          </div>
+          <div class="pt-20 pb-6 px-6">
+            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Plan de Capacitación</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Roadmap personalizado para desarrollar las 13 competencias clave de manera progresiva.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="group relative">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.2s;">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            3
+          </div>
+          <div class="pt-20 pb-6 px-6">
+            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Implementación Guiada</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Acompañamiento experto para aplicar IA de forma responsable y efectiva en tu organización.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="group relative">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.3s;">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            4
+          </div>
+          <div class="pt-20 pb-6 px-6">
+            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Mejora Continua</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Métricas y seguimiento continuo para asegurar impacto sostenible y crecimiento constante.</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="group relative">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.4s;">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+            5
+          </div>
+          <div class="pt-20 pb-6 px-6">
+            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Escalamiento y Gobierno</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Expansión, seguridad y gobierno de IA con prácticas responsables y escalables.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" -->
-<section class="py-16 bg-gray-50 dark:bg-gray-950">
-  <div class="container mx-auto px-4 text-center">
-    <h2 class="text-3xl font-bold mb-12 text-gray-900 dark:text-white">Nuestras Soluciones para la Transformación Digital</h2>
+<!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" MEJORADA -->
+<section class="py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative overflow-hidden">
+  <!-- Elementos de fondo -->
+  <div class="absolute inset-0">
+    <div class="absolute top-20 right-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 left-20 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 text-center relative z-10">
+    <div class="max-w-4xl mx-auto mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white">
+        Nuestras Soluciones para la 
+        <span class="gradient-text">Transformación Digital</span>
+      </h2>
+      <p class="text-xl text-slate-600 dark:text-slate-400">
+        Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable
+      </p>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
-        <h3 class="font-bold text-2xl mb-4">Capacitación Adaptativa (AVE-AI)</h3>
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave.</p>
-        <button (click)="iniciarDiagnostico()" class="text-blue-600 font-bold hover:underline">Realizar Diagnóstico →</button>
+      <div class="group">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Capacitación Adaptativa (AVE-AI)</h3>
+          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.</p>
+          <button (click)="iniciarDiagnostico()" class="btn btn-primary group-hover:scale-105 transition-transform duration-300">
+            Realizar Diagnóstico →
+          </button>
+        </div>
       </div>
-      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
-        <h3 class="font-bold text-2xl mb-4">Consultoría Estratégica (ARES-AI)</h3>
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio.</p>
-        <button (click)="contactarAsesor()" class="text-blue-600 font-bold hover:underline">Contactar un Asesor →</button>
+      
+      <div class="group">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4" style="animation-delay: 0.1s;">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+          </div>
+          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Consultoría Estratégica (ARES-AI)</h3>
+          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.</p>
+          <button (click)="contactarAsesor()" class="btn btn-secondary group-hover:scale-105 transition-transform duration-300">
+            Contactar un Asesor →
+          </button>
+        </div>
       </div>
-      <div class="bg-white dark:bg-gray-900 p-8 rounded-lg shadow-lg">
-        <h3 class="font-bold text-2xl mb-4">Implementación de Proyectos</h3>
-        <p class="mb-4 text-gray-700 dark:text-gray-300">Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue.</p>
-        <a [routerLink]="['/', i18n.currentLang(), 'casos-de-exito']" class="text-blue-600 font-bold hover:underline">Ver Casos de Éxito →</a>
+      
+      <div class="group">
+        <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4" style="animation-delay: 0.2s;">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Implementación de Proyectos</h3>
+          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.</p>
+          <a [routerLink]="['/', i18n.currentLang(), 'casos-de-exito']" class="btn btn-outline group-hover:scale-105 transition-transform duration-300">
+            Ver Casos de Éxito →
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 4. HAN CONFIADO (Carrusel infinito 2 filas) -->
-<section class="py-16 bg-white dark:bg-gray-900">
-  <div class="container mx-auto px-4">
-    <h2 class="text-3xl font-bold mb-8 text-center text-gray-900 dark:text-white">Han confiado</h2>
-    <div class="overflow-hidden">
-      <div class="flex gap-8 items-center justify-center flex-wrap mb-6">
-        <img *ngFor="let l of logosEmpresas" [src]="l.url" [alt]="l.name || 'logo'" class="h-12 md:h-14 object-contain opacity-80 hover:opacity-100 transition" />
+<!-- 4. SECCIÓN "HAN CONFIADO" CON CARRUSEL MEJORADO -->
+<section class="py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+  <!-- Elementos de fondo -->
+  <div class="absolute inset-0">
+    <div class="absolute top-1/2 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl"></div>
+    <div class="absolute top-1/2 right-0 w-40 h-40 bg-purple-500/5 rounded-full blur-2xl"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 text-center relative z-10">
+    <h2 class="text-4xl md:text-5xl font-bold mb-16 text-slate-900 dark:text-white">
+      Han confiado en 
+      <span class="gradient-text">nosotros</span>
+    </h2>
+    
+    <!-- Carrusel de logos con animación infinita -->
+    <div class="relative overflow-hidden">
+      <!-- Primera fila de logos -->
+      <div class="flex gap-16 items-center justify-center mb-8 animate-scroll-left">
+        <div class="flex gap-16 items-center">
+          <img *ngFor="let l of logosEmpresas" [src]="l.url" [alt]="l.name || 'logo'" 
+               class="h-16 md:h-20 object-contain opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-110 grayscale hover:grayscale-0" />
+        </div>
+        <!-- Duplicar para efecto infinito -->
+        <div class="flex gap-16 items-center">
+          <img *ngFor="let l of logosEmpresas" [src]="l.url" [alt]="l.name || 'logo'" 
+               class="h-16 md:h-20 object-contain opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-110 grayscale hover:grayscale-0" />
+        </div>
       </div>
-      <div class="flex gap-8 items-center justify-center flex-wrap">
-        <img *ngFor="let l of logosEducacion" [src]="l.url" [alt]="l.name || 'logo'" class="h-12 md:h-14 object-contain opacity-80 hover:opacity-100 transition" />
+      
+      <!-- Segunda fila de logos -->
+      <div class="flex gap-16 items-center justify-center animate-scroll-right">
+        <div class="flex gap-16 items-center">
+          <img *ngFor="let l of logosEducacion" [src]="l.url" [alt]="l.name || 'logo'" 
+               class="h-16 md:h-20 object-contain opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-110 grayscale hover:grayscale-0" />
+        </div>
+        <!-- Duplicar para efecto infinito -->
+        <div class="flex gap-16 items-center">
+          <img *ngFor="let l of logosEducacion" [src]="l.url" [alt]="l.name || 'logo'" 
+               class="h-16 md:h-20 object-contain opacity-80 hover:opacity-100 transition-all duration-300 hover:scale-110 grayscale hover:grayscale-0" />
+        </div>
       </div>
+    </div>
+    
+    <!-- CTA final -->
+    <div class="mt-16 text-center">
+      <p class="text-xl text-slate-600 dark:text-slate-400 mb-8">
+        Únete a las organizaciones que ya están transformando su futuro con IA
+      </p>
+      <button (click)="iniciarDiagnostico()" 
+              class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300">
+        Comenzar Ahora
+      </button>
     </div>
   </div>
 </section>
 
-<!-- Sección de Logos podría mantenerse o reubicarse más adelante -->
-
-<!-- CTA Final opcional -->
+<!-- Estilos adicionales para las animaciones del carrusel -->
+<style>
+  @keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  @keyframes scroll-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+  
+  .animate-scroll-left {
+    animation: scroll-left 30s linear infinite;
+  }
+  
+  .animate-scroll-right {
+    animation: scroll-right 30s linear infinite;
+  }
+  
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+</style>
 
