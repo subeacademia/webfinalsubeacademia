@@ -1,0 +1,78 @@
+<div 
+  class="modal-backdrop"
+  [class.visible]="isVisible"
+  (click)="onBackdropClick($event)"
+>
+  <div 
+    class="modal-container"
+    [class.visible]="isVisible"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header del modal -->
+    <div class="modal-header">
+      <div class="modal-title-section">
+        <div class="competency-icon">
+          {{ competency ? getCompetencyIcon(competency) : '📋' }}
+        </div>
+        <div class="title-content">
+          <h2 class="modal-title">{{ competency?.name }}</h2>
+          <p class="competency-description">{{ competency?.description }}</p>
+        </div>
+      </div>
+      <button 
+        class="close-button"
+        (click)="onClose()"
+        aria-label="Cerrar modal"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="modal-content">
+      <div class="levels-section">
+        <h3 class="levels-title">Niveles de Dominio</h3>
+        <p class="levels-subtitle">
+          Cada competencia se desarrolla a través de 6 niveles progresivos, desde el conocimiento básico hasta la maestría experta.
+        </p>
+        
+        <!-- Grid de niveles -->
+        <div class="levels-grid">
+          <div 
+            *ngFor="let level of competency?.levels"
+            class="level-card"
+          >
+            <div class="level-header">
+              <span 
+                class="level-badge"
+                [class]="getLevelColor(level.level)"
+              >
+                {{ level.level }}
+              </span>
+            </div>
+            
+            <div class="level-content">
+              <h4 class="level-definition-title">Definición</h4>
+              <p class="level-definition">{{ level.definition }}</p>
+              
+              <h4 class="level-behaviors-title">Conductas Asociadas</h4>
+              <p class="level-behaviors">{{ level.behaviors }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="modal-footer">
+      <button 
+        class="close-modal-btn"
+        (click)="onClose()"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>

@@ -2,40 +2,50 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import { AresAiGraphComponent } from './components/ares-ai-graph/ares-ai-graph.component';
+import { CompetencyModalComponent } from '../../shared/ui/competency-modal/competency-modal.component';
+import { COMPETENCIAS_COMPLETAS, Competency } from '../diagnostico/data/competencias';
 
 @Component({
   selector: 'app-methodology',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent],
+  imports: [
+    CommonModule, 
+    I18nTranslatePipe, 
+    PageHeaderComponent, 
+    AresAiGraphComponent,
+    CompetencyModalComponent
+  ],
   templateUrl: './methodology.component.html',
   styleUrls: ['./methodology.component.css']
 })
 export class MethodologyComponent {
-  competencies = Array.from({ length: 13 }, (_, i) => i + 1);
-  activeCard: number | null = null;
+  competencies = COMPETENCIAS_COMPLETAS;
+  
+  // Estado del modal
+  isModalOpen = false;
+  selectedCompetency: Competency | null = null;
 
-  toggleCard(cardIndex: number): void {
-    if (this.activeCard === cardIndex) {
-      this.activeCard = null;
-    } else {
-      this.activeCard = cardIndex;
-    }
+  openCompetencyModal(competency: Competency): void {
+    this.selectedCompetency = competency;
+    this.isModalOpen = true;
   }
 
-  isCardActive(cardIndex: number): boolean {
-    return this.activeCard === cardIndex;
+  onCloseModal(): void {
+    this.isModalOpen = false;
+    this.selectedCompetency = null;
   }
 
-  trackByIndex(index: number, item: number): number {
-    return item;
+  trackByIndex(index: number, item: Competency): string {
+    return item.id;
   }
 
-  getCompetencyIcon(index: number): string {
+  getCompetencyIcon(competency: Competency): string {
     const icons = [
       '🚀', '💡', '🔧', '📊', '🎯', '🌐', '⚡', '🔄', 
       '📈', '🎨', '🔒', '📱', '🌟'
     ];
-    return icons[index - 1] || '📋';
+    return icons[parseInt(competency.id) - 1] || '📋';
   }
 }
 

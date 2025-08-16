@@ -10,22 +10,9 @@
     
     <!-- Layout de dos columnas para explicación detallada -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-      <!-- Columna izquierda: Imagen/Gráfico -->
+      <!-- Columna izquierda: Gráfico Interactivo ARES AI -->
       <div class="flex justify-center lg:justify-start">
-        <div class="relative">
-          <!-- Placeholder para el gráfico ARES AI -->
-          <div class="w-80 h-80 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 rounded-2xl shadow-2xl flex items-center justify-center">
-            <div class="text-center text-white">
-              <div class="text-6xl mb-4">🧠</div>
-              <h3 class="text-xl font-bold mb-2">ARES AI</h3>
-              <p class="text-sm opacity-90">Framework de Metodología</p>
-            </div>
-          </div>
-          <!-- Elementos decorativos del gráfico -->
-          <div class="absolute -top-4 -right-4 w-8 h-8 bg-yellow-400 rounded-full pulse-slow"></div>
-          <div class="absolute -bottom-4 -left-4 w-6 h-6 bg-green-400 rounded-full pulse-slow" style="animation-delay: 1s;"></div>
-          <div class="absolute top-1/2 -right-8 w-4 h-4 bg-red-400 rounded-full pulse-slow" style="animation-delay: 0.5s;"></div>
-        </div>
+        <app-ares-ai-graph></app-ares-ai-graph>
       </div>
       
       <!-- Columna derecha: Texto explicativo -->
@@ -43,29 +30,36 @@
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">1</div>
               <div>
-                <h5 class="font-medium text-gray-900 dark:text-white">Análisis</h5>
-                <p class="text-gray-600 dark:text-gray-400">Evaluación profunda del contexto organizacional y necesidades</p>
+                <h5 class="font-medium text-gray-900 dark:text-white">Preparación y Evaluación</h5>
+                <p class="text-gray-600 dark:text-gray-400">Análisis de viabilidad, definición de objetivos y evaluación de riesgos éticos</p>
               </div>
             </div>
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">2</div>
               <div>
-                <h5 class="font-medium text-gray-900 dark:text-white">Recomendación</h5>
-                <p class="text-gray-600 dark:text-gray-400">Propuestas estratégicas basadas en IA y mejores prácticas</p>
+                <h5 class="font-medium text-gray-900 dark:text-white">Diseño y Prototipado</h5>
+                <p class="text-gray-600 dark:text-gray-400">Creación de prototipos funcionales y validación temprana con stakeholders</p>
               </div>
             </div>
             <div class="flex items-start space-x-3">
-              <div class="flex-shrink-0 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
+              <div class="flex-shrink-0 w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
               <div>
-                <h5 class="font-medium text-gray-900 dark:text-white">Estrategia</h5>
-                <p class="text-gray-600 dark:text-gray-400">Plan de implementación personalizado y roadmap de ejecución</p>
+                <h5 class="font-medium text-gray-900 dark:text-white">Desarrollo e Implementación</h5>
+                <p class="text-gray-600 dark:text-gray-400">Desarrollo del modelo de IA siguiendo prácticas de MLOps</p>
               </div>
             </div>
             <div class="flex items-start space-x-3">
               <div class="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">4</div>
               <div>
-                <h5 class="font-medium text-gray-900 dark:text-white">Seguimiento</h5>
-                <p class="text-gray-600 dark:text-gray-400">Monitoreo continuo y optimización basada en resultados</p>
+                <h5 class="font-medium text-gray-900 dark:text-white">Monitoreo y Optimización</h5>
+                <p class="text-gray-600 dark:text-gray-400">Seguimiento continuo del rendimiento y optimización de algoritmos</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold">5</div>
+              <div>
+                <h5 class="font-medium text-gray-900 dark:text-white">Escalado y Sostenibilidad</h5>
+                <p class="text-gray-600 dark:text-gray-400">Planificación para el crecimiento y gobernanza a largo plazo</p>
               </div>
             </div>
           </div>
@@ -97,7 +91,82 @@
   </div>
 </div>
 
-<!-- Sección 13 Competencias con Flashcards Interactivas -->
+<!-- Sección Fundamentos Pedagógicos -->
+<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-2xl lg:text-center mb-16">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Una Pedagogía para la Era de la IA</h2>
+      <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
+        Para cultivar estas 13 competencias clave en un mundo transformado por la IA, nuestro enfoque se basa en una pedagogía adaptativa e integrada, caracterizada por los siguientes pilares:
+      </p>
+    </div>
+    
+    <!-- Pilares Pedagógicos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
+        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🧠</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Enfoque en Metahabilidades</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Desarrollo de capacidades cognitivas superiores que permiten aprender, desaprender y reaprender continuamente en entornos de cambio acelerado.
+        </p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
+        <div class="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🤖</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Aprendizaje Híbrido Humano-IA</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Integración estratégica de capacidades humanas únicas con herramientas de IA para maximizar el potencial de aprendizaje y resolución de problemas.
+        </p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-8 border border-green-200 dark:border-green-800">
+        <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🎯</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Personalización Adaptativa</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Adaptación dinámica del contenido y metodologías según el perfil de aprendizaje, ritmo y objetivos específicos de cada participante.
+        </p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-yellow-200 dark:border-yellow-800">
+        <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🌱</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Crecimiento Sostenible</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Desarrollo de competencias que promueven la sostenibilidad tecnológica y la responsabilidad ética en la era de la IA.
+        </p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl p-8 border border-red-200 dark:border-red-800">
+        <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🔄</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Iteración Continua</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Proceso de mejora constante basado en feedback, evaluación y adaptación a las necesidades emergentes del mercado y la sociedad.
+        </p>
+      </div>
+      
+      <div class="bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-8 border border-indigo-200 dark:border-indigo-800">
+        <div class="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mb-6">
+          <span class="text-3xl">🌟</span>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Impacto Transformador</h3>
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+          Enfoque en generar cambios significativos y medibles en las organizaciones y la sociedad a través del desarrollo de competencias digitales.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sección 13 Competencias con Tarjetas Simplificadas -->
 <div class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
@@ -105,57 +174,34 @@
       <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">{{ 'methodology.competencies.description' | i18nTranslate }}</p>
     </div>
     
-    <!-- Grid de Flashcards Interactivas -->
+    <!-- Grid de Tarjetas de Competencias -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <div 
-        *ngFor="let i of competencies; trackBy: trackByIndex" 
+        *ngFor="let competency of competencies; trackBy: trackByIndex" 
         class="group cursor-pointer"
-        (click)="toggleCard(i)"
+        (click)="openCompetencyModal(competency)"
       >
-        <div 
-          class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out overflow-hidden competency-card card-hover-effect"
-          [class.ring-2]="isCardActive(i)"
-          [class.ring-blue-500]="isCardActive(i)"
-          [class.ring-offset-2]="isCardActive(i)"
-          [class.ring-offset-gray-50]="isCardActive(i)"
-          [class.dark:ring-offset-gray-950]="isCardActive(i)"
-          [class.active]="isCardActive(i)"
-        >
+        <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out overflow-hidden competency-card">
           <!-- Header de la tarjeta -->
           <div class="p-6 text-center">
             <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl">
-              {{ getCompetencyIcon(i) }}
+              {{ getCompetencyIcon(competency) }}
             </div>
-            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight">
-              {{ ('methodology.competencies.c' + i + '_title') | i18nTranslate }}
+            <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight mb-3">
+              {{ competency.name }}
             </h3>
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-3">
+              {{ competency.description }}
+            </p>
           </div>
           
-          <!-- Contenido expandible -->
-          <div 
-            class="px-6 pb-6 transition-all duration-300 ease-in-out expandable-content"
-            [class.max-h-0]="!isCardActive(i)"
-            [class.max-h-96]="isCardActive(i)"
-            [class.opacity-0]="!isCardActive(i)"
-            [class.opacity-100]="isCardActive(i)"
-            [class.overflow-hidden]="!isCardActive(i)"
-          >
-            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                {{ ('methodology.competencies.c' + i + '_desc') | i18nTranslate }}
-              </p>
-            </div>
-          </div>
-          
-          <!-- Indicador de expansión -->
-          <div class="px-6 pb-4 text-center">
-            <div 
-              class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 transition-transform duration-300 expand-indicator"
-              [class.rotate-180]="isCardActive(i)"
-            >
-              <svg class="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+          <!-- Footer de la tarjeta -->
+          <div class="px-6 pb-6">
+            <div class="text-center">
+              <div class="inline-flex items-center justify-center px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-sm font-medium rounded-lg">
+                <span class="mr-2">👆</span>
+                Haz clic para ver detalles
+              </div>
             </div>
           </div>
         </div>
@@ -163,5 +209,12 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Competencias -->
+<app-competency-modal 
+  *ngIf="isModalOpen" 
+  [competency]="selectedCompetency" 
+  (closeModal)="onCloseModal()">
+</app-competency-modal>
 
 
