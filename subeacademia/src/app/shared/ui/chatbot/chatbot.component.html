@@ -1,11 +1,14 @@
-<div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+<div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50" role="complementary" aria-label="Asistente de IA">
   <!-- Botón Flotante Animado Mejorado -->
   <button *ngIf="!isOpen" 
           (click)="toggleChat()" 
-          class="group relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-110 hover:rotate-12">
+          class="group relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-110 hover:rotate-12"
+          [attr.aria-label]="'Abrir chat con asistente de IA - ' + ('chatbot.header_title' | i18nTranslate)"
+          [attr.aria-expanded]="isOpen"
+          [attr.aria-controls]="isOpen ? 'chat-window' : null">
     
     <!-- Efecto de brillo -->
-    <div class="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-blue-400 via-purple-400 to-indigo-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
     
     <!-- Icono del robot mejorado -->
     <div class="relative z-10">
@@ -26,51 +29,60 @@
     </div>
     
     <!-- Indicador de notificación -->
-    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-bounce">
+    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-bounce" aria-hidden="true">
       <div class="w-full h-full bg-red-400 rounded-full animate-ping"></div>
     </div>
   </button>
 
   <!-- Ventana del Chatbox Mejorada -->
   <div *ngIf="isOpen" 
+       id="chat-window"
        class="w-[calc(100vw-2rem)] h-[calc(100vh-5rem)] sm:w-96 sm:h-[32rem] bg-white dark:bg-slate-800 rounded-3xl shadow-2xl flex flex-col transition-all duration-500 ease-out transform origin-bottom-right border border-slate-200 dark:border-slate-700 backdrop-blur-sm"
        [class.scale-100]="isOpen" 
        [class.opacity-100]="isOpen" 
        [class.scale-95]="!isOpen" 
-       [class.opacity-0]="!isOpen">
+       [class.opacity-0]="!isOpen"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="chat-header-title">
     
     <!-- Header Mejorado -->
     <div class="flex justify-between items-center p-6 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white rounded-t-3xl flex-shrink-0 relative overflow-hidden">
       <!-- Fondo con patrón -->
-      <div class="absolute inset-0 opacity-10">
+      <div class="absolute inset-0 opacity-10" aria-hidden="true">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.4%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
       </div>
       
       <div class="flex items-center gap-3 relative z-10">
-        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm" aria-hidden="true">
           <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
           </svg>
         </div>
         <div>
-          <h3 class="font-bold text-lg">{{ 'chatbot.header_title' | i18nTranslate }}</h3>
+          <h3 id="chat-header-title" class="font-bold text-lg">{{ 'chatbot.header_title' | i18nTranslate }}</h3>
           <p class="text-blue-100 text-sm">Asistente IA SubeAcademia</p>
         </div>
       </div>
       
       <button (click)="toggleChat()" 
-              class="relative z-10 hover:bg-white/20 p-2 rounded-full transition-all duration-200 hover:scale-110 group">
-        <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              class="relative z-10 hover:bg-white/20 p-2 rounded-full transition-all duration-200 hover:scale-110 group"
+              aria-label="Cerrar chat">
+        <svg class="w-6 h-6 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
 
     <!-- Mensajes con Diseño Mejorado -->
-    <div #scrollContainer class="flex-1 p-6 overflow-y-auto space-y-6 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900">
+    <div #scrollContainer 
+         class="flex-1 p-6 overflow-y-auto space-y-6 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900"
+         role="log"
+         aria-label="Historial de mensajes del chat"
+         tabindex="0">
       <!-- Mensaje de bienvenida -->
-      <div *ngIf="messages.length === 0" class="text-center py-8">
-        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+      <div *ngIf="messages.length === 0" class="text-center py-8" role="status" aria-live="polite">
+        <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center" aria-hidden="true">
           <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
           </svg>
@@ -80,21 +92,27 @@
       </div>
       
       <!-- Mensajes del chat -->
-      <div *ngFor="let msg of messages" 
+      <div *ngFor="let msg of messages; let i = index" 
            [ngClass]="{'justify-end': msg.sender === 'user', 'justify-start': msg.sender === 'bot'}" 
-           class="flex animate-fade-in-up">
+           class="flex animate-fade-in-up"
+           role="article"
+           [attr.aria-label]="msg.sender === 'user' ? 'Mensaje del usuario' : 'Respuesta del asistente'">
         
         <!-- Mensaje del usuario -->
         <div *ngIf="msg.sender === 'user'" 
-             class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl py-3 px-4 max-w-xs shadow-lg">
+             class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl py-3 px-4 max-w-xs shadow-lg"
+             role="textbox"
+             aria-label="Tu mensaje">
           <div class="prose prose-sm prose-invert" [innerHTML]="msg.text"></div>
         </div>
         
         <!-- Mensaje del bot -->
         <div *ngIf="msg.sender === 'bot'" 
-             class="bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl py-3 px-4 max-w-xs shadow-lg border border-slate-200 dark:border-slate-600 relative">
+             class="bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl py-3 px-4 max-w-xs shadow-lg border border-slate-200 dark:border-slate-600 relative"
+             role="textbox"
+             aria-label="Respuesta del asistente">
           <!-- Avatar del bot -->
-          <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+          <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg" aria-hidden="true">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
             </svg>
@@ -105,16 +123,16 @@
       </div>
       
       <!-- Indicador de carga mejorado -->
-      <div *ngIf="isLoading" class="flex justify-start animate-fade-in-up">
+      <div *ngIf="isLoading" class="flex justify-start animate-fade-in-up" role="status" aria-live="polite" aria-label="El asistente está escribiendo">
         <div class="bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl py-3 px-4 max-w-xs shadow-lg border border-slate-200 dark:border-slate-600 relative">
-          <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+          <div class="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg" aria-hidden="true">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
             </svg>
           </div>
           
           <div class="flex items-center gap-2 mt-2">
-            <div class="flex space-x-1">
+            <div class="flex space-x-1" aria-hidden="true">
               <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
               <div class="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
               <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
@@ -126,11 +144,12 @@
     </div>
 
     <!-- Starter Questions Mejoradas -->
-    <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-800">
+    <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-800" role="toolbar" aria-label="Preguntas rápidas">
       <div class="flex flex-wrap gap-2 justify-center">
-        <button *ngFor="let q of starterQuestions" 
+        <button *ngFor="let q of starterQuestions; let i = index" 
                 (click)="sendMessage(q)" 
-                class="text-sm bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 hover:from-blue-100 hover:to-purple-100 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-300 rounded-full px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md border border-slate-200 dark:border-slate-600">
+                class="text-sm bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 hover:from-blue-100 hover:to-purple-100 dark:hover:from-slate-600 dark:hover:to-slate-500 text-slate-700 dark:text-slate-300 rounded-full px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md border border-slate-200 dark:border-slate-600"
+                [attr.aria-label]="'Pregunta rápida ' + (i + 1) + ': ' + (q | i18nTranslate)">
           {{ q | i18nTranslate }}
         </button>
       </div>
@@ -138,16 +157,20 @@
 
     <!-- Input Mejorado -->
     <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-800 rounded-b-3xl">
-      <form (ngSubmit)="sendMessage()" class="flex gap-3">
+      <form (ngSubmit)="sendMessage()" class="flex gap-3" role="search">
         <div class="relative flex-1">
+          <label for="chat-input" class="sr-only">Escribir mensaje</label>
           <input [(ngModel)]="userInput" 
+                 id="chat-input"
                  name="userInput" 
                  type="text" 
                  [placeholder]="'chatbot.input_placeholder' | i18nTranslate" 
-                 class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-2xl bg-slate-50 dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 transition-all duration-200">
+                 class="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-2xl bg-slate-50 dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 transition-all duration-200"
+                 aria-label="Escribir mensaje para el asistente"
+                 [attr.aria-describedby]="isLoading ? 'chat-loading' : null">
           
           <!-- Icono de entrada -->
-          <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+          <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400" aria-hidden="true">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
             </svg>
@@ -156,12 +179,19 @@
         
         <button type="submit" 
                 [disabled]="isLoading || !userInput?.trim()" 
-                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl w-12 h-12 flex-shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl w-12 h-12 flex-shrink-0 flex items-center justify-center transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                aria-label="Enviar mensaje"
+                [attr.aria-describedby]="isLoading ? 'chat-loading' : null">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
           </svg>
         </button>
       </form>
+      
+      <!-- Indicador de estado de carga para lectores de pantalla -->
+      <div id="chat-loading" class="sr-only" *ngIf="isLoading">
+        El asistente está procesando tu mensaje, por favor espera.
+      </div>
     </div>
   </div>
 </div>
@@ -200,6 +230,28 @@
   
   .animate-fade-in-up {
     animation: slideInUp 0.3s ease-out;
+  }
+  
+  /* Mejoras de accesibilidad para el foco */
+  .overflow-y-auto:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  /* Reducir movimiento para usuarios que lo prefieren */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up,
+    .animate-pulse,
+    .animate-bounce,
+    .animate-ping {
+      animation: none !important;
+    }
+    
+    .transition-all,
+    .transition-transform,
+    .transition-opacity {
+      transition: none !important;
+    }
   }
 </style>
 

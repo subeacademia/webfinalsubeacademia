@@ -1,14 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" dir="ltr">
 <head>
   <meta charset="utf-8">
   <title>Sube Academ-IA | Educación + Inteligencia Artificial</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible. Únete a Sube Academ-IA.">
+  
+  <!-- Metadatos de accesibilidad -->
+  <meta name="application-name" content="Sube Academ-IA">
+  <meta name="theme-color" content="#3b82f6">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Open Graph y Twitter Card -->
+  <meta property="og:title" content="Sube Academ-IA | Educación + Inteligencia Artificial">
+  <meta property="og:description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible.">
+  <meta property="og:image" content="assets/og-placeholder.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  
+  <!-- Fuentes web con preload para mejor rendimiento -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <script>
     // Aplica el tema lo antes posible para evitar FOUC (flash de tema)
     (function () {
@@ -21,17 +41,46 @@
         d.setAttribute('data-theme', theme);
         // Mejora nativa de formularios/scrollbars
         d.style.colorScheme = theme;
+        
+        // Establecer idioma por defecto
+        var savedLang = localStorage.getItem('lang') || 'es';
+        d.setAttribute('lang', savedLang);
+        d.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr');
       } catch (e) { /* no-op */ }
     })();
   </script>
-  <meta name="description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible. Únete a Sube Academ-IA.">
-  <meta property="og:title" content="Sube Academ-IA | Educación + Inteligencia Artificial">
-  <meta property="og:description" content="Formación aplicada en IA para profesionales y equipos. Cursos, recursos y prácticas que generan impacto medible.">
-  <meta property="og:image" content="assets/og-placeholder.svg">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
+  <!-- Skip to main content link para navegación por teclado -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded z-50">
+    Saltar al contenido principal
+  </a>
+  
   <app-root></app-root>
+  
+  <!-- Script de accesibilidad adicional -->
+  <script>
+    // Mejoras de accesibilidad para navegación por teclado
+    document.addEventListener('DOMContentLoaded', function() {
+      // Asegurar que todos los elementos interactivos sean navegables por teclado
+      const interactiveElements = document.querySelectorAll('button, a, input, select, textarea, [tabindex]');
+      interactiveElements.forEach(el => {
+        if (!el.hasAttribute('tabindex')) {
+          el.setAttribute('tabindex', '0');
+        }
+      });
+      
+      // Mejorar el manejo del foco
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          document.body.classList.add('keyboard-navigation');
+        }
+      });
+      
+      document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-navigation');
+      });
+    });
+  </script>
 </body>
 </html>

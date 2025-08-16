@@ -1,29 +1,29 @@
 <!-- 1. HERO SECTION TRANSFORMADO -->
-<section class="relative min-h-screen flex items-center justify-center text-center bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
+<section class="relative min-h-screen flex items-center justify-center text-center bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden" role="banner" aria-labelledby="hero-title">
   <!-- Fondo animado con partículas -->
-  <div class="absolute inset-0 bg-black/30 z-0"></div>
+  <div class="absolute inset-0 bg-black/30 z-0" aria-hidden="true"></div>
   
   <!-- Elementos de fondo animados -->
-  <div class="absolute inset-0 z-0">
+  <div class="absolute inset-0 z-0" aria-hidden="true">
     <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
     <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl animate-pulse-slow"></div>
   </div>
 
   <!-- Hero Scene mejorado -->
-  <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
+  <app-hero-scene class="absolute top-0 left-0 w-full h-full z-0" aria-hidden="true"></app-hero-scene>
 
   <!-- Contenido principal con animaciones -->
   <div class="relative z-10 p-4 max-w-6xl mx-auto">
     <!-- Título principal con efecto de aparición -->
-    <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up text-balance">
+    <h1 id="hero-title" class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up text-balance">
       <span class="gradient-text">{{ tituloHome }}</span>
     </h1>
 
     <!-- Subtítulo con typewriter mejorado -->
-    <div class="mt-6 text-2xl sm:text-3xl lg:text-4xl font-medium text-blue-100 drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.3s;">
-      <span id="typewriter" class="inline-block"></span>
-      <span class="cursor ml-1 animate-pulse">|</span>
+    <div class="mt-6 text-2xl sm:text-3xl lg:text-4xl font-medium text-blue-100 drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.3s;" role="status" aria-live="polite">
+      <span id="typewriter" class="inline-block" aria-label="Texto dinámico que cambia automáticamente"></span>
+      <span class="cursor ml-1 animate-pulse" aria-hidden="true">|</span>
     </div>
 
     <!-- Descripción con animación -->
@@ -32,22 +32,24 @@
     </p>
 
     <!-- Botones de acción con efectos -->
-    <div class="flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up" style="animation-delay: 0.9s;">
+    <div class="flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up" style="animation-delay: 0.9s;" role="group" aria-label="Acciones principales">
       <button (click)="iniciarDiagnostico()" 
-              class="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg">
+              class="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
+              aria-label="Iniciar diagnóstico de competencias en IA">
         <span class="relative z-10 flex items-center gap-3">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
           </svg>
           INICIAR DIAGNÓSTICO DE COMPETENCIAS IA
         </span>
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
       </button>
       
       <button (click)="contactarAsesor()" 
-              class="group relative overflow-hidden bg-transparent border-2 border-white/50 hover:border-white text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm hover:bg-white/10">
+              class="group relative overflow-hidden bg-transparent border-2 border-white/50 hover:border-white text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm hover:bg-white/10"
+              aria-label="Contactar con un asesor especializado">
         <span class="relative z-10 flex items-center gap-3">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
           </svg>
           HABLAR CON UN ASESOR
@@ -56,7 +58,7 @@
     </div>
 
     <!-- Indicador de scroll -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce" aria-hidden="true">
       <div class="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
         <div class="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
       </div>
@@ -65,15 +67,15 @@
 </section>
 
 <!-- 2. SECCIÓN "HOJA DE RUTA" REDISEÑADA -->
-<section class="py-24 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-white relative overflow-hidden">
+<section class="py-24 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-white relative overflow-hidden" role="region" aria-labelledby="roadmap-title">
   <!-- Elementos de fondo decorativos -->
-  <div class="absolute inset-0">
+  <div class="absolute inset-0" aria-hidden="true">
     <div class="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-5"></div>
   </div>
   
   <div class="container mx-auto px-4 text-center relative z-10">
     <div class="max-w-4xl mx-auto mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
+      <h2 id="roadmap-title" class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
         Tu Hoja de Ruta hacia la 
         <span class="gradient-text">Madurez en IA</span>
       </h2>
@@ -83,10 +85,10 @@
     </div>
     
     <!-- Pasos del proceso con diseño de tarjetas -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
-      <div class="group relative">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8" role="list" aria-label="Pasos del proceso de madurez en IA">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             1
           </div>
           <div class="pt-20 pb-6 px-6">
@@ -96,9 +98,9 @@
         </div>
       </div>
       
-      <div class="group relative">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.1s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             2
           </div>
           <div class="pt-20 pb-6 px-6">
@@ -108,9 +110,9 @@
         </div>
       </div>
       
-      <div class="group relative">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.2s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             3
           </div>
           <div class="pt-20 pb-6 px-6">
@@ -120,9 +122,9 @@
         </div>
       </div>
       
-      <div class="group relative">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.3s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             4
           </div>
           <div class="pt-20 pb-6 px-6">
@@ -132,9 +134,9 @@
         </div>
       </div>
       
-      <div class="group relative">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-2" style="animation-delay: 0.4s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             5
           </div>
           <div class="pt-20 pb-6 px-6">
@@ -148,16 +150,16 @@
 </section>
 
 <!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" MEJORADA -->
-<section class="py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative overflow-hidden">
+<section class="py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative overflow-hidden" role="region" aria-labelledby="solutions-title">
   <!-- Elementos de fondo -->
-  <div class="absolute inset-0">
+  <div class="absolute inset-0" aria-hidden="true">
     <div class="absolute top-20 right-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
     <div class="absolute bottom-20 left-20 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
   </div>
   
   <div class="container mx-auto px-4 text-center relative z-10">
     <div class="max-w-4xl mx-auto mb-16">
-      <h2 class="text-4xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white">
+      <h2 id="solutions-title" class="text-4xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white">
         Nuestras Soluciones para la 
         <span class="gradient-text">Transformación Digital</span>
       </h2>
@@ -166,47 +168,47 @@
       </p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="group">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" role="list" aria-label="Soluciones disponibles">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
           </div>
           <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Capacitación Adaptativa (AVE-AI)</h3>
           <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.</p>
-          <button (click)="iniciarDiagnostico()" class="btn btn-primary group-hover:scale-105 transition-transform duration-300">
+          <button (click)="iniciarDiagnostico()" class="btn btn-primary group-hover:scale-105 transition-transform duration-300" aria-label="Realizar diagnóstico de competencias">
             Realizar Diagnóstico →
           </button>
         </div>
       </div>
       
-      <div class="group">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4" style="animation-delay: 0.1s;">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
           </div>
           <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Consultoría Estratégica (ARES-AI)</h3>
           <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.</p>
-          <button (click)="contactarAsesor()" class="btn btn-secondary group-hover:scale-105 transition-transform duration-300">
+          <button (click)="contactarAsesor()" class="btn btn-secondary group-hover:scale-105 transition-transform duration-300" aria-label="Contactar con un asesor especializado">
             Contactar un Asesor →
           </button>
         </div>
       </div>
       
-      <div class="group">
+      <div class="group" role="listitem">
         <div class="card card-interactive bg-white dark:bg-slate-800 border-0 shadow-soft hover:shadow-large transform transition-all duration-500 hover:-translate-y-4" style="animation-delay: 0.2s;">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
             <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
             </svg>
           </div>
           <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Implementación de Proyectos</h3>
           <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.</p>
-          <a [routerLink]="['/', i18n.currentLang(), 'casos-de-exito']" class="btn btn-outline group-hover:scale-105 transition-transform duration-300">
+          <a [routerLink]="['/', i18n.currentLang(), 'casos-de-exito']" class="btn btn-outline group-hover:scale-105 transition-transform duration-300" aria-label="Ver casos de éxito de implementación">
             Ver Casos de Éxito →
           </a>
         </div>
@@ -216,15 +218,15 @@
 </section>
 
 <!-- 4. SECCIÓN "HAN CONFIADO" CON CARRUSEL MEJORADO -->
-<section class="py-24 bg-white dark:bg-slate-900 relative overflow-hidden">
+<section class="py-24 bg-white dark:bg-slate-900 relative overflow-hidden" role="region" aria-labelledby="trust-title">
   <!-- Elementos de fondo -->
-  <div class="absolute inset-0">
+  <div class="absolute inset-0" aria-hidden="true">
     <div class="absolute top-1/2 left-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl"></div>
     <div class="absolute top-1/2 right-0 w-40 h-40 bg-purple-500/5 rounded-full blur-2xl"></div>
   </div>
   
   <div class="container mx-auto px-4 text-center relative z-10">
-    <h2 class="text-4xl md:text-5xl font-bold mb-16 text-slate-900 dark:text-white">
+    <h2 id="trust-title" class="text-4xl md:text-5xl font-bold mb-16 text-slate-900 dark:text-white">
       Han confiado en 
       <span class="gradient-text">nosotros</span>
     </h2>
@@ -232,7 +234,7 @@
     <!-- Carrusel de logos con animación infinita -->
     <div class="space-y-8">
       <!-- Debug info -->
-      <div class="text-sm text-gray-500 mb-4">
+      <div class="text-sm text-gray-500 mb-4" aria-hidden="true">
         Debug: companyLogos.length = {{companyLogos.length}}, educationLogos.length = {{educationLogos.length}}
       </div>
       
@@ -243,7 +245,8 @@
           <app-logo-carousel 
             [logos]="companyLogos.length > 0 ? companyLogos : logosDePrueba" 
             direction="normal"
-            class="carousel-top">
+            class="carousel-top"
+            aria-label="Logos de empresas que confían en nosotros">
           </app-logo-carousel>
         </div>
       </div>
@@ -255,7 +258,8 @@
           <app-logo-carousel 
             [logos]="educationLogos.length > 0 ? educationLogos : logosDePrueba" 
             direction="reverse"
-            class="carousel-bottom">
+            class="carousel-bottom"
+            aria-label="Logos de instituciones educativas que confían en nosotros">
           </app-logo-carousel>
         </div>
       </div>
@@ -267,7 +271,8 @@
         Únete a las organizaciones que ya están transformando su futuro con IA
       </p>
       <button (click)="iniciarDiagnostico()" 
-              class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300">
+              class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300"
+              aria-label="Comenzar el proceso de transformación con IA">
         Comenzar Ahora
       </button>
     </div>

@@ -25,15 +25,15 @@ export interface SliderFieldConfig {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, I18nTranslatePipe, InfoModalComponent],
   template: `
-    <div class="bg-slate-800 dark:bg-slate-900 rounded-lg p-6 shadow-xl border border-slate-700 dark:border-slate-600">
+    <div class="bg-slate-800 dark:bg-slate-900 rounded-lg p-6 shadow-xl border border-slate-700 dark:border-slate-600" role="group" [attr.aria-labelledby]="'slider-label-' + config.id">
       <!-- Header con título, fase y botón de información -->
       <div class="flex items-center justify-between mb-4">
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
-            <h3 class="text-lg font-semibold text-white dark:text-white">
+            <h3 [id]="'slider-label-' + config.id" class="text-lg font-semibold text-white dark:text-white">
               {{ config.labelKey | i18nTranslate }}
             </h3>
-            <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">
+            <span class="px-2 py-1 bg-blue-600 text-white text-xs rounded-full font-medium" [attr.aria-label]="'Fase ' + config.phase">
               {{ config.phase }}
             </span>
           </div>
@@ -50,8 +50,9 @@ export interface SliderFieldConfig {
           type="button" 
           class="ml-4 p-2 text-blue-400 hover:text-blue-300 rounded-full hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors duration-200"
           (click)="openInfo()"
-          [attr.aria-label]="'Más información sobre ' + (config.labelKey | i18nTranslate)">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          [attr.aria-label]="'Más información sobre ' + (config.labelKey | i18nTranslate)"
+          [attr.aria-describedby]="'info-tooltip-' + config.id">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </button>
@@ -61,7 +62,7 @@ export interface SliderFieldConfig {
       <div class="mb-4">
         <div class="relative">
           <!-- Etiquetas de valores -->
-          <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mb-2">
+          <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500 mb-2" aria-hidden="true">
             <span>{{ config.minValue }} - {{ config.labels[0] | i18nTranslate }}</span>
             <span>{{ Math.round((config.maxValue + config.minValue) / 2) }} - {{ config.labels[Math.floor(config.labels.length / 2)] | i18nTranslate }}</span>
             <span>{{ config.maxValue }} - {{ config.labels[config.labels.length - 1] | i18nTranslate }}</span>
@@ -69,14 +70,22 @@ export interface SliderFieldConfig {
           
           <!-- Barra de progreso visual clickeable -->
           <div class="w-full h-3 bg-slate-600 dark:bg-slate-700 rounded-lg overflow-hidden mb-4 relative cursor-pointer group"
-               (click)="onBarClick($event)">
+               (click)="onBarClick($event)"
+               role="slider"
+               [attr.aria-valuemin]="config.minValue"
+               [attr.aria-valuemax]="config.maxValue"
+               [attr.aria-valuenow]="currentValue"
+               [attr.aria-valuetext]="getCurrentLabel() | i18nTranslate"
+               tabindex="0"
+               (keydown)="onKeyDown($event)"
+               [attr.aria-label]="'Ajustar valor de ' + (config.labelKey | i18nTranslate)">
             <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out relative"
                  [style.width.%]="getProgressPercentage()">
               <!-- Indicador de valor actual -->
-              <div class="absolute right-0 top-0 w-1 h-full bg-white shadow-lg transform translate-x-1/2"></div>
+              <div class="absolute right-0 top-0 w-1 h-full bg-white shadow-lg transform translate-x-1/2" aria-hidden="true"></div>
             </div>
             <!-- Overlay para mostrar hover effect -->
-            <div class="absolute inset-0 bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+            <div class="absolute inset-0 bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden="true"></div>
           </div>
           
           <!-- Slider (oculto visualmente pero funcional para accesibilidad) -->
@@ -87,14 +96,20 @@ export interface SliderFieldConfig {
             [step]="config.step"
             [formControl]="config.formControl"
             class="sr-only"
-            (input)="onSliderChange($event)">
+            (input)="onSliderChange($event)"
+            [attr.aria-label]="'Control deslizante para ' + (config.labelKey | i18nTranslate)">
           
           <!-- Marcadores de pasos con indicadores clickeables -->
-          <div class="flex justify-between mt-2 relative">
+          <div class="flex justify-between mt-2 relative" role="group" aria-label="Valores predefinidos">
             <div *ngFor="let label of config.labels; let i = index" 
                  class="text-center text-xs text-gray-400 dark:text-gray-500 cursor-pointer hover:text-blue-400 transition-colors duration-200"
-                 (click)="setValueFromStep(i)">
-              <div class="w-3 h-3 bg-slate-500 dark:bg-slate-600 rounded-full mx-auto mb-1 hover:bg-blue-500 transition-colors duration-200"></div>
+                 (click)="setValueFromStep(i)"
+                 role="button"
+                 tabindex="0"
+                 (keydown.enter)="setValueFromStep(i)"
+                 (keydown.space)="setValueFromStep(i)"
+                 [attr.aria-label]="'Establecer valor a ' + (label | i18nTranslate)">
+              <div class="w-3 h-3 bg-slate-500 dark:bg-slate-600 rounded-full mx-auto mb-1 hover:bg-blue-500 transition-colors duration-200" aria-hidden="true"></div>
               <span class="block w-16">{{ label | i18nTranslate }}</span>
             </div>
           </div>
@@ -104,16 +119,21 @@ export interface SliderFieldConfig {
       <!-- Valor actual y etiqueta -->
       <div class="flex items-center justify-between">
         <div class="text-sm text-gray-300 dark:text-gray-400">
-          Valor actual: <span class="font-semibold text-white dark:text-white">{{ currentValue }}</span>
+          Valor actual: <span class="font-semibold text-white dark:text-white" [attr.aria-live]="'polite'">{{ currentValue }}</span>
         </div>
         <div class="text-right">
-          <div class="text-lg font-bold text-blue-400 dark:text-blue-300">
+          <div class="text-lg font-bold text-blue-400 dark:text-blue-300" [attr.aria-live]="'polite'">
             {{ getCurrentLabel() | i18nTranslate }}
           </div>
           <div class="text-xs text-gray-400 dark:text-gray-500">
             {{ getCurrentDescription() | i18nTranslate }}
           </div>
         </div>
+      </div>
+      
+      <!-- Tooltip de información oculto para lectores de pantalla -->
+      <div [id]="'info-tooltip-' + config.id" class="sr-only">
+        {{ config.tooltipKey | i18nTranslate }}
       </div>
     </div>
 
@@ -160,6 +180,21 @@ export interface SliderFieldConfig {
     .shadow-lg {
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
+    
+    /* Mejoras de accesibilidad para el foco */
+    [role="button"]:focus-visible,
+    [role="slider"]:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    /* Reducir movimiento para usuarios que lo prefieren */
+    @media (prefers-reduced-motion: reduce) {
+      .transition-colors,
+      .transition-opacity {
+        transition: none !important;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -196,6 +231,47 @@ export class SliderFieldComponent implements OnInit, OnDestroy {
     this.currentValue = value;
     this.config.formControl.setValue(value);
     this.valueChange.emit(value);
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    let newValue = this.currentValue;
+    
+    switch (event.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        event.preventDefault();
+        newValue = Math.max(this.config.minValue, this.currentValue - this.config.step);
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        event.preventDefault();
+        newValue = Math.min(this.config.maxValue, this.currentValue + this.config.step);
+        break;
+      case 'Home':
+        event.preventDefault();
+        newValue = this.config.minValue;
+        break;
+      case 'End':
+        event.preventDefault();
+        newValue = this.config.maxValue;
+        break;
+      case 'PageDown':
+        event.preventDefault();
+        newValue = Math.max(this.config.minValue, this.currentValue - (this.config.step * 2));
+        break;
+      case 'PageUp':
+        event.preventDefault();
+        newValue = Math.min(this.config.maxValue, this.currentValue + (this.config.step * 2));
+        break;
+      default:
+        return;
+    }
+    
+    if (newValue !== this.currentValue) {
+      this.currentValue = newValue;
+      this.config.formControl.setValue(newValue);
+      this.valueChange.emit(newValue);
+    }
   }
 
   getCurrentLabel(): string {
