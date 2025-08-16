@@ -10,10 +10,10 @@ import { ToastService } from '../../core/ui/toast/toast.service';
   selector: 'app-admin-courses-page',
   imports: [RouterLink, NgFor, NgIf, UiButtonComponent],
   template: `
-    <div class="max-w-7xl mx-auto p-6 space-y-6">
+    <div class="admin-page max-w-7xl mx-auto p-6 space-y-6">
       <!-- Header con botones de gestión masiva -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 class="text-3xl font-bold text-gray-900">Cursos</h1>
+        <h1 class="admin-text text-3xl font-bold">Cursos</h1>
         <div class="flex flex-col sm:flex-row gap-3">
           <!-- Botones de gestión masiva -->
           <div class="flex gap-2">
@@ -49,26 +49,26 @@ import { ToastService } from '../../core/ui/toast/toast.service';
 
       <!-- Lista de cursos -->
       <div class="grid gap-4">
-        <div *ngFor="let c of courses()" class="bg-white rounded-lg shadow-sm border p-6">
+        <div *ngFor="let c of courses()" class="admin-card rounded-lg shadow-sm p-6">
           <div class="md:flex items-center justify-between">
             <div class="flex-1">
-              <div class="font-semibold text-lg text-gray-900">{{c.title}}</div>
-              <div class="text-sm text-gray-600 mt-1">
+              <div class="admin-text font-semibold text-lg">{{c.title}}</div>
+              <div class="admin-text-muted text-sm mt-1">
                 {{c.lang}} • {{c.level}} • {{c.status}}
                 <span *ngIf="c.price" class="ml-2 text-green-600 font-medium">
                   {{formatPrice(c.price, c.currency)}}
                 </span>
               </div>
-              <div *ngIf="c.summary" class="text-sm text-gray-500 mt-2 line-clamp-2">
+              <div *ngIf="c.summary" class="admin-text-muted text-sm mt-2 line-clamp-2">
                 {{c.summary}}
               </div>
             </div>
             <div class="flex gap-2 mt-4 md:mt-0">
-              <a class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+              <a class="inline-flex items-center px-4 py-2 border admin-border rounded-md shadow-sm text-sm font-medium admin-text bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" 
                  [routerLink]="['/admin/courses', c.id]">
                 Editar
               </a>
-              <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                       (click)="deleteCourse(c.id)">
                 Eliminar
               </button>
@@ -76,8 +76,8 @@ import { ToastService } from '../../core/ui/toast/toast.service';
           </div>
         </div>
         
-        <div *ngIf="!courses().length" class="bg-white rounded-lg shadow-sm border p-12 text-center">
-          <div class="text-gray-500 text-lg mb-4">No hay cursos aún.</div>
+        <div *ngIf="!courses().length" class="admin-card rounded-lg shadow-sm p-12 text-center">
+          <div class="admin-text-muted text-lg mb-4">No hay cursos aún.</div>
           <app-ui-button 
             variant="primary" 
             (clicked)="goToNewCourse()"

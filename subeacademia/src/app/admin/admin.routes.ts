@@ -20,6 +20,10 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'courses/new', loadComponent: () => import('./courses/course-edit.component').then(m => m.CourseEditComponent), canActivate: [AdminGuard] },
       { path: 'courses/:id', loadComponent: () => import('./courses/course-edit.component').then(m => m.CourseEditComponent), canActivate: [AdminGuard] },
 
+      { path: 'projects', loadComponent: () => import('./projects/projects-page.component').then(m => m.ProjectsPageComponent), canActivate: [AdminGuard] },
+      { path: 'projects/new', loadComponent: () => import('./projects/project-edit.component').then(m => m.ProjectEditComponent), canActivate: [AdminGuard] },
+      { path: 'projects/:id', loadComponent: () => import('./projects/project-edit.component').then(m => m.ProjectEditComponent), canActivate: [AdminGuard] },
+
       { path: 'media', loadComponent: () => import('./media/media-page.component').then(m => m.MediaPageComponent), canActivate: [AdminGuard] },
       { path: 'logos', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
       { path: 'settings', loadComponent: () => import('./settings/settings-page.component').then(m => m.SettingsPageComponent), canActivate: [AdminGuard] },

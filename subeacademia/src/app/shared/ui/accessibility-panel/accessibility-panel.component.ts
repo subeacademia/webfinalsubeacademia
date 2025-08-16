@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccessibilityService, AccessibilityConfig } from '../../../core/accessibility/accessibility.service';
+import { ThemeService } from '../../theme.service';
 
 @Component({
   selector: 'app-accessibility-panel',
@@ -163,6 +164,32 @@ import { AccessibilityService, AccessibilityConfig } from '../../../core/accessi
         </div>
       </div>
     </div>
+
+    <div class="fixed bottom-4 right-4 z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Panel de Accesibilidad</h3>
+        
+        <!-- Botón de cambio de tema -->
+        <button 
+          (click)="toggleTheme()"
+          class="w-full mb-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+          {{ isDarkTheme ? '☀️ Tema Claro' : '🌙 Tema Oscuro' }}
+        </button>
+        
+        <!-- Información del tema actual -->
+        <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          <p>Tema actual: <strong>{{ currentTheme }}</strong></p>
+          <p>Clases CSS: <code class="text-xs">{{ cssClasses }}</code></p>
+        </div>
+        
+        <!-- Botón de prueba de descarga -->
+        <button 
+          (click)="testDownload()"
+          class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+          🧪 Probar Descarga JSON
+        </button>
+      </div>
+    </div>
   `,
   styles: [`
     /* Estilos específicos para el panel de accesibilidad */
@@ -198,10 +225,26 @@ export class AccessibilityPanelComponent implements OnInit {
   };
 
   private readonly accessibilityService = inject(AccessibilityService);
+  private themeService = inject(ThemeService);
+  
+  isDarkTheme = false;
+  currentTheme = 'light';
+  cssClasses = '';
 
   ngOnInit(): void {
     // Cargar configuración actual
     this.config = this.accessibilityService.getConfig();
+
+    this.themeService.isDarkTheme$.subscribe(isDark => {
+      this.isDarkTheme = isDark;
+      this.currentTheme = isDark ? 'dark' : 'light';
+      this.updateCssClasses();
+    });
+    
+    // Verificar estado inicial
+    this.currentTheme = this.themeService.current();
+    this.isDarkTheme = this.currentTheme === 'dark';
+    this.updateCssClasses();
   }
 
   togglePanel(): void {
@@ -257,5 +300,37 @@ export class AccessibilityPanelComponent implements OnInit {
         `Reporte de accesibilidad generado. ${issuesCount} problemas y ${warningsCount} advertencias encontradas.`
       );
     }
+  }
+
+  toggleTheme() {
+    this.themeService.toggle();
+  }
+
+  updateCssClasses() {
+    const root = document.documentElement;
+    this.cssClasses = Array.from(root.classList).join(' ');
+  }
+
+  testDownload() {
+    // Crear un JSON de prueba
+    const testData = {
+      test: true,
+      timestamp: new Date().toISOString(),
+      message: 'Este es un archivo de prueba para verificar la funcionalidad de descarga'
+    };
+    
+    const jsonContent = JSON.stringify(testData, null, 2);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'test-download.json';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    console.log('Descarga de prueba completada');
   }
 }

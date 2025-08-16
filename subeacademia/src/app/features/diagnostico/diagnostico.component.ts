@@ -31,6 +31,14 @@ export class DiagnosticoComponent implements OnInit {
     private readonly _progress = signal(0);
     readonly progress = this._progress.asReadonly();
 
+    constructor() {
+        // Suscribirse a cambios en el progreso del servicio
+        effect(() => {
+            this.diagnosticState.progressChanged();
+            this.updateProgress();
+        });
+    }
+
     ngOnInit(): void {
         // Calcular progreso inicial
         this.updateProgress();
@@ -41,12 +49,6 @@ export class DiagnosticoComponent implements OnInit {
         ).subscribe(() => {
             this.updateProgress();
             console.log('Navegación completada, progreso actual:', this.progress());
-        });
-
-        // Suscribirse a cambios en el progreso del servicio
-        effect(() => {
-            this.diagnosticState.progressChanged();
-            this.updateProgress();
         });
     }
 

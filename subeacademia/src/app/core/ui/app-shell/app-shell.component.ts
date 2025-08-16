@@ -5,6 +5,7 @@ import { I18nService } from '../../i18n/i18n.service';
 import { SettingsService, SiteSettings } from '../../data/settings.service';
 import { ThemeService } from '../../../shared/theme.service';
 
+
 type Lang = 'es' | 'en' | 'pt';
 
 @Component({
@@ -255,6 +256,7 @@ type Lang = 'es' | 'en' | 'pt';
       </div>
     </footer>
     
+
   `,
 })
 export class AppShellComponent {

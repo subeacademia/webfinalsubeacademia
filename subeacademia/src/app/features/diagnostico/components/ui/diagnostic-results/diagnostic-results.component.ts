@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService, ActionPlan, PersonalizedActionPlan } from '../../../services/scoring.service';
+import { GenerativeAiService, DiagnosticAnalysisData } from '../../../../../core/ai/generative-ai.service';
+import { ApiHealthService } from '../../../../../core/ai/api-health.service';
+import { ApiProgressBarComponent } from '../api-progress-bar/api-progress-bar.component';
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import 'chart.js/auto';
 import { ARES_ITEMS } from '../../../data/ares-items';
@@ -11,11 +14,12 @@ import html2canvas from 'html2canvas';
 import { Course } from '../../../../../core/models/course.model';
 import { Post } from '../../../../../core/models/post.model';
 import { Observable, of } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ApiProgressBarComponent],
   template: `
     <div class="animate-fade-in">
       <div class="text-center mb-8">
@@ -241,15 +245,71 @@ import { Observable, of } from 'rxjs';
         </div>
       </div>
 
-      <!-- Tu Plan de Acción Personalizado -->
-      <div class="bg-gradient-to-r from-indigo-900/20 to-cyan-900/20 border border-indigo-500/30 rounded-lg p-8 mb-8">
-        <h3 class="text-3xl font-bold text-white mb-6 text-center">Tu Plan de Acción Personalizado</h3>
-        
-        <!-- Indicador de carga -->
-        <div *ngIf="loadingRecommendations" class="text-center py-8">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
-          <p class="text-indigo-200">Cargando recomendaciones personalizadas...</p>
-        </div>
+             <!-- Análisis de IA Generativa -->
+       <div class="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-8 mb-8">
+         <h3 class="text-3xl font-bold text-white mb-6 text-center flex items-center justify-center">
+           <svg class="w-8 h-8 mr-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+           </svg>
+           Análisis Personalizado con IA
+         </h3>
+         
+         <!-- Estado de la API -->
+         <div *ngIf="showApiStatus && apiStatus" class="mb-6 p-4 rounded-lg" 
+              [class]="apiStatus.isHealthy ? 'bg-green-900/20 border border-green-500/30' : 'bg-yellow-900/20 border border-yellow-500/30'">
+           <div class="flex items-center justify-center space-x-2">
+             <div class="w-3 h-3 rounded-full" [class]="apiStatus.isHealthy ? 'bg-green-400' : 'bg-yellow-400'"></div>
+             <span class="text-sm" [class]="apiStatus.isHealthy ? 'text-green-200' : 'text-yellow-200'">
+               {{ apiStatus.recommendation }}
+             </span>
+           </div>
+         </div>
+         
+         <!-- Barra de Progreso de la API -->
+         <app-api-progress-bar class="mb-6"></app-api-progress-bar>
+         
+         <!-- Indicador de carga del análisis -->
+         <div *ngIf="isLoadingAnalysis" class="text-center py-8">
+           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
+           <p class="text-emerald-200">Generando análisis personalizado con IA...</p>
+         </div>
+
+         <!-- Contenido del análisis cuando está cargado -->
+         <div *ngIf="!isLoadingAnalysis" class="prose prose-invert max-w-none">
+           <div [innerHTML]="generativeAnalysis$ | async" class="text-gray-200 leading-relaxed"></div>
+         </div>
+       </div>
+
+       <!-- Tu Plan de Acción Personalizado -->
+       <div class="bg-gradient-to-r from-indigo-900/20 to-cyan-900/20 border border-indigo-500/30 rounded-lg p-8 mb-8">
+         <h3 class="text-3xl font-bold text-white mb-6 text-center">Tu Plan de Acción Personalizado</h3>
+         
+         <!-- Plan de Acción Generado por IA -->
+         <div class="mb-8">
+           <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
+             <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+               <path fill-rule="evenodd" d="M9.663 17.119a1 1 0 01-1.414 0L.293 9.414a1 1 0 010-1.414l7.956-7.956a1 1 0 011.414 0l7.956 7.956a1 1 0 010 1.414L9.663 17.119z" clip-rule="evenodd"></path>
+             </svg>
+             Plan de Acción Generado con IA
+           </h4>
+           
+           <!-- Indicador de carga del plan de acción -->
+           <div *ngIf="isLoadingActionPlan" class="text-center py-8">
+             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+             <p class="text-indigo-200">Generando plan de acción personalizado con IA...</p>
+           </div>
+
+           <!-- Contenido del plan de acción cuando está cargado -->
+           <div *ngIf="!isLoadingActionPlan" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6">
+             <div [innerHTML]="aiGeneratedActionPlan$ | async" class="text-indigo-100 leading-relaxed prose prose-invert max-w-none"></div>
+           </div>
+         </div>
+
+         <!-- Indicador de carga -->
+         <div *ngIf="loadingRecommendations" class="text-center py-8">
+           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+           <p class="text-indigo-200">Cargando recomendaciones personalizadas...</p>
+         </div>
 
         <!-- Contenido cuando las recomendaciones están cargadas -->
         <div *ngIf="!loadingRecommendations">
@@ -382,6 +442,8 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   
   private readonly diagnosticState = inject(DiagnosticStateService);
   private readonly scoringService = inject(ScoringService);
+  private readonly generativeAiService = inject(GenerativeAiService);
+  private readonly apiHealthService = inject(ApiHealthService);
   private readonly router = inject(Router);
 
   private aresChart: Chart | null = null;
@@ -392,14 +454,29 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   microActions: string[] = [];
   loadingRecommendations = false;
 
+  // Propiedades para el análisis de IA
+  isLoadingAnalysis = true;
+  generativeAnalysis$: Observable<string> = of('');
+  aiGeneratedActionPlan$: Observable<string> = of('');
+  isLoadingActionPlan = true;
+  
+  // Propiedades para el estado de la API
+  apiStatus: { isHealthy: boolean; recommendation: string; fallbackAvailable: boolean } | null = null;
+  showApiStatus = false;
+
   ngOnInit(): void {
     // Inicialización del componente
     this.debugDiagnosticState();
+    
+    // Verificar estado de la API
+    this.checkApiStatus();
     
     // Forzar recarga de datos desde localStorage
     setTimeout(() => {
       this.reloadDiagnosticData();
       this.loadPersonalizedRecommendations();
+      this.generateAiAnalysis();
+      this.generateActionPlanWithAI();
     }, 100);
   }
 
@@ -1213,6 +1290,92 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     return lines;
   }
 
+  private generateAiAnalysis(): void {
+    try {
+      const leadForm = this.diagnosticState.leadForm.value;
+      const competenciasData = this.diagnosticState.competenciasForm.value;
+      
+      if (!leadForm || !competenciasData) {
+        console.log('Datos insuficientes para generar análisis de IA');
+        this.isLoadingAnalysis = false;
+        return;
+      }
+
+      // Verificar que los datos no estén vacíos
+      if (Object.keys(competenciasData).length === 0) {
+        console.log('No hay datos de competencias para analizar');
+        this.isLoadingAnalysis = false;
+        return;
+      }
+
+      // Obtener las competencias con sus puntajes
+      const competencias = Object.entries(competenciasData).map(([competenciaId, nivel]) => {
+        const puntaje = nivel ? this.getCompetencyScore(nivel as string) : 0;
+        return { name: competenciaId, score: puntaje };
+      });
+
+      // Ordenar por puntaje (más altas primero para fortalezas, más bajas para oportunidades)
+      const topCompetencies = competencias.sort((a, b) => b.score - a.score).slice(0, 3);
+      const lowestCompetencies = competencias.sort((a, b) => a.score - b.score).slice(0, 3);
+
+      const analysisData: DiagnosticAnalysisData = {
+        userName: leadForm.nombre || 'Usuario',
+        userRole: leadForm.cargo || 'Profesional',
+        userIndustry: leadForm.industria || 'Tecnología',
+        topCompetencies,
+        lowestCompetencies
+      };
+
+      console.log('Generando análisis de IA con datos:', analysisData);
+
+      this.generativeAnalysis$ = this.generativeAiService.generateDiagnosticAnalysis(analysisData).pipe(
+        finalize(() => {
+          console.log('Análisis de IA completado');
+          this.isLoadingAnalysis = false;
+        })
+      );
+    } catch (error) {
+      console.error('Error en generateAiAnalysis:', error);
+      this.isLoadingAnalysis = false;
+    }
+  }
+
+  private generateActionPlanWithAI(): void {
+    try {
+      const leadForm = this.diagnosticState.leadForm.value;
+      const competenciasData = this.diagnosticState.competenciasForm.value;
+      
+      if (!leadForm || !competenciasData) {
+        console.log('Datos insuficientes para generar plan de acción con IA');
+        return;
+      }
+
+      // Verificar que los datos no estén vacíos
+      if (Object.keys(competenciasData).length === 0) {
+        console.log('No hay datos de competencias para generar plan de acción');
+        return;
+      }
+
+      const userData = {
+        nombre: leadForm.nombre,
+        cargo: leadForm.cargo,
+        industria: leadForm.industria,
+        competencias: competenciasData
+      };
+
+      console.log('Generando plan de acción con IA para:', userData);
+
+      this.aiGeneratedActionPlan$ = this.scoringService.generateActionPlanWithAI(userData).pipe(
+        finalize(() => {
+          console.log('Plan de acción con IA completado');
+          this.isLoadingActionPlan = false;
+        })
+      );
+    } catch (error) {
+      console.error('Error en generateActionPlanWithAI:', error);
+    }
+  }
+
   private loadPersonalizedRecommendations(): void {
     this.loadingRecommendations = true;
     
@@ -1256,5 +1419,37 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       'experto': 100
     };
     return scoreMap[nivel] || 0;
+  }
+
+  private checkApiStatus(): void {
+    console.log('🔍 Verificando estado de la API...');
+    this.apiHealthService.checkApiHealth().subscribe({
+      next: (isHealthy: boolean) => {
+        if (isHealthy) {
+          this.apiStatus = {
+            isHealthy: true,
+            recommendation: 'API externa funcionando correctamente. Usando IA externa.',
+            fallbackAvailable: true
+          };
+        } else {
+          this.apiStatus = {
+            isHealthy: false,
+            recommendation: 'API externa no disponible. Usando análisis local de alta calidad.',
+            fallbackAvailable: true
+          };
+        }
+        this.showApiStatus = true;
+        console.log('📊 Estado de la API:', this.apiStatus);
+      },
+      error: (error: unknown) => {
+        console.error('❌ Error verificando estado de la API:', error);
+        this.apiStatus = {
+          isHealthy: false,
+          recommendation: 'Error verificando API. Usando análisis local.',
+          fallbackAvailable: true
+        };
+        this.showApiStatus = true;
+      }
+    });
   }
 }

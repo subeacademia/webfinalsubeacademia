@@ -1,9 +1,9 @@
+/* Importación de fuentes web */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Importación de fuentes web */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 /* Estilos para la generación de PDF */
 @media print {
@@ -87,6 +87,13 @@
   --card: var(--surface-1);
   --panel: var(--surface-2);
   --accent: var(--ring);
+  
+  /* Variables específicas para componentes del admin */
+  --admin-bg: #ffffff;
+  --admin-card-bg: #ffffff;
+  --admin-text: #0b1220;
+  --admin-text-muted: #5a6577;
+  --admin-border: #e2e8f0;
 }
 
 /* Tema oscuro */
@@ -115,6 +122,13 @@
   --card: var(--surface-1);
   --panel: var(--surface-2);
   --accent: var(--ring);
+  
+  /* Variables específicas para componentes del admin en modo oscuro */
+  --admin-bg: #0b1220;
+  --admin-card-bg: #1e293b;
+  --admin-text: #E6EDF3;
+  --admin-text-muted: #9FB1C1;
+  --admin-border: #2b3a4b;
 }
 
 /* ----- Base HTML ----- */
@@ -675,6 +689,40 @@ a:hover {
   .animate-shimmer {
     animation: none !important;
   }
+}
+
+/* ----- Estilos específicos para componentes del admin ----- */
+.admin-page {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+}
+
+.admin-card {
+  background-color: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.admin-text {
+  color: var(--admin-text);
+}
+
+.admin-text-muted {
+  color: var(--admin-text-muted);
+}
+
+.admin-border {
+  border-color: var(--admin-border);
+}
+
+/* Transiciones suaves para cambios de tema */
+.admin-page,
+.admin-card,
+.admin-text,
+.admin-text-muted,
+.admin-border {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ----- Estados de carga ----- */

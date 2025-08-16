@@ -23,6 +23,7 @@ import { Subject, takeUntil } from 'rxjs';
       <div class="text-xs text-[var(--muted)] mb-2" *ngIf="userEmail">{{ userEmail }}</div>
       <a class="btn w-full" routerLink="/admin/posts">Posts</a>
       <a class="btn w-full" routerLink="/admin/courses">Cursos</a>
+      <a class="btn w-full" routerLink="/admin/projects">Proyectos</a>
       <a class="btn w-full" routerLink="/admin/media">Media</a>
       <a class="btn w-full" routerLink="/admin/logos">Logos</a>
       <a class="btn w-full" routerLink="/admin/settings">Ajustes</a>

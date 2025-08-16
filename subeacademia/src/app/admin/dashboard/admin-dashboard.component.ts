@@ -32,7 +32,7 @@ import { AuthService } from '../../core/services/auth.service';
           <span class="flex-1"></span>
           <button mat-button (click)="logout()"><mat-icon>logout</mat-icon> Cerrar sesión</button>
         </mat-toolbar>
-        <div class="p-6">
+        <div class="admin-page p-6">
           <router-outlet />
         </div>
       </mat-sidenav-content>

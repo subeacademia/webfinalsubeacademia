@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SemaforoAresComponent, AresPhaseScore } from './semaforo-ares.component';
 import { RadarChartComponent } from './radar-chart.component';
 import { DiagnosticStateService } from '../../services/diagnostic-state.service';
 import { ThemeService } from '../../../../shared/theme.service';
 import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
+import { ApiProgressBarComponent } from './api-progress-bar/api-progress-bar.component';
+import { GenerativeAiService } from '../../../../core/ai/generative-ai.service';
 
 @Component({
 	selector: 'app-diagnostic-results',
 	standalone: true,
-	imports: [CommonModule, SemaforoAresComponent, RadarChartComponent, I18nTranslatePipe],
+	imports: [CommonModule, SemaforoAresComponent, RadarChartComponent, I18nTranslatePipe, ApiProgressBarComponent],
     template: `
         <div class="min-h-screen bg-gray-900 dark:bg-gray-900 text-white p-6 transition-colors duration-300">
             <div class="max-w-7xl mx-auto">
@@ -17,6 +19,11 @@ import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
                 <div class="text-center mb-12">
                     <h1 class="text-4xl font-bold text-white dark:text-white mb-4">Resultados del Diagnóstico</h1>
                     <p class="text-xl text-gray-300 dark:text-gray-400">Análisis completo de tu madurez en IA y competencias digitales</p>
+                </div>
+
+                <!-- Estado de la API de IA -->
+                <div class="mb-8">
+                    <app-api-progress-bar></app-api-progress-bar>
                 </div>
 
                 <!-- Tarjeta Principal - Tu Nivel de Madurez General (2 columnas) -->
@@ -69,6 +76,58 @@ import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
                         <app-semaforo-ares 
                             [aresByPhase]="aresByPhase()">
                         </app-semaforo-ares>
+                    </div>
+                </div>
+
+                <!-- Análisis Generado con IA -->
+                <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+                    <h3 class="text-2xl font-bold text-purple-400 dark:text-purple-300 mb-6 flex items-center gap-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Análisis Personalizado Generado con IA
+                    </h3>
+                    
+                    <div *ngIf="isGeneratingAnalysis()" class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                        <p class="text-purple-300 text-lg">Generando análisis personalizado con IA...</p>
+                    </div>
+                    
+                    <div *ngIf="!isGeneratingAnalysis() && aiAnalysis()" class="ai-content prose prose-invert max-w-none">
+                        <div [innerHTML]="aiAnalysis()" class="text-gray-200"></div>
+                    </div>
+                    
+                    <div *ngIf="!isGeneratingAnalysis() && !aiAnalysis()" class="text-center py-8">
+                        <button (click)="generateAnalysis()" 
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+                            🚀 Generar Análisis con IA
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plan de Acción Generado con IA -->
+                <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+                    <h3 class="text-2xl font-bold text-blue-400 dark:text-blue-300 mb-6 flex items-center gap-3">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                        </svg>
+                        Plan de Acción Personalizado Generado con IA
+                    </h3>
+                    
+                    <div *ngIf="isGeneratingActionPlan()" class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p class="text-blue-300 text-lg">Generando plan de acción personalizado con IA...</p>
+                    </div>
+                    
+                    <div *ngIf="!isGeneratingActionPlan() && aiActionPlan()" class="ai-content prose prose-invert max-w-none">
+                        <div [innerHTML]="aiActionPlan()" class="text-gray-200"></div>
+                    </div>
+                    
+                    <div *ngIf="!isGeneratingActionPlan() && !aiActionPlan()" class="text-center py-8">
+                        <button (click)="generateActionPlan()" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                            🎯 Generar Plan de Acción con IA
+                        </button>
                     </div>
                 </div>
 
@@ -282,11 +341,90 @@ import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
             </div>
         </div>
     `,
+    styles: [`
+        .ai-content {
+            @apply text-gray-200;
+        }
+        
+        .ai-content h1, .ai-content h2, .ai-content h3, .ai-content h4, .ai-content h5, .ai-content h6 {
+            @apply text-white font-semibold mb-3;
+        }
+        
+        .ai-content h1 { @apply text-2xl; }
+        .ai-content h2 { @apply text-xl; }
+        .ai-content h3 { @apply text-lg; }
+        .ai-content h4 { @apply text-base; }
+        
+        .ai-content p {
+            @apply mb-3 text-gray-200 leading-relaxed;
+        }
+        
+        .ai-content ul, .ai-content ol {
+            @apply mb-4 pl-6;
+        }
+        
+        .ai-content li {
+            @apply mb-2 text-gray-200;
+        }
+        
+        .ai-content strong {
+            @apply text-white font-semibold;
+        }
+        
+        .ai-content em {
+            @apply text-gray-300 italic;
+        }
+        
+        .ai-content blockquote {
+            @apply border-l-4 border-purple-500 pl-4 py-2 my-4 bg-purple-900/20 rounded-r;
+        }
+        
+        .ai-content code {
+            @apply bg-gray-700 text-green-400 px-2 py-1 rounded text-sm;
+        }
+        
+        .ai-content pre {
+            @apply bg-gray-800 p-4 rounded-lg overflow-x-auto my-4;
+        }
+        
+        .ai-content pre code {
+            @apply bg-transparent text-green-400 p-0;
+        }
+        
+        .ai-content table {
+            @apply w-full border-collapse border border-gray-600 my-4;
+        }
+        
+        .ai-content th, .ai-content td {
+            @apply border border-gray-600 px-3 py-2 text-sm;
+        }
+        
+        .ai-content th {
+            @apply bg-gray-700 text-white font-semibold;
+        }
+        
+        .ai-content td {
+            @apply text-gray-200;
+        }
+    `],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiagnosticResultsComponent {
+export class DiagnosticResultsComponent implements OnInit {
     private readonly diagnosticState = inject(DiagnosticStateService);
     private readonly themeService = inject(ThemeService);
+    private readonly generativeAiService = inject(GenerativeAiService);
+
+    // Signals para el estado de la IA
+    private readonly _isGeneratingAnalysis = signal(false);
+    private readonly _isGeneratingActionPlan = signal(false);
+    private readonly _aiAnalysis = signal<string | null>(null);
+    private readonly _aiActionPlan = signal<string | null>(null);
+
+    // Computed properties para el estado
+    readonly isGeneratingAnalysis = this._isGeneratingAnalysis.asReadonly();
+    readonly isGeneratingActionPlan = this._isGeneratingActionPlan.asReadonly();
+    readonly aiAnalysis = this._aiAnalysis.asReadonly();
+    readonly aiActionPlan = this._aiActionPlan.asReadonly();
 
     // Datos de ejemplo para demostración
     readonly aresByPhase = computed(() => ({
@@ -303,6 +441,104 @@ export class DiagnosticResultsComponent {
         'Comunicación', 'Colaboración', 'Creatividad', 'Diseño Tecnológico',
         'Automatización', 'Seguridad', 'Ética', 'Sostenibilidad', 'Aprendizaje', 'Liderazgo'
     ]);
+
+    ngOnInit(): void {
+        // Generar análisis automáticamente al cargar la página
+        this.generateAnalysis();
+    }
+
+    // Métodos para generar contenido con IA
+    generateAnalysis(): void {
+        if (this._isGeneratingAnalysis()) return;
+
+        console.log('🚀 Iniciando generación de análisis con IA...');
+        this._isGeneratingAnalysis.set(true);
+        
+        const analysisData = {
+            userName: 'Usuario',
+            userRole: 'Profesional',
+            userIndustry: 'Tecnología',
+            topCompetencies: [
+                { name: this.getTopCompetencyStrengths().split(', ')[0] || 'Liderazgo', score: 5 }
+            ],
+            lowestCompetencies: [
+                { name: this.getTopCompetencyWeaknesses().split(', ')[0] || 'Comunicación', score: 2 }
+            ]
+        };
+
+        console.log('📊 Datos para análisis:', analysisData);
+
+        this.generativeAiService.generateDiagnosticAnalysis(analysisData).subscribe({
+            next: (analysis) => {
+                console.log('✅ Análisis recibido:', analysis);
+                console.log('📝 Longitud del análisis:', analysis?.length || 0);
+                console.log('🔍 Tipo de análisis:', typeof analysis);
+                
+                if (analysis && analysis.length > 0) {
+                    this._aiAnalysis.set(analysis);
+                    console.log('✅ Análisis establecido en el componente');
+                } else {
+                    console.warn('⚠️ Análisis vacío o inválido recibido');
+                    this._aiAnalysis.set('Error: Análisis vacío recibido de la IA');
+                }
+                
+                this._isGeneratingAnalysis.set(false);
+                console.log('✅ Análisis generado exitosamente');
+            },
+            error: (error) => {
+                console.error('❌ Error generando análisis:', error);
+                console.error('❌ Stack trace:', error.stack);
+                this._isGeneratingAnalysis.set(false);
+                this._aiAnalysis.set(`Error generando análisis: ${error.message}. Por favor, inténtalo de nuevo.`);
+            }
+        });
+    }
+
+    generateActionPlan(): void {
+        if (this._isGeneratingActionPlan()) return;
+
+        console.log('🎯 Iniciando generación de plan de acción con IA...');
+        this._isGeneratingActionPlan.set(true);
+        
+        const analysisData = {
+            userName: 'Usuario',
+            userRole: 'Profesional',
+            userIndustry: 'Tecnología',
+            topCompetencies: [
+                { name: this.getTopCompetencyStrengths().split(', ')[0] || 'Liderazgo', score: 5 }
+            ],
+            lowestCompetencies: [
+                { name: this.getTopCompetencyWeaknesses().split(', ')[0] || 'Comunicación', score: 2 }
+            ]
+        };
+
+        console.log('📊 Datos para plan de acción:', analysisData);
+
+        this.generativeAiService.generateActionPlanWithAI(analysisData).subscribe({
+            next: (actionPlan) => {
+                console.log('✅ Plan de acción recibido:', actionPlan);
+                console.log('📝 Longitud del plan:', actionPlan?.length || 0);
+                console.log('🔍 Tipo del plan:', typeof actionPlan);
+                
+                if (actionPlan && actionPlan.length > 0) {
+                    this._aiActionPlan.set(actionPlan);
+                    console.log('✅ Plan de acción establecido en el componente');
+                } else {
+                    console.warn('⚠️ Plan de acción vacío o inválido recibido');
+                    this._aiActionPlan.set('Error: Plan de acción vacío recibido de la IA');
+                }
+                
+                this._isGeneratingActionPlan.set(false);
+                console.log('✅ Plan de acción generado exitosamente');
+            },
+            error: (error) => {
+                console.error('❌ Error generando plan de acción:', error);
+                console.error('❌ Stack trace:', error.stack);
+                this._isGeneratingActionPlan.set(false);
+                this._aiActionPlan.set(`Error generando plan de acción: ${error.message}. Por favor, inténtalo de nuevo.`);
+            }
+        });
+    }
 
     // Computed properties
     readonly overallAresScore = computed(() => {
