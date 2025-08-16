@@ -7,11 +7,23 @@ import { SeoService } from '../../core/seo/seo.service';
 import { courseJsonLd } from '../../core/seo/jsonld';
 import { Course } from '../../core/models/course.model';
 import { CoursesService } from '../../core/data/courses.service';
+import { UiButtonComponent } from '../../shared/ui-kit/button/button';
+import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import { CompetencyModalComponent } from '../../shared/ui/competency-modal/competency-modal.component';
+import { Competency } from '../../features/diagnostico/data/competencias';
 
 @Component({
   selector: 'app-course',
   standalone: true,
-  imports: [NgIf, NgFor, RouterLink, I18nTranslatePipe],
+  imports: [
+    NgIf, 
+    NgFor, 
+    RouterLink, 
+    I18nTranslatePipe, 
+    UiButtonComponent,
+    PageHeaderComponent,
+    CompetencyModalComponent
+  ],
   templateUrl: './course.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -22,7 +34,10 @@ export class CourseComponent implements OnInit {
   private readonly seo = inject(SeoService);
 
   protected readonly course = signal<Course | null>(null);
+  protected readonly competencias = signal<Competency[]>([]);
   public activeModule: number | null = 0;
+  public showCompetencyModal = false;
+  public selectedCompetency: Competency | null = null;
 
   toggleModule(index: number): void {
     this.activeModule = this.activeModule === index ? null : index;
@@ -33,6 +48,19 @@ export class CourseComponent implements OnInit {
     if (course?.paymentLink) {
       window.open(course.paymentLink, '_blank');
     }
+  }
+
+  openCompetencyModal(competencyId: string): void {
+    const competency = this.competencias().find(c => c.id === competencyId);
+    if (competency) {
+      this.selectedCompetency = competency;
+      this.showCompetencyModal = true;
+    }
+  }
+
+  closeCompetencyModal(): void {
+    this.showCompetencyModal = false;
+    this.selectedCompetency = null;
   }
 
   formatPrice(price: number, currency?: string): string {
@@ -50,9 +78,14 @@ export class CourseComponent implements OnInit {
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug') ?? '';
     const lang = this.i18n.currentLang();
-    // Obtener por slug desde CoursesService
+    
+    // Cargar competencias
+    this.loadCompetencies();
+    
+    // Obtener curso por slug
     this.coursesService.getBySlug(slug).then((c) => {
       if (!c) return;
+      
       const localizedTitle = (c as any)[`title_${lang}`] || (c as any).title || (c as any).titleI18n?.[lang] || '';
       const localizedDesc = (c as any)[`description_${lang}`] || (c as any).description || (c as any).summary || '';
       const image = (c as any).image || (c as any).coverUrl || '/assets/og-placeholder.svg';
@@ -62,8 +95,15 @@ export class CourseComponent implements OnInit {
         lessons: m?.[`lessons_${lang}`] || m?.lessons || []
       }));
 
-      this.course.set({ ...(c as any), title: localizedTitle, description: localizedDesc, image, modules } as Course);
+      this.course.set({ 
+        ...(c as any), 
+        title: localizedTitle, 
+        description: localizedDesc, 
+        image, 
+        modules 
+      } as Course);
 
+      // Configurar SEO
       const title = (c as any).seo?.title ?? localizedTitle;
       const description = (c as any).seo?.description ?? localizedDesc;
       const og = (c as any).seo?.ogImage ?? image;
@@ -77,6 +117,25 @@ export class CourseComponent implements OnInit {
         offers: (c as any).price ? { price: (c as any).price, priceCurrency: 'USD' } : undefined,
       }));
     });
+  }
+
+  private async loadCompetencies(): Promise<void> {
+    try {
+      const module = await import('../../features/diagnostico/data/competencias');
+      this.competencias.set(module.COMPETENCIAS_COMPLETAS);
+    } catch (error) {
+      console.error('Error cargando competencias:', error);
+    }
+  }
+
+  getCompetencyName(competencyId: string): string {
+    const competency = this.competencias().find(c => c.id === competencyId);
+    return competency?.name || competencyId;
+  }
+
+  getCompetencyDescription(competencyId: string): string {
+    const competency = this.competencias().find(c => c.id === competencyId);
+    return competency?.description || '';
   }
 }
 

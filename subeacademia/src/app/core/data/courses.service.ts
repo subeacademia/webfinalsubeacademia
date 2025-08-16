@@ -52,6 +52,18 @@ export class CoursesService {
     }
   }
 
+  // Método para obtener todos los cursos (para exportación)
+  async getAllCourses(): Promise<Course[]> {
+    try {
+      const qRef = query(this.col, orderBy('createdAt', 'desc'));
+      const snap = await getDocs(qRef);
+      return snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Course[];
+    } catch (error) {
+      console.error('Error obteniendo todos los cursos:', error);
+      return [];
+    }
+  }
+
   findCoursesByCompetencies(competencyIds: string[]): Observable<Course[]> {
     if (!competencyIds || competencyIds.length === 0) {
       return of([]);

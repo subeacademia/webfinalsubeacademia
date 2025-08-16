@@ -1,91 +1,263 @@
-<div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200" *ngIf="course() as course">
-  <!-- Encabezado del Curso -->
-  <header class="bg-white dark:bg-gray-800 py-12 border-b dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <a [routerLink]="['/', i18n.currentLang(), 'cursos']" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline mb-4 inline-block">&larr; {{ 'course.back_to_courses' | i18nTranslate }}</a>
-      <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">{{ course.title }}</h1>
-      <p class="mt-4 text-xl text-gray-600 dark:text-gray-400">{{ course.description || course.summary }}</p>
-    </div>
-  </header>
-
-  <!-- Contenido y Barra Lateral -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="lg:grid lg:grid-cols-12 lg:gap-12">
-      <!-- Contenido Principal (Izquierda) -->
-      <div class="lg:col-span-8">
-        <div class="mb-8 rounded-lg overflow-hidden shadow-lg">
-          <img [src]="course.image || '/assets/og-placeholder.svg'" [alt]="course.title" class="w-full object-cover">
-        </div>
-        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">{{ 'course.syllabus_title' | i18nTranslate }}</h2>
-        <!-- Acordeón del Temario -->
-        <div class="space-y-4" *ngIf="course.modules?.length; else noModules">
-          <div *ngFor="let module of course.modules; let i = index" class="border dark:border-gray-700 rounded-lg overflow-hidden">
-            <button (click)="toggleModule(i)" class="w-full flex justify-between items-center p-4 text-left bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <span class="text-lg font-semibold">{{ module.title }}</span>
-              <svg class="w-6 h-6 transition-transform" [class.rotate-180]="activeModule === i" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <div *ngIf="activeModule === i" class="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-400">
-                <li *ngFor="let lesson of module.lessons">{{ lesson }}</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <ng-template #noModules>
-          <p class="text-gray-600 dark:text-gray-400">El temario estará disponible pronto.</p>
-        </ng-template>
-
-        <!-- Recursos opcionales si existen -->
-        <section *ngIf="$any(course).resources?.length" class="mt-10">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Recursos</h3>
-          <ul class="list-disc pl-6 space-y-2">
-            <li *ngFor="let r of $any(course).resources">
-              <a [href]="r.url" target="_blank" rel="noopener" class="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors">
-                {{ r.title || r.type }}
-              </a>
-            </li>
-          </ul>
-        </section>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900" *ngIf="course() as course">
+  
+  <!-- Header de la página -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center gap-4 mb-6">
+        <a [routerLink]="['/', i18n.currentLang(), 'cursos']" 
+           class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver a Cursos
+        </a>
       </div>
-
-      <!-- Barra Lateral (Derecha) -->
-      <aside class="lg:col-span-4 mt-12 lg:mt-0">
-        <div class="sticky top-24 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ 'course.details_title' | i18nTranslate }}</h3>
-            <ul class="space-y-3 text-gray-600 dark:text-gray-400">
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span><strong>{{ 'course.duration' | i18nTranslate }}:</strong> {{ $any(course).duration || ($any(course).durationHours ? $any(course).durationHours + ' h' : '—') }}</span></li>
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"></path></svg> <span><strong>{{ 'course.lessons' | i18nTranslate }}:</strong> {{ $any(course).lessonCount || '—' }}</span></li>
-            <li class="flex items-center gap-3"><svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg> <span><strong>{{ 'course.level' | i18nTranslate }}:</strong> {{ $any(course).level }}</span></li>
-          </ul>
-          <!-- Información de Precio -->
-          <div *ngIf="course.price !== undefined && course.price !== null" class="mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-green-600 dark:text-green-400">
-                {{ formatPrice(course.price, course.currency) }}
-              </div>
-              <div class="text-sm text-gray-600 dark:text-gray-400">
-                {{ course.currency === 'CLP' ? 'Peso Chileno' : course.currency === 'EUR' ? 'Euro' : 'Dólar' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Botón de Compra/Acceso -->
-          <ng-container *ngIf="course.price && course.price > 0 && course.paymentLink; else freeAccess">
-            <button 
-              (click)="goToPayment()"
-              class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">
-              Comprar Curso por {{ formatPrice(course.price, course.currency) }}
-            </button>
-          </ng-container>
-          <ng-template #freeAccess>
-            <button class="mt-6 w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
-              Acceder Gratis
-            </button>
-          </ng-template>
-        </div>
-      </aside>
+      <app-page-header 
+        [title]="course.title || ''"
+        [subtitle]="course.description || course.summary || ''">
+      </app-page-header>
     </div>
   </div>
+
+  <!-- Contenido principal -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Columna Izquierda - Contenido del Curso (70%) -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Imagen del curso -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          <img [src]="course.image || '/assets/og-placeholder.svg'" 
+               [alt]="course.title" 
+               class="w-full h-64 md:h-80 object-cover">
+        </div>
+
+        <!-- Descripción del curso -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Descripción del Curso
+          </h2>
+          <div class="prose prose-lg max-w-none text-gray-700 dark:text-gray-300" 
+               [innerHTML]="course.description || course.summary || 'Descripción no disponible'">
+          </div>
+        </div>
+
+        <!-- Programa Académico -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Programa Académico
+          </h2>
+          
+          <div *ngIf="course.modules?.length; else noModules" class="space-y-4">
+            <div *ngFor="let module of course.modules; let i = index" 
+                 class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+              
+              <button (click)="toggleModule(i)" 
+                      class="w-full flex justify-between items-center p-6 text-left bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                <div class="flex items-center gap-3">
+                  <span class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-sm font-semibold">
+                    {{ i + 1 }}
+                  </span>
+                  <span class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ module.title }}
+                  </span>
+                </div>
+                <svg class="w-6 h-6 text-gray-500 transition-transform duration-200" 
+                     [class.rotate-180]="activeModule === i" 
+                     fill="none" 
+                     viewBox="0 0 24 24" 
+                     stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              
+              <div *ngIf="activeModule === i" 
+                   class="p-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <ul class="space-y-3">
+                  <li *ngFor="let lesson of module.lessons; let j = index" 
+                      class="flex items-start gap-3">
+                    <span class="flex-shrink-0 w-5 h-5 bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
+                      {{ j + 1 }}
+                    </span>
+                    <span class="text-gray-700 dark:text-gray-300">{{ lesson }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <ng-template #noModules>
+            <div class="text-center py-12">
+              <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">📚</div>
+              <p class="text-gray-600 dark:text-gray-400 text-lg">
+                El programa académico estará disponible pronto
+              </p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Recursos del curso -->
+        <div *ngIf="$any(course).resources?.length" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Recursos Adicionales
+          </h2>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div *ngFor="let resource of $any(course).resources" 
+                 class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+              <div class="flex items-center gap-3">
+                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                  <span class="text-blue-600 dark:text-blue-400 text-lg">
+                    {{ resource.type === 'video' ? '🎥' : resource.type === 'pdf' ? '📄' : resource.type === 'zip' ? '📦' : '🔗' }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-medium text-gray-900 dark:text-white truncate">
+                    {{ resource.title || resource.type }}
+                  </h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    {{ resource.type }}
+                  </p>
+                </div>
+              </div>
+              <a [href]="resource.url" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="mt-3 inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                Ver recurso
+                <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha - Barra Lateral (30%) -->
+      <div class="space-y-6">
+        
+        <!-- Tarjeta de información del curso -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 sticky top-24">
+          <div class="p-6 space-y-6">
+            
+            <!-- Información básica -->
+            <div class="space-y-4">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                Información del Curso
+              </h3>
+              
+              <div class="space-y-3">
+                <div class="flex items-center gap-3 text-sm">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-gray-600 dark:text-gray-400">
+                    <strong>Duración:</strong> 
+                    {{ $any(course).duration || ($any(course).durationHours ? $any(course).durationHours + ' horas' : 'No especificada') }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center gap-3 text-sm">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                  <span class="text-gray-600 dark:text-gray-400">
+                    <strong>Lecciones:</strong> 
+                    {{ $any(course).lessonCount || 'No especificadas' }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center gap-3 text-sm">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                  </svg>
+                  <span class="text-gray-600 dark:text-gray-400">
+                    <strong>Nivel:</strong> 
+                    {{ course.level || 'No especificado' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Precio -->
+            <div *ngIf="course.price !== undefined && course.price !== null" 
+                 class="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div class="text-center">
+                <div class="text-3xl font-bold text-green-600 dark:text-green-400">
+                  {{ formatPrice(course.price, course.currency) }}
+                </div>
+                <div class="text-sm text-green-700 dark:text-green-300 mt-1">
+                  {{ course.currency === 'CLP' ? 'Peso Chileno' : course.currency === 'EUR' ? 'Euro' : 'Dólar' }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Botón de compra -->
+            <div class="space-y-3">
+              <ng-container *ngIf="course.price && course.price > 0 && course.paymentLink; else freeAccess">
+                <app-ui-button 
+                  variant="primary" 
+                  size="lg"
+                  (clicked)="goToPayment()"
+                  class="w-full">
+                  🛒 Comprar Curso por {{ formatPrice(course.price, course.currency) }}
+                </app-ui-button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Acceso inmediato al contenido completo
+                </p>
+              </ng-container>
+              
+              <ng-template #freeAccess>
+                <app-ui-button 
+                  variant="primary" 
+                  size="lg"
+                  class="w-full">
+                  🎓 Acceder Gratis
+                </app-ui-button>
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Contenido disponible sin costo
+                </p>
+              </ng-template>
+            </div>
+
+            <!-- Competencias relacionadas -->
+            <div *ngIf="course.relatedCompetencies?.length" class="space-y-4">
+              <h4 class="font-semibold text-gray-900 dark:text-white">
+                Competencias que desarrollarás
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                <button *ngFor="let competencyId of course.relatedCompetencies" 
+                        (click)="openCompetencyModal(competencyId)"
+                        class="inline-flex items-center gap-2 px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors cursor-pointer">
+                  <span>{{ getCompetencyName(competencyId) }}</span>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                <p>✅ Acceso de por vida</p>
+                <p>📱 Disponible en todos los dispositivos</p>
+                <p>🔄 Certificado de finalización</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de competencia -->
+  <app-competency-modal 
+    *ngIf="showCompetencyModal && selectedCompetency"
+    [competency]="selectedCompetency"
+    (close)="closeCompetencyModal()">
+  </app-competency-modal>
 </div>
 
 
