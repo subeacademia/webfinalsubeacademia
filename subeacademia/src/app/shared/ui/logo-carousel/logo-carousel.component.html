@@ -1,0 +1,12 @@
+<div class="logo-carousel-container" [attr.aria-label]="'Carrusel de logos'">
+  <div class="logo-track" [style.animation-direction]="direction">
+    <!-- Primera lista de logos -->
+    <div class="logo-slide" *ngFor="let logo of logos">
+      <img [src]="logo.imageUrl" [alt]="logo.name" />
+    </div>
+    <!-- Segunda lista de logos (para el bucle) -->
+    <div class="logo-slide" *ngFor="let logo of logos" aria-hidden="true">
+      <img [src]="logo.imageUrl" [alt]="logo.name" />
+    </div>
+  </div>
+</div>

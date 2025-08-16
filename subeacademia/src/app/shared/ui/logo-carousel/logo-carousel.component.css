@@ -1,44 +1,32 @@
-.logo-carousel-container {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-}
-
-.logo-carousel-track {
-  display: flex;
-  animation: scroll 35s linear infinite;
-  width: max-content;
-}
-
-.logo-carousel-track.reverse {
-  animation-direction: reverse;
-}
-
-.logo-item {
-  flex-shrink: 0;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-image {
-  height: 60px;
-  width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  filter: grayscale(100%);
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.logo-image:hover {
-  filter: grayscale(0%);
-  opacity: 1;
-  transform: scale(1.05);
-}
-
 @keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* Mueve el contenedor exactamente la mitad de su ancho (que es el ancho de una lista de logos) */
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes scroll-cross-left {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-cross-right {
   0% {
     transform: translateX(0);
   }
@@ -47,7 +35,132 @@
   }
 }
 
-/* Pausar animación en hover */
-.logo-carousel-container:hover .logo-carousel-track {
-  animation-play-state: paused;
+.logo-carousel-container {
+  width: 100%;
+  overflow: hidden;
+  padding: 1.5rem 0;
+  position: relative;
+  /* Efecto de desvanecimiento en los bordes para una mejor integración visual */
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.logo-track {
+  display: flex;
+  /* Asegura que el ancho sea suficiente para contener ambas listas de logos */
+  width: max-content;
+  /* Aplica la animación */
+  animation: scroll 40s linear infinite;
+  will-change: transform; /* Optimización para el rendimiento de la animación */
+  gap: 2rem;
+  align-items: center;
+}
+
+.logo-track[style*="reverse"] {
+  animation: scroll-reverse 40s linear infinite;
+}
+
+/* Carrusel superior: empieza desde la izquierda y va hacia la derecha */
+.carousel-top .logo-track {
+  animation: scroll-cross-left 40s linear infinite;
+}
+
+/* Carrusel inferior: empieza desde la derecha y va hacia la izquierda */
+.carousel-bottom .logo-track {
+  animation: scroll-cross-right 40s linear infinite;
+}
+
+.logo-track:hover {
+  animation-play-state: paused; /* Pausa la animación cuando el cursor está sobre el carrusel */
+}
+
+.logo-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 160px; /* Tamaño estándar para todos los logos */
+  height: 80px; /* Altura estándar */
+  padding: 0 1rem;
+}
+
+.logo-slide img {
+  /* Tamaño estándar para todos los logos */
+  width: 140px;
+  height: 70px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+}
+
+.logo-slide img:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos específicos para el carrusel doble */
+.carousel-row {
+  position: relative;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.carousel-top .logo-carousel-container {
+  border-top: 2px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+.carousel-bottom .logo-carousel-container {
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+  border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .logo-slide {
+    min-width: 120px;
+    height: 60px;
+  }
+  
+  .logo-slide img {
+    width: 100px;
+    height: 50px;
+  }
+  
+  .logo-track {
+    gap: 1rem;
+    animation-duration: 30s;
+  }
+  
+  .logo-track[style*="reverse"] {
+    animation-duration: 30s;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-slide {
+    min-width: 100px;
+    height: 50px;
+  }
+  
+  .logo-slide img {
+    width: 80px;
+    height: 40px;
+  }
+  
+  .logo-track {
+    gap: 0.5rem;
+    animation-duration: 25s;
+  }
+  
+  .logo-track[style*="reverse"] {
+    animation-duration: 25s;
+  }
 }

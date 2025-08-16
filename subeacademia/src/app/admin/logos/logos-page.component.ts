@@ -5,6 +5,7 @@ import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { MediaService } from '../../core/data/media.service';
 import { StorageService } from '../../core/storage.service';
+import { ToastService } from '../../core/ui/toast/toast.service';
 
 @Component({
     standalone: true,
@@ -69,6 +70,7 @@ export class LogosPageComponent {
     private readonly logos = inject(LogosService);
     private readonly media = inject(MediaService);
     private readonly storage = inject(StorageService);
+    private readonly toast = inject(ToastService);
 
 	empresas = signal<Logo[]>([]);
 	educacion = signal<Logo[]>([]);
@@ -119,11 +121,15 @@ export class LogosPageComponent {
             this.previewUrl = null;
             this.form.name = '';
             
-            // Muestra notificación de éxito (aquí podrías usar un toast service)
-            console.log('Logo añadido exitosamente');
+            // Muestra notificación de éxito
+            this.toast.success('Logo añadido exitosamente');
+            
+            // Recarga la lista de logos para mostrar el nuevo
+            this.refreshLogos();
             
 		} catch (error) {
             console.error('Error al añadir logo:', error);
+            this.toast.error('Error al añadir logo. Por favor, inténtalo de nuevo.');
 		} finally {
 			this.busy.set(false);
 		}
@@ -131,6 +137,12 @@ export class LogosPageComponent {
 
 	async remove(item: Logo){
 		await this.logos.deleteLogo(item);
+	}
+
+	private refreshLogos() {
+		// Recarga las listas de logos
+		this.logos.listByType('Empresa').subscribe(v => this.empresas.set(v));
+		this.logos.listByType('Institución Educativa').subscribe(v => this.educacion.set(v));
 	}
 }
 

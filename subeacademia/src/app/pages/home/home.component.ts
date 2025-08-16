@@ -35,6 +35,56 @@ export class HomeComponent implements OnInit, OnDestroy {
   private timeoutId: any;
   companyLogos: Logo[] = [];
   educationLogos: Logo[] = [];
+  logosDePrueba: Logo[] = [
+    {
+      id: '1',
+      name: 'Empresa de Prueba 1',
+      imageUrl: 'https://via.placeholder.com/140x70/3B82F6/FFFFFF?text=Logo+1',
+      type: 'Empresa'
+    },
+    {
+      id: '2',
+      name: 'Empresa de Prueba 2',
+      imageUrl: 'https://via.placeholder.com/140x70/8B5CF6/FFFFFF?text=Logo+2',
+      type: 'Empresa'
+    },
+    {
+      id: '3',
+      name: 'Empresa de Prueba 3',
+      imageUrl: 'https://via.placeholder.com/140x70/EF4444/FFFFFF?text=Logo+3',
+      type: 'Empresa'
+    },
+    {
+      id: '4',
+      name: 'Empresa de Prueba 4',
+      imageUrl: 'https://via.placeholder.com/140x70/10B981/FFFFFF?text=Logo+4',
+      type: 'Empresa'
+    },
+    {
+      id: '5',
+      name: 'Empresa de Prueba 5',
+      imageUrl: 'https://via.placeholder.com/140x70/F59E0B/FFFFFF?text=Logo+5',
+      type: 'Empresa'
+    },
+    {
+      id: '6',
+      name: 'Empresa de Prueba 6',
+      imageUrl: 'https://via.placeholder.com/140x70/EC4899/FFFFFF?text=Logo+6',
+      type: 'Empresa'
+    },
+    {
+      id: '7',
+      name: 'Empresa de Prueba 7',
+      imageUrl: 'https://via.placeholder.com/140x70/06B6D4/FFFFFF?text=Logo+7',
+      type: 'Empresa'
+    },
+    {
+      id: '8',
+      name: 'Empresa de Prueba 8',
+      imageUrl: 'https://via.placeholder.com/140x70/84CC16/FFFFFF?text=Logo+8',
+      type: 'Empresa'
+    }
+  ];
 
   ngOnInit(): void {
     this.contentSub = this.i18n.currentLang$
@@ -63,8 +113,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
 
     // Logos
-    this.logos.listByType('Empresa').subscribe(v => this.companyLogos = v);
-    this.logos.listByType('Institución Educativa').subscribe(v => this.educationLogos = v);
+    this.logos.listByType('Empresa').subscribe(v => {
+      this.companyLogos = v;
+      console.log('HomeComponent: Logos de empresas cargados:', this.companyLogos.length, this.companyLogos);
+    });
+    this.logos.listByType('Institución Educativa').subscribe(v => {
+      this.educationLogos = v;
+      console.log('HomeComponent: Logos de instituciones cargados:', this.educationLogos.length, this.educationLogos);
+    });
   }
 
   private resetTypewriterState() {

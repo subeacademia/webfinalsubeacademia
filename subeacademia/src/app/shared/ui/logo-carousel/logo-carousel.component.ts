@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Logo } from '../../../core/models/logo.model';
 
@@ -6,21 +6,16 @@ import { Logo } from '../../../core/models/logo.model';
   selector: 'app-logo-carousel',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="logo-carousel-container">
-      <div class="logo-carousel-track" [class.reverse]="direction === 'reverse'">
-        <div class="logo-item" *ngFor="let logo of logos">
-          <img [src]="logo.imageUrl" [alt]="logo.name" class="logo-image">
-        </div>
-        <div class="logo-item" *ngFor="let logo of logos">
-          <img [src]="logo.imageUrl" [alt]="logo.name" class="logo-image">
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './logo-carousel.component.html',
   styleUrls: ['./logo-carousel.component.css']
 })
-export class LogoCarouselComponent {
+export class LogoCarouselComponent implements OnChanges {
   @Input() logos: Logo[] = [];
   @Input() direction: 'normal' | 'reverse' = 'normal';
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['logos'] && this.logos.length > 0) {
+      console.log('LogoCarousel: Logos recibidos:', this.logos.length, this.logos);
+    }
+  }
 }

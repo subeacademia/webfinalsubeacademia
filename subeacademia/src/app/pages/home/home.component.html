@@ -230,17 +230,34 @@
     </h2>
     
     <!-- Carrusel de logos con animación infinita -->
-    <div class="space-y-12">
-      <!-- Logos de Empresas -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-6 text-slate-700 dark:text-slate-300">Empresas</h3>
-        <app-logo-carousel [logos]="companyLogos" direction="normal"></app-logo-carousel>
+    <div class="space-y-8">
+      <!-- Debug info -->
+      <div class="text-sm text-gray-500 mb-4">
+        Debug: companyLogos.length = {{companyLogos.length}}, educationLogos.length = {{educationLogos.length}}
       </div>
       
-      <!-- Logos de Instituciones Educativas -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-6 text-slate-700 dark:text-slate-300">Instituciones Educativas</h3>
-        <app-logo-carousel [logos]="educationLogos" direction="reverse"></app-logo-carousel>
+      <!-- Carrusel Doble: Primera fila (izquierda a derecha) -->
+      <div class="relative">
+        <h3 class="text-xl font-semibold text-center mb-6 text-primary">Empresas</h3>
+        <div class="carousel-row">
+          <app-logo-carousel 
+            [logos]="companyLogos.length > 0 ? companyLogos : logosDePrueba" 
+            direction="normal"
+            class="carousel-top">
+          </app-logo-carousel>
+        </div>
+      </div>
+      
+      <!-- Carrusel Doble: Segunda fila (derecha a izquierda) -->
+      <div class="relative mt-12">
+        <h3 class="text-xl font-semibold text-center mb-6 text-secondary">Instituciones Educativas</h3>
+        <div class="carousel-row">
+          <app-logo-carousel 
+            [logos]="educationLogos.length > 0 ? educationLogos : logosDePrueba" 
+            direction="reverse"
+            class="carousel-bottom">
+          </app-logo-carousel>
+        </div>
       </div>
     </div>
     
