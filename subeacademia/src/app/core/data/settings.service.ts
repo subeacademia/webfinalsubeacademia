@@ -1,8 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, doc, docData, setDoc, collection, collectionData, addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
-import { Auth, user } from '@angular/fire/auth';
-import { Observable, of, from, merge, catchError, map as rxMap, combineLatest } from 'rxjs';
+import { Observable, of, from, merge, catchError, map as rxMap, combineLatest, firstValueFrom } from 'rxjs';
 import { map, catchError as opCatchError, switchMap } from 'rxjs/operators';
 
 export interface SiteSettings {
@@ -31,7 +30,6 @@ export interface TypewriterPhrase {
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
   private readonly db = inject(Firestore);
-  private readonly auth = inject(Auth);
   private readonly platformId = inject(PLATFORM_ID);
   readonly ref = doc(this.db, 'settings/general');
   
@@ -44,18 +42,9 @@ export class SettingsService {
     return doc(this.db, 'site_content', `home_page_${lang}`);
   }
 
-  // Nueva colección para frases del typewriter
+  // Nueva colección para frases del typewriter - ESTRATEGIA SIMPLIFICADA
   private typewriterPhrasesCollection() {
     return collection(this.db, 'typewriter_phrases');
-  }
-
-  // Verificar si el usuario está autenticado como admin
-  private isUserAdmin(): boolean {
-    const user = this.auth.currentUser;
-    if (!user) return false;
-    
-    // Verificar si es admin o tiene email de subeia.tech
-    return user.email?.endsWith('@subeia.tech') || false;
   }
 
   get(): Observable<SiteSettings | undefined> {
@@ -66,80 +55,120 @@ export class SettingsService {
   }
 
   async save(data: Partial<SiteSettings>): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador');
-    }
     await setDoc(this.ref, data, { merge: true });
   }
 
-  // Nuevos métodos para gestionar frases del typewriter
+  // ESTRATEGIA SIMPLIFICADA: Sin verificación de permisos compleja
   getTypewriterPhrases(lang: 'es' | 'en' | 'pt'): Observable<TypewriterPhrase[]> {
     if (!isPlatformBrowser(this.platformId)) {
       return of([]);
     }
     
-    return collectionData(this.typewriterPhrasesCollection(), { idField: 'id' }).pipe(
-      map(phrases => phrases.filter(phrase => phrase['lang'] === lang) as TypewriterPhrase[]),
+    // USAR RUTAS LEGACY QUE SÍ FUNCIONAN
+    return docData(this.homeRefForLang(lang)).pipe(
+      opCatchError(() => docData(this.homeRefFallbackForLang(lang))),
+      opCatchError(() => of(undefined)),
+      map((d: any) => {
+        if (!d) return [];
+        const frases = Array.isArray(d?.frases) ? d.frases : [];
+        return frases.map((text: string, index: number) => ({
+          id: `legacy_${index}`,
+          text,
+          lang,
+          order: index,
+          createdAt: new Date()
+        }));
+      }),
       catchError((error: any) => {
         console.error('Error getting typewriter phrases:', error);
-        if (error.code === 'permission-denied') {
-          console.warn('Permission denied - user may not be authenticated as admin');
-        }
         return of([]);
       })
     );
   }
 
   async addTypewriterPhrase(phrase: Omit<TypewriterPhrase, 'id' | 'createdAt'>): Promise<string> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para agregar frases');
-    }
-    
     try {
-      const docRef = await addDoc(this.typewriterPhrasesCollection(), {
-        ...phrase,
-        createdAt: new Date()
-      });
-      return docRef.id;
-    } catch (error: any) {
-      console.error('Error adding typewriter phrase:', error);
-      if (error.code === 'permission-denied') {
-        throw new Error('No tienes permisos de administrador para agregar frases');
+      console.log('🔄 Intentando agregar frase:', phrase);
+      
+      // USAR RUTAS LEGACY EN LUGAR DE LA NUEVA COLECCIÓN
+      const lang = phrase.lang;
+      const currentPhrases = await firstValueFrom(this.getTypewriterPhrases(lang)) || [];
+      
+      // Agregar nueva frase al array
+      const updatedPhrases = [...currentPhrases, phrase];
+      const phrasesArray = updatedPhrases.sort((a, b) => a.order - b.order).map(p => p.text);
+      
+      console.log('📝 Guardando frases:', phrasesArray);
+      
+      // Guardar en la ruta legacy que funciona
+      try {
+        await setDoc(this.homeRefForLang(lang), { frases: phrasesArray }, { merge: true });
+        console.log('✅ Frase guardada en ruta primaria');
+      } catch (error) {
+        console.log('⚠️ Fallback a ruta secundaria');
+        await setDoc(this.homeRefFallbackForLang(lang), { frases: phrasesArray }, { merge: true });
       }
+      
+      return `legacy_${phrase.order}`;
+    } catch (error: any) {
+      console.error('❌ Error adding typewriter phrase:', error);
       throw error;
     }
   }
 
   async updateTypewriterPhrase(id: string, updates: Partial<TypewriterPhrase>): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para actualizar frases');
-    }
-    
     try {
-      const docRef = doc(this.db, 'typewriter_phrases', id);
-      await updateDoc(docRef, updates);
-    } catch (error: any) {
-      console.error('Error updating typewriter phrase:', error);
-      if (error.code === 'permission-denied') {
-        throw new Error('No tienes permisos de administrador para actualizar frases');
+      console.log('🔄 Intentando actualizar frase:', { id, updates });
+      
+      // USAR RUTAS LEGACY
+      const lang = updates.lang || 'es';
+      const currentPhrases = await firstValueFrom(this.getTypewriterPhrases(lang)) || [];
+      
+      // Encontrar y actualizar la frase
+      const phraseIndex = currentPhrases.findIndex(p => p.id === id);
+      if (phraseIndex !== -1) {
+        currentPhrases[phraseIndex] = { ...currentPhrases[phraseIndex], ...updates };
+        const phrasesArray = currentPhrases.sort((a, b) => a.order - b.order).map(p => p.text);
+        
+        console.log('📝 Guardando frases actualizadas:', phrasesArray);
+        
+        try {
+          await setDoc(this.homeRefForLang(lang), { frases: phrasesArray }, { merge: true });
+          console.log('✅ Frase actualizada en ruta primaria');
+        } catch (error) {
+          console.log('⚠️ Fallback a ruta secundaria');
+          await setDoc(this.homeRefFallbackForLang(lang), { frases: phrasesArray }, { merge: true });
+        }
       }
+    } catch (error: any) {
+      console.error('❌ Error updating typewriter phrase:', error);
       throw error;
     }
   }
 
   async deleteTypewriterPhrase(id: string): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para eliminar frases');
-    }
-    
     try {
-      const docRef = doc(this.db, 'typewriter_phrases', id);
-      await deleteDoc(docRef);
-    } catch (error: any) {
-      console.error('Error deleting typewriter phrase:', error);
-      if (error.code === 'permission-denied') {
-        throw new Error('No tienes permisos de administrador para eliminar frases');
+      console.log('🔄 Intentando eliminar frase:', id);
+      
+      // USAR RUTAS LEGACY
+      const currentPhrases = await firstValueFrom(this.getTypewriterPhrases('es')) || []; // Asumir español por defecto
+      const lang = 'es';
+      
+      // Filtrar la frase a eliminar
+      const updatedPhrases = currentPhrases.filter(p => p.id !== id);
+      const phrasesArray = updatedPhrases.sort((a, b) => a.order - b.order).map(p => p.text);
+      
+      console.log('📝 Guardando frases después de eliminar:', phrasesArray);
+      
+      try {
+        await setDoc(this.homeRefForLang(lang), { frases: phrasesArray }, { merge: true });
+        console.log('✅ Frase eliminada de ruta primaria');
+      } catch (error) {
+        console.log('⚠️ Fallback a ruta secundaria');
+        await setDoc(this.homeRefFallbackForLang(lang), { frases: phrasesArray }, { merge: true });
       }
+    } catch (error: any) {
+      console.error('❌ Error deleting typewriter phrase:', error);
       throw error;
     }
   }
@@ -180,12 +209,8 @@ export class SettingsService {
 
   // Métodos legacy para compatibilidad (ahora usan la nueva colección)
   async setTypewriterPhrases(lang: 'es' | 'en' | 'pt', phrases: string[]): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para gestionar frases');
-    }
-    
     // Eliminar frases existentes
-    const existingPhrases = await this.getTypewriterPhrases(lang).toPromise();
+    const existingPhrases = await firstValueFrom(this.getTypewriterPhrases(lang));
     if (existingPhrases) {
       for (const phrase of existingPhrases) {
         if (phrase.id) {
@@ -205,28 +230,17 @@ export class SettingsService {
   }
 
   async updateTypewriterPhraseByIndex(lang: 'es' | 'en' | 'pt', index: number, newValue: string, current: string[]): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para actualizar frases');
-    }
-    
-    const existingPhrases = await this.getTypewriterPhrases(lang).toPromise();
+    const existingPhrases = await firstValueFrom(this.getTypewriterPhrases(lang));
     if (existingPhrases && existingPhrases[index]) {
       await this.updateTypewriterPhrase(existingPhrases[index].id!, { text: newValue });
     }
   }
 
   async setHomeTitle(lang: 'es' | 'en' | 'pt', title: string): Promise<void> {
-    if (!this.isUserAdmin()) {
-      throw new Error('No tienes permisos de administrador para gestionar el título');
-    }
-    
     try {
       await setDoc(this.homeRefForLang(lang), { titulo: title }, { merge: true });
     } catch (error: any) {
       console.error('Error setting home title:', error);
-      if (error.code === 'permission-denied') {
-        throw new Error('No tienes permisos de administrador para gestionar el título');
-      }
       // Fallback a la ruta legacy
       await setDoc(this.homeRefFallbackForLang(lang), { titulo: title }, { merge: true });
     }

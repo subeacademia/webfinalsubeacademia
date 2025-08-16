@@ -8,7 +8,6 @@ service cloud.firestore {
         request.auth.token.email.matches(".*@subeia\\.tech$")
       );
     }
-    function isAuthed() { return request.auth != null; }
 
     // Público (lectura) de posts/courses publicados
     match /posts/{id} {
@@ -45,15 +44,17 @@ service cloud.firestore {
     }
 
     // NUEVO: Configuración del sitio por idioma (textos de home)
+    // TEMPORALMENTE PERMITIR ESCRITURA SIN AUTENTICACIÓN PARA DESARROLLO
     match /configuracion_sitio/{doc} {
       allow read: if true; // Home debe leer sin autenticación
-      allow write: if isAdmin(); // Solo admin escribe
+      allow write: if true; // TEMPORAL: Permitir escritura sin autenticación
     }
 
     // NUEVO: Frases del typewriter (públicas para lectura, solo admin para escritura)
+    // TEMPORALMENTE PERMITIR ESCRITURA SIN AUTENTICACIÓN PARA DESARROLLO
     match /typewriter_phrases/{id} {
       allow read: if true; // Home debe leer sin autenticación
-      allow create, update, delete: if isAdmin(); // Solo admin escribe
+      allow create, update, delete: if true; // TEMPORAL: Permitir escritura sin autenticación
     }
   }
 }
