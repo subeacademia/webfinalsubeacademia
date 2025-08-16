@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Competency } from '../../../features/diagnostico/data/competencias';
 
@@ -9,13 +9,23 @@ import { Competency } from '../../../features/diagnostico/data/competencias';
   templateUrl: './competency-modal.component.html',
   styleUrls: ['./competency-modal.component.css']
 })
-export class CompetencyModalComponent implements OnInit {
+export class CompetencyModalComponent implements OnInit, OnChanges {
   @Input() competency: Competency | null = null;
   @Output() closeModal = new EventEmitter<void>();
 
   isVisible = false;
 
   ngOnInit() {
+    this.showModal();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['competency'] && changes['competency'].currentValue) {
+      this.showModal();
+    }
+  }
+
+  showModal() {
     if (this.competency) {
       // Pequeño delay para la animación de entrada
       setTimeout(() => {

@@ -27,11 +27,13 @@ export class MethodologyComponent {
   selectedCompetency: Competency | null = null;
 
   openCompetencyModal(competency: Competency): void {
+    console.log('Abriendo modal para:', competency.name);
     this.selectedCompetency = competency;
     this.isModalOpen = true;
   }
 
   onCloseModal(): void {
+    console.log('Cerrando modal');
     this.isModalOpen = false;
     this.selectedCompetency = null;
   }

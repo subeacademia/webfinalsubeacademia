@@ -212,7 +212,7 @@
 
 <!-- Modal de Competencias -->
 <app-competency-modal 
-  *ngIf="isModalOpen" 
+  *ngIf="isModalOpen && selectedCompetency" 
   [competency]="selectedCompetency" 
   (closeModal)="onCloseModal()">
 </app-competency-modal>
