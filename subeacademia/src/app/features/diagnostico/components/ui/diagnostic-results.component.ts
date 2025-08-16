@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SemaforoAresComponent, AresPhaseScore } from './semaforo-ares.component';
 import { RadarChartComponent } from './radar-chart.component';
@@ -88,9 +88,19 @@ import { GenerativeAiService } from '../../../../core/ai/generative-ai.service';
                         Análisis Personalizado Generado con IA
                     </h3>
                     
-                    <div *ngIf="isGeneratingAnalysis()" class="text-center py-8">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                        <p class="text-purple-300 text-lg">Generando análisis personalizado con IA...</p>
+                    <div *ngIf="isGeneratingAnalysis()" class="p-6 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                <!-- Ícono SVG de cerebro -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Analizando tu perfil...</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ loadingMessage }}</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div *ngIf="!isGeneratingAnalysis() && aiAnalysis()" class="ai-content prose prose-invert max-w-none">
@@ -114,9 +124,19 @@ import { GenerativeAiService } from '../../../../core/ai/generative-ai.service';
                         Plan de Acción Personalizado Generado con IA
                     </h3>
                     
-                    <div *ngIf="isGeneratingActionPlan()" class="text-center py-8">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                        <p class="text-blue-300 text-lg">Generando plan de acción personalizado con IA...</p>
+                    <div *ngIf="isGeneratingActionPlan()" class="p-6 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+                                <!-- Ícono SVG de plan de acción -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Generando tu plan de acción...</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ loadingMessage }}</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <div *ngIf="!isGeneratingActionPlan() && aiActionPlan()" class="ai-content prose prose-invert max-w-none">
@@ -409,10 +429,11 @@ import { GenerativeAiService } from '../../../../core/ai/generative-ai.service';
     `],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DiagnosticResultsComponent implements OnInit {
+export class DiagnosticResultsComponent implements OnInit, OnDestroy {
     private readonly diagnosticState = inject(DiagnosticStateService);
     private readonly themeService = inject(ThemeService);
     private readonly generativeAiService = inject(GenerativeAiService);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     // Signals para el estado de la IA
     private readonly _isGeneratingAnalysis = signal(false);
@@ -425,6 +446,22 @@ export class DiagnosticResultsComponent implements OnInit {
     readonly isGeneratingActionPlan = this._isGeneratingActionPlan.asReadonly();
     readonly aiAnalysis = this._aiAnalysis.asReadonly();
     readonly aiActionPlan = this._aiActionPlan.asReadonly();
+    
+    // Propiedades para mensajes de carga dinámicos
+    loadingMessage: string = 'Preparando tu análisis...';
+    private loadingInterval: any;
+    
+    // Pool de mensajes de carga (copiado del chatbot para consistencia)
+    private mensajesCarga = [
+        'Pensando en la mejor respuesta para ti... 🤔',
+        'Consultando nuestra base de datos de Sube Academia... 📊',
+        'Buscando la información más precisa... 🔍',
+        'Procesando tu consulta con IA... ⚡',
+        'Analizando tus resultados... 📈',
+        'Preparando una respuesta detallada... ✨',
+        'Generando un plan de acción personalizado... 🎯',
+        'Elaborando el mejor feedback para ti... 💡'
+    ];
 
     // Datos de ejemplo para demostración
     readonly aresByPhase = computed(() => ({
@@ -445,6 +482,13 @@ export class DiagnosticResultsComponent implements OnInit {
     ngOnInit(): void {
         // Generar análisis automáticamente al cargar la página
         this.generateAnalysis();
+        
+        // Iniciar el ciclo de mensajes de carga
+        this.startLoadingMessages();
+    }
+    
+    ngOnDestroy(): void {
+        this.stopLoadingMessages(); // Asegurarse de limpiar el intervalo al destruir el componente
     }
 
     // Métodos para generar contenido con IA
@@ -483,12 +527,16 @@ export class DiagnosticResultsComponent implements OnInit {
                 }
                 
                 this._isGeneratingAnalysis.set(false);
+                this.stopLoadingMessages(); // Detener el ciclo de mensajes
+                this.cdr.detectChanges(); // Forzar la detección de cambios
                 console.log('✅ Análisis generado exitosamente');
             },
             error: (error) => {
                 console.error('❌ Error generando análisis:', error);
                 console.error('❌ Stack trace:', error.stack);
                 this._isGeneratingAnalysis.set(false);
+                this.stopLoadingMessages(); // Detener el ciclo de mensajes
+                this.cdr.detectChanges(); // Forzar la detección de cambios
                 this._aiAnalysis.set(`Error generando análisis: ${error.message}. Por favor, inténtalo de nuevo.`);
             }
         });
@@ -529,12 +577,16 @@ export class DiagnosticResultsComponent implements OnInit {
                 }
                 
                 this._isGeneratingActionPlan.set(false);
+                this.stopLoadingMessages(); // Detener el ciclo de mensajes
+                this.cdr.detectChanges(); // Forzar la detección de cambios
                 console.log('✅ Plan de acción generado exitosamente');
             },
             error: (error) => {
                 console.error('❌ Error generando plan de acción:', error);
                 console.error('❌ Stack trace:', error.stack);
                 this._isGeneratingActionPlan.set(false);
+                this.stopLoadingMessages(); // Detener el ciclo de mensajes
+                this.cdr.detectChanges(); // Forzar la detección de cambios
                 this._aiActionPlan.set(`Error generando plan de acción: ${error.message}. Por favor, inténtalo de nuevo.`);
             }
         });
@@ -774,4 +826,18 @@ export class DiagnosticResultsComponent implements OnInit {
             target: 'Reducir 40% en 12 meses'
         }
     ]);
+    
+    // Métodos para manejar mensajes de carga dinámicos
+    private startLoadingMessages(): void {
+        this.loadingInterval = setInterval(() => {
+            this.loadingMessage = this.mensajesCarga[Math.floor(Math.random() * this.mensajesCarga.length)];
+            this.cdr.detectChanges();
+        }, 2000); // Cambia el mensaje cada 2 segundos
+    }
+
+    private stopLoadingMessages(): void {
+        if (this.loadingInterval) {
+            clearInterval(this.loadingInterval);
+        }
+    }
 }
