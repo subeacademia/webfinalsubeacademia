@@ -335,7 +335,7 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
         opacity: 0.4
       });
       
-      const stream = new THREE.Line(streamGeometry, streamMaterial);
+      const stream = new THREE.LineSegments(streamGeometry, streamMaterial);
       this.dataStreams.push(stream);
       this.scene.add(stream);
     }
@@ -379,14 +379,14 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
 
   private animateParticles(): void {
     this.particles.forEach(particleSystem => {
-      const positions = particleSystem.geometry.attributes.position.array as Float32Array;
+      const positions = particleSystem.geometry.attributes['position'].array as Float32Array;
       
       for (let i = 0; i < positions.length; i += 3) {
         positions[i + 1] += Math.sin(this.time + i * 0.01) * 0.1;
         positions[i + 2] += Math.cos(this.time + i * 0.01) * 0.1;
       }
       
-      particleSystem.geometry.attributes.position.needsUpdate = true;
+      particleSystem.geometry.attributes['position'].needsUpdate = true;
       particleSystem.rotation.y = this.time * 0.1;
     });
   }
@@ -394,7 +394,11 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
   private animateEnergyWaves(): void {
     this.energyWaves.forEach((wave, i) => {
       wave.scale.setScalar(1 + Math.sin(this.time + i) * 0.1);
-      wave.material.opacity = 0.1 + Math.sin(this.time * 2 + i) * 0.05;
+      if (Array.isArray(wave.material)) {
+        wave.material.forEach(mat => (mat as any).opacity = 0.1 + Math.sin(this.time * 2 + i) * 0.05);
+      } else {
+        (wave.material as any).opacity = 0.1 + Math.sin(this.time * 2 + i) * 0.05;
+      }
       wave.rotation.z = this.time * 0.2 * (i + 1);
     });
   }
@@ -411,7 +415,11 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
   private animateDataStreams(): void {
     this.dataStreams.forEach((stream, i) => {
       stream.rotation.y = this.time * 0.1 + i * 0.5;
-      stream.material.opacity = 0.4 + Math.sin(this.time + i) * 0.2;
+      if (Array.isArray(stream.material)) {
+        stream.material.forEach(mat => (mat as any).opacity = 0.4 + Math.sin(this.time + i) * 0.2);
+      } else {
+        (stream.material as any).opacity = 0.4 + Math.sin(this.time + i) * 0.2;
+      }
     });
   }
 

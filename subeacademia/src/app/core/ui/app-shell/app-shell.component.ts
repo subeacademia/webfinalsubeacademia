@@ -14,7 +14,7 @@ type Lang = 'es' | 'en' | 'pt';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur">
-        <nav class="container flex items-center justify-between h-16" role="navigation" aria-label="Principal">
+        <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16" role="navigation" aria-label="Principal">
            <a [routerLink]="['/', currentLang()]" class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]">
           <img *ngIf="logoUrl()" [src]="logoUrl()!" alt="Logo" class="h-7 w-7 md:h-8 md:w-8 rounded"/>
           <span>{{ brandName() }}</span>
@@ -87,7 +87,7 @@ type Lang = 'es' | 'en' | 'pt';
       </nav>
 
       <div [class.nav--open]="navOpen()" class="md:hidden border-t border-white/10 bg-[var(--panel)]/90 nav" *ngIf="navOpen()">
-        <div class="container py-3 space-y-2">
+        <div class="container mx-auto max-w-7xl py-3 space-y-2">
           <a (click)="closeNav()" [routerLink]="['/', currentLang()]" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Inicio">Home</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'cursos']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Cursos">Cursos</a>
           <a (click)="closeNav()" [routerLink]="['/', currentLang(), 'nosotros']" class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Nosotros">Nosotros</a>
@@ -108,12 +108,12 @@ type Lang = 'es' | 'en' | 'pt';
       </div>
     </header>
 
-    <main class="container pt-24 pb-8">
+    <main class="container mx-auto max-w-7xl pt-24 pb-8">
       <ng-content />
     </main>
 
     <footer class="mt-10 border-t border-white/10 bg-[var(--panel)]/40">
-      <div class="container py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
+      <div class="container mx-auto max-w-7xl py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
         <span>© Sube Academ-IA</span>
         <nav class="flex items-center gap-4" aria-label="Secundaria">
           <a [routerLink]="['/', currentLang(), 'contacto']" class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" aria-label="Ir a Política de Privacidad">Política de Privacidad</a>
