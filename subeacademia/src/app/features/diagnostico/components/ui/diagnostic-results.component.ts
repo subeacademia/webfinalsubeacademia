@@ -562,7 +562,7 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
 
         console.log('📊 Datos para plan de acción:', analysisData);
 
-        this.generativeAiService.generateActionPlanWithAI(analysisData).subscribe({
+        this.generativeAiService.generateDiagnosticAnalysis(analysisData).subscribe({
             next: (actionPlan) => {
                 console.log('✅ Plan de acción recibido:', actionPlan);
                 console.log('📝 Longitud del plan:', actionPlan?.length || 0);

@@ -5,8 +5,7 @@ import { NIVEL_TO_SCORE } from '../data/levels';
 import { COMPETENCIAS } from '../data/competencias';
 import { CoursesService } from '../../../core/data/courses.service';
 import { PostsService } from '../../../core/data/posts.service';
-import { GenerativeAiService } from '../../../core/ai/generative-ai.service';
-import { AI_CONFIG } from '../../../core/ai/ai-config';
+// Importaciones de IA eliminadas - ahora se manejan en el componente
 import { Observable, forkJoin, of, throwError, timer } from 'rxjs';
 import { Course } from '../../../core/models/course.model';
 import { Post } from '../../../core/models/post.model';
@@ -57,85 +56,13 @@ export type DiagnosticData = DiagnosticoFormValue;
 export class ScoringService {
     constructor(
         private coursesService: CoursesService,
-        private postsService: PostsService,
-        private generativeAiService: GenerativeAiService
+        private postsService: PostsService
     ) {}
 
-    getPersonalizedActionPlan(lowestCompetencies: { id: string; name: string; score: number }[]): Observable<PersonalizedActionPlan> {
-        if (!lowestCompetencies || lowestCompetencies.length === 0) {
-            return of({
-                recommendedCourses: [],
-                recommendedPosts: [],
-                microActions: this.generateMicroActions(),
-                aiGeneratedPlan: this.generateFallbackActionPlan()
-            });
-        }
+    // Método eliminado para evitar confusión en el flujo de datos
+    // La lógica de IA ahora se maneja directamente en el componente
 
-        // Extraer los IDs de las 3 competencias más bajas
-        const competencyIds = lowestCompetencies.slice(0, 3).map(comp => comp.id);
-
-        // Buscar cursos y posts recomendados
-        const courses$ = this.coursesService.findCoursesByCompetencies(competencyIds);
-        const posts$ = this.postsService.findPostsByCompetencies(competencyIds);
-
-        return forkJoin({
-            recommendedCourses: courses$,
-            recommendedPosts: posts$
-        }).pipe(
-            map(result => ({
-                recommendedCourses: result.recommendedCourses,
-                recommendedPosts: result.recommendedPosts,
-                microActions: this.generateMicroActions(),
-                aiGeneratedPlan: this.generateFallbackActionPlan()
-            })),
-            catchError(error => {
-                console.error('Error obteniendo recomendaciones:', error);
-                return of({
-                    recommendedCourses: [],
-                    recommendedPosts: [],
-                    microActions: this.generateMicroActions(),
-                    aiGeneratedPlan: this.generateFallbackActionPlan()
-                });
-            })
-        );
-    }
-
-    // Nuevo método para generar plan de acción con IA
-    generateActionPlanWithAI(userData: any): Observable<string> {
-        try {
-            console.log('🔍 Generando plan de acción con IA para:', userData);
-            
-            // Crear datos para el análisis de IA
-            const analysisData = {
-                userName: userData.nombre || 'Usuario',
-                userRole: userData.cargo || 'Profesional',
-                userIndustry: userData.industria || 'Tecnología',
-                topCompetencies: this.getTopCompetencies(userData),
-                lowestCompetencies: this.getLowestCompetencies(userData)
-            };
-
-            return this.generativeAiService.generateActionPlanWithAI(analysisData).pipe(
-                timeout(25000), // Aumentado a 25 segundos para respuestas más detalladas
-                retry({
-                    count: 1, // Permitir 1 reintento para respuestas más complejas
-                    delay: () => timer(2000) // Esperar 2 segundos antes de reintentar
-                }),
-                catchError((error) => {
-                    console.warn('⚠️ Error generando plan de acción con IA, usando fallback local:', error.message);
-                    if (AI_CONFIG.FALLBACK.ENABLED) {
-                        return of(this.generateFallbackActionPlan());
-                    }
-                    return throwError(() => new Error('Error en el servicio de IA. Se mostrará un plan de acción local.'));
-                })
-            );
-        } catch (error) {
-            console.error('❌ Error en generateActionPlanWithAI:', error);
-            if (AI_CONFIG.FALLBACK.ENABLED) {
-                return of(this.generateFallbackActionPlan());
-            }
-            return throwError(() => new Error('Error en el servicio de IA. Se mostrará un plan de acción local.'));
-        }
-    }
+    // Método eliminado - la lógica de IA ahora se maneja en el componente
 
     private getTopCompetencies(userData: any): { name: string; score: number }[] {
         // Lógica para obtener las competencias más altas del usuario
@@ -244,6 +171,17 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         });
         // Ordenar desc por puntaje para consistencia
         return out.sort((a, b) => b.puntaje - a.puntaje);
+    }
+
+    /**
+     * Calcula los puntajes de competencias en el formato requerido por el componente de resultados
+     */
+    calculateScores(data: DiagnosticData): { name: string; score: number }[] {
+        const competencias = this.computeCompetencyScores(data);
+        return competencias.map(comp => ({
+            name: comp.competenciaId,
+            score: comp.puntaje
+        }));
     }
 
     generateDiagnosticAnalysis(data: DiagnosticData): DiagnosticAnalysis {

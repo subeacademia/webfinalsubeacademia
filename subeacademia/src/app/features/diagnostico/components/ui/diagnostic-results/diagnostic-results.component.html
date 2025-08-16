@@ -1,0 +1,344 @@
+<div class="min-h-screen bg-gray-900 dark:bg-gray-900 text-white p-6 transition-colors duration-300">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-white dark:text-white mb-4">¡Diagnóstico Completado!</h1>
+      <p class="text-xl text-gray-300 dark:text-gray-400">Has completado exitosamente el diagnóstico de madurez ARES-AI. Aquí tienes tu reporte personalizado y plan de acción.</p>
+    </div>
+
+    <!-- Tarjeta Principal - Tu Nivel de Madurez General (2 columnas) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600">
+        <h3 class="text-2xl font-bold text-blue-400 dark:text-blue-300 mb-4">Score ARES General</h3>
+        <div class="text-5xl font-bold text-white dark:text-white mb-4">{{ overallAresScore }}%</div>
+        <p class="text-gray-300 dark:text-gray-400 text-lg">{{ getAresLevelDescription() }}</p>
+        <div class="mt-6">
+          <div class="w-full bg-gray-700 dark:bg-gray-600 rounded-full h-4">
+            <div class="bg-blue-500 dark:bg-blue-400 h-4 rounded-full transition-all duration-1000" [style.width.%]="overallAresScore"></div>
+          </div>
+        </div>
+        <div class="mt-4 text-sm text-gray-400 dark:text-gray-500">
+          <p><strong>Fase actual:</strong> {{ getCurrentPhase() }}</p>
+          <p><strong>Próximo hito:</strong> {{ getNextMilestone() }}</p>
+        </div>
+      </div>
+      
+      <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600">
+        <h3 class="text-2xl font-bold text-green-400 dark:text-green-300 mb-4">Competencias Promedio</h3>
+        <div class="text-5xl font-bold text-white dark:text-white mb-4">{{ averageCompetencyScore }}/5</div>
+        <p class="text-gray-300 dark:text-gray-400 text-lg">{{ getCompetencyLevelDescription() }}</p>
+        <div class="mt-6">
+          <div class="w-full bg-gray-700 dark:bg-gray-600 rounded-full h-4">
+            <div class="bg-green-500 dark:bg-green-400 h-4 rounded-full transition-all duration-1000" [style.width.%]="competencyProgress"></div>
+          </div>
+        </div>
+        <div class="mt-4 text-sm text-gray-400 dark:text-gray-500">
+          <p><strong>Fortalezas:</strong> {{ getTopCompetencyStrengths() }}</p>
+          <p><strong>Áreas de mejora:</strong> {{ getTopCompetencyWeaknesses() }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos principales -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- Radar de competencias -->
+      <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-6 shadow-xl border border-slate-700 dark:border-slate-600">
+        <h3 class="text-xl font-semibold text-center text-gray-200 dark:text-gray-200 mb-4">Perfil de Competencias</h3>
+        <app-radar-chart 
+          [labels]="competencyLabels"
+          [data]="competencyScores">
+        </app-radar-chart>
+      </div>
+
+      <!-- Semaforo ARES -->
+      <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-6 shadow-xl border border-slate-700 dark:border-slate-600">
+        <h3 class="text-xl font-semibold text-center text-gray-200 dark:text-gray-200 mb-4">Estado ARES por Fase</h3>
+        <app-semaforo-ares 
+          [aresByPhase]="aresByPhase">
+        </app-semaforo-ares>
+      </div>
+    </div>
+
+    <!-- Análisis Generado con IA -->
+    <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+      <h3 class="text-2xl font-bold text-purple-400 dark:text-purple-300 mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+        Análisis Personalizado Generado con IA
+      </h3>
+      
+      <div *ngIf="isLoadingAnalysis" class="p-6 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-full bg-purple-600/20 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Analizando tu perfil...</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ loadingMessage }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!isLoadingAnalysis && generativeAnalysis" class="ai-content prose prose-invert max-w-none">
+        <div [innerHTML]="generativeAnalysis" class="text-gray-200"></div>
+      </div>
+      
+      <div *ngIf="!isLoadingAnalysis && !generativeAnalysis" class="text-center py-8">
+        <button (click)="fetchGenerativeAnalysis()" 
+                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
+          🚀 Generar Análisis con IA
+        </button>
+      </div>
+    </div>
+
+    <!-- Plan de Acción Generado con IA -->
+    <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+      <h3 class="text-2xl font-bold text-blue-400 dark:text-blue-300 mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+        </svg>
+        Plan de Acción Personalizado Generado con IA
+      </h3>
+      
+      <div *ngIf="isLoadingActionPlan" class="p-6 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-full bg-blue-600/20 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Generando tu plan de acción...</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ loadingMessage }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!isLoadingActionPlan && generativeActionPlan" class="ai-content prose prose-invert max-w-none">
+        <div [innerHTML]="generativeActionPlan" class="text-gray-200"></div>
+      </div>
+      
+      <div *ngIf="!isLoadingActionPlan && !generativeActionPlan" class="text-center py-8">
+        <button (click)="generateActionPlan()" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+          🎯 Generar Plan de Acción con IA
+        </button>
+      </div>
+    </div>
+
+    <!-- Análisis Detallado de Fortalezas -->
+    <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+      <h3 class="text-2xl font-bold text-green-400 dark:text-green-300 mb-6 flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        Fortalezas Principales y Oportunidades
+      </h3>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Fortalezas -->
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold text-green-300 dark:text-green-400">Fortalezas Identificadas</h4>
+          <div class="space-y-3">
+            <div *ngFor="let strength of topCompetencies" class="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h5 class="font-medium text-green-200 dark:text-green-300">{{ strength.name }}</h5>
+                  <p class="text-sm text-green-100 dark:text-green-200 mt-1">Puntuación: {{ strength.score }}/5</p>
+                  <div class="mt-2 text-xs text-green-200/80 dark:text-green-300/80">
+                    <strong>Impacto:</strong> Alto - Base fundamental para el éxito
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Oportunidades -->
+        <div class="space-y-4">
+          <h4 class="text-lg font-semibold text-orange-300 dark:text-orange-400">Oportunidades de Mejora</h4>
+          <div class="space-y-3">
+            <div *ngFor="let opportunity of lowestCompetencies" class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                <div>
+                  <h5 class="font-medium text-orange-200 dark:text-orange-300">{{ opportunity.name }}</h5>
+                  <p class="text-sm text-orange-100 dark:text-orange-200 mt-1">Puntuación: {{ opportunity.score }}/5</p>
+                  <div class="mt-2 text-xs text-orange-200/80 dark:text-orange-300/80">
+                    <strong>Prioridad:</strong> Alta - Crítico para el éxito
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan de Acción Detallado -->
+    <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+      <h3 class="text-2xl font-bold text-blue-400 dark:text-blue-300 mb-6 text-center">Plan de Acción Estratégico</h3>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Acciones Inmediatas -->
+        <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">1</div>
+            <h4 class="font-semibold text-blue-200 dark:text-blue-300 text-lg">Acciones Inmediatas</h4>
+            <p class="text-blue-100 dark:text-blue-200 text-sm">0-3 meses</p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-blue-100 dark:text-blue-200 font-medium">Capacitación Básica del Equipo</p>
+                <p class="text-xs text-blue-200/80 dark:text-blue-300/80 mt-1">Implementar programa de capacitación en fundamentos de IA</p>
+                <div class="mt-1 text-xs text-blue-200/60 dark:text-blue-300/60">
+                  <strong>Recursos:</strong> Instructor interno + plataforma online
+                </div>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-blue-100 dark:text-blue-200 font-medium">Auditoría de Seguridad</p>
+                <p class="text-xs text-blue-200/80 dark:text-blue-300/80 mt-1">Realizar evaluación completa de seguridad de datos</p>
+                <div class="mt-1 text-xs text-blue-200/60 dark:text-blue-300/60">
+                  <strong>Recursos:</strong> Consultor de seguridad + herramientas
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones a Mediano Plazo -->
+        <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-6">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-yellow-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">2</div>
+            <h4 class="font-semibold text-yellow-200 dark:text-yellow-300 text-lg">Mediano Plazo</h4>
+            <p class="text-yellow-100 dark:text-yellow-200 text-sm">3-12 meses</p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-yellow-100 dark:text-yellow-200 font-medium">Implementación de MLOps</p>
+                <p class="text-xs text-yellow-200/80 dark:text-yellow-300/80 mt-1">Desarrollar capacidades de Machine Learning Operations</p>
+                <div class="mt-1 text-xs text-yellow-200/60 dark:text-yellow-300/60">
+                  <strong>Inversión:</strong> $50K - $200K USD
+                </div>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-yellow-100 dark:text-yellow-200 font-medium">Pilotos de IA por Departamento</p>
+                <p class="text-xs text-yellow-200/80 dark:text-yellow-300/80 mt-1">Lanzar proyectos piloto en áreas de alto impacto</p>
+                <div class="mt-1 text-xs text-yellow-200/60 dark:text-yellow-300/60">
+                  <strong>Inversión:</strong> $100K - $500K USD
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones a Largo Plazo -->
+        <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6">
+          <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">3</div>
+            <h4 class="font-semibold text-green-200 dark:text-green-300 text-lg">Largo Plazo</h4>
+            <p class="text-green-100 dark:text-green-200 text-sm">12+ meses</p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-green-100 dark:text-green-200 font-medium">Transformación Digital Completa</p>
+                <p class="text-xs text-green-200/80 dark:text-green-300/80 mt-1">Integrar IA en todos los procesos críticos del negocio</p>
+                <div class="mt-1 text-xs text-green-200/60 dark:text-green-300/60">
+                  <strong>ROI esperado:</strong> 300-500% en 3-5 años
+                </div>
+              </div>
+            </div>
+            <div class="flex items-start gap-2">
+              <div class="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <p class="text-sm text-green-100 dark:text-green-200 font-medium">Centro de Excelencia en IA</p>
+                <p class="text-xs text-green-200/80 dark:text-green-300/80 mt-1">Establecer un centro de excelencia para innovación en IA</p>
+                <div class="mt-1 text-xs text-green-200/60 dark:text-green-300/60">
+                  <strong>ROI esperado:</strong> 200-400% en 2-3 años
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas de Seguimiento -->
+    <div class="bg-slate-800 dark:bg-slate-800 rounded-lg p-8 shadow-xl border border-slate-700 dark:border-slate-600 mb-12">
+      <h3 class="text-2xl font-bold text-purple-400 dark:text-purple-300 mb-6 text-center">Métricas de Seguimiento y KPIs</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">📊</div>
+          <h4 class="font-semibold text-purple-200 dark:text-purple-300 mb-2">Adopción de IA</h4>
+          <p class="text-sm text-purple-100 dark:text-purple-200">Porcentaje de procesos que utilizan IA</p>
+          <div class="mt-2 text-xs text-purple-200/80 dark:text-purple-300/80">
+            <strong>Meta:</strong> 25% en 12 meses
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">💰</div>
+          <h4 class="font-semibold text-purple-200 dark:text-purple-300 mb-2">ROI de Proyectos</h4>
+          <p class="text-sm text-purple-100 dark:text-purple-200">Retorno de inversión de iniciativas de IA</p>
+          <div class="mt-2 text-xs text-purple-200/80 dark:text-purple-300/80">
+            <strong>Meta:</strong> 200% en 18 meses
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">👥</div>
+          <h4 class="font-semibold text-purple-200 dark:text-purple-300 mb-2">Competencias del Equipo</h4>
+          <p class="text-sm text-purple-100 dark:text-purple-200">Promedio de competencias en IA del equipo</p>
+          <div class="mt-2 text-xs text-purple-200/80 dark:text-purple-300/80">
+            <strong>Meta:</strong> 4.0/5 en 24 meses
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl mx-auto mb-3">🚀</div>
+          <h4 class="font-semibold text-purple-200 dark:text-purple-300 mb-2">Velocidad de Implementación</h4>
+          <p class="text-sm text-purple-100 dark:text-purple-200">Tiempo promedio para implementar nuevas funcionalidades</p>
+          <div class="mt-2 text-xs text-purple-200/80 dark:text-purple-300/80">
+            <strong>Meta:</strong> Reducir 40% en 12 meses
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="text-center">
+      <button (click)="printResults()" class="btn-primary mr-4 mb-4">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Imprimir Resultados
+      </button>
+      <button class="btn-secondary mr-4 mb-4">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Agendar Consultoría
+      </button>
+      <button class="btn-tertiary mb-4">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+        </svg>
+        Ver Dashboard de Seguimiento
+      </button>
+    </div>
+  </div>
+</div>
