@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError, timer } from 'rxjs';
-import { map, catchError, timeout, retry, finalize, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { AsistenteIaService } from '../../shared/ui/chatbot/asistente-ia.service';
 import { AIMonitoringService } from './ai-monitoring.service';
 import { ApiHealthService, ApiRequestProgress } from './api-health.service';
 import { AI_CONFIG } from './ai-config';
 
+// Interfaz para los datos de entrada, mantenemos la estructura
 export interface DiagnosticAnalysisData {
   userName: string;
   userRole: string;
@@ -26,140 +27,126 @@ export class GenerativeAiService {
   ) { }
 
   generateDiagnosticAnalysis(data: DiagnosticAnalysisData): Observable<string> {
-    const requestId = `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    console.log('🔍 Intentando conectar con API externa de IA...');
+    // 1. CONSTRUCCIÓN DEL PROMPT DE SISTEMA (LAS INSTRUCCIONES)
+    // Este prompt es más detallado y le da a la IA un formato de salida claro.
+    const systemPrompt = `
+      Actúa como un coach ejecutivo y experto en desarrollo de talento para la empresa Sube Academia.
+      Tu tono debe ser inspirador, profesional, constructivo y altamente personalizado.
+      Tu misión es analizar los datos del diagnóstico de un usuario y generar un informe narrativo conciso y poderoso en formato Markdown.
+      El informe debe tener exactamente 3 secciones: "Tus Superpoderes", "Tu Próximo Nivel" y "Plan de Acción Estratégico".
+      Utiliza negritas para resaltar conceptos clave.
+    `;
 
-    // Crear el payload con el formato correcto que espera Vercel
+    // 2. CONSTRUCCIÓN DEL PROMPT DE USUARIO (LOS DATOS A ANALIZAR)
+    // Presentamos los datos del usuario de forma clara y estructurada.
+    const userPrompt = `
+      Por favor, genera el informe de diagnóstico para el siguiente perfil:
+
+      **Datos del Usuario:**
+      - **Nombre:** ${data.userName}
+      - **Rol Actual:** ${data.userRole}
+      - **Industria:** ${data.userIndustry}
+
+      **Resultados del Diagnóstico:**
+      - **Competencias Destacadas (Fortalezas):**
+        ${data.topCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
+      
+      - **Áreas de Oportunidad (Para Crecer):**
+        ${data.lowestCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
+
+      Genera el informe siguiendo estrictamente las 3 secciones y el tono definidos en tus instrucciones de sistema.
+    `;
+
+    // 3. CONSTRUCCIÓN DEL PAYLOAD CORRECTO
+    // Esta es la corrección clave: enviamos un mensaje de sistema y uno de usuario.
     const payload = {
       messages: [
-        { 
-          role: 'system', 
-          content: this.buildPrompt(data) 
-        }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
       ],
-      maxTokens: 2048,
-      temperature: 0.8,
-      topP: 0.9,
-      frequencyPenalty: 0.1,
-      presencePenalty: 0.1
+      maxTokens: 1200, // Aumentamos para asegurar un análisis completo
+      temperature: 0.7
     };
 
-    // Hacer la llamada directa a la API
-    return this.apiHealthService.sendRequestWithProgress(payload).pipe(
-      timeout(30000), // 30 segundos máximo
-      map((result) => {
-        console.log('✅ Respuesta exitosa de API externa:', result);
-        
-        // Extraer la respuesta real
-        if (result && result.response) {
-          const apiResponse = result.response;
-          console.log('📤 Respuesta de API recibida:', apiResponse);
-          
-          // Si la respuesta es directamente un string
-          if (typeof apiResponse === 'string') {
-            console.log('✅ Respuesta string recibida, longitud:', apiResponse.length);
-            return apiResponse;
-          }
-          
-          // Si la respuesta tiene estructura de OpenAI
-          if (apiResponse && typeof apiResponse === 'object') {
-            if ('choices' in apiResponse && Array.isArray(apiResponse.choices) && apiResponse.choices.length > 0) {
-              const choice = apiResponse.choices[0];
-              if ('message' in choice && 'content' in choice.message) {
-                console.log('✅ Respuesta OpenAI recibida, longitud:', choice.message.content.length);
-                return choice.message.content;
-              }
-            }
-            // Si tiene estructura personalizada
-            if ('content' in apiResponse) {
-              console.log('✅ Respuesta con content recibida, longitud:', apiResponse.content.length);
-              return apiResponse.content;
-            }
-            if ('message' in apiResponse) {
-              console.log('✅ Respuesta con message recibida, longitud:', apiResponse.message.length);
-              return apiResponse.message;
-            }
-          }
+    // 4. LLAMADA A LA API Y MANEJO DE RESPUESTA
+    return this.asistenteIaService.generarTextoAzure(payload).pipe(
+      map((res: any) => {
+        // Extraemos el contenido de la respuesta de la IA
+        if (res && res.choices && res.choices[0]?.message?.content) {
+          return res.choices[0].message.content;
         }
+        // Fallback por si la estructura de la respuesta cambia
+        if (res && res.text) return res.text;
+        if (typeof res === 'string') return res;
         
-        console.warn('⚠️ Estructura de respuesta inesperada, usando fallback:', result);
-        return this.generateFallbackAnalysis(data);
+        // Si no se encuentra contenido, lanzamos un error manejable
+        throw new Error('Respuesta de la IA inválida o vacía.');
       }),
-      catchError((error) => {
-        console.warn('⚠️ API externa no disponible, usando fallback local:', error.message);
-        
-        // Fallback inmediato a análisis local
-        return of(this.generateFallbackAnalysis(data));
+      catchError(err => {
+        console.error('Error al generar el análisis del diagnóstico:', err);
+        // Devolvemos un mensaje de error amigable para mostrar en la UI
+        return of('Lo sentimos, no hemos podido generar tu análisis personalizado en este momento. Por favor, intenta recargar la página.');
       })
     );
   }
 
   generateActionPlanWithAI(data: DiagnosticAnalysisData): Observable<string> {
-    const requestId = `action_plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    console.log('🔍 Generando plan de acción con IA...');
+    // 1. CONSTRUCCIÓN DEL PROMPT DE SISTEMA (LAS INSTRUCCIONES)
+    const systemPrompt = `
+      Actúa como un coach ejecutivo y experto en desarrollo de talento para la empresa Sube Academia.
+      Tu tono debe ser inspirador, profesional y constructivo.
+      Genera un plan de acción personalizado, detallado y altamente accionable en formato Markdown.
+      El plan debe tener exactamente 3 secciones: "Acción Inmediata", "Acción de Medio Plazo" y "Acción de Largo Plazo".
+      Utiliza negritas para resaltar conceptos clave y emojis para hacer el contenido más atractivo.
+    `;
 
-    // Crear el payload con el formato correcto que espera Vercel
+    // 2. CONSTRUCCIÓN DEL PROMPT DE USUARIO (LOS DATOS A ANALIZAR)
+    const userPrompt = `
+      Por favor, genera el plan de acción personalizado para el siguiente perfil:
+
+      **Datos del Usuario:**
+      - **Nombre:** ${data.userName}
+      - **Rol Actual:** ${data.userRole}
+      - **Industria:** ${data.userIndustry}
+
+      **Resultados del Diagnóstico:**
+      - **Competencias Destacadas (Fortalezas):**
+        ${data.topCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
+      
+      - **Áreas de Oportunidad (Para Crecer):**
+        ${data.lowestCompetencies.map(c => `- ${c.name} (Puntaje: ${c.score}/100)`).join('\n')}
+
+      Genera el plan siguiendo estrictamente las 3 secciones y el tono definidos en tus instrucciones de sistema.
+    `;
+
+    // 3. CONSTRUCCIÓN DEL PAYLOAD CORRECTO
     const payload = {
       messages: [
-        { 
-          role: 'system', 
-          content: this.buildActionPlanPrompt(data) 
-        }
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
       ],
       maxTokens: 1500,
-      temperature: 0.8,
-      topP: 0.9,
-      frequencyPenalty: 0.1,
-      presencePenalty: 0.1
+      temperature: 0.7
     };
 
-    // Hacer la llamada directa a la API
-    return this.apiHealthService.sendRequestWithProgress(payload).pipe(
-      timeout(25000), // 25 segundos máximo
-      map((result) => {
-        console.log('✅ Plan de acción generado exitosamente:', result);
-        
-        // Extraer la respuesta real
-        if (result && result.response) {
-          const apiResponse = result.response;
-          console.log('📤 Respuesta de API para plan de acción:', apiResponse);
-          
-          // Si la respuesta es directamente un string
-          if (typeof apiResponse === 'string') {
-            console.log('✅ Respuesta string recibida, longitud:', apiResponse.length);
-            return apiResponse;
-          }
-          
-          // Si la respuesta tiene estructura de OpenAI
-          if (apiResponse && typeof apiResponse === 'object') {
-            if ('choices' in apiResponse && Array.isArray(apiResponse.choices) && apiResponse.choices.length > 0) {
-              const choice = apiResponse.choices[0];
-              if ('message' in choice && 'content' in choice.message) {
-                console.log('✅ Respuesta OpenAI recibida, longitud:', choice.message.content.length);
-                return choice.message.content;
-              }
-            }
-            // Si tiene estructura personalizada
-            if ('content' in apiResponse) {
-              console.log('✅ Respuesta con content recibida, longitud:', apiResponse.content.length);
-              return apiResponse.content;
-            }
-            if ('message' in apiResponse) {
-              console.log('✅ Respuesta con message recibida, longitud:', apiResponse.message.length);
-              return apiResponse.message;
-            }
-          }
+    // 4. LLAMADA A LA API Y MANEJO DE RESPUESTA
+    return this.asistenteIaService.generarTextoAzure(payload).pipe(
+      map((res: any) => {
+        // Extraemos el contenido de la respuesta de la IA
+        if (res && res.choices && res.choices[0]?.message?.content) {
+          return res.choices[0].message.content;
         }
+        // Fallback por si la estructura de la respuesta cambia
+        if (res && res.text) return res.text;
+        if (typeof res === 'string') return res;
         
-        console.warn('⚠️ Estructura de respuesta inesperada para plan de acción, usando fallback:', result);
-        return this.generateFallbackActionPlan(data);
+        // Si no se encuentra contenido, lanzamos un error manejable
+        throw new Error('Respuesta de la IA inválida o vacía.');
       }),
-      catchError((error) => {
-        console.warn('⚠️ Error generando plan de acción con IA, usando fallback local:', error.message);
-        
-        return of(this.generateFallbackActionPlan(data));
+      catchError(err => {
+        console.error('Error al generar el plan de acción con IA:', err);
+        // Devolvemos un mensaje de error amigable para mostrar en la UI
+        return of('Lo sentimos, no hemos podido generar tu plan de acción personalizado en este momento. Por favor, intenta recargar la página.');
       })
     );
   }

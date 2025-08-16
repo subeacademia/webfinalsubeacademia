@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, computed, inject, OnInit, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
@@ -245,141 +245,136 @@ import { finalize } from 'rxjs/operators';
         </div>
       </div>
 
-             <!-- Análisis de IA Generativa -->
-       <div class="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-8 mb-8">
-         <h3 class="text-3xl font-bold text-white mb-6 text-center flex items-center justify-center">
-           <svg class="w-8 h-8 mr-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-           </svg>
-           Análisis Personalizado con IA
-         </h3>
-         
-         <!-- Estado de la API -->
-         <div *ngIf="showApiStatus && apiStatus" class="mb-6 p-4 rounded-lg" 
-              [class]="apiStatus.isHealthy ? 'bg-green-900/20 border border-green-500/30' : 'bg-yellow-900/20 border border-yellow-500/30'">
-           <div class="flex items-center justify-center space-x-2">
-             <div class="w-3 h-3 rounded-full" [class]="apiStatus.isHealthy ? 'bg-green-400' : 'bg-yellow-400'"></div>
-             <span class="text-sm" [class]="apiStatus.isHealthy ? 'text-green-200' : 'text-yellow-200'">
-               {{ apiStatus.recommendation }}
-             </span>
-           </div>
-         </div>
-         
-         <!-- Barra de Progreso de la API -->
-         <app-api-progress-bar class="mb-6"></app-api-progress-bar>
-         
-         <!-- Indicador de carga del análisis -->
-         <div *ngIf="isLoadingAnalysis" class="text-center py-8">
-           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400 mx-auto mb-4"></div>
-           <p class="text-emerald-200">Generando análisis personalizado con IA...</p>
-         </div>
-
-         <!-- Contenido del análisis cuando está cargado -->
-         <div *ngIf="!isLoadingAnalysis" class="prose prose-invert max-w-none">
-           <div [innerHTML]="generativeAnalysis$ | async" class="text-gray-200 leading-relaxed"></div>
-         </div>
-       </div>
-
-       <!-- Tu Plan de Acción Personalizado -->
-       <div class="bg-gradient-to-r from-indigo-900/20 to-cyan-900/20 border border-indigo-500/30 rounded-lg p-8 mb-8">
-         <h3 class="text-3xl font-bold text-white mb-6 text-center">Tu Plan de Acción Personalizado</h3>
-         
-         <!-- Plan de Acción Generado por IA -->
-         <div class="mb-8">
-           <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
-             <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-               <path fill-rule="evenodd" d="M9.663 17.119a1 1 0 01-1.414 0L.293 9.414a1 1 0 010-1.414l7.956-7.956a1 1 0 011.414 0l7.956 7.956a1 1 0 010 1.414L9.663 17.119z" clip-rule="evenodd"></path>
-             </svg>
-             Plan de Acción Generado con IA
-           </h4>
-           
-           <!-- Indicador de carga del plan de acción -->
-           <div *ngIf="isLoadingActionPlan" class="text-center py-8">
-             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
-             <p class="text-indigo-200">Generando plan de acción personalizado con IA...</p>
-           </div>
-
-           <!-- Contenido del plan de acción cuando está cargado -->
-           <div *ngIf="!isLoadingActionPlan" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6">
-             <div [innerHTML]="aiGeneratedActionPlan$ | async" class="text-indigo-100 leading-relaxed prose prose-invert max-w-none"></div>
-           </div>
-         </div>
-
-         <!-- Indicador de carga -->
-         <div *ngIf="loadingRecommendations" class="text-center py-8">
-           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
-           <p class="text-indigo-200">Cargando recomendaciones personalizadas...</p>
-         </div>
-
-        <!-- Contenido cuando las recomendaciones están cargadas -->
-        <div *ngIf="!loadingRecommendations">
-          <!-- Cursos Recomendados -->
-          <div *ngIf="recommendedCourses.length > 0" class="mb-8">
-            <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
-              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.591a1 1 0 00.941 0l6-1.75A1 1 0 0019 12V6a1 1 0 00-.606-.92l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9 12v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1zm5-1a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-6z"></path>
+      <!-- Sección para el Análisis Personalizado por IA -->
+      <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
+          Análisis y Plan de Acción por IA
+        </h3>
+        
+        <!-- ESTADO DE CARGA MEJORADO -->
+        <div *ngIf="isLoadingAnalysis" class="p-6 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <!-- Puedes usar un ícono SVG de cerebro o similar aquí -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              Cursos Recomendados para Ti
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div *ngFor="let course of recommendedCourses" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6 hover:bg-indigo-800/30 transition-colors">
-                <div class="flex items-center justify-between mb-3">
-                  <h5 class="text-lg font-semibold text-indigo-200">{{ course.title }}</h5>
-                  <span class="bg-indigo-600/50 px-2 py-1 rounded text-xs text-indigo-100">{{ course.level || 'Principiante' }}</span>
-                </div>
-                <p *ngIf="course.description" class="text-indigo-100 text-sm mb-4 line-clamp-3">{{ course.description }}</p>
-                <div class="flex items-center justify-between text-xs text-indigo-300 mb-4">
-                  <span *ngIf="course.duration">Duración: {{ course.duration }}</span>
-                  <span *ngIf="course.lessonCount">{{ course.lessonCount }} lecciones</span>
-                </div>
-                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
-                  Ver Curso
-                </button>
-              </div>
             </div>
-          </div>
-
-          <!-- Artículos Recomendados -->
-          <div *ngIf="recommendedPosts.length > 0" class="mb-8">
-            <h4 class="text-2xl font-semibold text-cyan-200 mb-4 flex items-center">
-              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
-              </svg>
-              Artículos Recomendados para Ti
-            </h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div *ngFor="let post of recommendedPosts" class="bg-cyan-800/20 border border-cyan-400/30 rounded-lg p-6 hover:bg-cyan-800/30 transition-colors">
-                <h5 class="text-lg font-semibold text-cyan-200 mb-3">{{ post.title }}</h5>
-                <p *ngIf="post.summary" class="text-cyan-100 text-sm mb-4 line-clamp-3">{{ post.summary }}</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs text-cyan-300">{{ post.authors?.[0]?.name || 'Autor' }}</span>
-                  <button class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                    Leer Artículo
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Micro-acciones -->
-          <div class="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-6">
-            <h4 class="text-xl font-semibold text-emerald-200 mb-4 flex items-center">
-              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-              </svg>
-              Micro-acciones para Esta Semana
-            </h4>
-            <div class="space-y-3">
-              <div *ngFor="let action of microActions; let i = index" class="flex items-start">
-                <div class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5 flex-shrink-0">
-                  {{ i + 1 }}
-                </div>
-                <p class="text-emerald-100">{{ action }}</p>
-              </div>
+            <div>
+              <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">Analizando tu perfil...</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ loadingMessage }}</p>
             </div>
           </div>
         </div>
+
+        <!-- CONTENIDO DEL ANÁLISIS UNA VEZ CARGADO -->
+        <div *ngIf="!(isLoadingAnalysis) && (generativeAnalysis$ | async) as analysis">
+          <div class="prose prose-lg dark:prose-invert max-w-none p-6 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <div [innerHTML]="analysis" class="text-gray-200 leading-relaxed"></div>
+          </div>
+        </div>
       </div>
+
+      <!-- Tu Plan de Acción Personalizado -->
+      <div class="bg-gradient-to-r from-indigo-900/20 to-cyan-900/20 border border-indigo-500/30 rounded-lg p-8 mb-8">
+        <h3 class="text-3xl font-bold text-white mb-6 text-center">Tu Plan de Acción Personalizado</h3>
+        
+        <!-- Plan de Acción Generado por IA -->
+        <div class="mb-8">
+          <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M9.663 17.119a1 1 0 01-1.414 0L.293 9.414a1 1 0 010-1.414l7.956-7.956a1 1 0 011.414 0l7.956 7.956a1 1 0 010 1.414L9.663 17.119z" clip-rule="evenodd"></path>
+            </svg>
+            Plan de Acción Generado con IA
+          </h4>
+          
+          <!-- Indicador de carga del plan de acción -->
+          <div *ngIf="isLoadingActionPlan" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+            <p class="text-indigo-200">Generando plan de acción personalizado con IA...</p>
+          </div>
+
+          <!-- Contenido del plan de acción cuando está cargado -->
+          <div *ngIf="!isLoadingActionPlan" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6">
+            <div [innerHTML]="aiGeneratedActionPlan$ | async" class="text-indigo-100 leading-relaxed prose prose-invert max-w-none"></div>
+          </div>
+        </div>
+
+        <!-- Indicador de carga -->
+        <div *ngIf="loadingRecommendations" class="text-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p class="text-indigo-200">Cargando recomendaciones personalizadas...</p>
+        </div>
+
+       <!-- Contenido cuando las recomendaciones están cargadas -->
+       <div *ngIf="!loadingRecommendations">
+         <!-- Cursos Recomendados -->
+         <div *ngIf="recommendedCourses.length > 0" class="mb-8">
+           <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
+             <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+               <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.591a1 1 0 00.941 0l6-1.75A1 1 0 0019 12V6a1 1 0 00-.606-.92l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9 12v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1zm5-1a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-6z"></path>
+             </svg>
+             Cursos Recomendados para Ti
+           </h4>
+           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             <div *ngFor="let course of recommendedCourses" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6 hover:bg-indigo-800/30 transition-colors">
+               <div class="flex items-center justify-between mb-3">
+                 <h5 class="text-lg font-semibold text-indigo-200">{{ course.title }}</h5>
+                 <span class="bg-indigo-600/50 px-2 py-1 rounded text-xs text-indigo-100">{{ course.level || 'Principiante' }}</span>
+               </div>
+               <p *ngIf="course.description" class="text-indigo-100 text-sm mb-4 line-clamp-3">{{ course.description }}</p>
+               <div class="flex items-center justify-between text-xs text-indigo-300 mb-4">
+                 <span *ngIf="course.duration">Duración: {{ course.duration }}</span>
+                 <span *ngIf="course.lessonCount">{{ course.lessonCount }} lecciones</span>
+               </div>
+               <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
+                 Ver Curso
+               </button>
+             </div>
+           </div>
+         </div>
+
+         <!-- Artículos Recomendados -->
+         <div *ngIf="recommendedPosts.length > 0" class="mb-8">
+           <h4 class="text-2xl font-semibold text-cyan-200 mb-4 flex items-center">
+             <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+               <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+             </svg>
+             Artículos Recomendados para Ti
+           </h4>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div *ngFor="let post of recommendedPosts" class="bg-cyan-800/20 border border-cyan-400/30 rounded-lg p-6 hover:bg-cyan-800/30 transition-colors">
+               <h5 class="text-lg font-semibold text-cyan-200 mb-3">{{ post.title }}</h5>
+               <p *ngIf="post.summary" class="text-cyan-100 text-sm mb-4 line-clamp-3">{{ post.summary }}</p>
+               <div class="flex items-center justify-between">
+                 <span class="text-xs text-cyan-300">{{ post.authors?.[0]?.name || 'Autor' }}</span>
+                 <button class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                   Leer Artículo
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         <!-- Micro-acciones -->
+         <div class="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-6">
+           <h4 class="text-xl font-semibold text-emerald-200 mb-4 flex items-center">
+             <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+             </svg>
+             Micro-acciones para Esta Semana
+           </h4>
+           <div class="space-y-3">
+             <div *ngFor="let action of microActions; let i = index" class="flex items-start">
+               <div class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5 flex-shrink-0">
+                 {{ i + 1 }}
+               </div>
+               <p class="text-emerald-100">{{ action }}</p>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
 
       <!-- Botones de Acción -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -437,7 +432,7 @@ import { finalize } from 'rxjs/operators';
     }
   `]
 })
-export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
+export class DiagnosticResultsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('aresChart', { static: false }) aresChartRef!: ElementRef<HTMLCanvasElement>;
   
   private readonly diagnosticState = inject(DiagnosticStateService);
@@ -445,6 +440,7 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   private readonly generativeAiService = inject(GenerativeAiService);
   private readonly apiHealthService = inject(ApiHealthService);
   private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   private aresChart: Chart | null = null;
 
@@ -464,12 +460,31 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   apiStatus: { isHealthy: boolean; recommendation: string; fallbackAvailable: boolean } | null = null;
   showApiStatus = false;
 
+  // Propiedades para el mensaje de carga dinámico
+  loadingMessage: string = 'Preparando tu análisis...';
+  private loadingInterval: any;
+
+  // Pool de mensajes de carga (copiado del chatbot para consistencia)
+  private mensajesCarga = [
+    'Pensando en la mejor respuesta para ti... 🤔',
+    'Consultando nuestra base de datos de Sube Academia... 📊',
+    'Buscando la información más precisa... 🔍',
+    'Procesando tu consulta con IA... ⚡',
+    'Analizando tus resultados... 📈',
+    'Preparando una respuesta detallada... ✨',
+    'Generando un plan de acción personalizado... 🎯',
+    'Elaborando el mejor feedback para ti... 💡'
+  ];
+
   ngOnInit(): void {
     // Inicialización del componente
     this.debugDiagnosticState();
     
     // Verificar estado de la API
     this.checkApiStatus();
+    
+    // Iniciar el ciclo de mensajes de carga
+    this.startLoadingMessages();
     
     // Forzar recarga de datos desde localStorage
     setTimeout(() => {
@@ -478,6 +493,23 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       this.generateAiAnalysis();
       this.generateActionPlanWithAI();
     }, 100);
+  }
+
+  private startLoadingMessages(): void {
+    this.loadingInterval = setInterval(() => {
+      this.loadingMessage = this.mensajesCarga[Math.floor(Math.random() * this.mensajesCarga.length)];
+      this.cdr.detectChanges();
+    }, 2000); // Cambia el mensaje cada 2 segundos
+  }
+
+  private stopLoadingMessages(): void {
+    if (this.loadingInterval) {
+      clearInterval(this.loadingInterval);
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopLoadingMessages(); // Asegurarse de limpiar el intervalo al destruir el componente
   }
 
   private reloadDiagnosticData(): void {
@@ -1298,6 +1330,7 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       if (!leadForm || !competenciasData) {
         console.log('Datos insuficientes para generar análisis de IA');
         this.isLoadingAnalysis = false;
+        this.stopLoadingMessages(); // Detener el ciclo de mensajes
         return;
       }
 
@@ -1305,6 +1338,7 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       if (Object.keys(competenciasData).length === 0) {
         console.log('No hay datos de competencias para analizar');
         this.isLoadingAnalysis = false;
+        this.stopLoadingMessages(); // Detener el ciclo de mensajes
         return;
       }
 
@@ -1332,11 +1366,14 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
         finalize(() => {
           console.log('Análisis de IA completado');
           this.isLoadingAnalysis = false;
+          this.stopLoadingMessages(); // Detener el ciclo de mensajes
+          this.cdr.detectChanges(); // Forzar la detección de cambios
         })
       );
     } catch (error) {
       console.error('Error en generateAiAnalysis:', error);
       this.isLoadingAnalysis = false;
+      this.stopLoadingMessages(); // Detener el ciclo de mensajes
     }
   }
 
@@ -1347,32 +1384,47 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       
       if (!leadForm || !competenciasData) {
         console.log('Datos insuficientes para generar plan de acción con IA');
+        this.isLoadingActionPlan = false;
         return;
       }
 
       // Verificar que los datos no estén vacíos
       if (Object.keys(competenciasData).length === 0) {
         console.log('No hay datos de competencias para generar plan de acción');
+        this.isLoadingActionPlan = false;
         return;
       }
 
-      const userData = {
-        nombre: leadForm.nombre,
-        cargo: leadForm.cargo,
-        industria: leadForm.industria,
-        competencias: competenciasData
+      // Obtener las competencias con sus puntajes
+      const competencias = Object.entries(competenciasData).map(([competenciaId, nivel]) => {
+        const puntaje = nivel ? this.getCompetencyScore(nivel as string) : 0;
+        return { name: competenciaId, score: puntaje };
+      });
+
+      // Ordenar por puntaje (más altas primero para fortalezas, más bajas para oportunidades)
+      const topCompetencies = competencias.sort((a, b) => b.score - a.score).slice(0, 3);
+      const lowestCompetencies = competencias.sort((a, b) => a.score - b.score).slice(0, 3);
+
+      const analysisData: DiagnosticAnalysisData = {
+        userName: leadForm.nombre || 'Usuario',
+        userRole: leadForm.cargo || 'Profesional',
+        userIndustry: leadForm.industria || 'Tecnología',
+        topCompetencies,
+        lowestCompetencies
       };
 
-      console.log('Generando plan de acción con IA para:', userData);
+      console.log('Generando plan de acción con IA para:', analysisData);
 
-      this.aiGeneratedActionPlan$ = this.scoringService.generateActionPlanWithAI(userData).pipe(
+      this.aiGeneratedActionPlan$ = this.generativeAiService.generateActionPlanWithAI(analysisData).pipe(
         finalize(() => {
           console.log('Plan de acción con IA completado');
           this.isLoadingActionPlan = false;
+          this.cdr.detectChanges(); // Forzar la detección de cambios
         })
       );
     } catch (error) {
       console.error('Error en generateActionPlanWithAI:', error);
+      this.isLoadingActionPlan = false;
     }
   }
 
