@@ -1,19 +1,202 @@
+/* Tarjetas del equipo fundador (flip cards) */
 .flip-card {
   perspective: 1000px;
+  height: 400px;
+  width: 100%;
 }
+
 .flip-card-inner {
   transition: transform 0.6s;
   transform-style: preserve-3d;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
+
 .flip-card.flipped .flip-card-inner {
   transform: rotateY(180deg);
 }
+
 .flip-card-front, .flip-card-back {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
 }
+
 .flip-card-back {
   transform: rotateY(180deg);
+}
+
+/* Tarjetas de socios colaboradores (hover flip cards) */
+.collaborator-card {
+  perspective: 1000px;
+  height: 300px;
+  width: 100%;
+}
+
+.collaborator-card-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.collaborator-card:hover .collaborator-card-inner {
+  transform: rotateY(180deg);
+}
+
+.collaborator-card-front, .collaborator-card-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
+}
+
+.collaborator-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Timeline vertical */
+.timeline-event {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 3rem;
+}
+
+.timeline-event.left-event {
+  justify-content: flex-start;
+  padding-right: 50%;
+}
+
+.timeline-event.right-event {
+  justify-content: flex-end;
+  padding-left: 50%;
+}
+
+.timeline-content {
+  position: relative;
+  z-index: 10;
+  max-width: 20rem;
+}
+
+/* Líneas conectoras para el timeline */
+.timeline-event.left-event .timeline-content::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(to right, #6366f1, #a855f7);
+  transform: translateY(-50%);
+}
+
+.timeline-event.right-event .timeline-content::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -30px;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(to left, #6366f1, #a855f7);
+  transform: translateY(-50%);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .timeline-event.left-event,
+  .timeline-event.right-event {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .timeline-event.left-event .timeline-content::after,
+  .timeline-event.right-event .timeline-content::before {
+    display: none;
+  }
+  
+  .timeline-content {
+    max-width: 100% !important;
+  }
+  
+  .flip-card,
+  .collaborator-card {
+    height: auto;
+    min-height: 350px;
+  }
+}
+
+/* Animaciones y transiciones */
+.flip-card-inner,
+.collaborator-card-inner {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-content {
+  transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Efectos de hover para las tarjetas */
+.flip-card:hover .flip-card-front,
+.collaborator-card:hover .collaborator-card-front {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Gradientes y sombras mejoradas */
+.flip-card-back,
+.collaborator-card-back {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.dark .flip-card-back,
+.dark .collaborator-card-back {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+/* Asegurar que las tarjetas no se superpongan */
+.flip-card,
+.collaborator-card {
+  margin-bottom: 2rem;
+}
+
+/* Estilos específicos para el contenido de las tarjetas */
+.flip-card-front,
+.flip-card-back,
+.collaborator-card-front,
+.collaborator-card-back {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+/* Ajustes para el texto dentro de las tarjetas */
+.flip-card-front h3,
+.collaborator-card-front h3 {
+  margin-bottom: 0.5rem;
+}
+
+.flip-card-front p,
+.collaborator-card-front p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
 }
 
 

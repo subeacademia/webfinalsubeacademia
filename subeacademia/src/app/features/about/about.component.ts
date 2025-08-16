@@ -83,13 +83,13 @@ export class AboutComponent {
   ];
 
   collaborators = [
-    { name: 'Nataly Saavedra', role: 'Abogada Especialista' },
-    { name: 'Lina Barraza', role: 'Psicóloga Clínica' },
-    { name: 'Ignacio Lipski', role: 'Marketing Digital' },
-    { name: 'Carlos Baldovinos', role: 'Geógrafo' },
-    { name: 'Jorge Vásquez', role: 'Historiador y experto en Robótica' },
-    { name: 'Diego Ramirez', role: 'Psicólogo Organizacional' },
-    { name: 'Nicolás Valenzuela', role: 'Ingeniero de IA' },
+    { name: 'Nataly Saavedra', role: 'Abogada Especialista', bio: 'Especialista en derecho tecnológico y regulaciones de IA con amplia experiencia en compliance y gobernanza digital.' },
+    { name: 'Lina Barraza', role: 'Psicóloga Clínica', bio: 'Experta en psicología organizacional y desarrollo de competencias humanas para la era de la IA.' },
+    { name: 'Ignacio Lipski', role: 'Marketing Digital', bio: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.' },
+    { name: 'Carlos Baldovinos', role: 'Geógrafo', bio: 'Especialista en análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.' },
+    { name: 'Jorge Vásquez', role: 'Historiador y experto en Robótica', bio: 'Investigador interdisciplinario que combina historia de la tecnología con innovación en robótica e IA.' },
+    { name: 'Diego Ramirez', role: 'Psicólogo Organizacional', bio: 'Consultor en desarrollo organizacional y adaptación humana a entornos tecnológicos avanzados.' },
+    { name: 'Nicolás Valenzuela', role: 'Ingeniero de IA', bio: 'Desarrollador de sistemas de IA con especialización en machine learning y ética computacional.' },
   ];
 
   toggleFlip(member: TeamMember): void {
