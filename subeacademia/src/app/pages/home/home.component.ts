@@ -8,11 +8,12 @@ import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
+import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })

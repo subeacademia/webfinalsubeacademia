@@ -33,9 +33,11 @@
 
     <!-- Botones de acción con efectos -->
     <div class="flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up" style="animation-delay: 0.9s;" role="group" aria-label="Acciones principales">
-      <button (click)="iniciarDiagnostico()" 
-              class="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg"
-              aria-label="Iniciar diagnóstico de competencias en IA">
+      <app-ui-button 
+        variant="primary" 
+        size="lg" 
+        (clicked)="iniciarDiagnostico()"
+        class="group relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg">
         <span class="relative z-10 flex items-center gap-3">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -43,18 +45,20 @@
           INICIAR DIAGNÓSTICO DE COMPETENCIAS IA
         </span>
         <div class="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true"></div>
-      </button>
+      </app-ui-button>
       
-      <button (click)="contactarAsesor()" 
-              class="group relative overflow-hidden bg-transparent border-2 border-white/50 hover:border-white text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm hover:bg-white/10"
-              aria-label="Contactar con un asesor especializado">
+      <app-ui-button 
+        variant="ghost" 
+        size="lg" 
+        (clicked)="contactarAsesor()"
+        class="group relative overflow-hidden bg-transparent border-2 border-white/50 hover:border-white text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all duration-300 transform hover:scale-105 backdrop-blur-sm hover:bg-white/10">
         <span class="relative z-10 flex items-center gap-3">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
           </svg>
           HABLAR CON UN ASESOR
         </span>
-      </button>
+      </app-ui-button>
     </div>
 
     <!-- Indicador de scroll -->
@@ -178,9 +182,13 @@
           </div>
           <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Capacitación Adaptativa (AVE-AI)</h3>
           <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.</p>
-          <button (click)="iniciarDiagnostico()" class="btn btn-primary group-hover:scale-105 transition-transform duration-300" aria-label="Realizar diagnóstico de competencias">
+          <app-ui-button 
+            variant="primary" 
+            (clicked)="iniciarDiagnostico()" 
+            class="btn btn-primary group-hover:scale-105 transition-transform duration-300" 
+            aria-label="Realizar diagnóstico de competencias">
             Realizar Diagnóstico →
-          </button>
+          </app-ui-button>
         </div>
       </div>
       
@@ -193,9 +201,13 @@
           </div>
           <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Consultoría Estratégica (ARES-AI)</h3>
           <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.</p>
-          <button (click)="contactarAsesor()" class="btn btn-secondary group-hover:scale-105 transition-transform duration-300" aria-label="Contactar con un asesor especializado">
+          <app-ui-button 
+            variant="secondary" 
+            (clicked)="contactarAsesor()" 
+            class="btn btn-secondary group-hover:scale-105 transition-transform duration-300" 
+            aria-label="Contactar con un asesor especializado">
             Contactar un Asesor →
-          </button>
+          </app-ui-button>
         </div>
       </div>
       
@@ -270,11 +282,14 @@
       <p class="text-xl text-slate-600 dark:text-slate-400 mb-8">
         Únete a las organizaciones que ya están transformando su futuro con IA
       </p>
-      <button (click)="iniciarDiagnostico()" 
-              class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300"
-              aria-label="Comenzar el proceso de transformación con IA">
+      <app-ui-button 
+        variant="primary" 
+        size="lg"
+        (clicked)="iniciarDiagnostico()" 
+        class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300"
+        aria-label="Comenzar el proceso de transformación con IA">
         Comenzar Ahora
-      </button>
+      </app-ui-button>
     </div>
   </div>
 </section>
