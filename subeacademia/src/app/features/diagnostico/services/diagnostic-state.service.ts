@@ -42,6 +42,10 @@ export class DiagnosticStateService {
     // Signals públicos
     readonly isCompleted = this._isCompleted.asReadonly();
 
+    // Signal para notificar cambios en el progreso
+    private readonly _progressChanged = signal(0);
+    readonly progressChanged = this._progressChanged.asReadonly();
+
     // Formularios
     readonly form: FormGroup = this.fb.group({
         segmento: this.fb.control<Segment | null>(null),
@@ -81,15 +85,30 @@ export class DiagnosticStateService {
 
     private setupFormSubscriptions(): void {
         // Persistencia en localStorage
-        this.form.valueChanges.subscribe(() => this.saveToStorage());
-        this.aresForm.valueChanges.subscribe(() => this.saveToStorage());
-        this.competenciasForm.valueChanges.subscribe(() => this.saveToStorage());
-        this.leadForm.valueChanges.subscribe(() => this.saveToStorage());
+        this.form.valueChanges.subscribe(() => {
+            this.saveToStorage();
+            this.notifyProgressChange();
+        });
+        this.aresForm.valueChanges.subscribe(() => {
+            this.saveToStorage();
+            this.notifyProgressChange();
+        });
+        this.competenciasForm.valueChanges.subscribe(() => {
+            this.saveToStorage();
+            this.notifyProgressChange();
+        });
+        this.leadForm.valueChanges.subscribe(() => {
+            this.saveToStorage();
+            this.notifyProgressChange();
+        });
         
         // Suscripción a los controles de contexto
         Object.values(this.contextoControls).forEach(control => {
             if (control instanceof FormControl) {
-                control.valueChanges.subscribe(() => this.saveToStorage());
+                control.valueChanges.subscribe(() => {
+                    this.saveToStorage();
+                    this.notifyProgressChange();
+                });
             }
         });
     }
@@ -447,6 +466,11 @@ export class DiagnosticStateService {
             lead: this.leadForm.value,
             segmento: this.form.get('segmento')?.value
         };
+    }
+
+    // Método para notificar cambios en el progreso
+    private notifyProgressChange(): void {
+        this._progressChanged.set(this._progressChanged() + 1);
     }
 }
 

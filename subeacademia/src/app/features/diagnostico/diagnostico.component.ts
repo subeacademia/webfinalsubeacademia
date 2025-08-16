@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
@@ -27,23 +27,33 @@ export class DiagnosticoComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly themeService = inject(ThemeService);
 
-    // Señal de progreso basada en la ruta actual y cambios en formularios
-    progress = computed(() => {
-        const currentRoute = this.router.url;
-        // Forzar recálculo cuando cambien los formularios
-        this.diagnosticState.aresForm.value;
-        this.diagnosticState.competenciasForm.value;
-        return this.diagnosticState.getProgressForRoute(currentRoute);
-    });
+    // Signal de progreso que se actualiza manualmente
+    private readonly _progress = signal(0);
+    readonly progress = this._progress.asReadonly();
 
     ngOnInit(): void {
+        // Calcular progreso inicial
+        this.updateProgress();
+        
         // Suscribirse a cambios de navegación para actualizar el progreso
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd)
         ).subscribe(() => {
-            // El progreso se actualiza automáticamente a través de la señal computed
+            this.updateProgress();
             console.log('Navegación completada, progreso actual:', this.progress());
         });
+
+        // Suscribirse a cambios en el progreso del servicio
+        effect(() => {
+            this.diagnosticState.progressChanged();
+            this.updateProgress();
+        });
+    }
+
+    private updateProgress(): void {
+        const currentRoute = this.router.url;
+        const newProgress = this.diagnosticState.getProgressForRoute(currentRoute);
+        this._progress.set(newProgress);
     }
 }
 

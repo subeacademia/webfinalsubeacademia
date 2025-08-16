@@ -62,12 +62,12 @@
 
 /* Carrusel superior: empieza desde la izquierda y va hacia la derecha */
 .carousel-top .logo-track {
-  animation: scroll-cross-left 40s linear infinite;
+  animation: scroll-cross-left 40s linear infinite !important;
 }
 
 /* Carrusel inferior: empieza desde la derecha y va hacia la izquierda */
 .carousel-bottom .logo-track {
-  animation: scroll-cross-right 40s linear infinite;
+  animation: scroll-cross-right 40s linear infinite !important;
 }
 
 .logo-track:hover {

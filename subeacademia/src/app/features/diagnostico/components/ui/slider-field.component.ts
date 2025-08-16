@@ -57,7 +57,7 @@ export interface SliderFieldConfig {
         </button>
       </div>
 
-      <!-- Slider principal -->
+      <!-- Barra de progreso visual -->
       <div class="mb-4">
         <div class="relative">
           <!-- Etiquetas de valores -->
@@ -67,21 +67,34 @@ export interface SliderFieldConfig {
             <span>{{ config.maxValue }} - {{ config.labels[config.labels.length - 1] | i18nTranslate }}</span>
           </div>
           
-          <!-- Slider -->
+          <!-- Barra de progreso visual clickeable -->
+          <div class="w-full h-3 bg-slate-600 dark:bg-slate-700 rounded-lg overflow-hidden mb-4 relative cursor-pointer group"
+               (click)="onBarClick($event)">
+            <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out relative"
+                 [style.width.%]="getProgressPercentage()">
+              <!-- Indicador de valor actual -->
+              <div class="absolute right-0 top-0 w-1 h-full bg-white shadow-lg transform translate-x-1/2"></div>
+            </div>
+            <!-- Overlay para mostrar hover effect -->
+            <div class="absolute inset-0 bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+          </div>
+          
+          <!-- Slider (oculto visualmente pero funcional para accesibilidad) -->
           <input
             type="range"
             [min]="config.minValue"
             [max]="config.maxValue"
             [step]="config.step"
             [formControl]="config.formControl"
-            class="w-full h-3 bg-slate-600 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+            class="sr-only"
             (input)="onSliderChange($event)">
           
-          <!-- Marcadores de pasos -->
-          <div class="flex justify-between mt-2">
+          <!-- Marcadores de pasos con indicadores clickeables -->
+          <div class="flex justify-between mt-2 relative">
             <div *ngFor="let label of config.labels; let i = index" 
-                 class="text-center text-xs text-gray-400 dark:text-gray-500">
-              <div class="w-2 h-2 bg-slate-500 dark:bg-slate-600 rounded-full mx-auto mb-1"></div>
+                 class="text-center text-xs text-gray-400 dark:text-gray-500 cursor-pointer hover:text-blue-400 transition-colors duration-200"
+                 (click)="setValueFromStep(i)">
+              <div class="w-3 h-3 bg-slate-500 dark:bg-slate-600 rounded-full mx-auto mb-1 hover:bg-blue-500 transition-colors duration-200"></div>
               <span class="block w-16">{{ label | i18nTranslate }}</span>
             </div>
           </div>
@@ -112,59 +125,40 @@ export interface SliderFieldConfig {
     </app-info-modal>
   `,
   styles: [`
-    .slider {
-      background: linear-gradient(to right, #3b82f6 0%, #3b82f6 50%, #475569 50%, #475569 100%);
-    }
-    
-    .slider::-webkit-slider-thumb {
-      appearance: none;
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: #3b82f6;
+    /* Estilos para la barra de progreso interactiva */
+    .cursor-pointer {
       cursor: pointer;
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     
-    .slider::-moz-range-thumb {
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: #3b82f6;
-      cursor: pointer;
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    /* Efecto hover en los marcadores de pasos */
+    .hover\\:bg-blue-500:hover {
+      background-color: #3b82f6;
     }
     
-    .slider::-ms-thumb {
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: #3b82f6;
-      cursor: pointer;
-      border: 2px solid #ffffff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    .hover\\:text-blue-400:hover {
+      color: #60a5fa;
     }
     
-    /* Dark mode adjustments */
-    .dark .slider {
-      background: linear-gradient(to right, #60a5fa 0%, #60a5fa 50%, #64748b 50%, #64748b 100%);
+    /* Transiciones suaves */
+    .transition-colors {
+      transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 150ms;
     }
     
-    .dark .slider::-webkit-slider-thumb {
-      background: #60a5fa;
-      border-color: #1e293b;
+    .transition-opacity {
+      transition-property: opacity;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      transition-duration: 150ms;
     }
     
-    .dark .slider::-moz-range-thumb {
-      background: #60a5fa;
-      border-color: #1e293b;
+    /* Indicador de valor actual en la barra */
+    .bg-white {
+      background-color: #ffffff;
     }
     
-    .dark .slider::-ms-thumb {
-      background: #60a5fa;
-      border-color: #1e293b;
+    .shadow-lg {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -223,8 +217,48 @@ export class SliderFieldComponent implements OnInit, OnDestroy {
     return descriptions[Math.max(0, Math.min(index, descriptions.length - 1))];
   }
 
+  getProgressPercentage(): number {
+    const value = this.currentValue;
+    const min = this.config.minValue;
+    const max = this.config.maxValue;
+    const percentage = ((value - min) / (max - min)) * 100;
+    return Math.max(0, Math.min(100, percentage));
+  }
+
   openInfo(): void {
     this.modalText = this.config.tooltipKey;
     this.modalOpen = true;
+  }
+
+  onBarClick(event: MouseEvent): void {
+    const bar = event.currentTarget as HTMLElement;
+    const rect = bar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = (clickX / rect.width) * 100;
+    
+    // Calcular el valor basado en el porcentaje
+    const value = Math.round(
+      this.config.minValue + (percentage / 100) * (this.config.maxValue - this.config.minValue)
+    );
+    
+    // Asegurar que el valor esté dentro del rango y en los pasos correctos
+    const clampedValue = Math.max(this.config.minValue, Math.min(this.config.maxValue, value));
+    const steppedValue = Math.round(clampedValue / this.config.step) * this.config.step;
+    
+    this.currentValue = steppedValue;
+    this.config.formControl.setValue(steppedValue);
+    this.valueChange.emit(steppedValue);
+  }
+
+  setValueFromStep(index: number): void {
+    // Calcular el valor basado en el índice del paso
+    const value = this.config.minValue + index;
+    
+    // Asegurar que el valor esté dentro del rango
+    const clampedValue = Math.max(this.config.minValue, Math.min(this.config.maxValue, value));
+    
+    this.currentValue = clampedValue;
+    this.config.formControl.setValue(clampedValue);
+    this.valueChange.emit(clampedValue);
   }
 }
