@@ -3,6 +3,12 @@ import { AresScoresByDimension, DiagnosticoFormValue, DiagnosticoScores, NivelCo
 import { ARES_ITEMS } from '../data/ares-items';
 import { NIVEL_TO_SCORE } from '../data/levels';
 import { COMPETENCIAS } from '../data/competencias';
+import { CoursesService } from '../../../core/data/courses.service';
+import { PostsService } from '../../../core/data/posts.service';
+import { Observable, forkJoin, of } from 'rxjs';
+import { Course } from '../../../core/models/course.model';
+import { Post } from '../../../core/models/post.model';
+import { map, catchError } from 'rxjs/operators';
 
 export interface DiagnosticAnalysis {
     mainLevel: string;
@@ -36,10 +42,65 @@ export interface CursoRecomendado {
     duracion: string;
 }
 
+export interface PersonalizedActionPlan {
+    recommendedCourses: Course[];
+    recommendedPosts: Post[];
+    microActions: string[];
+}
+
 export type DiagnosticData = DiagnosticoFormValue;
 
 @Injectable({ providedIn: 'root' })
 export class ScoringService {
+    constructor(
+        private coursesService: CoursesService,
+        private postsService: PostsService
+    ) {}
+
+    getPersonalizedActionPlan(lowestCompetencies: { id: string; name: string; score: number }[]): Observable<PersonalizedActionPlan> {
+        if (!lowestCompetencies || lowestCompetencies.length === 0) {
+            return of({
+                recommendedCourses: [],
+                recommendedPosts: [],
+                microActions: this.generateMicroActions()
+            });
+        }
+
+        // Extraer los IDs de las 3 competencias más bajas
+        const competencyIds = lowestCompetencies.slice(0, 3).map(comp => comp.id);
+
+        // Buscar cursos y posts recomendados
+        const courses$ = this.coursesService.findCoursesByCompetencies(competencyIds);
+        const posts$ = this.postsService.findPostsByCompetencies(competencyIds);
+
+        return forkJoin({
+            recommendedCourses: courses$,
+            recommendedPosts: posts$
+        }).pipe(
+            map(result => ({
+                recommendedCourses: result.recommendedCourses,
+                recommendedPosts: result.recommendedPosts,
+                microActions: this.generateMicroActions()
+            })),
+            catchError(error => {
+                console.error('Error obteniendo recomendaciones:', error);
+                return of({
+                    recommendedCourses: [],
+                    recommendedPosts: [],
+                    microActions: this.generateMicroActions()
+                });
+            })
+        );
+    }
+
+    private generateMicroActions(): string[] {
+        return [
+            'Esta semana, dedica 15 minutos a leer uno de los artículos recomendados',
+            'Identifica una tarea en tu trabajo donde puedas aplicar conscientemente una de tus competencias más fuertes para apoyar una más débil',
+            'Programa una sesión de 30 minutos para revisar y actualizar tu plan de desarrollo profesional'
+        ];
+    }
+
     computeAresScore(form: DiagnosticoFormValue): AresScoresByDimension & { promedio: number } {
         // Regla simple: promedio por dimensión de valores 1-5, 0 se excluye; escala a 0-100.
         const byDim: Record<string, number[]> = {};

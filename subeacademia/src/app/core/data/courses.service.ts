@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, collectionData, doc, docData, addDoc, setDoc, deleteDoc, query, where, updateDoc, orderBy, limit, getDocs } from '@angular/fire/firestore';
 import { Course } from '../models';
-import { Observable, from, firstValueFrom, defer } from 'rxjs';
+import { Observable, from, firstValueFrom, defer, of } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
 
 @Injectable({ providedIn: 'root' })
@@ -50,6 +50,43 @@ export class CoursesService {
     } catch {
       return null;
     }
+  }
+
+  findCoursesByCompetencies(competencyIds: string[]): Observable<Course[]> {
+    if (!competencyIds || competencyIds.length === 0) {
+      return of([]);
+    }
+
+    // Buscar cursos que contengan al menos una de las competencias especificadas
+    const qRef = query(
+      this.col,
+      where('status', '==', 'published'),
+      where('relatedCompetencies', 'array-contains-any', competencyIds),
+      limit(3)
+    );
+
+    return new Observable<Course[]>((observer) => {
+      getDocs(qRef).then(snap => {
+        const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Course[];
+        observer.next(items);
+        observer.complete();
+      }).catch(async (e: any) => {
+        if (String(e?.message || '').includes('requires an index')) {
+          // Fallback: buscar en memoria si no hay índice
+          const snap = await getDocs(query(this.col, where('status', '==', 'published'), limit(50)));
+          let items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Course[];
+          items = items.filter(c => 
+            c.relatedCompetencies && 
+            c.relatedCompetencies.some(compId => competencyIds.includes(compId))
+          );
+          items = items.slice(0, 3);
+          observer.next(items);
+          observer.complete();
+        } else {
+          observer.error(e);
+        }
+      });
+    });
   }
 
   async create(data: Course) {

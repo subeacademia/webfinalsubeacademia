@@ -35,6 +35,7 @@ export interface Course {
   lessonCount?: number;
   date?: any; // Firestore timestamp
   modules?: CourseModule[]; // Programa académico
+  relatedCompetencies?: string[]; // IDs de competencias relacionadas
 
   // Campos legacy/opcionales para compatibilidad con datos existentes
   lang?: 'es' | 'pt' | 'en';

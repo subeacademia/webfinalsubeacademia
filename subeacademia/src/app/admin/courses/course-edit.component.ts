@@ -2,12 +2,14 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormArray, FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { CoursesService } from '../../core/data/courses.service';
+import { ContentService } from '../../core/services/content.service';
 import { CommonModule } from '@angular/common';
 import { MediaPickerComponent } from '../shared/media-picker.component';
 import { MediaService } from '../../core/data/media.service';
 import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { Competency } from '../../features/diagnostico/data/competencias';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
@@ -62,6 +64,15 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           <input class="w-full ui-input" [value]="(form.value.topics || []).join(', ')" (change)="onTopicsChange($any($event.target).value)">
         </label>
       </div>
+
+      <label class="block">Competencias Relacionadas
+        <select class="w-full ui-input" multiple formControlName="relatedCompetencies">
+          <option *ngFor="let comp of competencias" [value]="comp.id">{{ comp.name }}</option>
+        </select>
+        <div class="text-xs text-gray-500 mt-1">
+          Selecciona las competencias que este curso ayuda a desarrollar
+        </div>
+      </label>
 
       <div class="space-y-2">
         <div class="font-medium flex items-center justify-between">
@@ -195,6 +206,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private courses = inject(CoursesService);
   private media = inject(MediaService);
+  private content = inject(ContentService);
 
   id = signal<string | null>(null);
   private readonly unsubscribe$ = new Subject<void>();
@@ -216,9 +228,15 @@ export class CourseEditComponent implements OnInit, OnDestroy {
     currency: ['CLP'],
     paymentLink: [''],
     modules: this.fb.array([] as any[]),
+    relatedCompetencies: [[] as string[]],
   });
 
+  competencias: Competency[] = [];
+
   ngOnInit(): void {
+    // Obtener las competencias disponibles
+    this.loadCompetencies();
+    
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);
@@ -238,6 +256,13 @@ export class CourseEditComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  private loadCompetencies(): void {
+    // Obtener las competencias desde el archivo de competencias
+    import('../../features/diagnostico/data/competencias').then(module => {
+      this.competencias = module.COMPETENCIAS_COMPLETAS;
+    });
   }
 
   ngOnDestroy(): void {

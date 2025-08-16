@@ -3,6 +3,8 @@ import { Firestore, collection, doc, docData, addDoc, updateDoc, query, where, o
 import { firstValueFrom, defer } from 'rxjs';
 import { TranslationService } from '../ai/translation.service';
 import { Auth } from '@angular/fire/auth';
+import { Observable, of } from 'rxjs';
+import { Post } from '../models/post.model';
 
 @Injectable({ providedIn: 'root' })
 export class PostsService {
@@ -37,6 +39,43 @@ export class PostsService {
   }
   get(id:string){
     return defer(() => docData(doc(this.db,'posts',id), { idField:'id' }));
+  }
+
+  findPostsByCompetencies(competencyIds: string[]): Observable<Post[]> {
+    if (!competencyIds || competencyIds.length === 0) {
+      return of([]);
+    }
+
+    // Buscar posts que contengan al menos una de las competencias especificadas
+    const qRef = query(
+      collection(this.db, 'posts'),
+      where('status', '==', 'published'),
+      where('relatedCompetencies', 'array-contains-any', competencyIds),
+      limit(2)
+    );
+
+    return new Observable<Post[]>((observer) => {
+      getDocs(qRef).then(snap => {
+        const items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Post[];
+        observer.next(items);
+        observer.complete();
+      }).catch(async (e: any) => {
+        if (String(e?.message || '').includes('requires an index')) {
+          // Fallback: buscar en memoria si no hay índice
+          const snap = await getDocs(query(collection(this.db, 'posts'), where('status', '==', 'published'), limit(50)));
+          let items = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Post[];
+          items = items.filter(p => 
+            p.relatedCompetencies && 
+            p.relatedCompetencies.some(compId => competencyIds.includes(compId))
+          );
+          items = items.slice(0, 2);
+          observer.next(items);
+          observer.complete();
+        } else {
+          observer.error(e);
+        }
+      });
+    });
   }
   async create(data:any){
     const col = collection(this.db,'posts');

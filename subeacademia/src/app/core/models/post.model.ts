@@ -43,5 +43,6 @@ export interface Post {
   status: 'draft' | 'published' | 'scheduled';
   scheduledAt?: number;
   seo?: PostSeo;
+  relatedCompetencies?: string[]; // IDs de competencias relacionadas
 }
 

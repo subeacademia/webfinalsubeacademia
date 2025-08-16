@@ -2,12 +2,15 @@ import { Component, computed, inject, OnInit, ElementRef, ViewChild, AfterViewIn
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { ScoringService, ActionPlan } from '../../../services/scoring.service';
+import { ScoringService, ActionPlan, PersonalizedActionPlan } from '../../../services/scoring.service';
 import { Chart, ChartConfiguration, ChartData } from 'chart.js';
 import 'chart.js/auto';
 import { ARES_ITEMS } from '../../../data/ares-items';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { Course } from '../../../../../core/models/course.model';
+import { Post } from '../../../../../core/models/post.model';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -238,6 +241,86 @@ import html2canvas from 'html2canvas';
         </div>
       </div>
 
+      <!-- Tu Plan de Acción Personalizado -->
+      <div class="bg-gradient-to-r from-indigo-900/20 to-cyan-900/20 border border-indigo-500/30 rounded-lg p-8 mb-8">
+        <h3 class="text-3xl font-bold text-white mb-6 text-center">Tu Plan de Acción Personalizado</h3>
+        
+        <!-- Indicador de carga -->
+        <div *ngIf="loadingRecommendations" class="text-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p class="text-indigo-200">Cargando recomendaciones personalizadas...</p>
+        </div>
+
+        <!-- Contenido cuando las recomendaciones están cargadas -->
+        <div *ngIf="!loadingRecommendations">
+          <!-- Cursos Recomendados -->
+          <div *ngIf="recommendedCourses.length > 0" class="mb-8">
+            <h4 class="text-2xl font-semibold text-indigo-200 mb-4 flex items-center">
+              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.591a1 1 0 00.941 0l6-1.75A1 1 0 0019 12V6a1 1 0 00-.606-.92l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9 12v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1zm5-1a1 1 0 011-1h1a1 1 0 011 1v6a1 1 0 01-1 1h-1a1 1 0 01-1-1v-6z"></path>
+              </svg>
+              Cursos Recomendados para Ti
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div *ngFor="let course of recommendedCourses" class="bg-indigo-800/20 border border-indigo-400/30 rounded-lg p-6 hover:bg-indigo-800/30 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                  <h5 class="text-lg font-semibold text-indigo-200">{{ course.title }}</h5>
+                  <span class="bg-indigo-600/50 px-2 py-1 rounded text-xs text-indigo-100">{{ course.level || 'Principiante' }}</span>
+                </div>
+                <p *ngIf="course.description" class="text-indigo-100 text-sm mb-4 line-clamp-3">{{ course.description }}</p>
+                <div class="flex items-center justify-between text-xs text-indigo-300 mb-4">
+                  <span *ngIf="course.duration">Duración: {{ course.duration }}</span>
+                  <span *ngIf="course.lessonCount">{{ course.lessonCount }} lecciones</span>
+                </div>
+                <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
+                  Ver Curso
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Artículos Recomendados -->
+          <div *ngIf="recommendedPosts.length > 0" class="mb-8">
+            <h4 class="text-2xl font-semibold text-cyan-200 mb-4 flex items-center">
+              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+              </svg>
+              Artículos Recomendados para Ti
+            </h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div *ngFor="let post of recommendedPosts" class="bg-cyan-800/20 border border-cyan-400/30 rounded-lg p-6 hover:bg-cyan-800/30 transition-colors">
+                <h5 class="text-lg font-semibold text-cyan-200 mb-3">{{ post.title }}</h5>
+                <p *ngIf="post.summary" class="text-cyan-100 text-sm mb-4 line-clamp-3">{{ post.summary }}</p>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-cyan-300">{{ post.authors?.[0]?.name || 'Autor' }}</span>
+                  <button class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                    Leer Artículo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Micro-acciones -->
+          <div class="bg-gradient-to-r from-emerald-900/20 to-teal-900/20 border border-emerald-500/30 rounded-lg p-6">
+            <h4 class="text-xl font-semibold text-emerald-200 mb-4 flex items-center">
+              <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              Micro-acciones para Esta Semana
+            </h4>
+            <div class="space-y-3">
+              <div *ngFor="let action of microActions; let i = index" class="flex items-start">
+                <div class="bg-emerald-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5 flex-shrink-0">
+                  {{ i + 1 }}
+                </div>
+                <p class="text-emerald-100">{{ action }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Botones de Acción -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <button 
@@ -277,6 +360,21 @@ import html2canvas from 'html2canvas';
     .btn-secondary {
       @apply bg-gray-700 hover:bg-gray-600 text-white rounded-lg transform hover:scale-105 transition-all duration-200;
     }
+
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .hover\\:bg-indigo-800\\/30:hover {
+      background-color: rgba(67, 56, 202, 0.3);
+    }
+
+    .hover\\:bg-cyan-800\\/30:hover {
+      background-color: rgba(14, 116, 144, 0.3);
+    }
   `]
 })
 export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
@@ -288,6 +386,12 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
 
   private aresChart: Chart | null = null;
 
+  // Propiedades para las recomendaciones
+  recommendedCourses: Course[] = [];
+  recommendedPosts: Post[] = [];
+  microActions: string[] = [];
+  loadingRecommendations = false;
+
   ngOnInit(): void {
     // Inicialización del componente
     this.debugDiagnosticState();
@@ -295,6 +399,7 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     // Forzar recarga de datos desde localStorage
     setTimeout(() => {
       this.reloadDiagnosticData();
+      this.loadPersonalizedRecommendations();
     }, 100);
   }
 
@@ -929,6 +1034,128 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       yPosition += 6;
     });
     
+    // Tu Plan de Acción Personalizado
+    if (yPosition > pageHeight - 120) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(0, 0, 0);
+    pdf.text('Tu Plan de Acción Personalizado', margin, yPosition);
+    yPosition += 10;
+
+    // Cursos Recomendados para Ti
+    if (yPosition > pageHeight - 100) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(147, 51, 234); // Púrpura
+    pdf.text('Cursos Recomendados para Ti:', margin + 5, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+
+    this.recommendedCourses.forEach((course: Course, index: number) => {
+      if (yPosition > pageHeight - 80) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(147, 51, 234); // Púrpura
+      pdf.text(`${index + 1}. ${course.title}`, margin + 10, yPosition);
+      yPosition += 6;
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+
+      const courseDescriptionLines = this.splitTextIntoLines(course.description || '', maxWidth - 15, pdf);
+      courseDescriptionLines.forEach(line => {
+        pdf.text(line, margin + 15, yPosition);
+        yPosition += 5;
+      });
+
+      pdf.text(`Duración: ${course.duration}`, margin + 15, yPosition);
+      yPosition += 8;
+    });
+
+    // Artículos Recomendados para Ti
+    if (yPosition > pageHeight - 100) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(245, 158, 11); // Amarillo
+    pdf.text('Artículos Recomendados para Ti:', margin + 5, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+
+    this.recommendedPosts.forEach((post: Post, index: number) => {
+      if (yPosition > pageHeight - 80) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(`${index + 1}. ${post.title}`, margin + 10, yPosition);
+      yPosition += 6;
+
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(0, 0, 0);
+
+      const postSummaryLines = this.splitTextIntoLines(post.summary || '', maxWidth - 15, pdf);
+      postSummaryLines.forEach(line => {
+        pdf.text(line, margin + 15, yPosition);
+        yPosition += 5;
+      });
+
+      pdf.text(`Autor: ${post.authors?.[0]?.name || 'Desconocido'}`, margin + 15, yPosition);
+      yPosition += 8;
+    });
+
+    // Micro-acciones para Esta Semana
+    if (yPosition > pageHeight - 120) {
+      pdf.addPage();
+      yPosition = margin;
+    }
+
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(34, 197, 94); // Verde
+    pdf.text('Micro-acciones para Esta Semana:', margin + 5, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+
+    this.microActions.forEach((action: string, index: number) => {
+      if (yPosition > pageHeight - 80) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(34, 197, 94); // Verde
+      pdf.text(`${index + 1}. ${action}`, margin + 10, yPosition);
+      yPosition += 6;
+    });
+    
     // Pie de página
     if (yPosition > pageHeight - 30) {
       pdf.addPage();
@@ -984,5 +1211,50 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     }
     
     return lines;
+  }
+
+  private loadPersonalizedRecommendations(): void {
+    this.loadingRecommendations = true;
+    
+    // Obtener las 3 competencias más bajas
+    const competenciasData = this.diagnosticState.competenciasForm.value;
+    if (!competenciasData) {
+      this.loadingRecommendations = false;
+      return;
+    }
+
+    const competencias = Object.entries(competenciasData).map(([competenciaId, nivel]) => {
+      const puntaje = nivel ? this.getCompetencyScore(nivel as string) : 0;
+      return { id: competenciaId, name: competenciaId, score: puntaje };
+    });
+
+    // Ordenar por puntaje ascendente (las más bajas primero)
+    const lowestCompetencies = competencias.sort((a, b) => a.score - b.score).slice(0, 3);
+
+    // Obtener recomendaciones personalizadas
+    this.scoringService.getPersonalizedActionPlan(lowestCompetencies).subscribe({
+      next: (actionPlan: PersonalizedActionPlan) => {
+        this.recommendedCourses = actionPlan.recommendedCourses;
+        this.recommendedPosts = actionPlan.recommendedPosts;
+        this.microActions = actionPlan.microActions;
+        this.loadingRecommendations = false;
+      },
+      error: (error) => {
+        console.error('Error cargando recomendaciones:', error);
+        this.loadingRecommendations = false;
+      }
+    });
+  }
+
+  private getCompetencyScore(nivel: string): number {
+    const scoreMap: { [key: string]: number } = {
+      'incipiente': 0,
+      'explorador': 20,
+      'aprendiz': 40,
+      'practicante': 60,
+      'avanzado': 80,
+      'experto': 100
+    };
+    return scoreMap[nivel] || 0;
   }
 }

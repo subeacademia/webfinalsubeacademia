@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer as AngularSanitizer } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 import { MediaPickerComponent } from '../shared/media-picker.component';
+import { Competency } from '../../features/diagnostico/data/competencias';
 
 function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
 
@@ -121,6 +122,15 @@ function slugify(s:string){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g
           <div></div>
         </div>
 
+        <label class="block">Competencias Relacionadas
+          <select class="w-full ui-input" multiple formControlName="relatedCompetencies">
+            <option *ngFor="let comp of competencias" [value]="comp.id">{{ comp.name }}</option>
+          </select>
+          <div class="text-xs text-gray-500 mt-1">
+            Selecciona las competencias que este artículo ayuda a desarrollar
+          </div>
+        </label>
+
         <div *ngIf="pickCover()" class="fixed inset-0 bg-black/40 grid place-items-center p-4">
           <div class="card max-w-3xl w-full p-4">
             <div class="flex items-center justify-between mb-3">
@@ -225,12 +235,15 @@ export class PostEditComponent implements OnDestroy, OnInit {
     coverUrl: [''],
     authorName: [''],
     authorUrl: [''],
-    media: this.fb.nonNullable.control([] as any[])
+    media: this.fb.nonNullable.control([] as any[]),
+    relatedCompetencies: [[] as string[]],
   });
 
   lockSlug = true;
 
   private readonly unsubscribe$ = new Subject<void>();
+
+  competencias: Competency[] = [];
 
   constructor(){
     const maybeId = this.route.snapshot.paramMap.get('id');
@@ -246,6 +259,9 @@ export class PostEditComponent implements OnDestroy, OnInit {
   }
 
   ngOnInit(): void {
+    // Obtener las competencias disponibles
+    this.loadCompetencies();
+    
     const slugControl = this.form.controls['slug'] as any;
     const titleControl = this.form.controls['title'] as any;
     let slugManuallyEdited = false;
@@ -285,6 +301,13 @@ export class PostEditComponent implements OnDestroy, OnInit {
           this.translationsReady.set(!!(p as any)?.translations?.en && !!(p as any)?.translations?.pt);
         });
     }
+  }
+
+  private loadCompetencies(): void {
+    // Obtener las competencias desde el archivo de competencias
+    import('../../features/diagnostico/data/competencias').then(module => {
+      this.competencias = module.COMPETENCIAS_COMPLETAS;
+    });
   }
 
   async save(){
