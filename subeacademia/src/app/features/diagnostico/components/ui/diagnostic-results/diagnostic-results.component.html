@@ -1,40 +1,30 @@
 <div class="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg">
-  <ng-container *ngIf="report$ | async as report; else loadingOrError">
-    <div class="max-w-4xl mx-auto">
-      <!-- Título y Resumen -->
+  <div class="max-w-4xl mx-auto">
+    <!-- Sección de Gráficos (se muestra siempre) -->
+    <section class="grid md:grid-cols-2 gap-8 mb-12 items-center">
+      <div>
+        <h2 class="text-2xl font-semibold mb-4 text-center">Análisis de Competencias Clave</h2>
+        <app-radar-chart [data]="scores.competencias"></app-radar-chart>
+      </div>
+      <div>
+        <h2 class="text-2xl font-semibold mb-4 text-center">Framework ARES-AI</h2>
+        <app-semaforo-ares [aresByPhase]="scores.ares"></app-semaforo-ares>
+      </div>
+    </section>
+
+    <!-- Sección del Informe de IA (se muestra al cargar) -->
+    <ng-container *ngIf="report$ | async as report; else loadingOrError">
       <header class="mb-8 text-center relative">
         <h1 class="text-4xl font-bold text-primary-500 mb-2">{{ report.titulo_informe }}</h1>
         <p class="text-lg text-gray-600 dark:text-gray-400">{{ report.resumen_ejecutivo }}</p>
-
-        <!-- Botón de Descarga PDF -->
-        <div *ngIf="pdfUrl" class="absolute top-0 right-0">
+        <div *ngIf="pdfUrl" class="mt-4">
           <a [href]="pdfUrl" target="_blank" rel="noopener noreferrer"
-             class="bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-colors duration-300 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-            </svg>
-            Descargar PDF
+             class="inline-block bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-colors duration-300">
+            Descargar Informe PDF
           </a>
         </div>
       </header>
 
-      <!-- Visualizaciones -->
-      <section class="grid md:grid-cols-2 gap-8 mb-12 items-center">
-        <div *ngIf="scores$ | async as scores">
-          <h2 class="text-2xl font-semibold mb-4 text-center">Análisis de Competencias Clave</h2>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <p class="text-center text-gray-600">Gráfico de Competencias</p>
-          </div>
-        </div>
-        <div *ngIf="scores$ | async as scores">
-          <h2 class="text-2xl font-semibold mb-4 text-center">Framework ARES-AI</h2>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <p class="text-center text-gray-600">Semaforo ARES</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Análisis Detallado ARES -->
       <section class="mb-12">
         <h2 class="text-3xl font-bold border-b-2 border-primary-500 pb-2 mb-6">Análisis por Dimensión ARES-AI</h2>
         <div class="grid md:grid-cols-2 gap-6">
@@ -45,43 +35,37 @@
         </div>
       </section>
 
-      <!-- Plan de Acción -->
       <section>
         <h2 class="text-3xl font-bold border-b-2 border-primary-500 pb-2 mb-6">Plan de Acción Recomendado</h2>
         <div *ngFor="let plan of report.plan_de_accion; let i = index" class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
           <h3 class="text-2xl font-semibold mb-2">Área de Mejora {{i + 1}}: <span class="text-primary-500">{{ plan.area_mejora }}</span></h3>
           <p class="italic text-gray-600 dark:text-gray-400 mb-4">{{ plan.descripcion_problema }}</p>
-          <div *ngFor="let accion of plan.acciones_recomendadas" class="mt-4 border-l-4 border-secondary-500 pl-4">
+          <div *ngFor="let accion of plan.acciones_recomendadas" class="mt-4 border-l-4 border-secondary-500 pl-4 py-2">
             <h4 class="font-bold text-lg">{{ accion.accion }}</h4>
             <p>{{ accion.detalle }}</p>
             <p *ngIf="accion.curso_recomendado_id" class="mt-2 text-sm">
               <span class="font-semibold">Curso Recomendado:</span>
-              <a [routerLink]="['/cursos', accion.curso_recomendado_id]" class="text-primary-500 hover:underline">Ver curso</a>
+              <a [routerLink]="['/cursos', accion.curso_recomendado_id]" class="text-primary-500 hover:underline">Ver curso de Sube Academia</a>
             </p>
           </div>
         </div>
       </section>
-    </div>
-  </ng-container>
+    </ng-container>
 
-  <!-- Template para Carga y Error -->
-  <ng-template #loadingOrError>
-    <div class="flex flex-col items-center justify-center min-h-[50vh]">
-      <ng-container *ngIf="!loadingError; else errorState">
-        <h2 class="text-2xl font-semibold mb-4">Generando tu informe personalizado...</h2>
-        <p class="mb-8 text-gray-600 dark:text-gray-400">La IA está analizando tus respuestas para crear un plan de acción único.</p>
-        <div class="w-full max-w-md">
-          <div class="bg-gray-200 rounded-full h-2">
-            <div class="bg-primary-500 h-2 rounded-full animate-pulse" style="width: 60%"></div>
+    <ng-template #loadingOrError>
+      <div class="flex flex-col items-center justify-center min-h-[20vh]">
+        <ng-container *ngIf="!loadingError; else errorState">
+          <h2 class="text-2xl font-semibold mb-4">Generando tu informe personalizado...</h2>
+          <p class="mb-8 text-gray-600 dark:text-gray-400">La IA está analizando tus respuestas para crear un plan de acción único.</p>
+          <app-api-progress-bar></app-api-progress-bar>
+        </ng-container>
+        <ng-template #errorState>
+          <div class="text-center text-red-500 p-6 bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-4">¡Oops! Algo salió mal</h2>
+            <p>No pudimos generar tu informe en este momento. Por favor, intenta de nuevo más tarde o contacta con nosotros.</p>
           </div>
-        </div>
-      </ng-container>
-      <ng-template #errorState>
-        <div class="text-center text-red-500">
-          <h2 class="text-2xl font-semibold mb-4">¡Oops! Algo salió mal.</h2>
-          <p>No pudimos generar tu informe en este momento. Por favor, intenta de nuevo más tarde.</p>
-        </div>
-      </ng-template>
-    </div>
-  </ng-template>
+        </ng-template>
+      </div>
+    </ng-template>
+  </div>
 </div>

@@ -21,7 +21,7 @@ export class GenerativeAiService {
           `- ID: ${course.id}, Título: ${course.title}, Descripción: ${course.description}`
         ).join('\n');
 
-        const prompt = this.buildGeminiPrompt(diagnosticData, scores, formattedCoursesString);
+        const prompt = this.buildEnhancedGeminiPrompt(diagnosticData, scores, formattedCoursesString);
 
         const requestBody = {
           contents: [{ parts: [{ text: prompt }] }],
@@ -47,72 +47,59 @@ export class GenerativeAiService {
             if (!responseText) {
               throw new Error('Respuesta inválida o vacía de la API de Gemini.');
             }
-            // El texto ya es un JSON, solo necesita ser parseado.
             return JSON.parse(responseText) as DiagnosticReport;
           })
         );
       }),
-      tap(response => console.log('Reporte de IA recibido:', response)), // Para depuración
+      tap(response => console.log('Reporte de IA recibido:', response)),
       catchError(error => {
         console.error('Error al generar el plan de acción:', error);
-        return of(null); // Devuelve null en caso de error para manejarlo en el componente
+        return of(null);
       })
     );
   }
 
-  private buildGeminiPrompt(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, formattedCoursesString: string): string {
+  private buildEnhancedGeminiPrompt(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, formattedCoursesString: string): string {
     return `
-      Eres un consultor senior experto en transformación digital e implementación de IA, actuando en nombre de Sube Academia. Tu misión es entregar un análisis profundo y un plan de acción de alto valor basado en el framework ARES-AI y el modelo de 13 competencias de Sube Academia. Tu respuesta debe ser únicamente un objeto JSON, sin texto introductorio, comentarios o comillas de bloque de código.
+      Eres un consultor senior experto en transformación digital e IA para Sube Academia. Tu misión es entregar un análisis profundo y un plan de acción de alto valor. Tu respuesta debe ser únicamente un objeto JSON, sin texto, comentarios o \`\`\`.
 
       **Contexto del Usuario:**
-      - Rol: ${diagnosticData.contexto?.industria || 'No especificado'}
+      - Rol: ${diagnosticData.segmento || 'No especificado'}
       - Industria: ${diagnosticData.contexto?.industria || 'No especificado'}
       - Objetivo Principal: ${diagnosticData.objetivo || 'No especificado'}
 
       **Resultados del Diagnóstico:**
       - Puntajes ARES-AI: ${JSON.stringify(scores.ares)}
-      - Puntajes de Competencias (Puntajes bajos indican debilidades críticas): ${JSON.stringify(scores.competencias)}
+      - Puntajes de Competencias: ${JSON.stringify(scores.competencias)}
 
       **Catálogo de Cursos de Sube Academia:**
       ${formattedCoursesString}
 
       **Tu Tarea:**
-      Genera un objeto JSON con la siguiente estructura exacta y contenido de alta calidad:
+      Genera un objeto JSON con la siguiente estructura y contenido de alta calidad:
       {
-        "titulo_informe": "Un título potente y profesional para el informe. Ejemplo: 'Hoja de Ruta Estratégica para la Adopción de IA'.",
-        "resumen_ejecutivo": "Un párrafo de 3-4 frases que resuma el nivel de madurez en IA, destacando la principal fortaleza y las 2 áreas de mejora más críticas. Debe ser claro y directo.",
+        "titulo_informe": "Hoja de Ruta Estratégica para la Adopción de IA",
+        "resumen_ejecutivo": "Un párrafo de 3-4 frases resumiendo el nivel de madurez en IA, destacando la principal fortaleza y las 2 áreas de mejora más críticas.",
         "analisis_ares": [
-          { "dimension": "Adopción", "puntaje": ${scores.ares['adopcion'] || 0}, "analisis": "Un análisis experto y conciso sobre las implicaciones prácticas de este puntaje en 'Adopción' para la organización." },
-          { "dimension": "Riesgos", "puntaje": ${scores.ares['riesgos'] || 0}, "analisis": "Análisis experto para 'Riesgos'." },
+          { "dimension": "Agilidad", "puntaje": ${scores.ares['agilidad'] || 0}, "analisis": "Análisis experto y conciso sobre las implicaciones prácticas de este puntaje en 'Agilidad'." },
+          { "dimension": "Responsabilidad", "puntaje": ${scores.ares['responsabilidad'] || 0}, "analisis": "Análisis experto para 'Responsabilidad'." },
           { "dimension": "Ética", "puntaje": ${scores.ares['etica'] || 0}, "analisis": "Análisis experto para 'Ética'." },
-          { "dimension": "Seguridad", "puntaje": ${scores.ares['seguridad'] || 0}, "analisis": "Análisis experto para 'Seguridad'." },
-          { "dimension": "Capacidad", "puntaje": ${scores.ares['capacidad'] || 0}, "analisis": "Análisis experto para 'Capacidad'." },
-          { "dimension": "Datos", "puntaje": ${scores.ares['datos'] || 0}, "analisis": "Análisis experto para 'Datos'." },
-          { "dimension": "Gobernanza", "puntaje": ${scores.ares['gobernanza'] || 0}, "analisis": "Análisis experto para 'Gobernanza'." },
-          { "dimension": "Valor", "puntaje": ${scores.ares['valor'] || 0}, "analisis": "Análisis experto para 'Valor'." },
-          { "dimension": "Operación", "puntaje": ${scores.ares['operacion'] || 0}, "analisis": "Análisis experto para 'Operación'." },
-          { "dimension": "Talento", "puntaje": ${scores.ares['talento'] || 0}, "analisis": "Análisis experto para 'Talento'." },
-          { "dimension": "Tecnología", "puntaje": ${scores.ares['tecnologia'] || 0}, "analisis": "Análisis experto para 'Tecnología'." },
-          { "dimension": "Integración", "puntaje": ${scores.ares['integracion'] || 0}, "analisis": "Análisis experto para 'Integración'." },
-          { "dimension": "Cumplimiento", "puntaje": ${scores.ares['cumplimiento'] || 0}, "analisis": "Análisis experto para 'Cumplimiento'." },
-          { "dimension": "Transparencia", "puntaje": ${scores.ares['transparencia'] || 0}, "analisis": "Análisis experto para 'Transparencia'." },
           { "dimension": "Sostenibilidad", "puntaje": ${scores.ares['sostenibilidad'] || 0}, "analisis": "Análisis experto para 'Sostenibilidad'." }
         ],
         "plan_de_accion": [
           {
-            "area_mejora": "Nombre de la competencia o dimensión ARES con el puntaje MÁS BAJO.",
-            "descripcion_problema": "Describe en 2 frases el riesgo o la oportunidad perdida que representa tener un puntaje bajo en esta área.",
+            "area_mejora": "Nombre de la competencia o dimensión con el puntaje MÁS BAJO.",
+            "descripcion_problema": "Describe en 2 frases el riesgo o la oportunidad perdida que representa este puntaje bajo.",
             "acciones_recomendadas": [
-              { "accion": "Paso 1: Una acción concreta e inmediata (ej: 'Realizar un workshop de sensibilización sobre IA para líderes').", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué' de esta acción.", "curso_recomendado_id": "El ID del curso de Sube Academia MÁS relevante para esta acción. Si ninguno aplica, usa 'null'." },
-              { "accion": "Paso 2: Una acción a mediano plazo que construya sobre la anterior (ej: 'Definir un comité de ética en IA').", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué' de esta acción.", "curso_recomendado_id": "El ID del curso de Sube Academia MÁS relevante para esta acción. Si ninguno aplica, usa 'null'." }
+              { "accion": "Paso 1 (Corto Plazo): Una acción concreta e inmediata.", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué' de esta acción.", "curso_recomendado_id": "El ID del curso MÁS relevante. Si ninguno aplica, usa 'null'." },
+              { "accion": "Paso 2 (Mediano Plazo): Una acción que construya sobre la anterior.", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué'.", "curso_recomendado_id": "El ID del curso MÁS relevante. Si ninguno aplica, usa 'null'." }
             ]
           },
           {
             "area_mejora": "Nombre de la SEGUNDA competencia o dimensión con puntaje más bajo.",
-            "descripcion_problema": "Describe en 2 frases el riesgo o la oportunidad perdida que representa tener un puntaje bajo en esta área.",
+            "descripcion_problema": "Describe en 2 frases el riesgo o la oportunidad perdida.",
             "acciones_recomendadas": [
-              { "accion": "Paso 1: Una acción concreta e inmediata.", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué'.", "curso_recomendado_id": "El ID del curso de Sube Academia MÁS relevante. Si ninguno aplica, usa 'null'." },
-              { "accion": "Paso 2: Una acción a mediano plazo.", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué'.", "curso_recomendado_id": "El ID del curso de Sube Academia MÁS relevante. Si ninguno aplica, usa 'null'." }
+              { "accion": "Paso 1 (Corto Plazo): Una acción concreta e inmediata.", "detalle": "Explica en 2-3 líneas el 'cómo' y el 'porqué'.", "curso_recomendado_id": "El ID del curso MÁS relevante. Si ninguno aplica, usa 'null'." }
             ]
           }
         ]
