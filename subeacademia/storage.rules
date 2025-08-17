@@ -19,14 +19,15 @@ service firebase.storage {
     }
     
     // Reportes de diagnóstico generados por Cloud Functions
-    match /reports/{userId}/{diagnosticId}.pdf {
-      allow read: if request.auth != null && request.auth.uid == userId;
+    match /reports/{diagnosticId}.pdf {
+      allow read: if true; // Los PDFs son públicos una vez generados
       allow write: if false; // Solo las Cloud Functions pueden escribir
     }
     
     // Permitir que las Cloud Functions escriban en reports/
     match /reports/{allPaths=**} {
-      allow read, write: if false; // Solo Cloud Functions pueden acceder
+      allow read: if true; // Los reportes son públicos
+      allow write: if false; // Solo Cloud Functions pueden acceder
     }
   }
 }

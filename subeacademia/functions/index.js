@@ -122,92 +122,48 @@ exports.sendEmail = onRequest({
 
 // Cloud Function para generar PDFs automáticamente
 exports.generatePdfReport = onWrite({
-  document: 'users/{userId}/diagnostics/{diagnosticId}',
+  document: 'diagnostics/{diagnosticId}',
   region: process.env.FUNCTION_REGION || 'us-central1',
-  timeoutSeconds: 300, // 5 minutos para generar PDF
-  memory: '2GiB', // Memoria necesaria para Puppeteer
+  timeoutSeconds: 300,
 }, async (event) => {
+  const diagnosticData = event.data.after.data();
+  const diagnosticId = event.data.after.id;
+
+  // Solo procesar si hay un reporte y no hay URL de PDF ya generada
+  if (!diagnosticData.report || diagnosticData.pdfUrl) {
+    return null;
+  }
+
+  logger.info(`Iniciando generación de PDF para el diagnóstico: ${diagnosticId}`);
+
   try {
-    // Solo procesar si es un documento nuevo
-    if (!event.data.after.exists()) {
-      logger.info('Documento eliminado, no se genera PDF');
-      return;
-    }
-
-    const diagnosticData = event.data.after.data();
-    const userId = event.params.userId;
-    const diagnosticId = event.params.diagnosticId;
-
-    logger.info(`Generando PDF para diagnóstico ${diagnosticId} del usuario ${userId}`);
-
-    // Verificar que no se haya generado ya un PDF
-    if (diagnosticData.pdfUrl) {
-      logger.info(`PDF ya existe para diagnóstico ${diagnosticId}`);
-      return;
-    }
-
-    // Generar HTML del reporte
-    const htmlContent = generateReportHtml(diagnosticData);
-    
-    // Generar PDF con Puppeteer
+    const htmlContent = generateDiagnosticReportHTML(diagnosticData);
     const pdfBuffer = await generatePdfFromHtml(htmlContent);
-    
-    // Subir PDF a Firebase Storage
+
+    // Guardar PDF en Storage
     const bucket = admin.storage().bucket();
-    const pdfFileName = `reports/${userId}/${diagnosticId}.pdf`;
-    const file = bucket.file(pdfFileName);
-    
+    const filePath = `reports/${diagnosticId}.pdf`;
+    const file = bucket.file(filePath);
+
     await file.save(pdfBuffer, {
-      metadata: {
-        contentType: 'application/pdf',
-        metadata: {
-          userId: userId,
-          diagnosticId: diagnosticId,
-          generatedAt: new Date().toISOString()
-        }
-      }
+      metadata: { contentType: 'application/pdf' },
     });
 
-    // Hacer el archivo público y obtener URL
+    // Hacer el archivo público para que se pueda descargar
     await file.makePublic();
-    const pdfUrl = `https://storage.googleapis.com/${bucket.name}/${pdfFileName}`;
+    const publicUrl = file.publicUrl();
 
-    // Actualizar el documento con la URL del PDF
-    const diagnosticRef = admin.firestore()
-      .collection('users')
-      .doc(userId)
-      .collection('diagnostics')
-      .doc(diagnosticId);
-    
-    await diagnosticRef.update({
-      pdfUrl: pdfUrl,
-      pdfGeneratedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
+    logger.info(`PDF generado y subido a: ${publicUrl}`);
 
-    logger.info(`PDF generado exitosamente para diagnóstico ${diagnosticId}: ${pdfUrl}`);
-
+    // Actualizar el documento en Firestore con la URL del PDF
+    return event.data.after.ref.set({ pdfUrl: publicUrl }, { merge: true });
   } catch (error) {
-    logger.error(`Error generando PDF para diagnóstico ${event.params.diagnosticId}:`, error);
-    
-    // Intentar actualizar el documento con información del error
-    try {
-      const diagnosticRef = admin.firestore()
-        .collection('users')
-        .doc(event.params.userId)
-        .collection('diagnostics')
-        .doc(event.params.diagnosticId);
-      
-      await diagnosticRef.update({
-        pdfError: error.message,
-        pdfErrorAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (updateError) {
-      logger.error('Error actualizando documento con información del error:', updateError);
-    }
+    logger.error('Error generando el PDF:', error);
+    return null;
   }
 });
 
-// Función para generar el HTML del reporte
+// Función para generar HTML del reporte
 function generateReportHtml(diagnosticData) {
   const { form, scores, analysisContent, fecha, puntajeGeneral } = diagnosticData;
   
@@ -630,5 +586,196 @@ async function generatePdfFromHtml(htmlContent) {
       await browser.close();
     }
   }
+}
+
+// Función para generar HTML del reporte de diagnóstico
+function generateDiagnosticReportHTML(data) {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf8" />
+        <title>Reporte de Madurez en IA - Sube Academia</title>
+        <style>
+          body { 
+            font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif; 
+            color: #333; 
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+          }
+          .header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            border-bottom: 3px solid #005f73; 
+            padding-bottom: 20px; 
+            background: linear-gradient(135deg, #005f73 0%, #0a9396 100%);
+            color: white;
+            padding: 30px 20px;
+          }
+          .header h1 { 
+            color: white; 
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          }
+          .header .subtitle {
+            color: #e9d8a6;
+            font-size: 1.2em;
+            margin-top: 10px;
+          }
+          h2 { 
+            color: #005f73; 
+            border-bottom: 2px solid #e9d8a6; 
+            padding-bottom: 10px; 
+            margin-top: 40px; 
+            font-size: 1.8em;
+          }
+          h3 {
+            color: #0a9396;
+            margin-top: 25px;
+            font-size: 1.4em;
+          }
+          .section { 
+            margin-bottom: 30px; 
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+          }
+          .plan-item { 
+            border-left: 4px solid #0a9396; 
+            padding-left: 20px; 
+            margin-bottom: 25px; 
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .action-step {
+            background: #e8f4f8;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 3px solid #005f73;
+          }
+          .action-step h4 {
+            color: #005f73;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+          }
+          .course-recommendation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+          }
+          .ares-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+          }
+          .ares-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-top: 4px solid #0a9396;
+          }
+          .ares-score {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #005f73;
+            text-align: center;
+            margin-bottom: 10px;
+          }
+          .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+          }
+          .logo-placeholder {
+            width: 120px;
+            height: 60px;
+            background: #e9d8a6;
+            margin: 0 auto 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #005f73;
+            font-weight: bold;
+            font-size: 0.9em;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="logo-placeholder">SUBE ACADEMIA</div>
+          <h1>Reporte de Madurez en Inteligencia Artificial</h1>
+          <div class="subtitle">Análisis Estratégico y Plan de Acción Personalizado</div>
+        </div>
+        
+        <div class="section">
+          <h2>Resumen Ejecutivo</h2>
+          <p>${data.report?.resumen_ejecutivo || "No disponible"}</p>
+        </div>
+        
+        ${data.report?.analisis_ares && data.report.analisis_ares.length > 0 ? `
+        <div class="section">
+          <h2>Análisis por Dimensión ARES-AI</h2>
+          <div class="ares-analysis">
+            ${data.report.analisis_ares.map(item => `
+              <div class="ares-item">
+                <div class="ares-score">${item.puntaje}/100</div>
+                <h3>${item.dimension}</h3>
+                <p>${item.analisis}</p>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        ` : ''}
+        
+        ${data.report?.plan_de_accion && data.report.plan_de_accion.length > 0 ? `
+        <div class="section">
+          <h2>Plan de Acción Recomendado</h2>
+          ${data.report.plan_de_accion.map((plan, index) => `
+            <div class="plan-item">
+              <h3>Área de Mejora ${index + 1}: ${plan.area_mejora}</h3>
+              <p><em>${plan.descripcion_problema}</em></p>
+              ${plan.acciones_recomendadas.map((accion, accIndex) => `
+                <div class="action-step">
+                  <h4>${accion.accion}</h4>
+                  <p>${accion.detalle}</p>
+                  ${accion.curso_recomendado_id ? `
+                    <div class="course-recommendation">
+                      <strong>🎯 Curso Recomendado:</strong> ID ${accion.curso_recomendado_id}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join("")}
+            </div>
+          `).join("")}
+        </div>
+        ` : ''}
+        
+        <div class="footer">
+          <p><strong>Reporte generado automáticamente por Sube Academia</strong></p>
+          <p>Fecha de generación: ${new Date().toLocaleDateString('es-ES', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+          <p>Este reporte es confidencial y está destinado únicamente para uso interno de la organización.</p>
+        </div>
+      </body>
+    </html>
+  `;
 }
 

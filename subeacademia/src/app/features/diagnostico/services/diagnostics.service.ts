@@ -70,6 +70,21 @@ export class DiagnosticsService {
 		return docRef.id;
 	}
 
+	async saveDiagnosticWithReport(report: any, scores: any, diagnosticData: any): Promise<any> {
+		// Guardar en la colección global de diagnósticos para que la Cloud Function lo procese
+		const globalCol = collection(this.firestore, 'diagnostics');
+		const docRef = await addDoc(globalCol, {
+			report,
+			scores,
+			diagnosticData,
+			fecha: new Date(),
+			timestamp: new Date(),
+			status: 'pending_pdf'
+		});
+		
+		return docRef;
+	}
+
 	getDiagnosticsForUser(userId: string): Observable<UserDiagnostic[]> {
 		const userCol = collection(this.firestore, `users/${userId}/diagnostics`);
 		const q = query(userCol, orderBy('fecha', 'desc'));
