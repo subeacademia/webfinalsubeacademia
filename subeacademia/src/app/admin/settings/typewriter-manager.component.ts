@@ -34,7 +34,7 @@ import { AuthCoreService } from '../../core/auth-core.service';
           >
           <button 
             (click)="saveTitle()" 
-            [disabled]="!titleValue?.trim() || isSavingTitle"
+            [disabled]="!titleValue.trim() || isSavingTitle"
             class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
           >
             <svg *ngIf="isSavingTitle" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -162,7 +162,7 @@ import { AuthCoreService } from '../../core/auth-core.service';
             >
             <button 
               (click)="addPhrase()" 
-              [disabled]="!newPhraseText?.trim() || isAddingPhrase"
+              [disabled]="!newPhraseText.trim() || isAddingPhrase"
               class="px-6 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
             >
               <svg *ngIf="isAddingPhrase" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">

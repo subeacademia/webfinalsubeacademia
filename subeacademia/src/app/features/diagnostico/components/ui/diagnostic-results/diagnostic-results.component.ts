@@ -130,7 +130,7 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
       context: {
         role: 'Profesional',
         industry: this.diagnosticData.contexto?.industria || 'General',
-        companySize: this.diagnosticData.contexto?.tamanoEmpresa || this.diagnosticData.contexto?.tamanoEquipo || this.diagnosticData.contexto?.numEmpleados || 'No especificado'
+        companySize: String(this.diagnosticData.contexto?.tamanoEmpresa || this.diagnosticData.contexto?.tamanoEquipo || this.diagnosticData.contexto?.numEmpleados || 'No especificado')
       },
       objective: {
         goal: this.diagnosticData.objetivo || 'No especificado'

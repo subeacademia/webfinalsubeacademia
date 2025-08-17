@@ -103,7 +103,7 @@
             <!-- Front -->
             <div class="collaborator-card-front bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 flex flex-col items-center text-center h-full">
               <div class="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 flex items-center justify-center mb-4">
-                <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ c.name.charAt(0) }}{{ c.name.split(' ')[1]?.charAt(0) || '' }}</span>
+                <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ c.name.charAt(0) }}{{ c.name.split(' ')[1] ? c.name.split(' ')[1].charAt(0) : '' }}</span>
               </div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ c.name }}</h3>
               <p class="text-indigo-600 dark:text-indigo-400 text-sm font-medium">{{ c.role }}</p>
