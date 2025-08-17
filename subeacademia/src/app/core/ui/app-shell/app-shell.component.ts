@@ -1,17 +1,18 @@
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { NgIf, AsyncPipe } from '@angular/common';
 import { I18nService } from '../../i18n/i18n.service';
 import { SettingsService, SiteSettings } from '../../data/settings.service';
 import { ThemeService } from '../../../shared/theme.service';
-
+import { AuthService } from '../../services/auth.service';
+import { User } from '@angular/fire/auth';
 
 type Lang = 'es' | 'en' | 'pt';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgIf],
+  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
@@ -122,6 +123,33 @@ type Lang = 'es' | 'en' | 'pt';
 
         <!-- Acciones persistentes a la derecha (desktop) -->
         <div class="hidden md:flex items-center gap-2 ml-2" role="group" aria-label="Acciones del sitio">
+          <!-- Botones de autenticación -->
+          <div *ngIf="!(currentUser$ | async)" class="flex items-center gap-2">
+            <button type="button" 
+                    (click)="loginWithGoogle()" 
+                    class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    aria-label="Iniciar sesión con Google">
+              <span class="mr-2">🔐</span>
+              Iniciar Sesión
+            </button>
+          </div>
+          
+          <div *ngIf="currentUser$ | async as user" class="flex items-center gap-2">
+            <a routerLink="/dashboard" 
+               class="btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+               aria-label="Ir al dashboard">
+              <span class="mr-2">👤</span>
+              {{ user.displayName || 'Dashboard' }}
+            </a>
+            <button type="button" 
+                    (click)="logout()" 
+                    class="btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors"
+                    aria-label="Cerrar sesión">
+              <span class="mr-1">🚪</span>
+              Salir
+            </button>
+          </div>
+
           <button type="button" 
                   (click)="toggleTheme()" 
                   class="theme-toggle" 
@@ -204,6 +232,34 @@ type Lang = 'es' | 'en' | 'pt';
              Admin
           </a>
 
+          <!-- Botones de autenticación móviles -->
+          <div *ngIf="!(currentUser$ | async)" class="pt-2">
+            <button type="button" 
+                    (click)="loginWithGoogle(); closeNav()" 
+                    class="w-full btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    aria-label="Iniciar sesión con Google">
+              <span class="mr-2">🔐</span>
+              Iniciar Sesión con Google
+            </button>
+          </div>
+          
+          <div *ngIf="currentUser$ | async as user" class="pt-2 space-y-2">
+            <a routerLink="/dashboard" 
+               (click)="closeNav()"
+               class="block w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
+               aria-label="Ir al dashboard">
+              <span class="mr-2">👤</span>
+              {{ user.displayName || 'Dashboard' }}
+            </a>
+            <button type="button" 
+                    (click)="logout(); closeNav()" 
+                    class="w-full btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                    aria-label="Cerrar sesión">
+              <span class="mr-1">🚪</span>
+              Cerrar Sesión
+            </button>
+          </div>
+
           <div class="pt-2 flex gap-2">
             <select class="btn w-full" 
                     [value]="currentLang()" 
@@ -267,7 +323,11 @@ export class AppShellComponent {
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
   private readonly themeService = inject(ThemeService);
+  private readonly authService = inject(AuthService);
   themeDark = signal<boolean>(this.themeService.current() === 'dark');
+
+  // Observable del usuario actual para la UI
+  readonly currentUser$ = this.authService.currentUser$;
 
   constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => Lang;
@@ -304,6 +364,22 @@ export class AppShellComponent {
   toggleTheme() { 
     this.themeService.toggle(); 
     this.themeDark.set(this.themeService.current() === 'dark'); 
+  }
+
+  async loginWithGoogle(): Promise<void> {
+    try {
+      await this.authService.loginWithGoogle();
+    } catch (error) {
+      console.error('Error en login con Google:', error);
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await this.authService.logout();
+    } catch (error) {
+      console.error('Error en logout:', error);
+    }
   }
 
   // Ya no gestionamos DOM aquí; lo hace ThemeService

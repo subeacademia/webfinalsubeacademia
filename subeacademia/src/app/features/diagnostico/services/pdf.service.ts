@@ -20,7 +20,7 @@ export class PdfService {
 		const imgData = canvas.toDataURL('image/png');
 		const pdf = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
 		const pageWidth = pdf.internal.pageSize.getWidth();
-		const pageHeight = pdf.internal.pageSize.getPageHeight();
+		const pageHeight = pdf.internal.pageSize.getHeight();
 		const imgWidth = pageWidth;
 		const imgHeight = (canvas.height * imgWidth) / canvas.width;
 		let y = 0;

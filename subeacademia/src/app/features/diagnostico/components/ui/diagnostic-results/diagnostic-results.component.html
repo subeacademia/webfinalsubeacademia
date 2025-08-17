@@ -66,7 +66,64 @@
 
         <div *ngIf="!(isLoadingAnalysis) && (generativeAnalysis$ | async) as analysis">
           <div class="prose prose-lg dark:prose-invert max-w-none p-6 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <markdown [data]="analysis"></markdown>
+            
+            <!-- Título del Informe -->
+            <h2 class="text-2xl font-bold text-primary mb-4">{{ analysis.titulo_informe }}</h2>
+            
+            <!-- Resumen Ejecutivo -->
+            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+              <h3 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">📋 Resumen Ejecutivo</h3>
+              <p class="text-blue-700 dark:text-blue-300">{{ analysis.resumen_ejecutivo }}</p>
+            </div>
+            
+            <!-- Análisis ARES -->
+            <div class="mb-6">
+              <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">🔍 Análisis ARES-AI</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngFor="let item of analysis.analisis_ares" 
+                     class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                  <div class="flex justify-between items-center mb-2">
+                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ item.dimension }}</h4>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium"
+                          [ngClass]="{
+                            'bg-red-100 text-red-800': item.puntaje < 30,
+                            'bg-yellow-100 text-yellow-800': item.puntaje >= 30 && item.puntaje < 60,
+                            'bg-green-100 text-green-800': item.puntaje >= 60
+                          }">
+                      {{ item.puntaje }}%
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">{{ item.analisis }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Plan de Acción -->
+            <div class="mb-6">
+              <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">🎯 Plan de Acción</h3>
+              <div class="space-y-4">
+                <div *ngFor="let area of analysis.plan_de_accion; let i = index" 
+                     class="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+                  <h4 class="font-semibold text-purple-800 dark:text-purple-200 mb-2">
+                    {{ i + 1 }}. {{ area.area_mejora }}
+                  </h4>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ area.descripcion_problema }}</p>
+                  
+                  <div class="space-y-3">
+                    <div *ngFor="let accion of area.acciones_recomendadas" 
+                         class="pl-4 border-l-2 border-purple-300 dark:border-purple-600">
+                      <h5 class="font-medium text-gray-800 dark:text-gray-200 mb-1">{{ accion.accion }}</h5>
+                      <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ accion.detalle }}</p>
+                      <div *ngIf="accion.curso_recomendado_id" 
+                           class="inline-block px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-xs rounded-full">
+                        📚 Curso recomendado: {{ accion.curso_recomendado_id }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -75,11 +132,44 @@
 </div>
 
 <!-- Botones de Acción Fuera del Contenido del PDF -->
-<div class="max-w-4xl mx-auto mt-8 px-4 sm:px-6 md:px-8 flex justify-end">
-  <app-ui-button (click)="generateAndDownloadPdf()">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+<div class="max-w-4xl mx-auto mt-8 px-4 sm:px-6 md:px-8 flex justify-end space-x-4">
+  
+  <!-- Botón de PDF Generado Automáticamente -->
+  <div *ngIf="currentUserId && currentDiagnosticId">
+    <!-- Estado de Generación -->
+    <div *ngIf="isPdfGenerating" class="flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 animate-spin" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+      </svg>
+      Generando PDF...
+    </div>
+    
+    <!-- Error en Generación -->
+    <div *ngIf="pdfError" class="flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+      </svg>
+      Error: {{ pdfError }}
+    </div>
+    
+    <!-- PDF Listo para Descargar -->
+    <app-ui-button *ngIf="pdfUrl && !isPdfGenerating && !pdfError" 
+                   (click)="downloadPdf()" 
+                   class="bg-green-600 hover:bg-green-700">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+      Descargar Reporte PDF
+    </app-ui-button>
+  </div>
+  
+  <!-- Botón de PDF Local (Fallback) -->
+  <app-ui-button (click)="generateAndDownloadPdf()" 
+                 [disabled]="!diagnosticData || !analysisContent"
+                 class="bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 0 20" fill="currentColor">
       <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
     </svg>
-    Descargar PDF
+    PDF Local
   </app-ui-button>
 </div>

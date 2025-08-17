@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth, User, authState, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { Auth, User, authState, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
@@ -31,6 +31,13 @@ export class AuthCoreService {
     if (!this.auth) throw new Error('Auth no disponible');
     const cred = await signInWithEmailAndPassword(this.auth, email, password);
     return cred.user;
+  }
+
+  async loginWithGoogle(): Promise<User> {
+    if (!this.auth) throw new Error('Auth no disponible');
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(this.auth, provider);
+    return result.user;
   }
 
   async logout(): Promise<void> { if (this.auth) await signOut(this.auth); }

@@ -17,5 +17,16 @@ service firebase.storage {
     match /private/{allPaths=**} {
       allow read, write: if isAdmin();
     }
+    
+    // Reportes de diagnóstico generados por Cloud Functions
+    match /reports/{userId}/{diagnosticId}.pdf {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // Solo las Cloud Functions pueden escribir
+    }
+    
+    // Permitir que las Cloud Functions escriban en reports/
+    match /reports/{allPaths=**} {
+      allow read, write: if false; // Solo Cloud Functions pueden acceder
+    }
   }
 }

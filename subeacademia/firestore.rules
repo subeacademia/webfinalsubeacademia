@@ -56,5 +56,18 @@ service cloud.firestore {
       allow read: if true; // Home debe leer sin autenticación
       allow create, update, delete: if true; // TEMPORAL: Permitir escritura sin autenticación
     }
+
+    // NUEVO: Reglas para usuarios autenticados
+    // Los usuarios pueden leer y escribir únicamente en su propio subdirectorio
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Diagnósticos globales (mantener compatibilidad)
+    match /diagnostics/{id} {
+      allow read: if true; // Público para lectura
+      allow create, update: if request.auth != null; // Usuarios autenticados pueden crear/actualizar
+      allow delete: if isAdmin(); // Solo admins pueden eliminar
+    }
   }
 }

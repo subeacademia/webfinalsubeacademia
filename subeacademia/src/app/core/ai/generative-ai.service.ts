@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, of, from } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { AsistenteIaService } from '../../shared/ui/chatbot/asistente-ia.service';
+import { CoursesService } from '../data/courses.service';
+import { Course } from '../models';
 
 export interface DiagnosticAnalysisData {
   userName: string;
@@ -11,16 +13,261 @@ export interface DiagnosticAnalysisData {
   lowestCompetencies: { name: string; score: number; description: string }[];
 }
 
+export interface DiagnosticAnalysisResponse {
+  titulo_informe: string;
+  resumen_ejecutivo: string;
+  analisis_ares: Array<{
+    dimension: string;
+    puntaje: number;
+    analisis: string;
+  }>;
+  plan_de_accion: Array<{
+    area_mejora: string;
+    descripcion_problema: string;
+    acciones_recomendadas: Array<{
+      accion: string;
+      detalle: string;
+      curso_recomendado_id: string | null;
+    }>;
+  }>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GenerativeAiService {
 
-  constructor(private asistenteIaService: AsistenteIaService) {}
+  constructor(
+    private asistenteIaService: AsistenteIaService,
+    private coursesService: CoursesService
+  ) {}
 
+  generateActionPlan(diagnosticData: any, scores: any): Observable<DiagnosticAnalysisResponse> {
+    return from(this.coursesService.getAllCourses()).pipe(
+      switchMap((courses: Course[]) => {
+        // Formatear la lista de cursos para el prompt
+        const formattedCoursesString = courses.map((course: Course) => 
+          `- ID: ${course.id}, Título: ${course.title}, Descripción: ${course.summary || 'Sin descripción'}`
+        ).join('\n');
+
+        // Construir el prompt con el nuevo formato JSON
+        const systemPrompt = `Eres un consultor experto en implementación de IA y transformación digital, basado en el framework ARES-AI (Agile, Responsible, Ethical, and Sustainable) y el modelo de 13 competencias de Sube Academia. Tu tarea es analizar el siguiente diagnóstico y generar un informe detallado en formato JSON. NO añadas texto antes o después del objeto JSON.
+
+**Contexto del Usuario:**
+- Rol: ${diagnosticData.context?.role || 'Profesional'}
+- Industria: ${diagnosticData.context?.industry || 'General'}
+- Tamaño de la Empresa: ${diagnosticData.context?.companySize || 'No especificado'}
+- Objetivo Principal: ${diagnosticData.objective?.goal || 'No especificado'}
+
+**Resultados del Diagnóstico:**
+- Puntajes ARES-AI: ${JSON.stringify(scores.ares)}
+- Puntajes de Competencias (las más bajas son las debilidades principales): ${JSON.stringify(scores.competencies)}
+
+**Cursos Disponibles en Sube Academia:**
+${formattedCoursesString}
+
+**Tu Tarea:**
+Genera un objeto JSON con la siguiente estructura exacta:
+{
+  "titulo_informe": "Un título inspirador y profesional para el informe.",
+  "resumen_ejecutivo": "Un párrafo conciso (2-3 frases) que resuma el estado actual de madurez en IA de la organización, destacando su principal fortaleza y su área de mejora más crítica.",
+  "analisis_ares": [
+    {
+      "dimension": "Agilidad",
+      "puntaje": ${scores.ares?.agilidad || 0},
+      "analisis": "Un análisis breve y experto sobre lo que significa este puntaje en la dimensión 'Agilidad' para la organización, explicando las implicaciones prácticas."
+    },
+    {
+      "dimension": "Responsabilidad",
+      "puntaje": ${scores.ares?.responsabilidad || 0},
+      "analisis": "Análisis similar para 'Responsabilidad'."
+    },
+    {
+      "dimension": "Ética",
+      "puntaje": ${scores.ares?.etica || 0},
+      "analisis": "Análisis similar para 'Ética'."
+    },
+    {
+      "dimension": "Sostenibilidad",
+      "puntaje": ${scores.ares?.sostenibilidad || 0},
+      "analisis": "Análisis similar para 'Sostenibilidad'."
+    }
+  ],
+  "plan_de_accion": [
+    {
+      "area_mejora": "Nombre de la competencia o dimensión ARES con puntaje más bajo.",
+      "descripcion_problema": "Descripción breve del desafío que representa tener un puntaje bajo en esta área.",
+      "acciones_recomendadas": [
+        {
+          "accion": "Una acción específica, clara y realizable a corto plazo (ej: 'Realizar un taller de sensibilización sobre ética en IA').",
+          "detalle": "Una explicación de 2-3 líneas sobre cómo implementar esta acción y por qué es importante.",
+          "curso_recomendado_id": "El ID del curso de Sube Academia más relevante para esta acción, o 'null' si ninguno aplica directamente."
+        },
+        {
+          "accion": "Una segunda acción específica a mediano plazo.",
+          "detalle": "Detalle de la segunda acción.",
+          "curso_recomendado_id": "ID del curso o 'null'."
+        }
+      ]
+    },
+    {
+      "area_mejora": "Nombre de la SEGUNDA competencia o dimensión con puntaje bajo.",
+      "descripcion_problema": "...",
+      "acciones_recomendadas": [
+        {
+          "accion": "...",
+          "detalle": "...",
+          "curso_recomendado_id": "..."
+        }
+      ]
+    }
+  ]
+}`;
+
+        const payload = {
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: 'Genera el informe JSON basado en el diagnóstico proporcionado.' }
+          ],
+          maxTokens: 2000,
+          temperature: 0.7
+        };
+
+        return this.asistenteIaService.generarTextoAzure(payload).pipe(
+          map((res: any) => {
+            if (res?.choices?.[0]?.message?.content) {
+              const content = res.choices[0].message.content;
+              try {
+                // Intentar parsear la respuesta como JSON
+                const jsonResponse = JSON.parse(content);
+                return jsonResponse as DiagnosticAnalysisResponse;
+              } catch (parseError) {
+                console.error('Error parseando respuesta JSON:', parseError);
+                console.log('Respuesta recibida:', content);
+                throw new Error('La IA no devolvió un JSON válido');
+              }
+            }
+            throw new Error('Respuesta de la IA con formato inesperado.');
+          }),
+          catchError(err => {
+            console.error('Error en GenerativeAiService:', err);
+            // Retornar un objeto de respuesta por defecto en caso de error
+            return of({
+              titulo_informe: "Informe de Diagnóstico - Modo de Emergencia",
+              resumen_ejecutivo: "No se pudo generar el análisis completo. Por favor, contacta con soporte técnico.",
+              analisis_ares: [],
+              plan_de_accion: []
+            } as DiagnosticAnalysisResponse);
+          })
+        );
+      }),
+      catchError(err => {
+        console.error('Error obteniendo cursos:', err);
+        // Fallback sin cursos
+        return this.generateActionPlanWithoutCourses(diagnosticData, scores);
+      })
+    );
+  }
+
+  private generateActionPlanWithoutCourses(diagnosticData: any, scores: any): Observable<DiagnosticAnalysisResponse> {
+    const systemPrompt = `Eres un consultor experto en implementación de IA y transformación digital, basado en el framework ARES-AI (Agile, Responsible, Ethical, and Sustainable) y el modelo de 13 competencias de Sube Academia. Tu tarea es analizar el siguiente diagnóstico y generar un informe detallado en formato JSON. NO añadas texto antes o después del objeto JSON.
+
+**Contexto del Usuario:**
+- Rol: ${diagnosticData.context?.role || 'Profesional'}
+- Industria: ${diagnosticData.context?.industry || 'General'}
+- Tamaño de la Empresa: ${diagnosticData.context?.companySize || 'No especificado'}
+- Objetivo Principal: ${diagnosticData.objective?.goal || 'No especificado'}
+
+**Resultados del Diagnóstico:**
+- Puntajes ARES-AI: ${JSON.stringify(scores.ares)}
+- Puntajes de Competencias (las más bajas son las debilidades principales): ${JSON.stringify(scores.competencies)}
+
+**Tu Tarea:**
+Genera un objeto JSON con la siguiente estructura exacta (sin cursos recomendados):
+{
+  "titulo_informe": "Un título inspirador y profesional para el informe.",
+  "resumen_ejecutivo": "Un párrafo conciso (2-3 frases) que resuma el estado actual de madurez en IA de la organización, destacando su principal fortaleza y su área de mejora más crítica.",
+  "analisis_ares": [
+    {
+      "dimension": "Agilidad",
+      "puntaje": ${scores.ares?.agilidad || 0},
+      "analisis": "Un análisis breve y experto sobre lo que significa este puntaje en la dimensión 'Agilidad' para la organización, explicando las implicaciones prácticas."
+    },
+    {
+      "dimension": "Responsabilidad",
+      "puntaje": ${scores.ares?.responsabilidad || 0},
+      "analisis": "Análisis similar para 'Responsabilidad'."
+    },
+    {
+      "dimension": "Ética",
+      "puntaje": ${scores.ares?.etica || 0},
+      "analisis": "Análisis similar para 'Ética'."
+    },
+    {
+      "dimension": "Sostenibilidad",
+      "puntaje": ${scores.ares?.sostenibilidad || 0},
+      "analisis": "Análisis similar para 'Sostenibilidad'."
+    }
+  ],
+  "plan_de_accion": [
+    {
+      "area_mejora": "Nombre de la competencia o dimensión ARES con puntaje más bajo.",
+      "descripcion_problema": "Descripción breve del desafío que representa tener un puntaje bajo en esta área.",
+      "acciones_recomendadas": [
+        {
+          "accion": "Una acción específica, clara y realizable a corto plazo.",
+          "detalle": "Una explicación de 2-3 líneas sobre cómo implementar esta acción y por qué es importante.",
+          "curso_recomendado_id": null
+        },
+        {
+          "accion": "Una segunda acción específica a mediano plazo.",
+          "detalle": "Detalle de la segunda acción.",
+          "curso_recomendado_id": null
+        }
+      ]
+    }
+  ]
+}`;
+
+    const payload = {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: 'Genera el informe JSON basado en el diagnóstico proporcionado.' }
+      ],
+      maxTokens: 2000,
+      temperature: 0.7
+    };
+
+    return this.asistenteIaService.generarTextoAzure(payload).pipe(
+      map((res: any) => {
+        if (res?.choices?.[0]?.message?.content) {
+          const content = res.choices[0].message.content;
+          try {
+            const jsonResponse = JSON.parse(content);
+            return jsonResponse as DiagnosticAnalysisResponse;
+          } catch (parseError) {
+            console.error('Error parseando respuesta JSON:', parseError);
+            throw new Error('La IA no devolvió un JSON válido');
+          }
+        }
+        throw new Error('Respuesta de la IA con formato inesperado.');
+      }),
+      catchError(err => {
+        console.error('Error en GenerativeAiService (fallback):', err);
+        return of({
+          titulo_informe: "Informe de Diagnóstico - Modo de Emergencia",
+          resumen_ejecutivo: "No se pudo generar el análisis completo. Por favor, contacta con soporte técnico.",
+          analisis_ares: [],
+          plan_de_accion: []
+        } as DiagnosticAnalysisResponse);
+      })
+    );
+  }
+
+  // Mantener el método anterior para compatibilidad
   generateDiagnosticAnalysis(data: DiagnosticAnalysisData): Observable<string> {
     
-    // MEGA PROMPT DE SISTEMA V2 - MÁS DETALLADO Y CONTEXTUAL
+    // MEGA PROMPT DE SISTEMA V3 - CORREGIDO Y MEJORADO
     const systemPrompt = `
       Actúa como un estratega de talento y coach ejecutivo de Sube Academia, con un doctorado en psicología organizacional y más de 15 años de experiencia en el desarrollo de líderes en la era de la IA. Tu tono es experto, empático, y visionario. Tu objetivo es entregar un análisis profundo y accionable que inspire al usuario a tomar control de su desarrollo profesional.
 
@@ -30,10 +277,10 @@ export class GenerativeAiService {
       Un párrafo inicial que resuma el perfil de ${data.userName}, conectando sus fortalezas y oportunidades con su contexto profesional (rol de ${data.userRole} en la industria de ${data.userIndustry}).
 
       ### 🚀 Tus Superpoderes: Análisis de Fortalezas
-      Para CADA UNA de las 3 competencias destacadas, crea un subtítulo en negrita (ej. **Fortaleza: Liderazgo e Influencia Social**). Luego, en un párrafo, explica por qué esta competencia, cuya definición es "${data.topCompetencies[0]?.description || 'Descripción no disponible'}", es un diferenciador clave en su rol. Proporciona un ejemplo táctico y concreto de cómo puede apalancar esta fortaleza en un proyecto real esta semana.
+      Para CADA UNA de las 3 competencias destacadas, crea un subtítulo en negrita (ej. **Fortaleza: Liderazgo e Influencia Social**). Luego, en un párrafo, explica por qué esta competencia, cuya definición es "${data.topCompetencies[0]?.description || 'Descripción no disponible'}", es un diferenciador clave en su rol. Proporciona un ejemplo táctico y concreto de cómo puede apalancar esta fortaleza en un proyecto real esta semana. Repite para las otras 2 fortalezas.
 
       ### 🌱 Tu Próximo Nivel: Oportunidades de Crecimiento
-      Para CADA UNA de las 3 áreas de oportunidad, crea un subtítulo en negrita (ej. **Oportunidad: Pensamiento Analítico**). En un párrafo, replantea esta área no como una debilidad, sino como una palanca de crecimiento estratégico. Explica el "costo de oportunidad" de no desarrollarla, basándote en su definición ("${data.lowestCompetencies[0]?.description || 'Descripción no disponible'}"), y el impacto positivo que tendría si la mejorara.
+      Para CADA UNA de las 3 áreas de oportunidad, crea un subtítulo en negrita (ej. **Oportunidad: Pensamiento Analítico**). En un párrafo, replantea esta área no como una debilidad, sino como una palanca de crecimiento estratégico. Explica el "costo de oportunidad" de no desarrollarla, basándote en su definición ("${data.lowestCompetencies[0]?.description || 'Descripción no disponible'}"), y el impacto positivo que tendría si la mejorara. Repite para las otras 2 oportunidades.
 
       ### 🎯 Plan de Acción Estratégico (Próximos 30 Días)
       Crea una lista numerada con 3 acciones concretas, accionables y de alto impacto. Cada acción debe combinar una fortaleza con un área de oportunidad de forma inteligente y sinérgica. Sé específico.

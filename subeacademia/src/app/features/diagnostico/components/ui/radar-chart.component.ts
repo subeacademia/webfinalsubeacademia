@@ -43,9 +43,7 @@ export class RadarChartComponent implements OnChanges {
                 ticks: {
                     color: '#9CA3AF',
                     backdropColor: 'transparent',
-                    stepSize: 20,
-                    max: 100,
-                    min: 0
+                    stepSize: 20
                 }
             }
         },
