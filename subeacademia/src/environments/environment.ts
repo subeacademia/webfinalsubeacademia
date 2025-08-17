@@ -19,6 +19,8 @@ export const environment = {
   backendIaUrl: "PON_AQUI_TU_ENDPOINT_VERCEL",
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
+  // API Key de Google Gemini
+  geminiApiKey: 'AIzaSyBhcmP7NTPJqF-pIuyS5rbZVXgxifaiMn8',
   // Para activar emuladores en local, pon en true
   // y arranca: firebase emulators:start
   useEmulators: false,
