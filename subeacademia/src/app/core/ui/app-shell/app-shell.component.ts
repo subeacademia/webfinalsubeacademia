@@ -7,8 +7,6 @@ import { ThemeService } from '../../../shared/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from '@angular/fire/auth';
 
-type Lang = 'es' | 'en' | 'pt';
-
 @Component({
   selector: 'app-shell',
   standalone: true,
@@ -318,7 +316,7 @@ type Lang = 'es' | 'en' | 'pt';
 export class AppShellComponent {
   protected navOpen: WritableSignal<boolean> = signal(false);
 
-  readonly currentLang: () => Lang;
+  readonly currentLang: () => string;
 
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
@@ -330,7 +328,7 @@ export class AppShellComponent {
   readonly currentUser$ = this.authService.currentUser$;
 
   constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
-    this.currentLang = this.i18n.currentLang as unknown as () => Lang;
+    this.currentLang = this.i18n.currentLang as unknown as () => string;
     try {
       this.settings.get().subscribe((s: SiteSettings | undefined) => {
         if (!s) return;
@@ -344,12 +342,17 @@ export class AppShellComponent {
   toggleNav() { 
     this.navOpen.set(!this.navOpen()); 
   }
-  
+
   closeNav() { 
     this.navOpen.set(false); 
   }
 
-  onChangeLang(lang: Lang) {
+  toggleTheme() { 
+    this.themeService.toggle(); 
+    this.themeDark.set(this.themeService.current() === 'dark'); 
+  }
+
+  onChangeLang(lang: string) {
     const supported = new Set(['es', 'en', 'pt']);
     const current = this.router.url;
     const match = current.match(/^\/(es|en|pt)(\/|$)/);
@@ -361,24 +364,23 @@ export class AppShellComponent {
     }
   }
 
-  toggleTheme() { 
-    this.themeService.toggle(); 
-    this.themeDark.set(this.themeService.current() === 'dark'); 
-  }
-
   async loginWithGoogle(): Promise<void> {
     try {
+      console.log('🔑 [AppShell] Intentando login con Google...');
       await this.authService.loginWithGoogle();
+      console.log('✅ [AppShell] Login exitoso');
     } catch (error) {
-      console.error('Error en login con Google:', error);
+      console.error('❌ [AppShell] Error en login:', error);
     }
   }
 
   async logout(): Promise<void> {
     try {
+      console.log('🚪 [AppShell] Intentando logout...');
       await this.authService.logout();
+      console.log('✅ [AppShell] Logout exitoso');
     } catch (error) {
-      console.error('Error en logout:', error);
+      console.error('❌ [AppShell] Error en logout:', error);
     }
   }
 

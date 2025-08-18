@@ -5,12 +5,11 @@ import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ARES_ITEMS } from '../../../data/ares-items';
 import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.component';
-import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-step-ares',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SliderFieldComponent, I18nTranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule, SliderFieldComponent],
   template: `
     <div class="max-w-6xl mx-auto animate-fade-in">
       <div class="text-center mb-8">

@@ -52,7 +52,7 @@ export class DiagnosticStateService {
         objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
     });
 
-	readonly contextoControls: Record<string, FormControl<any>> = {} as any;
+	readonly contextoControls: Record<string, FormControl<any>> = {} as Record<string, FormControl<any>>;
     readonly aresForm: FormGroup = this.fb.group({});
     readonly competenciasForm: FormGroup = this.fb.group({});
 	readonly leadForm: FormGroup = this.fb.group({
@@ -375,12 +375,21 @@ export class DiagnosticStateService {
     // Métodos de persistencia
     private saveToStorage(): void {
         try {
+            // Extraer solo los valores de los controles de contexto para evitar referencias circulares
+            const contextoValues: Record<string, any> = {};
+            Object.keys(this.contextoControls).forEach(key => {
+                const control = this.contextoControls[key];
+                if (control instanceof FormControl) {
+                    contextoValues[key] = control.value;
+                }
+            });
+
             const data = {
                 form: this.form.value,
                 aresForm: this.aresForm.value,
                 competenciasForm: this.competenciasForm.value,
                 leadForm: this.leadForm.value,
-                contextoControls: this.contextoControls,
+                contextoValues: contextoValues, // Solo los valores, no los controles
                 isCompleted: this._isCompleted()
             };
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
@@ -427,10 +436,10 @@ export class DiagnosticStateService {
                 if (data.isCompleted) this._isCompleted.set(data.isCompleted);
                 
                 // Restaurar controles de contexto si existen
-                if (data.contextoControls) {
-                    Object.keys(data.contextoControls).forEach(key => {
-                        if (data.contextoControls[key] && !this.contextoControls[key]) {
-                            this.contextoControls[key] = this.fb.control(data.contextoControls[key]);
+                if (data.contextoValues) {
+                    Object.keys(data.contextoValues).forEach(key => {
+                        if (data.contextoValues[key] !== null && data.contextoValues[key] !== undefined && !this.contextoControls[key]) {
+                            this.contextoControls[key] = this.fb.control(data.contextoValues[key]);
                         }
                     });
                 }

@@ -1,7 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, addDoc, collection, collectionData, query, where, orderBy } from '@angular/fire/firestore';
-import { httpsCallable } from '@angular/fire/functions';
-import { Functions } from '@angular/fire/functions';
 import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
 import { Observable, map } from 'rxjs';
 
@@ -18,7 +16,6 @@ interface UserDiagnostic {
 @Injectable({ providedIn: 'root' })
 export class DiagnosticsService {
 	private readonly firestore = inject(Firestore);
-	private readonly functions = inject(Functions);
 
 	async saveAndRequestEmail(payload: DiagnosticoPersistedPayload & { email?: string; userId?: string }): Promise<string> {
 		// Si hay userId, guardar en la colección del usuario

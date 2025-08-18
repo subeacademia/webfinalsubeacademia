@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { SeoService } from '../../core/seo/seo.service';
 import { courseJsonLd } from '../../core/seo/jsonld';
 import { Course } from '../../core/models/course.model';
@@ -16,10 +15,9 @@ import { Competency } from '../../features/diagnostico/data/competencias';
   selector: 'app-course',
   standalone: true,
   imports: [
-    NgIf, 
+    CommonModule, 
     NgFor, 
     RouterLink, 
-    I18nTranslatePipe, 
     UiButtonComponent,
     PageHeaderComponent,
     CompetencyModalComponent

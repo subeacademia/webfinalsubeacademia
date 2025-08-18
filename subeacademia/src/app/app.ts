@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, isDevMode, signal, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
@@ -8,7 +8,6 @@ import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
 import { ToastContainerComponent } from './core/ui/toast/toast.container';
 import { ChatbotComponent } from './shared/ui/chatbot/chatbot.component';
 import { ThemeService } from './shared/theme.service';
-import { FirebaseDataService } from './core/firebase-data.service';
 
 @Component({
   selector: 'app-root',
@@ -24,50 +23,36 @@ import { FirebaseDataService } from './core/firebase-data.service';
   styleUrl: './app.css'
 })
 export class App implements OnInit, OnDestroy {
-  protected readonly title = signal('subeacademia');
+  protected readonly title = 'subeacademia';
   private readonly themeService = inject(ThemeService);
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
-  private readonly data = inject(FirebaseDataService, { optional: true } as any);
   private readonly unsubscribe$ = new Subject<void>();
   isAdminRoute = false;
+  
   constructor() {}
   ngOnInit() {
     // Inicializa el tema (lee almacenamiento y aplica clases)
     try { this.themeService.init(); } catch {}
-    // ThemeService aplica el tema en el constructor (persistente)
-    if (isDevMode()) {
-      try {
-        const hints = this.data?.getIndexHints?.();
-        if (hints) {
-          // eslint-disable-next-line no-console
-          console.log('[Indices] Recomendados:', hints);
-        }
-      } catch {}
-    }
-    // Inicializar lang y SEO según ruta
-    this.router.events
-      .pipe(filter((e: any) => e instanceof NavigationEnd), takeUntil(this.unsubscribe$))
-      .subscribe(() => {
-        const urlTree = this.router.parseUrl(this.router.url);
-        const first = urlTree.root.children['primary']?.segments[0]?.path as
-          | 'es'
-          | 'en'
-          | 'pt'
-          | undefined;
-        if (first) void this.i18n.setLang(first);
 
-        const url = this.router.url;
-        this.isAdminRoute = url.startsWith('/admin');
-        if (url.includes('/blog')) {
-          this.seo.updateTags({ title: 'Blog · Sube Academia', description: 'Publicaciones y novedades', type: 'website' });
-        } else if (url.includes('/cursos')) {
-          this.seo.updateTags({ title: 'Cursos · Sube Academia', description: 'Cursos y rutas de aprendizaje', type: 'website' });
-        } else {
-          this.seo.updateTags({ title: 'Sube Academia', description: 'Aprende IA, cursos y recursos', type: 'website' });
-        }
+    // Suscribirse a cambios de ruta para detectar rutas admin
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      takeUntil(this.unsubscribe$)
+    ).subscribe((event: NavigationEnd) => {
+      this.isAdminRoute = event.url.startsWith('/admin');
+      console.log('🔍 [App] Ruta detectada:', event.url, '¿Es admin?:', this.isAdminRoute);
+    });
+
+    // Configurar SEO básico
+    try {
+      this.seo.updateTags({
+        title: 'Sube Academia - Aprende IA, cursos y recursos',
+        description: 'Aprende IA, cursos y recursos', 
+        type: 'website' 
       });
+    } catch {}
   }
   ngOnDestroy(): void {
     this.unsubscribe$.next();

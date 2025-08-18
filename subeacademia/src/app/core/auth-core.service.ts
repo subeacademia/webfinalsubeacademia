@@ -6,10 +6,15 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthCoreService {
-  private readonly auth = inject(Auth, { optional: true });
+  private readonly auth = inject(Auth);
 
-  readonly authState$: Observable<User | null> = this.auth ? authState(this.auth).pipe(shareReplay(1)) : new Observable<User | null>((obs) => { obs.next(null); obs.complete(); });
+  readonly authState$: Observable<User | null> = authState(this.auth).pipe(shareReplay(1));
   readonly isLoggedIn$: Observable<boolean> = this.authState$.pipe(map(u => !!u));
+
+  // Propiedad para acceso directo al usuario actual
+  get currentUser(): User | null {
+    return this.auth.currentUser;
+  }
 
   // Lista de admins declarada en environment
   private readonly allowedAdmins = new Set<string>(environment.adminEmails || []);
@@ -23,7 +28,17 @@ export class AuthCoreService {
   isAdminSync(): boolean {
     const current = (this.auth as any)?.currentUser as User | null;
     const email = current?.email ?? null;
-    return !!email && this.allowedAdmins.has(email);
+    const isAdmin = !!email && this.allowedAdmins.has(email);
+    
+    // Logging para debug
+    console.log('🔐 AuthCoreService.isAdminSync():', {
+      currentUser: current,
+      email: email,
+      allowedAdmins: Array.from(this.allowedAdmins),
+      isAdmin: isAdmin
+    });
+    
+    return isAdmin;
   }
 
   // Lógica básica de login/logout sin depender de guards ni router

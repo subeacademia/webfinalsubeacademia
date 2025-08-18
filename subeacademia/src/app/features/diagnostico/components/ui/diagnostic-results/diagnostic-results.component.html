@@ -1,75 +1,341 @@
 <!-- src/app/features/diagnostico/components/ui/diagnostic-results/diagnostic-results.component.html -->
 
-<div class="p-4 md:p-8 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg">
-  <div class="max-w-4xl mx-auto">
-
-    <!-- Sección de Gráficos (siempre visible) -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-center">
-      <div class="w-full h-full min-h-[300px]">
-        <h2 class="text-2xl font-semibold mb-4 text-center">Análisis de Competencias Clave</h2>
-        <app-radar-chart [data]="scores.competencias"></app-radar-chart>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- Header de Felicitaciones -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mb-6 shadow-lg">
+        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
       </div>
-      <div class="w-full h-full min-h-[300px]">
-        <h2 class="text-2xl font-semibold mb-4 text-center">Framework ARES-AI</h2>
-        <app-semaforo-ares [aresByPhase]="scores.ares"></app-semaforo-ares>
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4">
+        ¡Felicidades! Has Completado el Diagnóstico
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+        Tu evaluación personalizada está lista. Descubre tu nivel de madurez en IA y recibe un plan de acción estratégico diseñado específicamente para ti.
+      </p>
+    </div>
+
+    <!-- Sección de Gráficos y Métricas -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+      <!-- Análisis de Competencias Clave -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Análisis de Competencias Clave</h2>
+        </div>
+        
+        <div class="mb-6">
+          <app-radar-chart *ngIf="scores?.competencias" [data]="scores.competencias"></app-radar-chart>
+          <div *ngIf="!scores?.competencias" class="text-center text-gray-500 py-8">
+            <p>No hay datos de competencias disponibles</p>
+          </div>
+        </div>
+
+        <!-- Resumen de Competencias -->
+        <div *ngIf="scores?.competencias" class="grid grid-cols-2 gap-4">
+          <div *ngFor="let comp of getTopCompetencies()" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-semibold text-sm text-gray-700 dark:text-gray-300">{{ comp.name }}</span>
+              <span class="text-lg font-bold" [ngClass]="getScoreColor(comp.score)">
+                {{ comp.score }}
+              </span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+              <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" 
+                   [style.width.%]="comp.score"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Framework ARES-AI -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center mb-6">
+          <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Framework ARES-AI</h2>
+        </div>
+        
+        <div class="mb-6">
+          <app-semaforo-ares *ngIf="scores?.ares" [aresByPhase]="scores.ares"></app-semaforo-ares>
+          <div *ngIf="!scores?.ares" class="text-center text-gray-500 py-8">
+            <p>No hay datos ARES disponibles</p>
+          </div>
+        </div>
+
+        <!-- Resumen ARES -->
+        <div *ngIf="scores?.ares" class="space-y-3">
+          <div *ngFor="let phase of getAresPhases()" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <span class="font-medium text-gray-700 dark:text-gray-300">{{ phase.name }}</span>
+            <div class="flex items-center space-x-2">
+              <span class="text-sm font-semibold" [ngClass]="getAresScoreColor(phase.score)">
+                {{ phase.score }}
+              </span>
+              <div class="w-3 h-3 rounded-full" [ngClass]="getAresStatusColor(phase.score)"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Sección del Informe (se carga asíncronamente) -->
-    <ng-container *ngIf="!isLoadingReport; else loadingTemplate">
-      <ng-container *ngIf="report; else errorTemplate">
-        <header class="mb-8 text-center relative">
-          <h1 class="text-4xl font-bold text-primary-500 mb-2">{{ report.titulo_informe }}</h1>
-          <p class="text-lg text-gray-600 dark:text-gray-400">{{ report.resumen_ejecutivo }}</p>
-          <div *ngIf="pdfUrl" class="mt-6">
-            <a [href]="pdfUrl" target="_blank" rel="noopener noreferrer"
-               class="inline-block bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform duration-300 hover:scale-105">
-              <i class="fas fa-file-pdf mr-2"></i>Descargar Informe PDF
-            </a>
+    <!-- Información básica del diagnóstico -->
+    <section *ngIf="!isLoadingReport && !report && !loadingError" class="mb-16">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 text-center">
+        <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mb-6 flex items-center justify-center">
+          <svg class="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">¡Diagnóstico Completado!</h2>
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div class="text-left">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+              <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Resumen de Resultados
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Tu diagnóstico ha sido completado exitosamente. Los gráficos arriba muestran tu evaluación actual en competencias digitales y el framework ARES-AI para la adopción de IA.
+            </p>
+          </div>
+          <div class="text-left">
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+              <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              Próximos Pasos
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+              Estamos generando tu informe personalizado con recomendaciones específicas usando IA avanzada. Esto puede tardar unos momentos mientras analizamos tus respuestas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección del Informe de Gemini -->
+    <ng-container *ngIf="!isLoadingReport && !loadingError">
+      <ng-container *ngIf="report">
+        <!-- Header del Informe -->
+        <header class="mb-16 text-center relative">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 border border-gray-200 dark:border-gray-700">
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                Informe Generado con IA
+              </div>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-6 leading-tight">
+              {{ report.titulo_informe }}
+            </h1>
+            
+            <div class="max-w-4xl mx-auto">
+              <p class="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+                {{ report.resumen_ejecutivo }}
+              </p>
+            </div>
+
+            <div *ngIf="pdfUrl" class="mt-8">
+              <a [href]="pdfUrl" target="_blank" rel="noopener noreferrer"
+                 class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Descargar Informe PDF
+              </a>
+            </div>
           </div>
         </header>
 
-        <section class="mb-12">
-          <h2 class="text-3xl font-bold border-b-2 border-primary-500 pb-2 mb-6">Análisis por Dimensión ARES-AI</h2>
-          <div class="grid md:grid-cols-2 gap-6">
-            <div *ngFor="let item of report.analisis_ares" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-              <h3 class="text-xl font-semibold text-primary-500 mb-2">{{ item.dimension }} (Puntaje: {{ item.puntaje }}/100)</h3>
-              <p>{{ item.analisis }}</p>
+        <!-- Análisis por Dimensión ARES-AI -->
+        <section class="mb-16">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+              Análisis por Dimensión ARES-AI
+            </h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Evaluación detallada de cada dimensión del framework y su impacto en tu estrategia de adopción de IA
+            </p>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-8">
+            <div *ngFor="let item of report.analisis_ares" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 hover:shadow-2xl transition-all duration-300">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 dark:text-white">{{ item.dimension }}</h3>
+                <div class="text-right">
+                  <div class="text-3xl font-bold" [ngClass]="getScoreColor(item.puntaje)">
+                    {{ item.puntaje }}
+                  </div>
+                  <div class="text-sm text-gray-500">/100</div>
+                </div>
+              </div>
+              
+              <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3 mb-4">
+                <div class="h-3 rounded-full transition-all duration-500" 
+                     [ngClass]="getScoreColorClass(item.puntaje)"
+                     [style.width.%]="item.puntaje"></div>
+              </div>
+              
+              <p class="text-gray-600 dark:text-gray-300 leading-relaxed">{{ item.analisis }}</p>
+              
+              <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span [ngClass]="getScoreDescription(item.puntaje)">{{ getScoreDescription(item.puntaje) }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section>
-          <h2 class="text-3xl font-bold border-b-2 border-primary-500 pb-2 mb-6">Plan de Acción Recomendado</h2>
-          <div *ngFor="let plan of report.plan_de_accion; let i = index" class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-            <h3 class="text-2xl font-semibold mb-2">Área de Mejora {{i + 1}}: <span class="text-primary-500">{{ plan.area_mejora }}</span></h3>
-            <p class="italic text-gray-600 dark:text-gray-400 mb-4">{{ plan.descripcion_problema }}</p>
-            <div *ngFor="let accion of plan.acciones_recomendadas" class="mt-4 border-l-4 border-secondary-500 pl-4 py-2">
-              <h4 class="font-bold text-lg">{{ accion.accion }}</h4>
-              <p>{{ accion.detalle }}</p>
-              <p *ngIf="accion.curso_recomendado_id" class="mt-2 text-sm">
-                <span class="font-semibold">Curso Recomendado:</span>
-                <a [routerLink]="['/cursos', accion.curso_recomendado_id]" class="text-primary-500 hover:underline">Ver curso de Sube Academia</a>
-              </p>
+        <!-- Plan de Acción Recomendado por IA -->
+        <section class="mb-16">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
+              Plan de Acción Recomendado por IA
+            </h2>
+            <p class="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              Estrategia personalizada basada en tu perfil único para maximizar el impacto de la IA en tu organización
+            </p>
+          </div>
+          
+          <div class="space-y-8">
+            <div *ngFor="let plan of report.plan_de_accion; let i = index" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <!-- Header del Plan -->
+              <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-sm font-medium text-blue-100 mb-2">Área de Mejora {{i + 1}}</div>
+                    <h3 class="text-2xl md:text-3xl font-bold">{{ plan.area_mejora }}</h3>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-4xl font-bold text-blue-100">{{ i + 1 }}</div>
+                    <div class="text-sm text-blue-200">Prioridad</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Descripción del Problema -->
+              <div class="p-8">
+                <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
+                  <div class="flex items-start">
+                    <svg class="w-5 h-5 text-red-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    <div>
+                      <h4 class="font-semibold text-red-800 dark:text-red-200 mb-1">Descripción del Problema</h4>
+                      <p class="text-red-700 dark:text-red-300 italic">{{ plan.descripcion_problema }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Acciones Recomendadas -->
+                <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Acciones Recomendadas</h4>
+                <div class="space-y-6">
+                  <div *ngFor="let accion of plan.acciones_recomendadas; let j = index" class="bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border-l-4 border-blue-500">
+                    <div class="flex items-start">
+                      <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-4 flex-shrink-0">
+                        {{ j + 1 }}
+                      </div>
+                      <div class="flex-1">
+                        <h5 class="font-bold text-lg text-gray-800 dark:text-white mb-2">{{ accion.accion }}</h5>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">{{ accion.detalle }}</p>
+                        
+                        <div *ngIf="accion.curso_recomendado_id" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                              <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                              </svg>
+                              <span class="font-semibold text-blue-800 dark:text-blue-200">Curso Recomendado</span>
+                            </div>
+                            <a [routerLink]="['/cursos', accion.curso_recomendado_id]" 
+                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                              Ver Curso
+                              <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sección de Próximos Pasos -->
+        <section class="mb-16">
+          <div class="bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl shadow-xl p-8 text-white text-center">
+            <h2 class="text-3xl font-bold mb-4">¿Listo para Empezar?</h2>
+            <p class="text-xl mb-6 text-green-100">
+              Tu plan de acción está listo. Comienza implementando las recomendaciones paso a paso para transformar tu organización con IA.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button class="bg-white text-green-600 hover:bg-green-50 font-bold py-3 px-6 rounded-xl transition-colors duration-200">
+                Guardar Plan
+              </button>
+              <button class="border-2 border-white text-white hover:bg-white hover:text-green-600 font-bold py-3 px-6 rounded-xl transition-colors duration-200">
+                Compartir Resultados
+              </button>
             </div>
           </div>
         </section>
       </ng-container>
     </ng-container>
 
-    <!-- Plantillas de Carga y Error -->
-    <ng-template #loadingTemplate>
-      <div class="flex flex-col items-center justify-center min-h-[20vh]">
-        <h2 class="text-2xl font-semibold mb-4">Generando tu informe personalizado...</h2>
-        <p class="mb-8 text-gray-600 dark:text-gray-400">La IA está analizando tus respuestas. Esto puede tardar un momento.</p>
-        <app-api-progress-bar></app-api-progress-bar>
+    <!-- Plantilla de Carga -->
+    <ng-template *ngIf="isLoadingReport">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center border border-gray-200 dark:border-gray-700">
+        <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mb-8 flex items-center justify-center">
+          <svg class="w-12 h-12 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">Generando tu Informe Personalizado con IA</h2>
+        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+          Gemini está analizando tus respuestas para crear un plan de acción detallado y personalizado. Esto puede tardar unos momentos.
+        </p>
+        <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p class="text-sm text-gray-500 mt-4">Procesando con IA avanzada...</p>
       </div>
     </ng-template>
 
-    <ng-template #errorTemplate>
-      <div class="text-center text-red-500 p-6 bg-red-50 dark:bg-red-900/20 rounded-lg">
-        <h2 class="text-2xl font-semibold mb-4">¡Oops! Algo salió mal</h2>
-        <p>No pudimos generar tu informe en este momento. Por favor, intenta de nuevo más tarde o contacta con nosotros.</p>
+    <!-- Plantilla de Error -->
+    <ng-template *ngIf="loadingError">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center border border-gray-200 dark:border-gray-700">
+        <div class="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full mx-auto mb-8 flex items-center justify-center">
+          <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">¡Oops! Algo Salio Mal</h2>
+        <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+          No pudimos generar tu informe con IA en este momento. Por favor, intenta de nuevo o contacta con soporte si el problema persiste.
+        </p>
+        <button (click)="retryGeneration()" 
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl transition-colors duration-200 inline-flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          Reintentar
+        </button>
       </div>
     </ng-template>
   </div>
