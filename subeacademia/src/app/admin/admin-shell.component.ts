@@ -17,7 +17,7 @@ import { environment } from '../../environments/environment';
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">Admin Panel</h1>
             <nav class="space-y-4">
               <a class="btn w-full" routerLink="/admin/posts">Posts</a>
-              <a class="btn w-full" routerLink="/admin/courses">Cursos</a>
+              <a class="btn w-full" routerLink="/admin/productos">Productos</a>
               <a class="btn w-full" routerLink="/admin/projects">Proyectos</a>
               <a class="btn w-full" routerLink="/admin/media">Media</a>
               <a class="btn w-full" routerLink="/admin/logos">Logos</a>

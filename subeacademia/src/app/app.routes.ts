@@ -3,7 +3,7 @@ import { langMatcher } from './core/routing/lang.matcher';
 import { languageGuard } from './core/i18n/language.guard';
 import { HomeComponent } from './pages/home/home.component';
 import { LanguageGuard } from './core/i18n/language.guard';
-import { AuthGuard } from './core/auth.guard';
+
 
 export const routes: Routes = [
   {
@@ -26,12 +26,7 @@ export const routes: Routes = [
     loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent),
   },
 
-  // Dashboard del usuario (protegido por AuthGuard)
-  {
-    path: 'dashboard',
-    canActivate: [AuthGuard],
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-  },
+
 
   // Público con idioma restringido
   {
@@ -41,7 +36,7 @@ export const routes: Routes = [
       { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
       { path: 'diagnostico', loadChildren: () => import('./features/diagnostico/diagnostico.routes').then(m => m.DIAGNOSTICO_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
-      { path: 'cursos', loadChildren: () => import('./features/courses/courses.routes').then(m => m.COURSES_ROUTES) },
+      { path: 'productos', loadChildren: () => import('./features/productos/productos.routes').then(m => m.PRODUCTOS_ROUTES) },
       { path: 'proyectos', loadChildren: () => import('./features/projects/projects.routes').then(m => m.PROJECTS_ROUTES) },
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
       { path: 'metodologia', loadChildren: () => import('./features/methodology/methodology.routes').then(m => m.METHODOLOGY_ROUTES) },

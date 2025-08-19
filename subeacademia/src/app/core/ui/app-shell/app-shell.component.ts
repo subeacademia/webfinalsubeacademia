@@ -64,12 +64,12 @@ import { User } from '@angular/fire/auth';
             </a>
           </li>
           <li role="none">
-            <a [routerLink]="['/', currentLang(), 'cursos']"
+            <a [routerLink]="['/', currentLang(), 'productos']"
                routerLinkActive="text-[var(--accent)]"
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
-               aria-label="Ir a Cursos">
-              Cursos
+               aria-label="Ir a Productos">
+              Productos
             </a>
           </li>
           <li role="none">
@@ -121,32 +121,7 @@ import { User } from '@angular/fire/auth';
 
         <!-- Acciones persistentes a la derecha (desktop) -->
         <div class="hidden md:flex items-center gap-2 ml-2" role="group" aria-label="Acciones del sitio">
-          <!-- Botones de autenticación -->
-          <div *ngIf="!(currentUser$ | async)" class="flex items-center gap-2">
-            <button type="button" 
-                    (click)="loginWithGoogle()" 
-                    class="btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                    aria-label="Iniciar sesión con Google">
-              <span class="mr-2">🔐</span>
-              Iniciar Sesión
-            </button>
-          </div>
-          
-          <div *ngIf="currentUser$ | async as user" class="flex items-center gap-2">
-            <a routerLink="/dashboard" 
-               class="btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-               aria-label="Ir al dashboard">
-              <span class="mr-2">👤</span>
-              {{ user.displayName || 'Dashboard' }}
-            </a>
-            <button type="button" 
-                    (click)="logout()" 
-                    class="btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors"
-                    aria-label="Cerrar sesión">
-              <span class="mr-1">🚪</span>
-              Salir
-            </button>
-          </div>
+
 
           <button type="button" 
                   (click)="toggleTheme()" 
@@ -187,11 +162,11 @@ import { User } from '@angular/fire/auth';
              Home
           </a>
           <a (click)="closeNav()" 
-             [routerLink]="['/', currentLang(), 'cursos']" 
+             [routerLink]="['/', currentLang(), 'productos']" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
-             aria-label="Ir a Cursos">
-             Cursos
+             aria-label="Ir a Productos">
+             Productos
           </a>
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang(), 'nosotros']" 
