@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import anime from 'animejs/lib/anime.es.js';
+import { animate, stagger, createTimeline } from 'animejs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +13,11 @@ export class AnimationService {
    * Ideal para listas de tarjetas o elementos que deben aparecer en secuencia.
    * @param targets El selector de CSS o los elementos del DOM a animar.
    */
-  staggerFromBottom(targets: anime.AnimeParams['targets']): void {
-    anime({
-      targets: targets,
+  staggerFromBottom(targets: any): void {
+    animate(targets, {
       translateY: [30, 0],
       opacity: [0, 1],
-      delay: anime.stagger(150),
+      delay: stagger(150),
       duration: 900,
       easing: 'easeOutExpo',
     });
@@ -28,18 +27,17 @@ export class AnimationService {
    * Anima un texto para que aparezca letra por letra.
    * @param targets El selector del contenedor del texto.
    */
-  textReveal(targets: anime.AnimeParams['targets']): void {
-    const textWrapper = document.querySelector(targets as string);
+  textReveal(targets: string): void {
+    const textWrapper = document.querySelector(targets);
     if (textWrapper) {
       textWrapper.innerHTML = textWrapper.textContent!.replace(/\S/g, "<span class='letter'>$&</span>");
-      anime.timeline({ loop: false })
-        .add({
-          targets: `${targets} .letter`,
+      createTimeline({ loop: false })
+        .add(`${targets} .letter`, {
           translateY: [-100, 0],
           opacity: [0, 1],
           easing: "easeOutExpo",
           duration: 1400,
-          delay: (el, i) => 30 * i
+          delay: (el: any, i: number) => 30 * i
         });
     }
   }
@@ -49,12 +47,11 @@ export class AnimationService {
    * @param targets El selector del elemento que contiene el número.
    * @param endValue El valor final al que debe llegar el contador.
    */
-  countUp(targets: anime.AnimeParams['targets'], endValue: number): void {
-    const targetElement = document.querySelector(targets as string);
+  countUp(targets: string, endValue: number): void {
+    const targetElement = document.querySelector(targets);
     if (targetElement) {
         let counter = { value: 0 };
-        anime({
-            targets: counter,
+        animate(counter, {
             value: endValue,
             round: 1,
             easing: 'easeInOutQuad',

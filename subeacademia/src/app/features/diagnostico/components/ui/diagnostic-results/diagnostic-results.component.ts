@@ -67,16 +67,10 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     const radarChart = document.querySelector('#radarChart');
     if (radarChart) {
         (radarChart as HTMLElement).style.opacity = '0';
-        // Usar anime.js directamente para el gráfico
-        const anime = require('animejs/lib/anime.es.js');
-        anime({
-            targets: radarChart,
-            opacity: [0, 1],
-            scale: [0.8, 1],
-            duration: 1500,
-            easing: 'easeOutExpo',
-            delay: 500 // Aparece después de que los números empiecen a contar
-        });
+        // Usar el servicio de animación para el gráfico
+        setTimeout(() => {
+            this.animationService.staggerFromBottom([radarChart]);
+        }, 500);
     }
   }
 
