@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
@@ -8,6 +8,7 @@ import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { PdfService } from '../../../services/pdf.service';
 import { RadarChartComponent } from '../radar-chart.component';
 import { SemaforoAresComponent } from '../semaforo-ares.component';
+import { AnimationService } from '../../../../../core/services/animation.service';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -16,12 +17,13 @@ import { SemaforoAresComponent } from '../semaforo-ares.component';
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
-export class DiagnosticResultsComponent implements OnInit {
+export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   private stateService = inject(DiagnosticStateService);
   private scoringService = inject(ScoringService);
   private generativeAiService = inject(GenerativeAiService);
   private diagnosticsService = inject(DiagnosticsService);
   private pdfService = inject(PdfService);
+  private animationService = inject(AnimationService);
 
   scores: any;
   report: DiagnosticReport | null = null;
@@ -51,6 +53,30 @@ export class DiagnosticResultsComponent implements OnInit {
       console.error('❌ Error al inicializar resultados:', error);
       this.loadingError = true;
       this.isLoadingReport = false;
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Animar el número del puntaje final
+    if (this.scores?.ares?.total) {
+      this.animationService.countUp('#score-final', this.scores.ares.total);
+    }
+
+    // EXTRA: Animar la aparición del gráfico radar
+    // (Asumiendo que el gráfico se renderiza en un canvas con id="radarChart")
+    const radarChart = document.querySelector('#radarChart');
+    if (radarChart) {
+        (radarChart as HTMLElement).style.opacity = '0';
+        // Usar anime.js directamente para el gráfico
+        const anime = require('animejs/lib/anime.es.js');
+        anime({
+            targets: radarChart,
+            opacity: [0, 1],
+            scale: [0.8, 1],
+            duration: 1500,
+            easing: 'easeOutExpo',
+            delay: 500 // Aparece después de que los números empiecen a contar
+        });
     }
   }
 

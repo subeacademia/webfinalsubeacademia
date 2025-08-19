@@ -55,16 +55,23 @@
         </div>
       </div>
 
-      <!-- Framework ARES-AI -->
-      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
-        <div class="flex items-center mb-6">
-          <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-            </svg>
+              <!-- Framework ARES-AI -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+          <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Framework ARES-AI</h2>
           </div>
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Framework ARES-AI</h2>
-        </div>
+          
+          <!-- Puntaje Total ARES -->
+          <div *ngIf="scores?.ares?.total" class="text-center mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-200 dark:border-red-700">
+            <div class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">Puntaje Total ARES-AI</div>
+            <div id="score-final" class="text-4xl font-bold text-red-600 dark:text-red-400">0</div>
+            <div class="text-sm text-red-600 dark:text-red-400">de 100 puntos</div>
+          </div>
         
         <div class="mb-6">
           <app-semaforo-ares *ngIf="scores?.ares" [aresByPhase]="scores.ares"></app-semaforo-ares>

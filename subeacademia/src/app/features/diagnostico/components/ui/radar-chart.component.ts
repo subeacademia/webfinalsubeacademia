@@ -11,7 +11,7 @@ interface CompetencyScore {
     standalone: true,
     imports: [CommonModule],
     template: `
-        <div class="bg-slate-800 rounded-lg p-6 shadow-xl">
+        <div id="radarChart" class="bg-slate-800 rounded-lg p-6 shadow-xl">
             <h3 class="text-lg font-semibold text-center text-gray-200 mb-4">Perfil de Competencias</h3>
             
             <!-- Gráfico de barras simple como fallback -->

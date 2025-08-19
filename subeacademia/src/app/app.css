@@ -84,3 +84,10 @@ a, button, [tabindex] {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Estilos para la animación de texto con anime.js */
+.letter {
+  display: inline-block;
+  line-height: 1em;
+  opacity: 0; /* Asegura que partan de un estado invisible */
+}

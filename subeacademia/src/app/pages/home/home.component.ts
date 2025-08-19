@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.component';
 import { Router, RouterModule } from '@angular/router';
@@ -9,21 +9,24 @@ import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
+import { AnimationService } from '../../core/services/animation.service';
+import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, AnimateOnScrollDirective],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     public readonly i18n: I18nService,
     private readonly settings: SettingsService,
     private readonly router: Router,
     @Inject(PLATFORM_ID) private platformId: object,
-    private readonly logos: LogosService
+    private readonly logos: LogosService,
+    private readonly animationService: AnimationService
   ) {}
 
   private contentSub?: Subscription;
@@ -163,6 +166,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   contactarAsesor(): void {
     const lang = this.i18n.currentLang();
     this.router.navigate(['/', lang, 'contacto']);
+  }
+
+  ngAfterViewInit(): void {
+    // Ocultamos el título inicialmente para que la animación funcione
+    const titleEl = document.querySelector('#hero-title');
+    if (titleEl) (titleEl as HTMLElement).style.opacity = '0';
+
+    // Retrasamos ligeramente para asegurar que todo esté renderizado
+    setTimeout(() => {
+      this.animationService.textReveal('#hero-title');
+    }, 100);
   }
 
   ngOnDestroy(): void {
