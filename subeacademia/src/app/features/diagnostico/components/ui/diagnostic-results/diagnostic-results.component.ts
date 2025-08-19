@@ -1,18 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
 import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
 import { DiagnosticReport } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
+import { PdfService } from '../../../services/pdf.service';
 import { RadarChartComponent } from '../radar-chart.component';
 import { SemaforoAresComponent } from '../semaforo-ares.component';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, RouterLink, RadarChartComponent, SemaforoAresComponent],
+  imports: [CommonModule, RadarChartComponent, SemaforoAresComponent],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
@@ -21,12 +21,14 @@ export class DiagnosticResultsComponent implements OnInit {
   private scoringService = inject(ScoringService);
   private generativeAiService = inject(GenerativeAiService);
   private diagnosticsService = inject(DiagnosticsService);
+  private pdfService = inject(PdfService);
 
   scores: any;
   report: DiagnosticReport | null = null;
   isLoadingReport = true;
   loadingError = false;
   pdfUrl: string | null = null;
+  isGeneratingPdf = false;
 
   ngOnInit(): void {
     console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado');
@@ -81,6 +83,41 @@ export class DiagnosticResultsComponent implements OnInit {
           this.isLoadingReport = false;
         }
       });
+  }
+
+  async generatePdf(): Promise<void> {
+    if (!this.report || !this.scores) {
+      console.error('❌ No hay reporte o scores para generar PDF');
+      return;
+    }
+
+    try {
+      this.isGeneratingPdf = true;
+      console.log('🚀 Iniciando generación de PDF...');
+
+      // Buscar el elemento que contiene los resultados para capturar
+      const resultsElement = document.querySelector('.diagnostic-results-container') as HTMLElement;
+      
+      if (!resultsElement) {
+        console.error('❌ No se encontró el contenedor de resultados');
+        alert('Error: No se pudo encontrar el contenido para generar el PDF');
+        return;
+      }
+
+      // Generar el PDF
+      await this.pdfService.generateDiagnosticReport(
+        this.report,
+        this.scores,
+        resultsElement
+      );
+
+      console.log('✅ PDF generado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al generar PDF:', error);
+      alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+    } finally {
+      this.isGeneratingPdf = false;
+    }
   }
 
   retryGeneration(): void {

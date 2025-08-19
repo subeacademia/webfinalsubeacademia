@@ -60,6 +60,9 @@ export class GenerativeAiService {
   }
 
   private buildEnhancedGeminiPrompt(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, formattedCoursesString: string): string {
+    // Identificar áreas de mejora con puntuaciones más bajas
+    const areasMejora = this.identifyImprovementAreas(scores);
+    
     return `
       Eres un consultor senior experto en transformación digital e IA para Sube Academia. Tu misión es entregar un análisis profundo, personalizado y de alto valor que inspire acción inmediata. Tu respuesta debe ser únicamente un objeto JSON, sin texto, comentarios o \`\`\`.
 
@@ -73,15 +76,18 @@ export class GenerativeAiService {
       - Puntajes ARES-AI: ${JSON.stringify(scores.ares)}
       - Puntajes de Competencias: ${JSON.stringify(scores.competencias)}
 
+      **Áreas de Mejora Identificadas:**
+      ${areasMejora.map(area => `- ${area.name}: ${area.score}/100 (${this.getScoreDescription(area.score)})`).join('\n')}
+
       **Catálogo de Cursos de Sube Academia:**
       ${formattedCoursesString}
 
       **Tu Tarea:**
-      Genera un objeto JSON con la siguiente estructura y contenido de EXCELENTE calidad, personalizado para el contexto específico del usuario:
+      Genera un objeto JSON con la siguiente estructura y contenido de EXCELENTE calidad, personalizado para el contexto específico del usuario. INCLUYE CTAs DINÁMICOS basados en las áreas de mejora identificadas:
 
       {
         "titulo_informe": "Hoja de Ruta Estratégica para la Adopción de IA - [Industria del Usuario]",
-        "resumen_ejecutivo": "Un párrafo de 4-5 frases que resuma el nivel de madurez en IA, destaque la principal fortaleza, identifique las 2-3 áreas de mejora más críticas, y establezca el impacto potencial en el negocio. Usa lenguaje motivacional y orientado a resultados.",
+        "resumen_ejecutivo": "Un párrafo de 4-5 frases que resuma el nivel de madurez en IA, destaque la principal fortaleza, identifique las 2-3 áreas de mejora más críticas, y establezca el impacto potencial en el negocio. Usa lenguaje motivacional y orientado a resultados. AL FINAL del resumen, incluye un CTA específico recomendando un producto de Sube Academia basado en las áreas de mejora identificadas.",
         "analisis_ares": [
           {
             "dimension": "Agilidad",
@@ -142,7 +148,19 @@ export class GenerativeAiService {
               }
             ]
           }
-        ]
+        ],
+        "cta_dinamico": {
+          "titulo": "Producto Recomendado para ${areasMejora[0]?.name || 'Mejora Inmediata'}",
+          "descripcion": "Descripción de 2-3 frases del producto más relevante basado en las áreas de mejora identificadas. Explica por qué es la solución ideal para este usuario específico.",
+          "tipo_producto": "curso|asesoria|certificacion",
+          "producto_id": "ID del producto recomendado",
+          "url_producto": "/productos/[tipo]/[id]",
+          "beneficios_clave": [
+            "Beneficio 1 específico para el área de mejora",
+            "Beneficio 2 que resuelva el problema identificado",
+            "Beneficio 3 de impacto transformacional"
+          ]
+        }
       }
 
       **Instrucciones Especiales:**
@@ -154,6 +172,42 @@ export class GenerativeAiService {
       6. Usa terminología técnica apropiada para el nivel del usuario
       7. Incluye consideraciones de riesgo y mitigación
       8. Enfócate en la ejecución práctica y medible
+      9. **IMPORTANTE**: El CTA dinámico debe ser específico y relevante para las áreas de mejora identificadas
+      10. **IMPORTANTE**: El resumen ejecutivo debe terminar con una recomendación de producto específica
     `;
+  }
+
+  private identifyImprovementAreas(scores: DiagnosticoScores): Array<{name: string, score: number}> {
+    const allScores: Array<{name: string, score: number}> = [];
+    
+    // Añadir scores ARES
+    if (scores.ares) {
+      Object.entries(scores.ares).forEach(([name, score]) => {
+        if (typeof score === 'number') {
+          allScores.push({ name: `ARES-${name}`, score });
+        }
+      });
+    }
+    
+    // Añadir scores de competencias
+    if (scores.competencias) {
+      Object.entries(scores.competencias).forEach(([name, score]) => {
+        if (typeof score === 'number') {
+          allScores.push({ name, score });
+        }
+      });
+    }
+
+    // Ordenar por puntuación (más baja primero) y tomar las 3 peores
+    return allScores
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3);
+  }
+
+  private getScoreDescription(score: number): string {
+    if (score >= 80) return 'Excelente';
+    if (score >= 60) return 'Bueno';
+    if (score >= 40) return 'Regular';
+    return 'Crítico';
   }
 }

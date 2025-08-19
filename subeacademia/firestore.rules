@@ -69,5 +69,12 @@ service cloud.firestore {
       allow create, update: if request.auth != null; // Usuarios autenticados pueden crear/actualizar
       allow delete: if isAdmin(); // Solo admins pueden eliminar
     }
+
+    // NUEVO: Colección de leads del diagnóstico
+    // Cualquier usuario puede crear leads, solo admins pueden leer/actualizar/eliminar
+    match /leads/{id} {
+      allow create: if true; // Usuarios pueden crear leads
+      allow read, update, delete: if isAdmin(); // Solo admins pueden ver y gestionar leads
+    }
   }
 }

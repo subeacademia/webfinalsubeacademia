@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Firestore, collection, addDoc, serverTimestamp } from '@angular/fire/firestore';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 
 @Component({
@@ -101,12 +102,15 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
         <div class="pt-4">
           <button 
             type="submit" 
-            [disabled]="leadForm.invalid"
+            [disabled]="leadForm.invalid || isSubmitting"
             class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg *ngIf="!isSubmitting" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Finalizar Diagnóstico
+            <svg *ngIf="isSubmitting" class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            {{ isSubmitting ? 'Guardando...' : 'Finalizar Diagnóstico' }}
           </button>
         </div>
       </form>
@@ -143,8 +147,10 @@ export class StepLeadComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly stateService = inject(DiagnosticStateService);
   private readonly router = inject(Router);
+  private readonly firestore = inject(Firestore);
 
   leadForm!: FormGroup;
+  isSubmitting = false;
 
   ngOnInit(): void {
     this.initializeForm();
@@ -160,12 +166,47 @@ export class StepLeadComponent implements OnInit {
     // que ya tiene la lógica de persistencia
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.leadForm.valid) {
-      // Los datos ya están guardados en el servicio
-      // Marcar como completado y navegar a resultados
-      this.stateService.markAsCompleted();
-      this.navigateToResults();
+      this.isSubmitting = true;
+      
+      try {
+        // Guardar lead en Firestore
+        await this.saveLeadToFirestore();
+        
+        // Los datos ya están guardados en el servicio
+        // Marcar como completado y navegar a resultados
+        this.stateService.markAsCompleted();
+        this.navigateToResults();
+      } catch (error) {
+        console.error('Error al guardar lead:', error);
+        // Continuar con el flujo aunque falle el guardado en Firestore
+        this.stateService.markAsCompleted();
+        this.navigateToResults();
+      } finally {
+        this.isSubmitting = false;
+      }
+    }
+  }
+
+  private async saveLeadToFirestore(): Promise<void> {
+    try {
+      const leadData = {
+        nombre: this.leadForm.get('nombre')?.value,
+        email: this.leadForm.get('email')?.value,
+        telefono: this.leadForm.get('telefono')?.value || '',
+        aceptaComunicaciones: this.leadForm.get('aceptaComunicaciones')?.value || false,
+        timestamp: serverTimestamp(),
+        source: 'diagnostico_ia',
+        diagnosticData: this.stateService.getDiagnosticData()
+      };
+
+      const leadsRef = collection(this.firestore, 'leads');
+      const docRef = await addDoc(leadsRef, leadData);
+      console.log('✅ Lead guardado en Firestore con ID:', docRef.id);
+    } catch (error) {
+      console.error('❌ Error al guardar lead en Firestore:', error);
+      throw error;
     }
   }
 
