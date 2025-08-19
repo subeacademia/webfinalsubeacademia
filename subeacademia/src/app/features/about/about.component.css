@@ -199,4 +199,65 @@
   line-height: 1.5;
 }
 
+/* Prevenir fondo blanco en estados activos y focus */
+.flip-card:active .flip-card-front,
+.flip-card:focus .flip-card-front,
+.collaborator-card:active .collaborator-card-front,
+.collaborator-card:focus .collaborator-card-front {
+  background-color: inherit !important;
+}
+
+/* Mejoras de accesibilidad para botones */
+.flip-card button:focus,
+.collaborator-card button:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+.dark .flip-card button:focus,
+.dark .collaborator-card button:focus {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+/* Estados activos mejorados */
+.flip-card button:active,
+.collaborator-card button:active {
+  transform: translateY(1px);
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+.dark .flip-card button:active,
+.dark .collaborator-card button:active {
+  background-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Asegurar que las imágenes no se desborden */
+.flip-card img,
+.collaborator-card img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 640px) {
+  .flip-card,
+  .collaborator-card {
+    height: auto;
+    min-height: 320px;
+  }
+  
+  .flip-card-front,
+  .flip-card-back,
+  .collaborator-card-front,
+  .collaborator-card-back {
+    padding: 1rem;
+  }
+  
+  .timeline-event {
+    margin-bottom: 2rem;
+  }
+}
+
 
