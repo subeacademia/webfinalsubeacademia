@@ -17,7 +17,15 @@ import { environment } from '../../environments/environment';
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">Admin Panel</h1>
             <nav class="space-y-4">
               <a class="btn w-full" routerLink="/admin/posts">Posts</a>
-              <a class="btn w-full" routerLink="/admin/productos">Productos</a>
+              
+              <!-- Menú de Productos con subsecciones -->
+              <div class="space-y-2">
+                <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-2 py-1">Productos</div>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/asesorias">💡 Asesorías</a>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/cursos">📚 Cursos</a>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/certificaciones">🏆 Certificaciones</a>
+              </div>
+              
               <a class="btn w-full" routerLink="/admin/projects">Proyectos</a>
               <a class="btn w-full" routerLink="/admin/media">Media</a>
               <a class="btn w-full" routerLink="/admin/logos">Logos</a>
