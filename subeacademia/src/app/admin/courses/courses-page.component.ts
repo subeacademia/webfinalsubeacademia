@@ -21,7 +21,7 @@ import { ToastService } from '../../core/ui/toast/toast.service';
               variant="secondary" 
               (clicked)="downloadCoursesAsJson()"
               size="md">
-              📥 Descargar Cursos (JSON)
+              📥 Descargar Estructura Curso (JSON)
             </app-ui-button>
             <app-ui-button 
               variant="secondary" 
@@ -132,37 +132,85 @@ export class CoursesPageComponent {
     }
   }
 
-  // Función para descargar todos los cursos como JSON
+  // Función para descargar estructura de curso como JSON
   async downloadCoursesAsJson(): Promise<void> {
     try {
-      this.toast.info('Preparando descarga...');
+      this.toast.info('Preparando descarga de estructura de curso...');
       
-      // Obtener todos los cursos
-      const allCourses = await this.coursesSvc.getAllCourses();
-      
-      if (!allCourses || allCourses.length === 0) {
-        this.toast.warning('No hay cursos para descargar');
-        return;
-      }
+      // Estructura de datos de ejemplo para un curso
+      const courseStructure = {
+        "title": "Curso de Inteligencia Artificial",
+        "slug": "curso-ia",
+        "lang": "es",
+        "level": "intermedio",
+        "status": "draft",
+        "summary": "Curso completo de Inteligencia Artificial desde cero hasta nivel avanzado",
+        "description": "Aprende los fundamentos de la IA, machine learning y deep learning con proyectos prácticos",
+        "coverUrl": "https://ejemplo.com/cover-ia.jpg",
+        "durationHours": 40,
+        "price": 120000,
+        "currency": "CLP",
+        "topics": [
+          "Inteligencia Artificial",
+          "Machine Learning", 
+          "Deep Learning",
+          "Python",
+          "TensorFlow",
+          "Proyectos Prácticos"
+        ],
+        "relatedCompetencies": [
+          "comp-ia-001",
+          "comp-ml-002",
+          "comp-dl-003"
+        ],
+        "resources": [
+          {
+            "type": "video",
+            "url": "https://ejemplo.com/video-intro.mp4",
+            "title": "Video introductorio a la IA"
+          },
+          {
+            "type": "pdf",
+            "url": "https://ejemplo.com/material-ia.pdf",
+            "title": "Material de apoyo completo"
+          },
+          {
+            "type": "zip",
+            "url": "https://ejemplo.com/codigo-ejemplos.zip",
+            "title": "Código de ejemplo y proyectos"
+          }
+        ],
+        "seo": {
+          "title": "Curso de IA - Aprende Inteligencia Artificial",
+          "description": "Curso completo de Inteligencia Artificial desde cero hasta nivel avanzado",
+          "keywords": ["IA", "Inteligencia Artificial", "Machine Learning", "Python"],
+          "ogImage": "https://ejemplo.com/og-image-ia.jpg"
+        },
+        "paymentLink": "https://ejemplo.com/pago-ia",
+        "publishedAt": Date.now(),
+        "scheduledAt": null,
+        "createdAt": Date.now(),
+        "updatedAt": Date.now()
+      };
 
       // Convertir a JSON formateado
-      const jsonContent = JSON.stringify(allCourses, null, 2);
+      const jsonContent = JSON.stringify(courseStructure, null, 2);
       
       // Crear blob y descargar
       const blob = new Blob([jsonContent], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `cursos-sube-academia-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `estructura-curso-ejemplo-${new Date().toISOString().split('T')[0]}.json`;
       
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      this.toast.success(`Se han descargado ${allCourses.length} cursos exitosamente`);
+      this.toast.success('Estructura de curso descargada exitosamente');
     } catch (error: any) {
-      this.toast.error(`Error al descargar los cursos: ${error.message}`);
+      this.toast.error(`Error al descargar la estructura: ${error.message}`);
     }
   }
 

@@ -49,9 +49,9 @@ export interface Course {
   currency?: 'CLP' | 'EUR' | 'USD';
   paymentLink?: string;
   publishedAt?: number | any;
-  updatedAt?: number;
+  updatedAt?: number | null;
   status?: 'draft' | 'published' | 'scheduled';
-  scheduledAt?: number;
+  scheduledAt?: number | null;
   seo?: CourseSeo;
   topics?: string[];
 }

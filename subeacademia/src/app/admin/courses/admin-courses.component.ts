@@ -17,6 +17,10 @@ import { Course } from '../../core/models/course.model';
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-2xl font-semibold">Admin · Courses</h1>
       <div class="flex gap-2">
+        <button mat-stroked-button color="accent" (click)="downloadCoursesTemplate()">
+          <mat-icon>download</mat-icon>
+          Descargar Cursos (JSON)
+        </button>
         <button mat-stroked-button color="accent" (click)="openBulkUpload()">
           <mat-icon>upload</mat-icon>
           Cargar Cursos desde JSON
@@ -512,6 +516,97 @@ export class AdminCoursesComponent {
     } finally {
       this.uploading.set(false);
     }
+  }
+
+  downloadCoursesTemplate() {
+    console.log('🚀 MÉTODO EJECUTADO - downloadCoursesTemplate');
+    
+    // Estructura básica de datos para cursos
+    const courseStructure = [
+      {
+        "id": "ejemplo-curso-001",
+        "slug": "ejemplo-curso-ia",
+        "title": "Curso de Inteligencia Artificial",
+        "title_en": "Artificial Intelligence Course",
+        "title_pt": "Curso de Inteligência Artificial",
+        "description": "Aprende los fundamentos de la Inteligencia Artificial",
+        "description_en": "Learn the fundamentals of Artificial Intelligence",
+        "description_pt": "Aprenda os fundamentos da Inteligência Artificial",
+        "image": "https://ejemplo.com/imagen-curso.jpg",
+        "category": "Tecnología",
+        "level": "intermedio",
+        "duration": "20 horas",
+        "lessonCount": 15,
+        "date": new Date().toISOString(),
+        "lang": "es",
+        "status": "published",
+        "price": 99000,
+        "currency": "CLP",
+        "modules": [
+          {
+            "title": "Introducción a la IA",
+            "title_en": "Introduction to AI",
+            "title_pt": "Introdução à IA",
+            "lessons": [
+              "¿Qué es la Inteligencia Artificial?",
+              "Historia de la IA",
+              "Aplicaciones actuales"
+            ],
+            "lessons_en": [
+              "What is Artificial Intelligence?",
+              "History of AI",
+              "Current applications"
+            ],
+            "lessons_pt": [
+              "O que é Inteligência Artificial?",
+              "História da IA",
+              "Aplicações atuais"
+            ]
+          },
+          {
+            "title": "Machine Learning Básico",
+            "title_en": "Basic Machine Learning",
+            "title_pt": "Machine Learning Básico",
+            "lessons": [
+              "Algoritmos de ML",
+              "Entrenamiento de modelos",
+              "Evaluación de resultados"
+            ]
+          }
+        ],
+        "topics": ["Inteligencia Artificial", "Machine Learning", "Python"],
+        "relatedCompetencies": ["comp-ia-001", "comp-ml-002"],
+        "resources": [
+          {
+            "type": "video",
+            "url": "https://ejemplo.com/video.mp4",
+            "title": "Video introductorio"
+          },
+          {
+            "type": "pdf",
+            "url": "https://ejemplo.com/material.pdf",
+            "title": "Material de apoyo"
+          }
+        ],
+        "seo": {
+          "title": "Curso de IA - Aprende Inteligencia Artificial",
+          "description": "Curso completo de Inteligencia Artificial desde cero",
+          "ogImage": "https://ejemplo.com/og-image.jpg"
+        },
+        "publishedAt": Date.now(),
+        "updatedAt": Date.now()
+      }
+    ];
+
+    // Crear y descargar el archivo JSON
+    const json = JSON.stringify(courseStructure, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'estructura-cursos.json';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }
 
