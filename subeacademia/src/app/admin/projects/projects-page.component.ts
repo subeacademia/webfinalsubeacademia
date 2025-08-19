@@ -14,12 +14,33 @@ import { firstValueFrom } from 'rxjs';
     <div class="container mx-auto px-4 py-8">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Gestión de Proyectos</h1>
-        <button 
-          (click)="navigateToNew()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-          + Nuevo Proyecto
-        </button>
+        <div class="flex gap-3">
+          <!-- Botones de gestión masiva -->
+          <button 
+            (click)="downloadProjectsAsJson()"
+            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">
+            📥 Descargar Estructura Proyecto (JSON)
+          </button>
+          <button 
+            (click)="triggerJsonUpload()"
+            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg font-medium transition-colors">
+            📤 Cargar Proyectos (JSON)
+          </button>
+          <button 
+            (click)="navigateToNew()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            + Nuevo Proyecto
+          </button>
+        </div>
       </div>
+
+      <!-- Input oculto para la carga de archivos -->
+      <input 
+        type="file" 
+        class="hidden" 
+        accept=".json"
+        (change)="handleJsonFile($event)"
+        #fileInput>
 
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
@@ -107,7 +128,7 @@ import { firstValueFrom } from 'rxjs';
   `
 })
 export class ProjectsPageComponent implements OnInit {
-  private projectsService = inject(ProjectsService);
+  private projectsService = inject(ProjectsService)
   private router = inject(Router);
   private toastService = inject(ToastService);
   
@@ -122,7 +143,7 @@ export class ProjectsPageComponent implements OnInit {
       this.projects = await this.projectsService.getAllProjects();
     } catch (error) {
       console.error('Error cargando proyectos:', error);
-              this.toastService.error('Error al cargar los proyectos');
+      this.toastService.error('Error al cargar los proyectos');
     }
   }
 
@@ -171,5 +192,148 @@ export class ProjectsPageComponent implements OnInit {
       default:
         return 'Desconocido';
     }
+  }
+
+  // Función para descargar estructura de proyecto como JSON
+  async downloadProjectsAsJson(): Promise<void> {
+    try {
+      this.toastService.info('Preparando descarga de estructura de proyecto...');
+      
+      // Estructura de datos de ejemplo para un proyecto
+      const projectStructure = {
+        "title": "Sistema de IA para Análisis de Datos",
+        "slug": "sistema-ia-analisis-datos",
+        "clientName": "Empresa Tecnológica S.A.",
+        "summary": "Desarrollo de un sistema inteligente para análisis y visualización de datos empresariales",
+        "description": "Proyecto completo de implementación de un sistema de Inteligencia Artificial que permite a las empresas analizar grandes volúmenes de datos, identificar patrones y generar insights valiosos para la toma de decisiones estratégicas. El sistema incluye machine learning, procesamiento de lenguaje natural y dashboards interactivos.",
+        "imageUrl": "https://ejemplo.com/proyecto-ia.jpg",
+        "projectUrl": "https://ejemplo.com/proyecto-demo",
+        "relatedCompetencies": [
+          "comp-ia-001",
+          "comp-ml-002",
+          "comp-data-003",
+          "comp-web-004"
+        ],
+        "status": "draft",
+        "lang": "es",
+        "langBase": "es",
+        "createdAt": Date.now(),
+        "updatedAt": Date.now(),
+        "publishedAt": null
+      };
+
+      // Convertir a JSON formateado
+      const jsonContent = JSON.stringify(projectStructure, null, 2);
+      
+      // Crear blob y descargar
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `estructura-proyecto-ejemplo-${new Date().toISOString().split('T')[0]}.json`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      this.toastService.success('Estructura de proyecto descargada exitosamente');
+    } catch (error: any) {
+      this.toastService.error(`Error al descargar la estructura: ${error.message}`);
+    }
+  }
+
+  // Función para activar la selección de archivo
+  triggerJsonUpload(): void {
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
+  }
+
+  // Función para manejar la carga del archivo JSON
+  async handleJsonFile(event: Event): Promise<void> {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    
+    if (!file) return;
+
+    try {
+      this.toastService.info('Procesando archivo...');
+      
+      // Leer el archivo
+      const content = await this.readFileAsText(file);
+      
+      // Parsear JSON
+      let projectsData: any[];
+      try {
+        const parsed = JSON.parse(content);
+        projectsData = Array.isArray(parsed) ? parsed : [parsed];
+      } catch (parseError) {
+        throw new Error('El archivo no contiene un JSON válido');
+      }
+
+      // Validar estructura básica
+      if (!this.validateProjectsStructure(projectsData)) {
+        throw new Error('El archivo JSON no tiene la estructura correcta de proyectos');
+      }
+
+      // Procesar cada proyecto
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const projectData of projectsData) {
+        try {
+          if (projectData.id) {
+            // Actualizar proyecto existente
+            await this.projectsService.update(projectData.id, projectData);
+          } else {
+            // Crear nuevo proyecto
+            await this.projectsService.create(projectData);
+          }
+          successCount++;
+        } catch (projectError: any) {
+          console.error(`Error procesando proyecto ${projectData.title || projectData.id}:`, projectError);
+          errorCount++;
+        }
+      }
+
+      // Mostrar resultado
+      if (errorCount === 0) {
+        this.toastService.success(`Se han cargado ${successCount} proyectos exitosamente`);
+      } else {
+        this.toastService.warning(`Se cargaron ${successCount} proyectos, ${errorCount} con errores`);
+      }
+
+      // Recargar la lista
+      this.loadProjects();
+      
+      // Limpiar el input
+      target.value = '';
+      
+    } catch (error: any) {
+      this.toastService.error(`Error al procesar el archivo: ${error.message}`);
+      target.value = '';
+    }
+  }
+
+  // Función auxiliar para leer archivo como texto
+  private readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = (e) => reject(new Error('Error al leer el archivo'));
+      reader.readAsText(file);
+    });
+  }
+
+  // Función para validar la estructura de los proyectos
+  private validateProjectsStructure(projectsData: any[]): boolean {
+    if (!Array.isArray(projectsData)) return false;
+    
+    return projectsData.every(project => {
+      // Validar que tenga al menos título o slug
+      return project && (project.title || project.slug);
+    });
   }
 }
