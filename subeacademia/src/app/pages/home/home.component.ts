@@ -4,7 +4,7 @@ import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.co
 import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { HomeConfigService, HomePageContent } from '../../core/data/home-config.service';
-import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
+import { Subscription, distinctUntilChanged, switchMap, Observable } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
@@ -30,6 +30,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     // Valor por defecto para asegurar que el título se muestre
     this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+    
+    // Inicializar observables de logos
+    this.companyLogos$ = this.logos.listByType('Empresa');
+    this.educationLogos$ = this.logos.listByType('Institución Educativa');
   }
 
   private contentSub?: Subscription;
@@ -42,6 +46,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private timeoutId: any;
   companyLogos: Logo[] = [];
   educationLogos: Logo[] = [];
+  companyLogos$: Observable<Logo[]>;
+  educationLogos$: Observable<Logo[]>;
   logosDePrueba: Logo[] = [
     {
       id: '1',
@@ -136,14 +142,21 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
 
-    // Logos
-    this.logos.listByType('Empresa').subscribe(v => {
+    // Cargar logos desde Firestore
+    this.loadLogos();
+  }
+
+  private loadLogos(): void {
+    // Los observables ya están configurados en el constructor
+    // Solo necesitamos suscribirnos para mantener los arrays locales actualizados
+    this.companyLogos$.subscribe(v => {
       this.companyLogos = v;
-      console.log('HomeComponent: Logos de empresas cargados:', this.companyLogos.length, this.companyLogos);
+      console.log('HomeComponent: Logos de empresas cargados desde Firestore:', this.companyLogos.length, this.companyLogos);
     });
-    this.logos.listByType('Institución Educativa').subscribe(v => {
+
+    this.educationLogos$.subscribe(v => {
       this.educationLogos = v;
-      console.log('HomeComponent: Logos de instituciones cargados:', this.educationLogos.length, this.educationLogos);
+      console.log('HomeComponent: Logos de instituciones cargados desde Firestore:', this.educationLogos.length, this.educationLogos);
     });
   }
 

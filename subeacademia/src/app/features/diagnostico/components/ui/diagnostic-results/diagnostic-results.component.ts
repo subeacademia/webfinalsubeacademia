@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
@@ -16,9 +16,9 @@ import { BaseChartDirective } from 'ng2-charts';
   standalone: true,
   imports: [CommonModule, SemaforoAresComponent, BaseChartDirective],
   templateUrl: './diagnostic-results.component.html',
-  styleUrls: ['./diagnostic-results.component.css']
+  styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
-export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
+export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewInit {
   @ViewChild('resultsContainer') resultsContainer!: ElementRef;
   
   private stateService = inject(DiagnosticStateService);
@@ -67,6 +67,12 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['scores'] && this.scores) {
+      this.prepareChartData();
+    }
+  }
+
   ngAfterViewInit(): void {
     // Animar el número del puntaje final
     if (this.scores?.ares?.total) {
@@ -86,6 +92,31 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.animateChart();
     }, 2000);
+  }
+
+  private prepareChartData(): void {
+    if (!this.scores?.competencias) return;
+
+    // Extrae los labels y los datos de tu `scores`
+    const labels = Object.keys(this.scores.competencias);
+    const finalScores = Object.values(this.scores.competencias) as number[];
+
+    this.radarChartData = {
+      labels: labels,
+      datasets: [{
+        data: finalScores,
+        label: 'Resultado',
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgb(54, 162, 235)',
+        pointBackgroundColor: 'rgb(54, 162, 235)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgb(54, 162, 235)'
+      }]
+    };
+
+    // Llama a las animaciones después de que los datos estén listos
+    setTimeout(() => this.animateResults(), 100);
   }
 
   private prepareRadarChartData(): void {
@@ -116,6 +147,25 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
         pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
       }]
     };
+  }
+
+  private animateResults(): void {
+    // Animación de conteo para el puntaje total
+    if (this.scores?.ares?.total) {
+      this.animationService.countUp('#total-score', this.scores.ares.total);
+    }
+
+    // Animación de aparición para el gráfico
+    const anime = (window as any).anime;
+    if (anime) {
+      anime({
+        targets: '#radar-chart-container',
+        opacity: [0, 1],
+        translateY: [20, 0],
+        duration: 1200,
+        easing: 'easeOutExpo'
+      });
+    }
   }
 
   animateChart(): void {
@@ -162,7 +212,11 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
     this.isLoadingReport = true;
     this.loadingError = false;
     
-    this.generativeAiService.generateActionPlan(diagnosticData, this.scores)
+    // Identificar la competencia más débil para el CTA dinámico
+    const weakestCompetency = this.identifyWeakestCompetency();
+    const ctaPrompt = this.generateCTAPrompt(weakestCompetency);
+    
+    this.generativeAiService.generateActionPlan(diagnosticData, this.scores, ctaPrompt)
       .subscribe({
         next: (report) => {
           console.log('✅ Reporte generado con Gemini:', report);
@@ -186,6 +240,51 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
           this.isLoadingReport = false;
         }
       });
+  }
+
+  private identifyWeakestCompetency(): { name: string, score: number } | null {
+    if (!this.scores?.competencias) return null;
+    
+    const competencyEntries = Object.entries(this.scores.competencias);
+    if (competencyEntries.length === 0) return null;
+    
+    // Encontrar la competencia con el puntaje más bajo
+    const weakest = competencyEntries.reduce((min, [name, score]) => {
+      return (score as number) < (min.score as number) ? { name, score: score as number } : min;
+    }, { name: competencyEntries[0][0], score: competencyEntries[0][1] as number });
+    
+    console.log('🎯 Competencia más débil identificada:', weakest);
+    return weakest;
+  }
+
+  private generateCTAPrompt(weakestCompetency: { name: string, score: number } | null): string {
+    if (!weakestCompetency) return '';
+    
+    // Determinar el tipo de producto recomendado basado en la competencia
+    let productType = 'curso';
+    let productName = 'curso especializado';
+    
+    if (weakestCompetency.score < 30) {
+      productType = 'asesoría';
+      productName = 'asesoría personalizada';
+    } else if (weakestCompetency.score < 50) {
+      productType = 'certificación';
+      productName = 'programa de certificación';
+    }
+    
+    const ctaPrompt = `
+      IMPORTANTE: Al final del plan de acción, incluye una recomendación específica para una ${productName} 
+      relacionada con "${weakestCompetency.name}" que ayude a mejorar esta competencia. 
+      
+      El CTA debe ser convincente y específico, mencionando que esta ${productName} acelerará significativamente 
+      el proceso de mejora en esta área crítica.
+      
+      Formato sugerido: "Para acelerar tu desarrollo en ${weakestCompetency.name}, te recomendamos encarecidamente 
+      nuestra ${productName} [Nombre del Producto], diseñada específicamente para fortalecer esta competencia clave."
+    `;
+    
+    console.log('📝 Prompt de CTA generado:', ctaPrompt);
+    return ctaPrompt;
   }
 
   async generatePdf(): Promise<void> {

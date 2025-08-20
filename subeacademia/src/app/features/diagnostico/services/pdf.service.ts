@@ -32,7 +32,6 @@ export class PdfService {
 
       // Crear nuevo PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
-      let position = 0;
 
       // Añadir título del informe
       pdf.setFontSize(20);
@@ -50,7 +49,7 @@ export class PdfService {
 
       // Si la imagen es más alta que una página, añadir páginas adicionales
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+        const position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
@@ -68,8 +67,8 @@ export class PdfService {
       pdf.addPage();
       this.addMetricsPage(pdf, scores);
 
-      // Guardar el PDF
-      const fileName = `informe-diagnostico-${new Date().getTime()}.pdf`;
+      // Guardar el PDF con nombre más descriptivo
+      const fileName = `diagnostico-subeacademia-${new Date().toISOString().slice(0,10)}.pdf`;
       pdf.save(fileName);
       
       console.log('✅ PDF generado exitosamente:', fileName);

@@ -1,0 +1,118 @@
+/* Estilos para impresión y generación de PDF */
+@media print {
+  /* Ocultar elementos no deseados en el PDF */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Asegurar fondo blanco */
+  body {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Ajustar colores de texto para impresión */
+  .text-gray-300, 
+  .text-white,
+  .text-blue-100,
+  .text-green-100 {
+    color: #000 !important;
+  }
+
+  /* Asegurar que los gráficos sean visibles */
+  .radar-chart-container {
+    opacity: 1 !important;
+    background-color: #f8f9fa !important;
+  }
+
+  /* Optimizar sombras para impresión */
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Asegurar que los gradientes se vean bien */
+  .bg-gradient-to-r,
+  .bg-gradient-to-br {
+    background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
+  }
+
+  /* Optimizar bordes */
+  .border {
+    border-color: #d1d5db !important;
+  }
+
+  /* Asegurar que las tarjetas tengan fondo blanco */
+  .bg-white,
+  .bg-gray-800 {
+    background-color: #fff !important;
+  }
+
+  /* Optimizar texto para impresión */
+  h1, h2, h3, h4, h5, h6 {
+    color: #000 !important;
+    page-break-after: avoid;
+  }
+
+  /* Evitar cortes de página en elementos importantes */
+  .diagnostic-results-container section {
+    page-break-inside: avoid;
+  }
+
+  /* Asegurar que las métricas sean legibles */
+  .text-4xl,
+  .text-3xl,
+  .text-2xl {
+    font-size: 1.5rem !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Optimizar barras de progreso */
+  .bg-gradient-to-r.from-green-500.to-green-600,
+  .bg-gradient-to-r.from-yellow-500.to-yellow-600,
+  .bg-gradient-to-r.from-orange-500.to-orange-600,
+  .bg-gradient-to-r.from-red-500.to-red-600 {
+    background: #3b82f6 !important;
+  }
+
+  /* Asegurar que los iconos sean visibles */
+  svg {
+    fill: #000 !important;
+    stroke: #000 !important;
+  }
+
+  /* Optimizar espaciado para impresión */
+  .p-8, .p-6, .p-4 {
+    padding: 1rem !important;
+  }
+
+  .mb-16, .mb-12, .mb-8 {
+    margin-bottom: 1rem !important;
+  }
+
+  /* Asegurar que el contenido se ajuste a la página */
+  .max-w-7xl {
+    max-width: none !important;
+  }
+
+  /* Optimizar el contenedor principal */
+  .diagnostic-results-container {
+    background: #fff !important;
+    min-height: auto !important;
+  }
+}
+
+/* Estilos específicos para generación de PDF */
+.pdf-generation {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+
+.pdf-generation .no-print {
+  display: none !important;
+}
+
+.pdf-generation .radar-chart-container {
+  opacity: 1 !important;
+  background-color: #f8f9fa !important;
+}

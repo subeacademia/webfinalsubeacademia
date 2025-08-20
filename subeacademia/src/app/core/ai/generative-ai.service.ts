@@ -14,14 +14,14 @@ export class GenerativeAiService {
   private coursesService = inject(CoursesService);
   private readonly geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${environment.geminiApiKey}`;
 
-  generateActionPlan(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores): Observable<DiagnosticReport | null> {
+  generateActionPlan(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, additionalPrompt?: string): Observable<DiagnosticReport | null> {
     return from(this.coursesService.getAllCourses()).pipe(
       switchMap(courses => {
         const formattedCoursesString = courses.map((course: Course) =>
           `- ID: ${course.id}, Título: ${course.title}, Descripción: ${course.description}`
         ).join('\n');
 
-        const prompt = this.buildEnhancedGeminiPrompt(diagnosticData, scores, formattedCoursesString);
+        const prompt = this.buildEnhancedGeminiPrompt(diagnosticData, scores, formattedCoursesString, additionalPrompt);
 
         const requestBody = {
           contents: [{ parts: [{ text: prompt }] }],
@@ -59,7 +59,7 @@ export class GenerativeAiService {
     );
   }
 
-  private buildEnhancedGeminiPrompt(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, formattedCoursesString: string): string {
+  private buildEnhancedGeminiPrompt(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, formattedCoursesString: string, additionalPrompt?: string): string {
     // Identificar áreas de mejora con puntuaciones más bajas
     const areasMejora = this.identifyImprovementAreas(scores);
     
@@ -84,6 +84,8 @@ export class GenerativeAiService {
 
       **Tu Tarea:**
       Genera un objeto JSON con la siguiente estructura y contenido de EXCELENTE calidad, personalizado para el contexto específico del usuario. INCLUYE CTAs DINÁMICOS basados en las áreas de mejora identificadas:
+      
+      ${additionalPrompt ? `**Instrucciones Específicas Adicionales:**\n${additionalPrompt}\n` : ''}
 
       {
         "titulo_informe": "Hoja de Ruta Estratégica para la Adopción de IA - [Industria del Usuario]",

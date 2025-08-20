@@ -245,17 +245,13 @@
     
     <!-- Carrusel de logos con animación infinita -->
     <div class="space-y-8">
-      <!-- Debug info -->
-      <div class="text-sm text-gray-500 mb-4" aria-hidden="true">
-        Debug: companyLogos.length = {{companyLogos.length}}, educationLogos.length = {{educationLogos.length}}
-      </div>
       
       <!-- Carrusel Doble: Primera fila (izquierda a derecha) -->
       <div class="relative">
         <h3 class="text-xl font-semibold text-center mb-6 text-primary">Empresas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
-            [logos]="companyLogos.length > 0 ? companyLogos : logosDePrueba" 
+            [logos]="(companyLogos$ | async) || logosDePrueba" 
             direction="normal"
             class="carousel-top"
             aria-label="Logos de empresas que confían en nosotros">
@@ -268,7 +264,7 @@
         <h3 class="text-xl font-semibold text-center mb-6 text-secondary">Instituciones Educativas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
-            [logos]="educationLogos.length > 0 ? educationLogos : logosDePrueba" 
+            [logos]="(educationLogos$ | async) || logosDePrueba" 
             direction="reverse"
             class="carousel-bottom"
             aria-label="Logos de instituciones educativas que confían en nosotros">

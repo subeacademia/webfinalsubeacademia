@@ -33,7 +33,7 @@
         
         <div class="mb-6">
           <!-- Gráfico Radar con ng2-charts -->
-          <div *ngIf="radarChartData && radarChartData.labels?.length" class="radar-chart-container bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+          <div id="radar-chart-container" *ngIf="radarChartData && radarChartData.labels?.length" class="radar-chart-container bg-gray-50 dark:bg-gray-700 rounded-lg p-6 opacity-0">
             <canvas baseChart
                     [data]="radarChartData"
                     [type]="'radar'"
@@ -96,7 +96,7 @@
           <!-- Puntaje Total ARES -->
           <div *ngIf="scores?.ares?.total" class="text-center mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-200 dark:border-red-700">
             <div class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">Puntaje Total ARES-AI</div>
-            <div id="score-final" class="text-4xl font-bold text-red-600 dark:text-red-400">0</div>
+            <div id="total-score" class="text-4xl font-bold text-red-600 dark:text-red-400">0</div>
             <div class="text-sm text-red-600 dark:text-red-400">de 100 puntos</div>
           </div>
         
@@ -181,7 +181,7 @@
             </div>
 
             <!-- Botón de Descarga PDF -->
-            <div class="mt-8">
+            <div class="mt-8 no-print">
               <button (click)="generatePdf()" 
                       [disabled]="isGeneratingPdf"
                       class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:cursor-not-allowed">
