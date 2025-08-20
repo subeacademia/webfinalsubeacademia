@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Asesoria } from '../../features/productos/data/asesoria.model';
+import { AsesoriasService } from '../../features/productos/services/asesorias.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-asesorias',
@@ -123,40 +125,36 @@ import { Asesoria } from '../../features/productos/data/asesoria.model';
   `,
   styles: []
 })
-export class AdminAsesoriasComponent implements OnInit {
+export class AdminAsesoriasComponent implements OnInit, OnDestroy {
   asesorias: Asesoria[] = [];
   mostrarFormulario = false;
   asesoriaEditando: Asesoria | null = null;
   asesoriaForm: Partial<Asesoria> = {};
   tagsString = '';
+  private readonly unsubscribe$ = new Subject<void>();
+
+  constructor(private asesoriasService: AsesoriasService) {}
 
   ngOnInit(): void {
     this.cargarAsesorias();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   cargarAsesorias(): void {
-    // Simulación de datos - en producción esto vendría de un servicio
-    this.asesorias = [
-      {
-        id: '1',
-        titulo: 'Implementación de IA en Pymes',
-        descripcionCorta: 'Asesoría para implementar soluciones de IA en pequeñas empresas',
-        descripcionLarga: 'Asesoría completa para implementar soluciones de Inteligencia Artificial en pequeñas y medianas empresas...',
-        imagenDestacada: '',
-        precio: 1500,
-        tags: ['IA', 'Pymes', 'Implementación'],
-        slug: 'implementacion-ia-pymes',
-        fechaCreacion: new Date(),
-        fechaActualizacion: new Date(),
-        activo: true
-      }
-    ];
+    this.asesoriasService.getAllAsesorias()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(data => {
+        this.asesorias = data;
+      });
   }
 
   guardarAsesoria(): void {
     if (this.asesoriaForm.titulo && this.asesoriaForm.precio) {
-      const asesoria: Asesoria = {
-        id: this.asesoriaEditando?.id || Date.now().toString(),
+      const asesoriaData = {
         titulo: this.asesoriaForm.titulo,
         descripcionCorta: this.asesoriaForm.descripcionCorta || '',
         descripcionLarga: this.asesoriaForm.descripcionLarga || '',
@@ -170,15 +168,22 @@ export class AdminAsesoriasComponent implements OnInit {
       };
 
       if (this.asesoriaEditando) {
-        const index = this.asesorias.findIndex(a => a.id === asesoria.id);
-        if (index !== -1) {
-          this.asesorias[index] = asesoria;
-        }
+        // Actualizar asesoría existente
+        this.asesoriasService.updateAsesoria(this.asesoriaEditando.id, asesoriaData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarAsesorias();
+            this.limpiarFormulario();
+          });
       } else {
-        this.asesorias.push(asesoria);
+        // Crear nueva asesoría
+        this.asesoriasService.createAsesoria(asesoriaData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarAsesorias();
+            this.limpiarFormulario();
+          });
       }
-
-      this.limpiarFormulario();
     }
   }
 
@@ -191,7 +196,11 @@ export class AdminAsesoriasComponent implements OnInit {
 
   eliminarAsesoria(id: string): void {
     if (confirm('¿Estás seguro de que quieres eliminar esta asesoría?')) {
-      this.asesorias = this.asesorias.filter(a => a.id !== id);
+      this.asesoriasService.deleteAsesoria(id)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(() => {
+          this.cargarAsesorias();
+        });
     }
   }
 

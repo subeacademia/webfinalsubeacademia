@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, AnimateOnScrollDirective],
   template: `
     <div class="container mx-auto px-4 py-8">
       <!-- Header de la sección -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-6">Nuestros Productos</h1>
+        <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-6">Nuestros Productos</h1>
         <div class="max-w-4xl mx-auto">
           <p class="text-lg text-gray-700 leading-relaxed">
             Nuestros servicios son premium porque son personalizados, adaptados y pensados desde la matética y no desde la didáctica. 
@@ -23,7 +24,7 @@ import { RouterLink } from '@angular/router';
       <!-- Grid de categorías de productos -->
       <div class="grid md:grid-cols-3 gap-8 mb-12">
         <!-- Asesorías -->
-        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div class="text-center">
             <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">💡</span>
@@ -40,7 +41,7 @@ import { RouterLink } from '@angular/router';
         </div>
 
         <!-- Cursos -->
-        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div class="text-center">
             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">📚</span>
@@ -57,7 +58,7 @@ import { RouterLink } from '@angular/router';
         </div>
 
         <!-- Certificaciones -->
-        <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow">
           <div class="text-center">
             <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span class="text-2xl">🏆</span>
@@ -75,16 +76,29 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <!-- Información adicional -->
-      <div class="bg-gray-50 rounded-lg p-8 text-center">
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">¿Por qué elegir nuestros productos?</h2>
-        <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Personalización</h3>
-            <p class="text-gray-600">Cada producto se adapta a tus necesidades específicas</p>
+      <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center" [appAnimateOnScroll]="'.value-card'">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-8">¿Por qué elegir nuestros productos?</h2>
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div class="value-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
+            <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">🎯</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Personalización</h3>
+            <p class="text-gray-600 dark:text-gray-300">Cada producto se adapta a tus necesidades específicas y objetivos empresariales</p>
           </div>
-          <div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Experiencia Práctica</h3>
-            <p class="text-gray-600">Aprendizaje basado en casos reales y proyectos prácticos</p>
+          <div class="value-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">🚀</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Experiencia Práctica</h3>
+            <p class="text-gray-600 dark:text-gray-300">Aprendizaje basado en casos reales y proyectos prácticos del mundo empresarial</p>
+          </div>
+          <div class="value-card bg-white dark:bg-gray-700 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600">
+            <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span class="text-2xl">💎</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Calidad Premium</h3>
+            <p class="text-gray-600 dark:text-gray-300">Contenido de alta calidad desarrollado por expertos en IA y transformación digital</p>
           </div>
         </div>
       </div>

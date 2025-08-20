@@ -92,14 +92,16 @@ export class PdfService {
     const splitText = pdf.splitTextToSize(summaryText, 170);
     pdf.text(splitText, 20, 40);
 
-    // Título del informe
-    pdf.setFontSize(16);
-    pdf.setTextColor(59, 130, 246);
-    pdf.text('Título del Informe', 20, 80);
-    
-    pdf.setFontSize(12);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(report.titulo_informe || 'Sin título', 20, 95);
+    // Título del informe (solo si existe)
+    if (report.titulo_informe) {
+      pdf.setFontSize(16);
+      pdf.setTextColor(59, 130, 246);
+      pdf.text('Título del Informe', 20, 80);
+      
+      pdf.setFontSize(12);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(report.titulo_informe, 20, 95);
+    }
   }
 
   private addActionPlan(pdf: jsPDF, report: DiagnosticReport): void {
@@ -176,12 +178,25 @@ export class PdfService {
       pdf.text('Competencias Clave:', 20, yPosition);
       yPosition += 10;
 
-      Object.entries(scores.competencias).forEach(([name, score]) => {
-        pdf.setFontSize(11);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`${name}: ${score}/100`, 25, yPosition);
-        yPosition += 8;
-      });
+      // Verificar si competencias es un array o un objeto
+      if (Array.isArray(scores.competencias)) {
+        scores.competencias.forEach((comp: any) => {
+          pdf.setFontSize(11);
+          pdf.setTextColor(0, 0, 0);
+          const score = typeof comp.score === 'number' ? comp.score : 0;
+          pdf.text(`${comp.name}: ${score}/100`, 25, yPosition);
+          yPosition += 8;
+        });
+      } else {
+        // Si es un objeto, iterar sobre las entradas
+        Object.entries(scores.competencias).forEach(([name, score]) => {
+          pdf.setFontSize(11);
+          pdf.setTextColor(0, 0, 0);
+          const scoreValue = typeof score === 'number' ? score : 0;
+          pdf.text(`${name}: ${scoreValue}/100`, 25, yPosition);
+          yPosition += 8;
+        });
+      }
 
       yPosition += 10;
     }
@@ -196,7 +211,8 @@ export class PdfService {
       Object.entries(scores.ares).forEach(([name, score]) => {
         pdf.setFontSize(11);
         pdf.setTextColor(0, 0, 0);
-        pdf.text(`${name}: ${score}/100`, 25, yPosition);
+        const scoreValue = typeof score === 'number' ? score : 0;
+        pdf.text(`${name}: ${scoreValue}/100`, 25, yPosition);
         yPosition += 8;
       });
     }

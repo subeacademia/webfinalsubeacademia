@@ -15,6 +15,8 @@ export class GenerativeAiService {
   private readonly geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${environment.geminiApiKey}`;
 
   generateActionPlan(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, additionalPrompt?: string): Observable<DiagnosticReport | null> {
+    console.log('🤖 Generando plan de acción con datos:', { diagnosticData, scores });
+    
     return from(this.coursesService.getAllCourses()).pipe(
       switchMap(courses => {
         const formattedCoursesString = courses.map((course: Course) =>
@@ -22,6 +24,7 @@ export class GenerativeAiService {
         ).join('\n');
 
         const prompt = this.buildEnhancedGeminiPrompt(diagnosticData, scores, formattedCoursesString, additionalPrompt);
+        console.log('📝 Prompt enviado a Gemini:', prompt);
 
         const requestBody = {
           contents: [{ parts: [{ text: prompt }] }],
@@ -47,6 +50,7 @@ export class GenerativeAiService {
             if (!responseText) {
               throw new Error('Respuesta inválida o vacía de la API de Gemini.');
             }
+            console.log('📄 Respuesta de Gemini:', responseText);
             return JSON.parse(responseText) as DiagnosticReport;
           })
         );

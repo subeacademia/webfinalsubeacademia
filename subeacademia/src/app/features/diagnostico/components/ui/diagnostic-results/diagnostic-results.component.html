@@ -1,5 +1,8 @@
 <!-- src/app/features/diagnostico/components/ui/diagnostic-results/diagnostic-results.component.html -->
 
+<!-- Loader de generación de reporte -->
+<app-generating-report-loader *ngIf="isGeneratingReport"></app-generating-report-loader>
+
 <div #resultsContainer id="results-container" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 diagnostic-results-container">
   <div class="max-w-7xl mx-auto px-4 py-8">
     
@@ -32,6 +35,12 @@
         </div>
         
         <div class="mb-6">
+          <!-- Gráfico de Barras de Competencias -->
+          <app-competency-bar-chart 
+            [competencyScores]="scores?.competencias || []"
+            class="mb-6">
+          </app-competency-bar-chart>
+          
           <!-- Gráfico Radar con ng2-charts -->
           <div id="radar-chart-container" *ngIf="radarChartData && radarChartData.labels?.length" class="radar-chart-container bg-gray-50 dark:bg-gray-700 rounded-lg p-6 opacity-0">
             <canvas baseChart
@@ -57,11 +66,6 @@
                     }"
                     class="h-64">
             </canvas>
-          </div>
-          
-          <!-- Fallback si no hay datos -->
-          <div *ngIf="!radarChartData || !radarChartData.labels?.length" class="text-center text-gray-500 py-8">
-            <p>No hay datos de competencias disponibles</p>
           </div>
         </div>
 

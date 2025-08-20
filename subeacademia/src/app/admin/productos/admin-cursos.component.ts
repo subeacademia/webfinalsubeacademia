@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Curso } from '../../features/productos/data/producto.model';
+import { CursosService } from '../../features/productos/services/cursos.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-cursos',
@@ -154,45 +156,37 @@ import { Curso } from '../../features/productos/data/producto.model';
   `,
   styles: []
 })
-export class AdminCursosComponent implements OnInit {
+export class AdminCursosComponent implements OnInit, OnDestroy {
   cursos: Curso[] = [];
   mostrarFormulario = false;
   cursoEditando: Curso | null = null;
   cursoForm: Partial<Curso> = {};
   contenidoString = '';
   recursosString = '';
+  private readonly unsubscribe$ = new Subject<void>();
+
+  constructor(private cursosService: CursosService) {}
 
   ngOnInit(): void {
     this.cargarCursos();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   cargarCursos(): void {
-    // Simulación de datos - en producción esto vendría de un servicio
-    this.cursos = [
-      {
-        id: '1',
-        titulo: 'Fundamentos de Machine Learning',
-        descripcion: 'Curso introductorio a los conceptos básicos de Machine Learning',
-        imagenDestacada: '',
-        precio: 299,
-        slug: 'fundamentos-machine-learning',
-        fechaCreacion: new Date(),
-        fechaActualizacion: new Date(),
-        activo: true,
-        tipo: 'curso',
-        duracion: '40 horas',
-        nivel: 'Principiante',
-        instructor: 'Dr. Ana García',
-        contenido: ['Introducción a ML', 'Algoritmos básicos', 'Proyecto final'],
-        recursos: ['PDF', 'Videos', 'Ejercicios prácticos']
-      }
-    ];
+    this.cursosService.getAllCursos()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(data => {
+        this.cursos = data;
+      });
   }
 
   guardarCurso(): void {
     if (this.cursoForm.titulo && this.cursoForm.precio && this.cursoForm.duracion && this.cursoForm.nivel) {
-      const curso: Curso = {
-        id: this.cursoEditando?.id || Date.now().toString(),
+      const cursoData = {
         titulo: this.cursoForm.titulo,
         descripcion: this.cursoForm.descripcion || '',
         imagenDestacada: this.cursoForm.imagenDestacada || '',
@@ -201,7 +195,7 @@ export class AdminCursosComponent implements OnInit {
         fechaCreacion: this.cursoEditando?.fechaCreacion || new Date(),
         fechaActualizacion: new Date(),
         activo: true,
-        tipo: 'curso',
+        tipo: 'curso' as const,
         duracion: this.cursoForm.duracion,
         nivel: this.cursoForm.nivel,
         instructor: this.cursoForm.instructor || '',
@@ -210,15 +204,22 @@ export class AdminCursosComponent implements OnInit {
       };
 
       if (this.cursoEditando) {
-        const index = this.cursos.findIndex(c => c.id === curso.id);
-        if (index !== -1) {
-          this.cursos[index] = curso;
-        }
+        // Actualizar curso existente
+        this.cursosService.updateCurso(this.cursoEditando.id, cursoData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarCursos();
+            this.limpiarFormulario();
+          });
       } else {
-        this.cursos.push(curso);
+        // Crear nuevo curso
+        this.cursosService.createCurso(cursoData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarCursos();
+            this.limpiarFormulario();
+          });
       }
-
-      this.limpiarFormulario();
     }
   }
 
@@ -232,7 +233,11 @@ export class AdminCursosComponent implements OnInit {
 
   eliminarCurso(id: string): void {
     if (confirm('¿Estás seguro de que quieres eliminar este curso?')) {
-      this.cursos = this.cursos.filter(c => c.id !== id);
+      this.cursosService.deleteCurso(id)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(() => {
+          this.cargarCursos();
+        });
     }
   }
 

@@ -16,7 +16,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'posts/new', loadComponent: () => import('./posts/post-edit.component').then(m => m.PostEditComponent), canActivate: [AdminGuard] },
       { path: 'posts/:id', loadComponent: () => import('./posts/post-edit.component').then(m => m.PostEditComponent), canActivate: [AdminGuard] },
 
-      { path: 'productos', loadComponent: () => import('./productos/admin-asesorias.component').then(m => m.AdminAsesoriasComponent), canActivate: [AdminGuard] },
+      { path: 'productos', loadComponent: () => import('./productos/productos-dashboard.component').then(m => m.ProductosDashboardComponent), canActivate: [AdminGuard] },
       { path: 'productos/asesorias', loadComponent: () => import('./productos/admin-asesorias.component').then(m => m.AdminAsesoriasComponent), canActivate: [AdminGuard] },
       { path: 'productos/cursos', loadComponent: () => import('./productos/admin-cursos.component').then(m => m.AdminCursosComponent), canActivate: [AdminGuard] },
       { path: 'productos/certificaciones', loadComponent: () => import('./productos/admin-certificaciones.component').then(m => m.AdminCertificacionesComponent), canActivate: [AdminGuard] },

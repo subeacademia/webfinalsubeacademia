@@ -7,6 +7,8 @@ import { DiagnosticReport } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { PdfService } from '../../../services/pdf.service';
 import { SemaforoAresComponent } from '../semaforo-ares.component';
+import { CompetencyBarChartComponent } from '../competency-bar-chart/competency-bar-chart.component';
+import { GeneratingReportLoaderComponent } from '../generating-report-loader/generating-report-loader.component';
 import { AnimationService } from '../../../../../core/services/animation.service';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -14,7 +16,7 @@ import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, SemaforoAresComponent, BaseChartDirective],
+  imports: [CommonModule, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
@@ -34,6 +36,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   loadingError = false;
   pdfUrl: string | null = null;
   isGeneratingPdf = false;
+  isGeneratingReport = false;
 
   // Datos del gráfico radar
   public radarChartData!: ChartConfiguration<'radar'>['data'];
@@ -57,7 +60,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       // 2. Prepara los datos del gráfico radar
       this.prepareRadarChartData();
 
-      // 3. Llama a la IA para generar el reporte detallado.
+      // 3. Activar loader y llamar a la IA para generar el reporte detallado.
+      this.isGeneratingReport = true;
       this.generateReport(diagnosticData);
       
     } catch (error) {
@@ -122,21 +126,35 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private prepareRadarChartData(): void {
     if (!this.scores?.competencias) return;
 
-    // Convertir los datos de competencias al formato esperado por ng2-charts
-    const competencyEntries = Object.entries(this.scores.competencias);
+    console.log('📊 Scores de competencias recibidos:', this.scores.competencias);
+
+    // Verificar si competencias es un array o un objeto
+    let competencyEntries: [string, any][];
+    
+    if (Array.isArray(this.scores.competencias)) {
+      // Si es un array de CompetencyScore
+      competencyEntries = this.scores.competencias.map((comp: any) => [comp.competenciaId || comp.name, comp.puntaje || comp.score]);
+    } else {
+      // Si es un objeto, convertir a entradas
+      competencyEntries = Object.entries(this.scores.competencias);
+    }
+
     this.finalLabels = competencyEntries.map(([name]) => name);
-    this.finalScores = competencyEntries.map(([, score]) => score as number);
+    this.finalScores = competencyEntries.map(([, score]) => {
+      const scoreValue = typeof score === 'number' ? score : 0;
+      return scoreValue;
+    });
 
     console.log('📊 Datos del gráfico radar preparados:', {
       labels: this.finalLabels,
       scores: this.finalScores
     });
 
-    // INICIALIZA EL GRÁFICO CON DATOS EN CERO
+    // INICIALIZA EL GRÁFICO CON LOS DATOS REALES DEL DIAGNÓSTICO
     this.radarChartData = {
       labels: this.finalLabels,
       datasets: [{
-        data: new Array(this.finalScores.length).fill(0), // Empieza en cero
+        data: [...this.finalScores], // Usar los scores reales, no ceros
         label: 'Puntaje de Competencias',
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         borderColor: 'rgba(59, 130, 246, 1)',
@@ -173,25 +191,25 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
     console.log('🎬 Iniciando animación del gráfico radar...');
 
-    const animatedData = {
-      // Usamos un objeto proxy para que anime.js pueda modificar cada valor
-      ...this.finalScores.reduce((acc, val, i) => ({ ...acc, [`score${i}`]: 0 }), {})
-    };
+    // Crear una copia de los scores finales para la animación
+    const scoresCopy = [...this.finalScores];
+    
+    // Inicializar datos de animación en 0
+    const animatedData = scoresCopy.map(() => 0);
 
     // Usar anime.js para animar los datos
     const anime = (window as any).anime;
     if (anime) {
       anime({
         targets: animatedData,
-        // Mapeamos cada score final a su propiedad correspondiente en el objeto
-        ...this.finalScores.reduce((acc, val, i) => ({ ...acc, [`score${i}`]: val }), {}),
+        // Animar desde 0 hasta los valores finales
+        ...scoresCopy.reduce((acc, val, i) => ({ ...acc, [i]: val }), {}),
         easing: 'easeInOutExpo',
         duration: 2000,
         round: 1,
         update: () => {
           // En cada frame de la animación, actualizamos los datos del gráfico
-          const newData = Object.values(animatedData) as number[];
-          this.radarChartData.datasets[0].data = newData;
+          this.radarChartData.datasets[0].data = [...animatedData];
           
           // Forzar la actualización del gráfico
           this.radarChartData = { ...this.radarChartData };
@@ -199,7 +217,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       });
     } else {
       console.warn('⚠️ anime.js no está disponible, usando fallback');
-      // Fallback: actualizar directamente
+      // Fallback: mostrar directamente los scores finales
       setTimeout(() => {
         this.radarChartData.datasets[0].data = [...this.finalScores];
         this.radarChartData = { ...this.radarChartData };
@@ -233,11 +251,13 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
             this.loadingError = true;
           }
           this.isLoadingReport = false;
+          this.isGeneratingReport = false;
         },
         error: (error) => {
           console.error('❌ Error al generar reporte con Gemini:', error);
           this.loadingError = true;
           this.isLoadingReport = false;
+          this.isGeneratingReport = false;
         }
       });
   }
@@ -245,13 +265,28 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private identifyWeakestCompetency(): { name: string, score: number } | null {
     if (!this.scores?.competencias) return null;
     
-    const competencyEntries = Object.entries(this.scores.competencias);
-    if (competencyEntries.length === 0) return null;
+    let competenciesArray: Array<{name: string, score: number}>;
+    
+    if (Array.isArray(this.scores.competencias)) {
+      // Si es un array de CompetencyScore
+      competenciesArray = this.scores.competencias.map((comp: any) => ({
+        name: comp.competenciaId || comp.name,
+        score: comp.puntaje || comp.score || 0
+      }));
+    } else {
+      // Si es un objeto, convertir a array
+      competenciesArray = Object.entries(this.scores.competencias).map(([name, score]) => ({
+        name,
+        score: typeof score === 'number' ? score : 0
+      }));
+    }
+    
+    if (competenciesArray.length === 0) return null;
     
     // Encontrar la competencia con el puntaje más bajo
-    const weakest = competencyEntries.reduce((min, [name, score]) => {
-      return (score as number) < (min.score as number) ? { name, score: score as number } : min;
-    }, { name: competencyEntries[0][0], score: competencyEntries[0][1] as number });
+    const weakest = competenciesArray.reduce((min, current) => {
+      return current.score < min.score ? current : min;
+    });
     
     console.log('🎯 Competencia más débil identificada:', weakest);
     return weakest;
@@ -295,7 +330,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
     try {
       this.isGeneratingPdf = true;
-      console.log('🚀 Iniciando generación de PDF...');
+      console.log('�� Iniciando generación de PDF...');
 
       // Esperar un momento para asegurar que las animaciones del gráfico hayan terminado
       setTimeout(async () => {
@@ -332,8 +367,23 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   getTopCompetencies(): Array<{name: string, score: number}> {
     if (!this.scores?.competencias) return [];
     
-    return Object.entries(this.scores.competencias)
-      .map(([name, score]) => ({ name, score: score as number }))
+    let competenciesArray: Array<{name: string, score: number}>;
+    
+    if (Array.isArray(this.scores.competencias)) {
+      // Si es un array de CompetencyScore
+      competenciesArray = this.scores.competencias.map((comp: any) => ({
+        name: comp.competenciaId || comp.name,
+        score: comp.puntaje || comp.score || 0
+      }));
+    } else {
+      // Si es un objeto, convertir a array
+      competenciesArray = Object.entries(this.scores.competencias).map(([name, score]) => ({
+        name,
+        score: typeof score === 'number' ? score : 0
+      }));
+    }
+    
+    return competenciesArray
       .sort((a, b) => b.score - a.score)
       .slice(0, 4);
   }
@@ -342,7 +392,11 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     if (!this.scores?.ares) return [];
     
     return Object.entries(this.scores.ares)
-      .map(([name, score]) => ({ name, score: score as number }))
+      .filter(([key]) => key !== 'promedio')
+      .map(([name, score]) => ({ 
+        name, 
+        score: typeof score === 'number' ? score : 0 
+      }))
       .sort((a, b) => b.score - a.score);
   }
 

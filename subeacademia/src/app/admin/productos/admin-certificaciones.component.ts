@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Certificacion } from '../../features/productos/data/certificacion.model';
+import { CertificacionesService } from '../../features/productos/services/certificaciones.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-admin-certificaciones',
@@ -133,40 +135,36 @@ import { Certificacion } from '../../features/productos/data/certificacion.model
   `,
   styles: []
 })
-export class AdminCertificacionesComponent implements OnInit {
+export class AdminCertificacionesComponent implements OnInit, OnDestroy {
   certificaciones: Certificacion[] = [];
   mostrarFormulario = false;
   certificacionEditando: Certificacion | null = null;
   certificacionForm: Partial<Certificacion> = {};
+  private readonly unsubscribe$ = new Subject<void>();
+
+  constructor(private certificacionesService: CertificacionesService) {}
 
   ngOnInit(): void {
     this.cargarCertificaciones();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
   cargarCertificaciones(): void {
-    // Simulación de datos - en producción esto vendría de un servicio
-    this.certificaciones = [
-      {
-        id: '1',
-        titulo: 'Certificación en Deep Learning',
-        descripcion: 'Certificación oficial en técnicas avanzadas de Deep Learning',
-        imagenDestacada: '',
-        entidadCertificadora: 'TensorFlow',
-        nivel: 'Avanzado',
-        precio: 599,
-        slug: 'certificacion-deep-learning',
-        fechaCreacion: new Date(),
-        fechaActualizacion: new Date(),
-        activo: true
-      }
-    ];
+    this.certificacionesService.getAllCertificaciones()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(data => {
+        this.certificaciones = data;
+      });
   }
 
   guardarCertificacion(): void {
     if (this.certificacionForm.titulo && this.certificacionForm.precio && 
         this.certificacionForm.entidadCertificadora && this.certificacionForm.nivel) {
-      const certificacion: Certificacion = {
-        id: this.certificacionEditando?.id || Date.now().toString(),
+      const certificacionData = {
         titulo: this.certificacionForm.titulo,
         descripcion: this.certificacionForm.descripcion || '',
         imagenDestacada: this.certificacionForm.imagenDestacada || '',
@@ -180,15 +178,22 @@ export class AdminCertificacionesComponent implements OnInit {
       };
 
       if (this.certificacionEditando) {
-        const index = this.certificaciones.findIndex(c => c.id === certificacion.id);
-        if (index !== -1) {
-          this.certificaciones[index] = certificacion;
-        }
+        // Actualizar certificación existente
+        this.certificacionesService.updateCertificacion(this.certificacionEditando.id, certificacionData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarCertificaciones();
+            this.limpiarFormulario();
+          });
       } else {
-        this.certificaciones.push(certificacion);
+        // Crear nueva certificación
+        this.certificacionesService.createCertificacion(certificacionData)
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe(() => {
+            this.cargarCertificaciones();
+            this.limpiarFormulario();
+          });
       }
-
-      this.limpiarFormulario();
     }
   }
 
@@ -200,7 +205,11 @@ export class AdminCertificacionesComponent implements OnInit {
 
   eliminarCertificacion(id: string): void {
     if (confirm('¿Estás seguro de que quieres eliminar esta certificación?')) {
-      this.certificaciones = this.certificaciones.filter(c => c.id !== id);
+      this.certificacionesService.deleteCertificacion(id)
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe(() => {
+          this.cargarCertificaciones();
+        });
     }
   }
 

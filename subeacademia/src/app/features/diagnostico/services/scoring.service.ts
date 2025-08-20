@@ -61,21 +61,41 @@ export class ScoringService {
 
     // Método principal para calcular puntajes de competencias
     calculateScores(diagnosticData: DiagnosticData): { name: string; score: number }[] {
+        // Obtener todas las competencias disponibles
+        const allCompetencies = COMPETENCIAS;
+        
         if (!diagnosticData.competencias?.niveles) {
-            return [];
+            // Si no hay datos, devolver todas las competencias con puntaje 0
+            return allCompetencies.map(comp => ({
+                name: comp.nameKey,
+                score: 0
+            }));
         }
 
-        const scores = Object.entries(diagnosticData.competencias.niveles)
+        // Crear un mapa de todas las competencias con puntaje 0 por defecto
+        const competencyMap = new Map<string, number>();
+        allCompetencies.forEach(comp => {
+            competencyMap.set(comp.nameKey, 0);
+        });
+
+        // Actualizar con los puntajes reales del usuario
+        Object.entries(diagnosticData.competencias.niveles)
             .filter(([_, level]) => level !== null)
-            .map(([competencyId, level]) => {
-                const score = this.getCompetencyScore(level as string);
-                return {
-                    name: competencyId,
-                    score: score
-                };
+            .forEach(([competencyId, level]) => {
+                const competency = allCompetencies.find(c => c.id === competencyId);
+                if (competency) {
+                    const score = this.getCompetencyScore(level as string);
+                    competencyMap.set(competency.nameKey, score);
+                }
             });
 
-        return scores;
+        // Convertir el mapa a array y ordenar por puntaje descendente
+        const result = Array.from(competencyMap.entries())
+            .map(([name, score]) => ({ name, score }))
+            .sort((a, b) => b.score - a.score);
+            
+        console.log('📊 Scores de competencias calculados:', result);
+        return result;
     }
 
     // Método eliminado para evitar confusión en el flujo de datos
@@ -107,12 +127,11 @@ export class ScoringService {
 
     private getCompetencyScore(level: string): number {
         const scoreMap: { [key: string]: number } = {
-            'incipiente': 0,
-            'explorador': 20,
-            'aprendiz': 40,
-            'practicante': 60,
+            'incipiente': 20,
+            'basico': 40,
+            'intermedio': 60,
             'avanzado': 80,
-            'experto': 100
+            'lider': 100
         };
         return scoreMap[level] || 0;
     }
