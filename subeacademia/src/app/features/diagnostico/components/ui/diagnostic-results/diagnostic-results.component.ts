@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
@@ -6,18 +6,21 @@ import { GenerativeAiService } from '../../../../../core/ai/generative-ai.servic
 import { DiagnosticReport } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { PdfService } from '../../../services/pdf.service';
-import { RadarChartComponent } from '../radar-chart.component';
 import { SemaforoAresComponent } from '../semaforo-ares.component';
 import { AnimationService } from '../../../../../core/services/animation.service';
+import { ChartConfiguration } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, RadarChartComponent, SemaforoAresComponent],
+  imports: [CommonModule, SemaforoAresComponent, BaseChartDirective],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
 export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
+  @ViewChild('resultsContainer') resultsContainer!: ElementRef;
+  
   private stateService = inject(DiagnosticStateService);
   private scoringService = inject(ScoringService);
   private generativeAiService = inject(GenerativeAiService);
@@ -31,6 +34,11 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
   loadingError = false;
   pdfUrl: string | null = null;
   isGeneratingPdf = false;
+
+  // Datos del gráfico radar
+  public radarChartData!: ChartConfiguration<'radar'>['data'];
+  private finalScores: number[] = [];
+  private finalLabels: string[] = [];
 
   ngOnInit(): void {
     console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado');
@@ -46,7 +54,10 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       
       console.log('📈 Scores calculados:', this.scores);
 
-      // 2. Llama a la IA para generar el reporte detallado.
+      // 2. Prepara los datos del gráfico radar
+      this.prepareRadarChartData();
+
+      // 3. Llama a la IA para generar el reporte detallado.
       this.generateReport(diagnosticData);
       
     } catch (error) {
@@ -62,15 +73,87 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       this.animationService.countUp('#score-final', this.scores.ares.total);
     }
 
-    // EXTRA: Animar la aparición del gráfico radar
-    // (Asumiendo que el gráfico se renderiza en un canvas con id="radarChart")
-    const radarChart = document.querySelector('#radarChart');
-    if (radarChart) {
-        (radarChart as HTMLElement).style.opacity = '0';
-        // Usar el servicio de animación para el gráfico
-        setTimeout(() => {
-            this.animationService.staggerFromBottom([radarChart]);
-        }, 500);
+    // Animar la aparición de elementos en secuencia
+    setTimeout(() => {
+      this.animationService.cascadeIn([
+        '.diagnostic-results-container h1',
+        '.diagnostic-results-container .grid',
+        '.diagnostic-results-container section'
+      ], 300);
+    }, 500);
+
+    // Animar la aparición del gráfico radar
+    setTimeout(() => {
+      this.animateChart();
+    }, 2000);
+  }
+
+  private prepareRadarChartData(): void {
+    if (!this.scores?.competencias) return;
+
+    // Convertir los datos de competencias al formato esperado por ng2-charts
+    const competencyEntries = Object.entries(this.scores.competencias);
+    this.finalLabels = competencyEntries.map(([name]) => name);
+    this.finalScores = competencyEntries.map(([, score]) => score as number);
+
+    console.log('📊 Datos del gráfico radar preparados:', {
+      labels: this.finalLabels,
+      scores: this.finalScores
+    });
+
+    // INICIALIZA EL GRÁFICO CON DATOS EN CERO
+    this.radarChartData = {
+      labels: this.finalLabels,
+      datasets: [{
+        data: new Array(this.finalScores.length).fill(0), // Empieza en cero
+        label: 'Puntaje de Competencias',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+      }]
+    };
+  }
+
+  animateChart(): void {
+    if (!this.finalScores.length) return;
+
+    console.log('🎬 Iniciando animación del gráfico radar...');
+
+    const animatedData = {
+      // Usamos un objeto proxy para que anime.js pueda modificar cada valor
+      ...this.finalScores.reduce((acc, val, i) => ({ ...acc, [`score${i}`]: 0 }), {})
+    };
+
+    // Usar anime.js para animar los datos
+    const anime = (window as any).anime;
+    if (anime) {
+      anime({
+        targets: animatedData,
+        // Mapeamos cada score final a su propiedad correspondiente en el objeto
+        ...this.finalScores.reduce((acc, val, i) => ({ ...acc, [`score${i}`]: val }), {}),
+        easing: 'easeInOutExpo',
+        duration: 2000,
+        round: 1,
+        update: () => {
+          // En cada frame de la animación, actualizamos los datos del gráfico
+          const newData = Object.values(animatedData) as number[];
+          this.radarChartData.datasets[0].data = newData;
+          
+          // Forzar la actualización del gráfico
+          this.radarChartData = { ...this.radarChartData };
+        }
+      });
+    } else {
+      console.warn('⚠️ anime.js no está disponible, usando fallback');
+      // Fallback: actualizar directamente
+      setTimeout(() => {
+        this.radarChartData.datasets[0].data = [...this.finalScores];
+        this.radarChartData = { ...this.radarChartData };
+      }, 500);
     }
   }
 
@@ -115,27 +198,27 @@ export class DiagnosticResultsComponent implements OnInit, AfterViewInit {
       this.isGeneratingPdf = true;
       console.log('🚀 Iniciando generación de PDF...');
 
-      // Buscar el elemento que contiene los resultados para capturar
-      const resultsElement = document.querySelector('.diagnostic-results-container') as HTMLElement;
-      
-      if (!resultsElement) {
-        console.error('❌ No se encontró el contenedor de resultados');
-        alert('Error: No se pudo encontrar el contenido para generar el PDF');
-        return;
-      }
+      // Esperar un momento para asegurar que las animaciones del gráfico hayan terminado
+      setTimeout(async () => {
+        if (this.resultsContainer?.nativeElement && this.report) {
+          // Generar el PDF
+          await this.pdfService.generateDiagnosticReport(
+            this.report,
+            this.scores,
+            this.resultsContainer.nativeElement
+          );
 
-      // Generar el PDF
-      await this.pdfService.generateDiagnosticReport(
-        this.report,
-        this.scores,
-        resultsElement
-      );
+          console.log('✅ PDF generado exitosamente');
+        } else {
+          console.error('❌ No se encontró el contenedor de resultados');
+          alert('Error: No se pudo encontrar el contenido para generar el PDF');
+        }
+        this.isGeneratingPdf = false;
+      }, 2500); // Esperar 2.5 segundos para que las animaciones terminen
 
-      console.log('✅ PDF generado exitosamente');
     } catch (error) {
       console.error('❌ Error al generar PDF:', error);
       alert('Error al generar el PDF. Por favor, intenta de nuevo.');
-    } finally {
       this.isGeneratingPdf = false;
     }
   }

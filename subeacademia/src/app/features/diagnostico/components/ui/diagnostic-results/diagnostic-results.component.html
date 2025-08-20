@@ -1,19 +1,19 @@
 <!-- src/app/features/diagnostico/components/ui/diagnostic-results/diagnostic-results.component.html -->
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 diagnostic-results-container">
+<div #resultsContainer id="results-container" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 diagnostic-results-container">
   <div class="max-w-7xl mx-auto px-4 py-8">
     
     <!-- Header de Felicitaciones -->
-    <div class="text-center mb-12">
-      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mb-6 shadow-lg">
+    <div class="text-center mb-12 animate-fade-in">
+      <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full mb-6 shadow-lg animate-bounce">
         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
       </div>
-      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4">
+      <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4 animate-slide-in">
         ¡Felicidades! Has Completado el Diagnóstico
       </h1>
-      <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+      <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-in-delayed">
         Tu evaluación personalizada está lista. Descubre tu nivel de madurez en IA y recibe un plan de acción estratégico diseñado específicamente para ti.
       </p>
     </div>
@@ -32,8 +32,35 @@
         </div>
         
         <div class="mb-6">
-          <app-radar-chart *ngIf="scores?.competencias" [data]="scores.competencias"></app-radar-chart>
-          <div *ngIf="!scores?.competencias" class="text-center text-gray-500 py-8">
+          <!-- Gráfico Radar con ng2-charts -->
+          <div *ngIf="radarChartData && radarChartData.labels?.length" class="radar-chart-container bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+            <canvas baseChart
+                    [data]="radarChartData"
+                    [type]="'radar'"
+                    [options]="{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        r: {
+                          beginAtZero: true,
+                          max: 100,
+                          ticks: {
+                            stepSize: 20
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          display: false
+                        }
+                      }
+                    }"
+                    class="h-64">
+            </canvas>
+          </div>
+          
+          <!-- Fallback si no hay datos -->
+          <div *ngIf="!radarChartData || !radarChartData.labels?.length" class="text-center text-gray-500 py-8">
             <p>No hay datos de competencias disponibles</p>
           </div>
         </div>

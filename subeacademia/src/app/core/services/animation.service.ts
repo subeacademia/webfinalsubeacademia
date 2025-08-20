@@ -62,4 +62,145 @@ export class AnimationService {
         });
     }
   }
+
+  /**
+   * Anima la aparición de un elemento con un efecto de fade y scale.
+   * @param targets El selector del elemento a animar.
+   * @param delay Delay antes de iniciar la animación.
+   */
+  fadeInScale(targets: string, delay: number = 0): void {
+    const targetElement = document.querySelector(targets);
+    if (targetElement) {
+      (targetElement as HTMLElement).style.opacity = '0';
+      (targetElement as HTMLElement).style.transform = 'scale(0.8)';
+      
+      setTimeout(() => {
+        animate(targetElement, {
+          opacity: [0, 1],
+          scale: [0.8, 1],
+          duration: 800,
+          easing: 'easeOutExpo',
+        });
+      }, delay);
+    }
+  }
+
+  /**
+   * Anima un gráfico para que se "dibuje" desde cero.
+   * @param chartData Los datos del gráfico a animar.
+   * @param duration Duración de la animación en milisegundos.
+   */
+  animateChartData(chartData: any, duration: number = 2000): void {
+    if (!chartData || !chartData.datasets || !chartData.datasets[0]) return;
+
+    const dataset = chartData.datasets[0];
+    const finalData = [...dataset.data];
+    
+    // Inicializar en cero
+    dataset.data = new Array(finalData.length).fill(0);
+    
+    // Animar cada valor
+    finalData.forEach((finalValue: number, index: number) => {
+      setTimeout(() => {
+        animate({ value: 0 }, {
+          value: finalValue,
+          duration: duration,
+          easing: 'easeInOutExpo',
+          round: 1,
+          update: (anim: any) => {
+            dataset.data[index] = anim.animations[0].currentValue;
+            // Forzar actualización del gráfico
+            if (chartData.update) {
+              chartData.update();
+            }
+          }
+        });
+      }, index * 200); // Stagger de 200ms entre cada valor
+    });
+  }
+
+  /**
+   * Anima la aparición de elementos en secuencia con un efecto de cascada.
+   * @param targets Array de selectores o elementos a animar.
+   * @param staggerDelay Delay entre cada elemento.
+   */
+  cascadeIn(targets: string[], staggerDelay: number = 100): void {
+    targets.forEach((target, index) => {
+      const element = document.querySelector(target);
+      if (element) {
+        (element as HTMLElement).style.opacity = '0';
+        (element as HTMLElement).style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          animate(element, {
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 600,
+            easing: 'easeOutExpo',
+          });
+        }, index * staggerDelay);
+      }
+    });
+  }
+
+  /**
+   * Anima un elemento para que pulse suavemente.
+   * @param targets El selector del elemento a animar.
+   * @param iterations Número de veces que debe pulsar.
+   */
+  pulse(targets: string, iterations: number = 3): void {
+    const targetElement = document.querySelector(targets);
+    if (targetElement) {
+      animate(targetElement, {
+        scale: [1, 1.05, 1],
+        duration: 600,
+        easing: 'easeInOutQuad',
+        loop: iterations,
+      });
+    }
+  }
+
+  /**
+   * Anima un elemento para que se deslice desde la izquierda.
+   * @param targets El selector del elemento a animar.
+   * @param delay Delay antes de iniciar la animación.
+   */
+  slideInFromLeft(targets: string, delay: number = 0): void {
+    const targetElement = document.querySelector(targets);
+    if (targetElement) {
+      (targetElement as HTMLElement).style.opacity = '0';
+      (targetElement as HTMLElement).style.transform = 'translateX(-50px)';
+      
+      setTimeout(() => {
+        animate(targetElement, {
+          opacity: [0, 1],
+          translateX: [-50, 0],
+          duration: 800,
+          easing: 'easeOutExpo',
+        });
+      }, delay);
+    }
+  }
+
+  /**
+   * Anima un elemento para que se deslice desde la derecha.
+   * @param targets El selector del elemento a animar.
+   * @param delay Delay antes de iniciar la animación.
+   */
+  slideInFromRight(targets: string, delay: number = 0): void {
+    const targetElement = document.querySelector(targets);
+    if (targetElement) {
+      (targetElement as HTMLElement).style.opacity = '0';
+      (targetElement as HTMLElement).style.transform = 'translateX(50px)';
+      
+      setTimeout(() => {
+        animate(targetElement, {
+          opacity: [0, 1],
+          translateX: [50, 0],
+          duration: 800,
+          easing: 'easeOutExpo',
+        });
+      }, delay);
+    }
+  }
 }

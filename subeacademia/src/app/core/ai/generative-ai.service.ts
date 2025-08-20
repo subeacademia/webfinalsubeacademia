@@ -210,4 +210,43 @@ export class GenerativeAiService {
     if (score >= 40) return 'Regular';
     return 'Crítico';
   }
+
+  /**
+   * Genera texto usando la API de Gemini
+   * @param prompt El prompt para generar el texto
+   * @returns Promise con el texto generado o null si hay error
+   */
+  async generateText(prompt: string): Promise<string | null> {
+    try {
+      const requestBody = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.7,
+        }
+      };
+
+      const response = await fetch(this.geminiApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la API de Gemini: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!responseText) {
+        throw new Error('Respuesta inválida o vacía de la API de Gemini.');
+      }
+
+      return responseText;
+    } catch (error) {
+      console.error('Error al generar texto con Gemini:', error);
+      return null;
+    }
+  }
 }
