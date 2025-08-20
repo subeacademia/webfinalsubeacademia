@@ -12,6 +12,7 @@ import { GeneratingReportLoaderComponent } from '../generating-report-loader/gen
 import { AnimationService } from '../../../../../core/services/animation.service';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { COMPETENCIAS } from '../../../data/competencias';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -52,7 +53,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       
       // 1. Calcula y muestra los scores inmediatamente.
       const ares = this.scoringService.computeAresScore(diagnosticData);
-      const competencias = this.scoringService.calculateScores(diagnosticData);
+      const competencias = this.scoringService.computeCompetencyScores(diagnosticData);
       this.scores = { ares, competencias };
       
       console.log('📈 Scores calculados:', this.scores);
@@ -128,22 +129,28 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
     console.log('📊 Scores de competencias recibidos:', this.scores.competencias);
 
-    // Verificar si competencias es un array o un objeto
-    let competencyEntries: [string, any][];
-    
+    // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
     if (Array.isArray(this.scores.competencias)) {
-      // Si es un array de CompetencyScore
-      competencyEntries = this.scores.competencias.map((comp: any) => [comp.competenciaId || comp.name, comp.puntaje || comp.score]);
-    } else {
-      // Si es un objeto, convertir a entradas
-      competencyEntries = Object.entries(this.scores.competencias);
-    }
+      // Obtener los nombres de las competencias usando COMPETENCIAS
+      const competencyEntries = this.scores.competencias.map((comp: any) => {
+        const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+        return [competency?.nameKey || comp.competenciaId, comp.puntaje];
+      });
 
-    this.finalLabels = competencyEntries.map(([name]) => name);
-    this.finalScores = competencyEntries.map(([, score]) => {
-      const scoreValue = typeof score === 'number' ? score : 0;
-      return scoreValue;
-    });
+      this.finalLabels = competencyEntries.map(([name]: [string, any]) => name);
+      this.finalScores = competencyEntries.map(([, score]: [string, any]) => {
+        const scoreValue = typeof score === 'number' ? score : 0;
+        return scoreValue;
+      });
+    } else {
+      // Fallback para formato de objeto
+      const competencyEntries = Object.entries(this.scores.competencias);
+      this.finalLabels = competencyEntries.map(([name]) => name);
+      this.finalScores = competencyEntries.map(([, score]) => {
+        const scoreValue = typeof score === 'number' ? score : 0;
+        return scoreValue;
+      });
+    }
 
     console.log('📊 Datos del gráfico radar preparados:', {
       labels: this.finalLabels,
@@ -165,6 +172,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
         pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
       }]
     };
+
+    console.log('📊 Gráfico radar inicializado con datos:', this.radarChartData);
   }
 
   private animateResults(): void {
@@ -265,31 +274,42 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private identifyWeakestCompetency(): { name: string, score: number } | null {
     if (!this.scores?.competencias) return null;
     
-    let competenciesArray: Array<{name: string, score: number}>;
-    
     if (Array.isArray(this.scores.competencias)) {
-      // Si es un array de CompetencyScore
-      competenciesArray = this.scores.competencias.map((comp: any) => ({
-        name: comp.competenciaId || comp.name,
-        score: comp.puntaje || comp.score || 0
-      }));
+      // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
+      const competenciesArray = this.scores.competencias.map((comp: any) => {
+        const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+        return {
+          name: competency?.nameKey || comp.competenciaId,
+          score: comp.puntaje || 0
+        };
+      });
+      
+      if (competenciesArray.length === 0) return null;
+      
+      // Encontrar la competencia con el puntaje más bajo
+      const weakest = competenciesArray.reduce((min: any, current: any) => {
+        return current.score < min.score ? current : min;
+      });
+      
+      console.log('🎯 Competencia más débil identificada:', weakest);
+      return weakest;
     } else {
-      // Si es un objeto, convertir a array
-      competenciesArray = Object.entries(this.scores.competencias).map(([name, score]) => ({
+      // Fallback para formato de objeto
+      const competenciesArray = Object.entries(this.scores.competencias).map(([name, score]) => ({
         name,
         score: typeof score === 'number' ? score : 0
       }));
+      
+      if (competenciesArray.length === 0) return null;
+      
+      // Encontrar la competencia con el puntaje más bajo
+      const weakest = competenciesArray.reduce((min: any, current: any) => {
+        return current.score < min.score ? current : min;
+      });
+      
+      console.log('🎯 Competencia más débil identificada:', weakest);
+      return weakest;
     }
-    
-    if (competenciesArray.length === 0) return null;
-    
-    // Encontrar la competencia con el puntaje más bajo
-    const weakest = competenciesArray.reduce((min, current) => {
-      return current.score < min.score ? current : min;
-    });
-    
-    console.log('🎯 Competencia más débil identificada:', weakest);
-    return weakest;
   }
 
   private generateCTAPrompt(weakestCompetency: { name: string, score: number } | null): string {
@@ -363,29 +383,48 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     this.generateReport(diagnosticData);
   }
 
-  // Métodos auxiliares para el nuevo diseño
-  getTopCompetencies(): Array<{name: string, score: number}> {
+  // Método para convertir datos de competencias al formato del gráfico de barras
+  getCompetencyScoresForChart(): Array<{name: string, score: number}> {
     if (!this.scores?.competencias) return [];
     
-    let competenciesArray: Array<{name: string, score: number}>;
-    
     if (Array.isArray(this.scores.competencias)) {
-      // Si es un array de CompetencyScore
-      competenciesArray = this.scores.competencias.map((comp: any) => ({
-        name: comp.competenciaId || comp.name,
-        score: comp.puntaje || comp.score || 0
-      }));
+      // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
+      return this.scores.competencias.map((comp: any) => {
+        const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+        return {
+          name: competency?.nameKey || comp.competenciaId,
+          score: comp.puntaje || 0
+        };
+      });
     } else {
-      // Si es un objeto, convertir a array
-      competenciesArray = Object.entries(this.scores.competencias).map(([name, score]) => ({
+      // Fallback para formato de objeto
+      return Object.entries(this.scores.competencias).map(([name, score]) => ({
         name,
         score: typeof score === 'number' ? score : 0
       }));
     }
+  }
+
+  // Métodos auxiliares para el nuevo diseño
+  getTopCompetencies(): Array<{name: string, score: number}> {
+    if (!this.scores?.competencias) return [];
     
-    return competenciesArray
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 4);
+    if (Array.isArray(this.scores.competencias)) {
+      // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
+      return this.scores.competencias.map((comp: any) => {
+        const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+        return {
+          name: competency?.nameKey || comp.competenciaId,
+          score: comp.puntaje || 0
+        };
+      }).sort((a: any, b: any) => b.score - a.score).slice(0, 4);
+    } else {
+      // Fallback para formato de objeto
+      return Object.entries(this.scores.competencias).map(([name, score]) => ({
+        name,
+        score: typeof score === 'number' ? score : 0
+      })).sort((a, b) => b.score - a.score).slice(0, 4);
+    }
   }
 
   getAresPhases(): Array<{name: string, score: number}> {
@@ -433,5 +472,86 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     if (score >= 60) return 'bg-yellow-500';
     if (score >= 40) return 'bg-orange-500';
     return 'bg-red-500';
+  }
+
+  // Método para descargar el plan completo
+  async downloadPlan(): Promise<void> {
+    if (!this.report || !this.scores) {
+      console.error('❌ No hay reporte o scores para descargar');
+      return;
+    }
+
+    try {
+      console.log('📥 Iniciando descarga del plan...');
+      
+      // Crear el contenido del plan
+      const planContent = this.generatePlanContent();
+      
+      // Crear y descargar el archivo
+      const blob = new Blob([planContent], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `plan-accion-ia-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ Plan descargado exitosamente');
+    } catch (error) {
+      console.error('❌ Error al descargar el plan:', error);
+      alert('Error al descargar el plan. Por favor, intenta de nuevo.');
+    }
+  }
+
+  private generatePlanContent(): string {
+    if (!this.report || !this.scores) return '';
+    
+    let content = 'PLAN DE ACCIÓN ESTRATÉGICO - DIAGNÓSTICO DE IA\n';
+    content += '================================================\n\n';
+    
+    // Información del diagnóstico
+    content += `Fecha: ${new Date().toLocaleDateString('es-ES')}\n`;
+    content += `Puntaje Total ARES: ${this.scores.ares?.total || 0}/100\n\n`;
+    
+    // Resumen ejecutivo
+    if (this.report.resumen_ejecutivo) {
+      content += 'RESUMEN EJECUTIVO:\n';
+      content += '-------------------\n';
+      content += this.report.resumen_ejecutivo + '\n\n';
+    }
+    
+    // Plan de acción
+    if (this.report.plan_de_accion && this.report.plan_de_accion.length > 0) {
+      content += 'PLAN DE ACCIÓN:\n';
+      content += '----------------\n';
+      this.report.plan_de_accion.forEach((seccion, index) => {
+        content += `${index + 1}. ${seccion.area_mejora}\n`;
+        content += `   Problema: ${seccion.descripcion_problema}\n`;
+        content += `   Acciones recomendadas:\n`;
+        seccion.acciones_recomendadas.forEach((accion, accionIndex) => {
+          content += `     ${accionIndex + 1}. ${accion.accion}\n`;
+          content += `        ${accion.detalle}\n`;
+        });
+        content += '\n';
+      });
+    }
+    
+    // Análisis ARES
+    if (this.report.analisis_ares && this.report.analisis_ares.length > 0) {
+      content += 'ANÁLISIS ARES:\n';
+      content += '---------------\n';
+      this.report.analisis_ares.forEach((seccion, index) => {
+        content += `${index + 1}. ${seccion.dimension}: ${seccion.puntaje}/100\n`;
+        content += `   ${seccion.analisis}\n\n`;
+      });
+    }
+    
+    content += '================================================\n';
+    content += 'Generado por Sube Academia - Herramienta de Diagnóstico de IA\n';
+    content += 'Contacto: +56 9 8228 1888 | WhatsApp: +56 9 8228 1888\n';
+    
+    return content;
   }
 }

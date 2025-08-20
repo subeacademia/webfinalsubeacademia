@@ -180,33 +180,58 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
     computeAresScore(form: DiagnosticoFormValue): AresScoresByDimension & { promedio: number } {
         // Regla simple: promedio por dimensión de valores 1-5, 0 se excluye; escala a 0-100.
         const byDim: Record<string, number[]> = {};
+        console.log('🔍 Datos ARES recibidos en scoring:', form.ares);
+        
+        // Si no hay datos ARES, devolver scores vacíos
+        if (!form.ares || Object.keys(form.ares).length === 0) {
+            console.warn('⚠️ No hay datos ARES para procesar');
+            return { promedio: 0 } as any;
+        }
+        
         for (const item of ARES_ITEMS) {
-            const raw = form.ares?.respuestas?.[item.id] ?? null;
+            const raw = (form.ares as any)?.[item.id] ?? null;
             if (raw === null || raw === 0) continue; // 0 = N/A
             if (!byDim[item.dimension]) byDim[item.dimension] = [];
             byDim[item.dimension].push(Number(raw));
         }
+        
         const scores: AresScoresByDimension = {};
         let sumAll = 0;
         let countAll = 0;
+        
         for (const [dim, values] of Object.entries(byDim)) {
             const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
             const score = Math.round((avg / 5) * 100);
             scores[dim] = score;
             sumAll += score;
             countAll += 1;
+            console.log(`📊 Dimensión ${dim}: valores=${values}, promedio=${avg}, score=${score}`);
         }
+        
         const promedio = countAll ? Math.round(sumAll / countAll) : 0;
+        console.log('📈 Scores ARES calculados:', { scores, promedio });
         return { ...scores, promedio } as any;
     }
 
     computeCompetencyScores(form: DiagnosticoFormValue): DiagnosticoScores['competencias'] {
         // Mapea nivel autoevaluado -> puntaje
-        const niveles = form?.competencias?.niveles ?? {};
+        // El estado devuelve competencias directamente desde competenciasForm
+        const niveles = form?.competencias ?? {};
+        console.log('🔍 Datos de competencias recibidos en scoring:', niveles);
+        
+        // Si no hay datos, devolver array vacío
+        if (Object.keys(niveles).length === 0) {
+            console.warn('⚠️ No hay datos de competencias para procesar');
+            return [];
+        }
+        
         const out = Object.entries(niveles).map(([competenciaId, nivel]) => {
             const puntaje = nivel ? NIVEL_TO_SCORE[nivel as NivelCompetencia] : 0;
+            console.log(`📊 Competencia ${competenciaId}: nivel=${nivel}, puntaje=${puntaje}`);
             return { competenciaId, puntaje, nivel: (nivel || 'incipiente') as NivelCompetencia };
         });
+        
+        console.log('📈 Scores de competencias calculados:', out);
         // Ordenar desc por puntaje para consistencia
         return out.sort((a, b) => b.puntaje - a.puntaje);
     }

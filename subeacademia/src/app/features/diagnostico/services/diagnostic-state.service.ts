@@ -81,6 +81,9 @@ export class DiagnosticStateService {
         this.contextoControls['industria'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
         this.contextoControls['tamano'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
         this.contextoControls['presupuesto'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        
+        // Asegurar que los controles estén disponibles
+        console.log('Controles de contexto inicializados:', Object.keys(this.contextoControls));
     }
 
     private setupFormSubscriptions(): void {
@@ -178,32 +181,30 @@ export class DiagnosticStateService {
         console.log('saveContextoData llamado con:', data);
         console.log('Controles de contexto disponibles:', Object.keys(this.contextoControls));
         
-        if (this.contextoControls['industria']) {
-            console.log('Estableciendo industria:', data.industria);
-            this.contextoControls['industria'].setValue(data.industria);
-        } else {
-            console.error('Control industria no encontrado!');
+        // Asegurar que los controles existan
+        if (!this.contextoControls['industria']) {
+            this.contextoControls['industria'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        }
+        if (!this.contextoControls['tamano']) {
+            this.contextoControls['tamano'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
+        }
+        if (!this.contextoControls['presupuesto']) {
+            this.contextoControls['presupuesto'] = this.fb.control<string | null>(null, { validators: [Validators.required] });
         }
         
-        if (this.contextoControls['tamano']) {
-            console.log('Estableciendo tamano:', data.tamano);
-            this.contextoControls['tamano'].setValue(data.tamano);
-        } else {
-            console.error('Control tamano no encontrado!');
-        }
-        
-        if (this.contextoControls['presupuesto']) {
-            console.log('Estableciendo presupuesto:', data.presupuesto);
-            this.contextoControls['presupuesto'].setValue(data.presupuesto);
-        } else {
-            console.error('Control presupuesto no encontrado!');
-        }
+        // Establecer valores
+        this.contextoControls['industria'].setValue(data.industria);
+        this.contextoControls['tamano'].setValue(data.tamano);
+        this.contextoControls['presupuesto'].setValue(data.presupuesto);
         
         // Actualizar el segmento basado en la industria
         if (data.industria) {
             console.log('Actualizando segmento basado en industria:', data.industria);
             this.setSegmentFromIndustry(data.industria);
         }
+        
+        // Guardar en localStorage inmediatamente
+        this.saveToStorage();
         
         console.log('Estado final de controles de contexto:', {
             industria: this.contextoControls['industria']?.value,
@@ -438,8 +439,13 @@ export class DiagnosticStateService {
                 // Restaurar controles de contexto si existen
                 if (data.contextoValues) {
                     Object.keys(data.contextoValues).forEach(key => {
-                        if (data.contextoValues[key] !== null && data.contextoValues[key] !== undefined && !this.contextoControls[key]) {
-                            this.contextoControls[key] = this.fb.control(data.contextoValues[key]);
+                        if (data.contextoValues[key] !== null && data.contextoValues[key] !== undefined) {
+                            // Asegurar que el control existe
+                            if (!this.contextoControls[key]) {
+                                this.contextoControls[key] = this.fb.control(data.contextoValues[key]);
+                            } else {
+                                this.contextoControls[key].setValue(data.contextoValues[key]);
+                            }
                         }
                     });
                 }

@@ -66,7 +66,16 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
             id="telefono" 
             formControlName="telefono"
             placeholder="+56 9 1234 5678"
+            (input)="formatPhoneNumber($event)"
+            (keypress)="onlyNumbers($event)"
             class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+          <div *ngIf="leadForm.get('telefono')?.invalid && leadForm.get('telefono')?.touched" 
+               class="mt-1 text-red-400 text-sm">
+            <span *ngIf="leadForm.get('telefono')?.errors?.['pattern']">El teléfono solo debe contener números y espacios</span>
+          </div>
+          <div class="mt-1 text-xs text-gray-400">
+            Formato: +56 9 1234 5678 (solo números y espacios)
+          </div>
         </div>
 
         <!-- Acepta comunicaciones -->
@@ -92,27 +101,27 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
             </svg>
             <div class="text-sm text-gray-300">
-              <p class="font-medium text-blue-200 mb-1">Tu información está segura</p>
-              <p>Utilizamos tu información únicamente para generar tu diagnóstico personalizado y, si lo autorizas, para enviarte contenido relevante sobre IA. No compartimos tus datos con terceros.</p>
+              <span class="font-medium">Tu información está segura</span>
+              <p class="text-gray-400 mt-1">
+                La información que nos proporcionas se utiliza únicamente para generar tu diagnóstico personalizado y enviarte contenido relevante sobre IA. No compartimos tus datos con terceros.
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Botón de envío -->
-        <div class="pt-4">
-          <button 
-            type="submit" 
-            [disabled]="leadForm.invalid || isSubmitting"
-            class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-            <svg *ngIf="!isSubmitting" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <svg *ngIf="isSubmitting" class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            {{ isSubmitting ? 'Guardando...' : 'Finalizar Diagnóstico' }}
-          </button>
-        </div>
+        <button 
+          type="submit" 
+          [disabled]="leadForm.invalid || isSubmitting"
+          class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
+          <svg *ngIf="!isSubmitting" class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+          </svg>
+          <svg *ngIf="isSubmitting" class="w-5 h-5 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          {{ isSubmitting ? 'Guardando...' : 'Generar Diagnóstico' }}
+        </button>
       </form>
     </div>
   `,
@@ -134,12 +143,8 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
       @apply space-y-2;
     }
 
-    input[type="checkbox"] {
-      @apply rounded border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-2;
-    }
-
-    input[type="checkbox"]:checked {
-      @apply bg-blue-600 border-blue-600;
+    input:focus {
+      @apply outline-none;
     }
   `]
 })
@@ -159,6 +164,15 @@ export class StepLeadComponent implements OnInit {
 
   private initializeForm(): void {
     this.leadForm = this.stateService.leadForm;
+    
+    // Agregar validación personalizada para teléfono
+    const telefonoControl = this.leadForm.get('telefono');
+    if (telefonoControl) {
+      telefonoControl.setValidators([
+        this.phoneNumberValidator()
+      ]);
+      telefonoControl.updateValueAndValidity();
+    }
   }
 
   private loadExistingData(): void {
@@ -166,47 +180,130 @@ export class StepLeadComponent implements OnInit {
     // que ya tiene la lógica de persistencia
   }
 
+  // Validador personalizado para teléfono
+  private phoneNumberValidator() {
+    return (control: any) => {
+      if (!control.value) {
+        return null; // Campo opcional
+      }
+      
+      const phoneRegex = /^[\d\s\+\-\(\)]+$/;
+      if (!phoneRegex.test(control.value)) {
+        return { pattern: true };
+      }
+      
+      return null;
+    };
+  }
+
+  // Solo permitir números y algunos caracteres especiales
+  onlyNumbers(event: KeyboardEvent): void {
+    const allowedKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '(', ')', ' '];
+    const key = event.key;
+    
+    if (!allowedKeys.includes(key) && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault();
+    }
+  }
+
+  // Formatear número de teléfono
+  formatPhoneNumber(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Remover todos los caracteres excepto números
+    let numbers = value.replace(/\D/g, '');
+    
+    // Aplicar formato chileno si empieza con 56
+    if (numbers.startsWith('56') && numbers.length >= 9) {
+      let formatted = '';
+      
+      if (numbers.length >= 2) {
+        formatted += '+' + numbers.substring(0, 2);
+        numbers = numbers.substring(2);
+      }
+      
+      if (numbers.length >= 1) {
+        formatted += ' ' + numbers.substring(0, 1);
+        numbers = numbers.substring(1);
+      }
+      
+      if (numbers.length >= 4) {
+        formatted += ' ' + numbers.substring(0, 4);
+        numbers = numbers.substring(4);
+      }
+      
+      if (numbers.length >= 4) {
+        formatted += ' ' + numbers.substring(0, 4);
+        numbers = numbers.substring(4);
+      }
+      
+      if (numbers.length > 0) {
+        formatted += ' ' + numbers;
+      }
+      
+      input.value = formatted;
+    } else {
+      // Formato simple para otros casos
+      let formatted = '';
+      for (let i = 0; i < numbers.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+          formatted += ' ';
+        }
+        formatted += numbers[i];
+      }
+      input.value = formatted;
+    }
+    
+    // Actualizar el control del formulario
+    this.leadForm.patchValue({ telefono: input.value });
+  }
+
   async onSubmit(): Promise<void> {
     if (this.leadForm.valid) {
       this.isSubmitting = true;
       
       try {
-        // Guardar lead en Firestore
-        await this.saveLeadToFirestore();
+        const formData = this.leadForm.value;
         
-        // Los datos ya están guardados en el servicio
-        // Marcar como completado y navegar a resultados
+        // Limpiar teléfono antes de guardar
+        if (formData.telefono) {
+          formData.telefono = formData.telefono.replace(/\s+/g, ' ').trim();
+        }
+        
+        // Guardar en el servicio de estado
+        this.stateService.leadForm.patchValue(formData);
+        
+        // Marcar como completado
         this.stateService.markAsCompleted();
+        
+        // Intentar guardar en Firestore
+        try {
+          const diagnosticData = this.stateService.getDiagnosticData();
+          
+          const docData = {
+            diagnosticData,
+            lead: formData,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          };
+          
+          const docRef = await addDoc(collection(this.firestore, 'diagnostics'), docData);
+          console.log('✅ Diagnóstico guardado en Firestore con ID:', docRef.id);
+        } catch (firestoreError) {
+          console.warn('⚠️ No se pudo guardar en Firestore, pero continuando con el diagnóstico:', firestoreError);
+          // Continuar aunque falle Firestore
+        }
+        
+        // Navegar a resultados
         this.navigateToResults();
+        
       } catch (error) {
-        console.error('Error al guardar lead:', error);
-        // Continuar con el flujo aunque falle el guardado en Firestore
-        this.stateService.markAsCompleted();
-        this.navigateToResults();
+        console.error('❌ Error general al procesar el diagnóstico:', error);
+        alert('Error al procesar el diagnóstico. Por favor, intenta de nuevo.');
       } finally {
         this.isSubmitting = false;
       }
-    }
-  }
-
-  private async saveLeadToFirestore(): Promise<void> {
-    try {
-      const leadData = {
-        nombre: this.leadForm.get('nombre')?.value,
-        email: this.leadForm.get('email')?.value,
-        telefono: this.leadForm.get('telefono')?.value || '',
-        aceptaComunicaciones: this.leadForm.get('aceptaComunicaciones')?.value || false,
-        timestamp: serverTimestamp(),
-        source: 'diagnostico_ia',
-        diagnosticData: this.stateService.getDiagnosticData()
-      };
-
-      const leadsRef = collection(this.firestore, 'leads');
-      const docRef = await addDoc(leadsRef, leadData);
-      console.log('✅ Lead guardado en Firestore con ID:', docRef.id);
-    } catch (error) {
-      console.error('❌ Error al guardar lead en Firestore:', error);
-      throw error;
     }
   }
 
@@ -216,7 +313,7 @@ export class StepLeadComponent implements OnInit {
     const resultsUrl = `${baseUrl}/resultados`;
     
     this.router.navigate([resultsUrl]).catch(error => {
-      console.error('Error en navegación:', error);
+      console.error('Error en navegación a resultados:', error);
       // Fallback: navegar usando la ruta completa
       this.router.navigate(['/es', 'diagnostico', 'resultados']);
     });

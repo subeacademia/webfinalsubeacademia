@@ -68,18 +68,47 @@ export class DiagnosticsService {
 	}
 
 	async saveDiagnosticWithReport(report: any, scores: any, diagnosticData: any): Promise<any> {
-		// Guardar en la colección global de diagnósticos para que la Cloud Function lo procese
-		const globalCol = collection(this.firestore, 'diagnostics');
-		const docRef = await addDoc(globalCol, {
-			report,
-			scores,
-			diagnosticData,
-			fecha: new Date(),
-			timestamp: new Date(),
-			status: 'pending_pdf'
-		});
-		
-		return docRef;
+		try {
+			console.log('💾 Guardando diagnóstico con reporte...', { report, scores, diagnosticData });
+			
+			// Guardar en la colección global de diagnósticos para que la Cloud Function lo procese
+			const globalCol = collection(this.firestore, 'diagnostics');
+			const docRef = await addDoc(globalCol, {
+				report,
+				scores,
+				diagnosticData,
+				fecha: new Date(),
+				timestamp: new Date(),
+				status: 'pending_pdf',
+				// Asegurar que los datos del lead estén en el lugar correcto
+				lead: diagnosticData.lead,
+				form: {
+					lead: diagnosticData.lead
+				}
+			});
+			
+			console.log('✅ Diagnóstico guardado exitosamente en Firestore:', docRef.id);
+			
+			// También guardar en la colección del usuario si hay userId
+			if (diagnosticData.lead?.userId) {
+				const userCol = collection(this.firestore, `users/${diagnosticData.lead.userId}/diagnostics`);
+				await addDoc(userCol, {
+					report,
+					scores,
+					diagnosticData,
+					fecha: new Date(),
+					timestamp: new Date(),
+					status: 'completed',
+					userId: diagnosticData.lead.userId
+				});
+				console.log('✅ Diagnóstico guardado en colección del usuario');
+			}
+			
+			return docRef;
+		} catch (error) {
+			console.error('❌ Error al guardar diagnóstico:', error);
+			throw error;
+		}
 	}
 
 	getDiagnosticsForUser(userId: string): Observable<UserDiagnostic[]> {

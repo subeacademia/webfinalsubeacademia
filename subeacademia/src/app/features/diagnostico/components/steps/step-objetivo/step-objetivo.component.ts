@@ -9,110 +9,7 @@ import { GenerativeAiService } from '../../../../../core/ai/generative-ai.servic
   selector: 'app-step-objetivo',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  template: `
-    <div class="max-w-3xl mx-auto animate-fade-in">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-white mb-4">
-          Objetivo Principal
-        </h2>
-        <p class="text-lg text-gray-300">
-          Cuéntanos cuál es tu objetivo principal con la implementación de IA en tu organización
-        </p>
-      </div>
-
-      <!-- Sugerencias de IA -->
-      <div class="mb-8 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-6 border border-blue-700/30">
-        <div class="flex items-center mb-4">
-          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
-          </div>
-          <h3 class="text-xl font-semibold text-white">Sugerencias Personalizadas con IA</h3>
-        </div>
-        
-        <div *ngIf="isLoadingSuggestions" class="text-center py-8">
-          <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p class="text-blue-200">Generando sugerencias personalizadas...</p>
-        </div>
-
-        <div *ngIf="!isLoadingSuggestions && suggestions.length > 0" class="space-y-3">
-          <p class="text-blue-100 text-sm mb-4">
-            Basado en tu perfil, aquí tienes algunas sugerencias de objetivos que podrían ser relevantes:
-          </p>
-          <div class="grid gap-3">
-            <button 
-              *ngFor="let suggestion of suggestions; let i = index"
-              (click)="selectSuggestion(suggestion)"
-              class="text-left p-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-all duration-200 hover:scale-105 group">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center mb-2">
-                    <span class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full flex items-center justify-center mr-3">
-                      {{ i + 1 }}
-                    </span>
-                    <span class="font-medium text-white group-hover:text-blue-200 transition-colors">
-                      {{ suggestion }}
-                    </span>
-                  </div>
-                </div>
-                <svg class="w-5 h-5 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                </svg>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="!isLoadingSuggestions && suggestions.length === 0" class="text-center py-4">
-          <p class="text-blue-200 text-sm">No se pudieron generar sugerencias en este momento. Puedes escribir tu objetivo personalizado abajo.</p>
-        </div>
-      </div>
-
-      <form [formGroup]="objectiveForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Objetivo principal -->
-        <div class="form-group">
-          <label for="mainObjective" class="block text-sm font-medium text-gray-200 mb-2">
-            ¿Cuál es tu objetivo principal con la implementación de IA? *
-          </label>
-          <textarea 
-            id="mainObjective" 
-            formControlName="mainObjective"
-            rows="6"
-            placeholder="Describe tu objetivo principal. Por ejemplo: 'Quiero automatizar procesos de atención al cliente para mejorar la eficiencia y reducir costos operativos'"
-            class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none">
-          </textarea>
-          <div *ngIf="objectiveForm.get('mainObjective')?.invalid && objectiveForm.get('mainObjective')?.touched" 
-               class="mt-1 text-red-400 text-sm">
-            Por favor describe tu objetivo principal
-          </div>
-          <div class="mt-2 text-sm text-gray-400">
-            <p>Ejemplos de objetivos comunes:</p>
-            <ul class="mt-2 space-y-1 text-left">
-              <li>• Automatizar procesos repetitivos</li>
-              <li>• Mejorar la toma de decisiones con datos</li>
-              <li>• Optimizar la experiencia del cliente</li>
-              <li>• Reducir costos operativos</li>
-              <li>• Acelerar la innovación de productos</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Botón de envío -->
-        <div class="pt-4">
-          <button 
-            type="submit" 
-            [disabled]="objectiveForm.invalid"
-            class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
-            Siguiente
-          </button>
-        </div>
-      </form>
-    </div>
-  `,
+  templateUrl: './step-objetivo.component.html',
   styles: [`
     .animate-fade-in {
       animation: fadeIn 0.6s ease-out;
@@ -148,6 +45,7 @@ export class StepObjetivoComponent implements OnInit {
 
   objectiveForm!: FormGroup;
   suggestions: string[] = [];
+  selectedSuggestions: string[] = [];
   isLoadingSuggestions = false;
 
   ngOnInit(): void {
@@ -175,23 +73,42 @@ export class StepObjetivoComponent implements OnInit {
     this.isLoadingSuggestions = true;
     
     try {
-      const state = this.stateService.form.value;
-      const contextPrompt = `Basado en una empresa del sector "${state.contexto?.industria || 'tecnología'}", con un tamaño de "${state.contexto?.tamano || 'mediana'}" y un presupuesto de "${state.contexto?.presupuesto || 'moderado'}", genera 3 objetivos de negocio concisos y accionables para un proyecto de inteligencia artificial. Devuelve solo un array JSON de strings. Ejemplo: ["Optimizar la logística de entrega en un 15%", "Reducir el tiempo de respuesta al cliente a menos de 5 minutos", "Personalizar las campañas de marketing para aumentar la conversión un 10%"]`;
+      // Obtener datos del contexto del servicio de estado
+      const contextoData = this.stateService.getContextoData();
+      console.log('📊 Datos del contexto obtenidos:', contextoData);
+      
+      if (contextoData && contextoData.industria && contextoData.tamano && contextoData.presupuesto) {
+        const contextPrompt = `Basado en una empresa del sector "${contextoData.industria}", con un tamaño de "${contextoData.tamano}" y un presupuesto de "${contextoData.presupuesto}", genera 5 objetivos de negocio concisos y accionables para un proyecto de inteligencia artificial. Devuelve solo un array JSON de strings. Ejemplo: ["Optimizar la logística de entrega en un 15%", "Reducir el tiempo de respuesta al cliente a menos de 5 minutos", "Personalizar las campañas de marketing para aumentar la conversión un 10%"]`;
 
-      // Usar el servicio de IA para generar sugerencias
-      const response = await this.generativeAiService.generateText(contextPrompt);
-      if (response) {
-        try {
-          this.suggestions = JSON.parse(response);
-        } catch (parseError) {
-          console.error('Error al parsear sugerencias:', parseError);
+        console.log('🤖 Enviando prompt a IA:', contextPrompt);
+
+        // Usar el servicio de IA para generar sugerencias
+        const response = await this.generativeAiService.generateText(contextPrompt);
+        if (response) {
+          try {
+            const parsedSuggestions = JSON.parse(response);
+            if (Array.isArray(parsedSuggestions) && parsedSuggestions.length > 0) {
+              this.suggestions = parsedSuggestions;
+              console.log('✅ Sugerencias generadas por IA:', this.suggestions);
+            } else {
+              console.warn('⚠️ Respuesta de IA no es un array válido:', parsedSuggestions);
+              this.setDefaultSuggestions();
+            }
+          } catch (parseError) {
+            console.error('❌ Error al parsear sugerencias:', parseError);
+            console.log('📝 Respuesta cruda de IA:', response);
+            this.setDefaultSuggestions();
+          }
+        } else {
+          console.warn('⚠️ No se recibió respuesta de la IA');
           this.setDefaultSuggestions();
         }
       } else {
+        console.warn('⚠️ No hay datos de contexto completos, usando sugerencias por defecto');
         this.setDefaultSuggestions();
       }
     } catch (error) {
-      console.error('Error al generar sugerencias:', error);
+      console.error('❌ Error al generar sugerencias:', error);
       this.setDefaultSuggestions();
     } finally {
       this.isLoadingSuggestions = false;
@@ -202,8 +119,37 @@ export class StepObjetivoComponent implements OnInit {
     this.suggestions = [
       'Optimizar procesos internos para aumentar la eficiencia operativa',
       'Mejorar la experiencia del cliente mediante personalización con IA',
-      'Aumentar las ventas a través de análisis predictivo y automatización'
+      'Aumentar las ventas a través de análisis predictivo y automatización',
+      'Reducir costos operativos mediante automatización inteligente',
+      'Mejorar la toma de decisiones con análisis de datos en tiempo real'
     ];
+  }
+
+  toggleSuggestion(suggestion: string): void {
+    if (this.selectedSuggestions.includes(suggestion)) {
+      this.selectedSuggestions = this.selectedSuggestions.filter(s => s !== suggestion);
+    } else {
+      this.selectedSuggestions.push(suggestion);
+    }
+  }
+
+  applySelectedSuggestions(): void {
+    if (this.selectedSuggestions.length > 0) {
+      const combinedText = this.selectedSuggestions.join('. ');
+      this.objectiveForm.patchValue({
+        mainObjective: combinedText
+      });
+      
+      // Limpiar selección
+      this.selectedSuggestions = [];
+      
+      // Scroll suave al textarea
+      const textarea = document.getElementById('mainObjective');
+      if (textarea) {
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        textarea.focus();
+      }
+    }
   }
 
   selectSuggestion(suggestion: string): void {

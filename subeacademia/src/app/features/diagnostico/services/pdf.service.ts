@@ -92,11 +92,11 @@ export class PdfService {
     const splitText = pdf.splitTextToSize(summaryText, 170);
     pdf.text(splitText, 20, 40);
 
-    // Título del informe (solo si existe)
-    if (report.titulo_informe) {
+    // Solo mostrar título del informe si existe y es diferente del resumen
+    if (report.titulo_informe && report.titulo_informe !== summaryText) {
       pdf.setFontSize(16);
       pdf.setTextColor(59, 130, 246);
-      pdf.text('Título del Informe', 20, 80);
+      pdf.text('Información Adicional', 20, 80);
       
       pdf.setFontSize(12);
       pdf.setTextColor(0, 0, 0);
@@ -180,41 +180,57 @@ export class PdfService {
 
       // Verificar si competencias es un array o un objeto
       if (Array.isArray(scores.competencias)) {
+        // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
         scores.competencias.forEach((comp: any) => {
           pdf.setFontSize(11);
           pdf.setTextColor(0, 0, 0);
-          const score = typeof comp.score === 'number' ? comp.score : 0;
-          pdf.text(`${comp.name}: ${score}/100`, 25, yPosition);
+          
+          // Obtener el nombre de la competencia usando COMPETENCIAS
+          const competencyName = comp.competenciaId || comp.name || 'Competencia';
+          const score = typeof comp.puntaje === 'number' ? comp.puntaje : 0;
+          const level = comp.nivel || 'N/A';
+          
+          pdf.text(`${competencyName}: ${score}/100 (${level})`, 20, yPosition);
           yPosition += 8;
         });
       } else {
-        // Si es un objeto, iterar sobre las entradas
+        // Fallback para formato de objeto
         Object.entries(scores.competencias).forEach(([name, score]) => {
           pdf.setFontSize(11);
           pdf.setTextColor(0, 0, 0);
           const scoreValue = typeof score === 'number' ? score : 0;
-          pdf.text(`${name}: ${scoreValue}/100`, 25, yPosition);
+          pdf.text(`${name}: ${scoreValue}/100`, 20, yPosition);
           yPosition += 8;
         });
       }
-
-      yPosition += 10;
     }
+
+    yPosition += 10;
 
     // Métricas ARES
     if (scores?.ares) {
       pdf.setFontSize(14);
-      pdf.setTextColor(239, 68, 68);
-      pdf.text('Framework ARES-AI:', 20, yPosition);
+      pdf.setTextColor(59, 130, 246);
+      pdf.text('Fases ARES:', 20, yPosition);
       yPosition += 10;
 
-      Object.entries(scores.ares).forEach(([name, score]) => {
-        pdf.setFontSize(11);
-        pdf.setTextColor(0, 0, 0);
-        const scoreValue = typeof score === 'number' ? score : 0;
-        pdf.text(`${name}: ${scoreValue}/100`, 25, yPosition);
-        yPosition += 8;
+      Object.entries(scores.ares).forEach(([phase, score]) => {
+        if (phase !== 'promedio' && phase !== 'total') {
+          pdf.setFontSize(11);
+          pdf.setTextColor(0, 0, 0);
+          const scoreValue = typeof score === 'number' ? score : 0;
+          pdf.text(`${phase}: ${scoreValue}/100`, 20, yPosition);
+          yPosition += 8;
+        }
       });
+
+      // Mostrar puntaje total
+      if (scores.ares.total) {
+        yPosition += 5;
+        pdf.setFontSize(12);
+        pdf.setTextColor(59, 130, 246);
+        pdf.text(`Puntaje Total: ${scores.ares.total}/100`, 20, yPosition);
+      }
     }
 
     // Pie de página
