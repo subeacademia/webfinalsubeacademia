@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.component';
 import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { SettingsService, HomePageContent } from '../../core/data/settings.service';
+import { HomeConfigService, HomePageContent } from '../../core/data/home-config.service';
 import { Subscription, distinctUntilChanged, switchMap } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
@@ -22,12 +22,15 @@ import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.dire
 export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     public readonly i18n: I18nService,
-    private readonly settings: SettingsService,
+    private readonly homeConfig: HomeConfigService,
     private readonly router: Router,
     @Inject(PLATFORM_ID) private platformId: object,
     private readonly logos: LogosService,
     private readonly animationService: AnimationService
-  ) {}
+  ) {
+    // Valor por defecto para asegurar que el título se muestre
+    this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+  }
 
   private contentSub?: Subscription;
   frasesDinamicas: string[] = [];
@@ -91,21 +94,38 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   ngOnInit(): void {
+    console.log('🏠 HomeComponent: ngOnInit iniciado');
+    console.log('🏷️ Título inicial:', this.tituloHome);
+    
+    // Configurar contenido del home usando el servicio local
     this.contentSub = this.i18n.currentLang$
       .pipe(
         distinctUntilChanged(),
-        switchMap((lang: any) => this.settings.getHomePageContent(lang as 'es'|'en'|'pt'))
+        switchMap((lang: any) => {
+          console.log('🌐 Cambio de idioma detectado:', lang);
+          return this.homeConfig.getHomePageContent(lang as 'es'|'en'|'pt');
+        })
       )
-      .subscribe((c: HomePageContent | undefined) => {
+      .subscribe((c: HomePageContent) => {
+        console.log('📥 Contenido recibido del servicio:', c);
+        
+        // Configurar frases dinámicas
         this.frasesDinamicas = c?.typewriterPhrases?.length ? c.typewriterPhrases : [];
         if (!this.frasesDinamicas.length) {
+          console.log('📝 Usando frases por defecto');
           this.frasesDinamicas = [
             'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
             'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
             'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
           ];
         }
+        console.log('📝 Frases dinámicas configuradas:', this.frasesDinamicas);
+        
+        // Configurar título
         this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+        console.log('🏷️ Título del home configurado:', this.tituloHome);
+        
+        // Configurar typewriter
         if (typeof document !== 'undefined') {
           this.typewriterElement = document.getElementById('typewriter');
           if (this.typewriterElement) {
@@ -169,14 +189,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Ocultamos el título inicialmente para que la animación funcione
+    // Aseguramos que el título sea visible
     const titleEl = document.querySelector('#hero-title');
-    if (titleEl) (titleEl as HTMLElement).style.opacity = '0';
-
-    // Retrasamos ligeramente para asegurar que todo esté renderizado
-    setTimeout(() => {
-      this.animationService.textReveal('#hero-title');
-    }, 100);
+    if (titleEl) {
+      (titleEl as HTMLElement).style.opacity = '1';
+      (titleEl as HTMLElement).style.visibility = 'visible';
+    }
   }
 
   ngOnDestroy(): void {

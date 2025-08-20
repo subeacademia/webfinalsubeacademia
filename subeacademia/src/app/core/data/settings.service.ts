@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, doc, docData, setDoc, collection, collectionData, addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Observable, of, from, merge, catchError, map as rxMap, combineLatest, firstValueFrom } from 'rxjs';
@@ -29,9 +29,18 @@ export interface TypewriterPhrase {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private readonly db = inject(Firestore);
-  private readonly platformId = inject(PLATFORM_ID);
-  readonly ref = doc(this.db, 'settings/general');
+  private readonly db: Firestore;
+  private readonly platformId: object;
+  readonly ref: any;
+  
+  constructor(
+    @Inject(Firestore) db: Firestore,
+    @Inject(PLATFORM_ID) platformId: object
+  ) {
+    this.db = db;
+    this.platformId = platformId;
+    this.ref = doc(this.db, 'settings/general');
+  }
   
   // Referencia dinámica por idioma
   private homeRefForLang(lang: 'es' | 'en' | 'pt') {
@@ -182,28 +191,46 @@ export class SettingsService {
 
   getHomePageContent(lang: 'es' | 'en' | 'pt'): Observable<HomePageContent | undefined> {
     if (!isPlatformBrowser(this.platformId)) {
+      console.log('🚫 No es plataforma browser, retornando undefined');
       return of(undefined);
     }
+    
+    console.log('🔍 Obteniendo contenido del home para idioma:', lang);
     
     // Usar la nueva colección de frases
     const phrases$ = this.getTypewriterPhrasesAsArray(lang);
     
     // Obtener título del home
     const title$ = docData(this.homeRefForLang(lang)).pipe(
-      opCatchError(() => docData(this.homeRefFallbackForLang(lang))),
-      opCatchError(() => of(undefined)),
+      opCatchError((error) => {
+        console.log('⚠️ Error en ruta primaria, intentando fallback:', error);
+        return docData(this.homeRefFallbackForLang(lang));
+      }),
+      opCatchError((error) => {
+        console.log('⚠️ Error en ruta fallback, retornando undefined:', error);
+        return of(undefined);
+      }),
       map((d: any) => {
-        if (!d) return undefined;
-        return typeof d?.titulo === 'string' ? d.titulo : (typeof d?.title === 'string' ? d.title : undefined);
+        console.log('📄 Datos obtenidos del documento:', d);
+        if (!d) {
+          console.log('📄 No hay datos, retornando undefined');
+          return undefined;
+        }
+        const titulo = typeof d?.titulo === 'string' ? d.titulo : (typeof d?.title === 'string' ? d.title : undefined);
+        console.log('📄 Título extraído:', titulo);
+        return titulo;
       })
     );
     
     // Combinar frases y título
     return combineLatest([phrases$, title$]).pipe(
-      map(([phrases, title]) => ({
-        typewriterPhrases: phrases,
-        title
-      }))
+      map(([phrases, title]) => {
+        console.log('🔍 Contenido final del home:', { phrases, title });
+        return {
+          typewriterPhrases: phrases,
+          title
+        };
+      })
     ) as Observable<HomePageContent>;
   }
 
@@ -243,6 +270,99 @@ export class SettingsService {
       console.error('Error setting home title:', error);
       // Fallback a la ruta legacy
       await setDoc(this.homeRefFallbackForLang(lang), { titulo: title }, { merge: true });
+    }
+  }
+
+  // Método de prueba para verificar conexión y crear datos si no existen
+  async testAndInitializeHomeContent(lang: 'es' | 'en' | 'pt'): Promise<void> {
+    try {
+      console.log('🧪 Probando conexión con Firestore para idioma:', lang);
+      
+      // Intentar obtener datos existentes
+      const existingData = await firstValueFrom(docData(this.homeRefForLang(lang)));
+      console.log('📄 Datos existentes en ruta primaria:', existingData);
+      
+      if (!existingData || !existingData['titulo']) {
+        console.log('📝 No hay título configurado, creando datos por defecto');
+        
+        // Crear datos por defecto
+        let titulo = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+        if (lang === 'en') titulo = 'Power Your Talent in the Age of Artificial Intelligence';
+        if (lang === 'pt') titulo = 'Potencialize seu Talento na Era da Inteligência Artificial';
+        
+        let frases = [
+          'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
+          'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
+          'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
+        ];
+        
+        if (lang === 'en') {
+          frases = [
+            'Implement AI in an Agile, Responsible and Sustainable way with our ARES-AI© Framework.',
+            'Develop the 13 key competencies your team needs to lead digital transformation.',
+            'Transform your organization with our adaptive learning platform AVE-AI.'
+          ];
+        } else if (lang === 'pt') {
+          frases = [
+            'Implemente IA de forma Ágil, Responsável e Sustentável com nosso Framework ARES-AI©.',
+            'Desenvolva as 13 competências-chave que sua equipe precisa para liderar a transformação digital.',
+            'Transforme sua organização com nossa plataforma de aprendizado adaptativo AVE-AI.'
+          ];
+        }
+        
+        const defaultData = { titulo, frases };
+        
+        console.log('📝 Guardando datos por defecto:', defaultData);
+        await setDoc(this.homeRefForLang(lang), defaultData);
+        console.log('✅ Datos por defecto guardados exitosamente');
+      } else {
+        console.log('✅ Datos existentes encontrados, no se necesita inicialización');
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Error en testAndInitializeHomeContent:', error);
+      
+      // Intentar con ruta fallback
+      try {
+        console.log('🔄 Intentando con ruta fallback');
+        const fallbackData = await firstValueFrom(docData(this.homeRefFallbackForLang(lang)));
+        console.log('📄 Datos en ruta fallback:', fallbackData);
+        
+        if (!fallbackData || !fallbackData['titulo']) {
+          console.log('📝 Creando datos por defecto en ruta fallback');
+          
+          let titulo = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+          if (lang === 'en') titulo = 'Power Your Talent in the Age of Artificial Intelligence';
+          if (lang === 'pt') titulo = 'Potencialize seu Talento na Era da Inteligência Artificial';
+          
+          let frases = [
+            'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
+            'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
+            'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
+          ];
+          
+          if (lang === 'en') {
+            frases = [
+              'Implement AI in an Agile, Responsible and Sustainable way with our ARES-AI© Framework.',
+              'Develop the 13 key competencies your team needs to lead digital transformation.',
+              'Transform your organization with our adaptive learning platform AVE-AI.'
+            ];
+          } else if (lang === 'pt') {
+            frases = [
+              'Implemente IA de forma Ágil, Responsável e Sustentável com nosso Framework ARES-AI©.',
+              'Desenvolva as 13 competências-chave que sua equipe precisa para liderar a transformação digital.',
+              'Transforme sua organização com nossa plataforma de aprendizado adaptativo AVE-AI.'
+            ];
+          }
+          
+          const defaultData = { titulo, frases };
+          
+          await setDoc(this.homeRefFallbackForLang(lang), defaultData);
+          console.log('✅ Datos por defecto guardados en ruta fallback');
+        }
+      } catch (fallbackError: any) {
+        console.error('❌ Error también en ruta fallback:', fallbackError);
+      }
     }
   }
 }
