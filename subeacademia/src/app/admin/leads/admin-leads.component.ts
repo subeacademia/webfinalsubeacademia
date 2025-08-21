@@ -188,7 +188,7 @@ interface Lead {
 export class AdminLeadsComponent implements OnInit {
   private readonly firestore = inject(Firestore);
   
-  leads$: Observable<Lead[]>;
+  leads$!: Observable<Lead[]>;
   leads: Lead[] = [];
   isLoading = true;
 

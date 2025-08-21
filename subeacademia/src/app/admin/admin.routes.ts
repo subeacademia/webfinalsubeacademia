@@ -21,6 +21,9 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'productos/cursos', loadComponent: () => import('./productos/admin-cursos.component').then(m => m.AdminCursosComponent), canActivate: [AdminGuard] },
       { path: 'productos/certificaciones', loadComponent: () => import('./productos/admin-certificaciones.component').then(m => m.AdminCertificacionesComponent), canActivate: [AdminGuard] },
 
+      // Certificados (validador): CRUD propio
+      { path: 'certificados', loadComponent: () => import('./certificados/admin-certificados.component').then(m => m.AdminCertificadosComponent), canActivate: [AdminGuard] },
+
       { path: 'projects', loadComponent: () => import('./projects/projects-page.component').then(m => m.ProjectsPageComponent), canActivate: [AdminGuard] },
       { path: 'projects/new', loadComponent: () => import('./projects/project-edit.component').then(m => m.ProjectEditComponent), canActivate: [AdminGuard] },
       { path: 'projects/:id', loadComponent: () => import('./projects/project-edit.component').then(m => m.ProjectEditComponent), canActivate: [AdminGuard] },

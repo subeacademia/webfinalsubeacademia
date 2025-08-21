@@ -4,6 +4,7 @@ import { AsesoriasListComponent } from './components/asesorias-list.component';
 import { CursosListComponent } from './components/cursos-list.component';
 import { CertificacionesListComponent } from './components/certificaciones-list.component';
 import { ProductoDetalleComponent } from './components/producto-detalle.component';
+import { CertificateValidatorComponent } from './components/certificate-validator.component';
 
 export const PRODUCTOS_ROUTES: Routes = [
   {
@@ -21,6 +22,10 @@ export const PRODUCTOS_ROUTES: Routes = [
   {
     path: 'certificaciones',
     component: CertificacionesListComponent
+  },
+  {
+    path: 'certificaciones/validar/:code',
+    component: CertificateValidatorComponent
   },
   {
     path: ':slug',

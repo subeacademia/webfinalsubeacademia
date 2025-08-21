@@ -1,14 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AnimateOnScrollDirective } from '../../../shared/ui/animate-on-scroll.directive';
 import { AsesoriasService } from '../services/asesorias.service';
 import { Asesoria } from '../data/asesoria.model';
-import { Subject, takeUntil } from 'rxjs';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Observable, combineLatest, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-asesorias-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, AnimateOnScrollDirective],
   template: `
     <div class="container mx-auto px-4 py-8">
       <div class="text-center mb-12">
@@ -19,68 +21,95 @@ import { Subject, takeUntil } from 'rxjs';
         </p>
       </div>
 
-      <!-- Loading state -->
-      <div *ngIf="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-600">Cargando asesorías...</p>
-      </div>
+      <div class="grid md:grid-cols-12 gap-8">
+        <!-- Columna izquierda: filtros sticky -->
+        <aside class="md:col-span-3">
+          <form [formGroup]="filtersForm" class="sticky top-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+            <input type="text" formControlName="search" placeholder="Buscar por título o descripción" class="w-full px-4 py-2 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700" />
+            <select formControlName="tag" class="w-full px-4 py-2 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+              <option value="">Todas las categorías</option>
+              <option *ngFor="let t of (availableTags$ | async) || []" [value]="t">{{ t }}</option>
+            </select>
+            <select formControlName="precio" class="w-full px-4 py-2 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+              <option value="">Cualquier precio</option>
+              <option value="lt500">Menos de €500</option>
+              <option value="500-1500">€500 - €1500</option>
+              <option value="gt1500">Más de €1500</option>
+            </select>
+          </form>
+        </aside>
 
-      <!-- Lista de asesorías -->
-      <div *ngIf="!loading && asesorias.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div *ngFor="let asesoria of asesorias" 
-             class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-          
-          <!-- Imagen destacada -->
-          <div class="h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center">
-            <span class="text-6xl">💡</span>
+        <!-- Columna derecha: grid productos -->
+        <section class="md:col-span-9">
+          <!-- Loading state -->
+          <div *ngIf="(loading$ | async)" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">Cargando asesorías...</p>
           </div>
-          
-          <!-- Contenido -->
-          <div class="p-6">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-              {{ asesoria.titulo }}
-            </h3>
-            
-            <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-              {{ asesoria.descripcionCorta }}
-            </p>
-            
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mb-4">
-              <span *ngFor="let tag of asesoria.tags.slice(0, 3)" 
-                    class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
-                {{ tag }}
-              </span>
-            </div>
-            
-            <!-- Precio y CTA -->
-            <div class="flex items-center justify-between">
-              <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                €{{ asesoria.precio }}
+
+          <!-- Lista de asesorías -->
+          <ng-container *ngIf="filteredAsesorias$ | async as asesorias">
+          <div *ngIf="asesorias.length > 0" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" [appAnimateOnScroll]="'.card'">
+            <div *ngFor="let asesoria of asesorias" 
+                 class="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+              
+              <!-- Imagen destacada -->
+              <div class="h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center">
+                <span class="text-6xl">💡</span>
               </div>
-              <a [routerLink]="['/productos/asesorias', asesoria.slug]"
-                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                Ver Detalles
-              </a>
+              
+              <!-- Contenido -->
+              <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  {{ asesoria.titulo }}
+                </h3>
+                
+                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                  {{ asesoria.descripcionCorta }}
+                </p>
+                
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                  <span *ngFor="let tag of asesoria.tags.slice(0, 3)" 
+                        class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                    {{ tag }}
+                  </span>
+                </div>
+                
+                <!-- Precio y CTA -->
+                <div class="flex items-center justify-between">
+                  <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    €{{ asesoria.precio }}
+                  </div>
+                  <a [routerLink]="['/productos', asesoria.slug]"
+                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    Ver Detalles
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+          </ng-container>
+
+          <!-- Estado vacío -->
+          <ng-container *ngIf="filteredAsesorias$ | async as asesorias">
+          <div *ngIf="asesorias.length === 0" class="text-center py-12">
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8 max-w-2xl mx-auto">
+              <div class="text-yellow-800 dark:text-yellow-200">
+                <h2 class="text-2xl font-semibold mb-4">🚧 Próximamente...</h2>
+                <p class="text-lg mb-4">
+                  Estamos preparando nuestra sección de asesorías personalizadas en Inteligencia Artificial.
+                </p>
+                <p class="text-base">
+                  Muy pronto podrás acceder a consultoría especializada para implementar IA en tu empresa.
+                </p>
+              </div>
+            </div>
+          </div>
+          </ng-container>
+        </section>
       </div>
 
-      <!-- Estado vacío -->
-      <div *ngIf="!loading && asesorias.length === 0" class="text-center py-12">
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-8 max-w-2xl mx-auto">
-          <div class="text-yellow-800 dark:text-yellow-200">
-            <h2 class="text-2xl font-semibold mb-4">🚧 Próximamente...</h2>
-            <p class="text-lg mb-4">
-              Estamos preparando nuestra sección de asesorías personalizadas en Inteligencia Artificial.
-            </p>
-            <p class="text-base">
-              Muy pronto podrás acceder a consultoría especializada para implementar IA en tu empresa.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   `,
   styles: [`
@@ -92,35 +121,50 @@ import { Subject, takeUntil } from 'rxjs';
     }
   `]
 })
-export class AsesoriasListComponent implements OnInit, OnDestroy {
-  asesorias: Asesoria[] = [];
-  loading = true;
-  private readonly unsubscribe$ = new Subject<void>();
+export class AsesoriasListComponent {
+  asesorias$!: Observable<Asesoria[]>;
+  availableTags$!: Observable<string[]>;
+  filtersForm!: FormGroup;
+  loading$!: Observable<boolean>;
+  filteredAsesorias$!: Observable<Asesoria[]>;
 
-  constructor(private asesoriasService: AsesoriasService) {}
+  constructor(private asesoriasService: AsesoriasService, private fb: FormBuilder) {
+    this.filtersForm = this.fb.group({
+      search: [''],
+      tag: [''],
+      precio: ['']
+    });
 
-  ngOnInit(): void {
-    this.cargarAsesorias();
-  }
+    this.asesorias$ = this.asesoriasService.getAsesorias();
+    this.availableTags$ = this.asesorias$.pipe(
+      map(items => Array.from(new Set(items.flatMap(a => a.tags || []))))
+    );
+    this.loading$ = this.asesorias$.pipe(map(() => false), startWith(true));
 
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
-  }
-
-  cargarAsesorias(): void {
-    this.loading = true;
-    this.asesoriasService.getAsesorias()
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe({
-        next: (data) => {
-          this.asesorias = data;
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error('Error cargando asesorías:', error);
-          this.loading = false;
-        }
-      });
+    this.filteredAsesorias$ = combineLatest([
+      this.asesorias$,
+      this.filtersForm.valueChanges.pipe(startWith(this.filtersForm.value))
+    ]).pipe(
+      map(([items, filters]: [Asesoria[], any]) => {
+        const search = (filters.search || '').toLowerCase().trim();
+        const tag = filters.tag || '';
+        const precio = filters.precio || '';
+        return items.filter((item: Asesoria) => {
+          const matchesSearch = !search ||
+            item.titulo.toLowerCase().includes(search) ||
+            (item.descripcionCorta || '').toLowerCase().includes(search) ||
+            (item.descripcionLarga || '').toLowerCase().includes(search);
+          const matchesTag = !tag || (item.tags || []).includes(tag);
+          const matchesPrecio = (() => {
+            if (!precio) return true;
+            if (precio === 'lt500') return item.precio < 500;
+            if (precio === '500-1500') return item.precio >= 500 && item.precio <= 1500;
+            if (precio === 'gt1500') return item.precio > 1500;
+            return true;
+          })();
+          return matchesSearch && matchesTag && matchesPrecio;
+        });
+      })
+    );
   }
 }

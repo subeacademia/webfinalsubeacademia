@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Certificacion } from '../../features/productos/data/certificacion.model';
 import { CertificacionesService } from '../../features/productos/services/certificaciones.service';
+import { CertificateService } from '../../features/productos/services/certificate.service';
+import { Timestamp } from '@angular/fire/firestore';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -82,6 +84,34 @@ import { Subject, takeUntil } from 'rxjs';
         </form>
       </div>
 
+      <!-- Emisión de certificados -->
+      <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Emitir Certificado</h2>
+        <form (ngSubmit)="addCertificate()" class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Estudiante</label>
+            <input type="text" [(ngModel)]="certificateForm.studentName" name="studentName" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Curso</label>
+            <input type="text" [(ngModel)]="certificateForm.courseName" name="courseName" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Finalización</label>
+            <input type="date" [(ngModel)]="certificateForm.completionDateHtml" name="completionDateHtml" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Código Único del Certificado</label>
+            <input type="text" [(ngModel)]="certificateForm.certificateCode" name="certificateCode" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+          </div>
+          <div class="md:col-span-2 flex gap-3 mt-2">
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Emitir</button>
+            <a *ngIf="lastCreatedCode" [href]="'/productos/certificaciones/validar/' + lastCreatedCode" target="_blank" class="text-blue-600 underline">Verificar recién emitido</a>
+          </div>
+        </form>
+        <div *ngIf="certStatusMessage" class="mt-3 text-sm" [class.text-green-700]="certStatusOk" [class.text-red-700]="!certStatusOk">{{ certStatusMessage }}</div>
+      </div>
+
       <!-- Lista de certificaciones -->
       <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -141,8 +171,12 @@ export class AdminCertificacionesComponent implements OnInit, OnDestroy {
   certificacionEditando: Certificacion | null = null;
   certificacionForm: Partial<Certificacion> = {};
   private readonly unsubscribe$ = new Subject<void>();
+  certificateForm: any = { studentName: '', courseName: '', completionDateHtml: '', certificateCode: '' };
+  lastCreatedCode: string | null = null;
+  certStatusMessage = '';
+  certStatusOk = false;
 
-  constructor(private certificacionesService: CertificacionesService) {}
+  constructor(private certificacionesService: CertificacionesService, private certificateService: CertificateService) {}
 
   ngOnInit(): void {
     this.cargarCertificaciones();
@@ -221,5 +255,28 @@ export class AdminCertificacionesComponent implements OnInit, OnDestroy {
     this.certificacionForm = {};
     this.certificacionEditando = null;
     this.mostrarFormulario = false;
+  }
+
+  async addCertificate(): Promise<void> {
+    this.certStatusMessage = '';
+    this.certStatusOk = false;
+    try {
+      const { studentName, courseName, completionDateHtml, certificateCode } = this.certificateForm;
+      if (!studentName || !courseName || !completionDateHtml || !certificateCode) {
+        this.certStatusMessage = 'Completa todos los campos.';
+        return;
+      }
+      const date = new Date(completionDateHtml);
+      const ts = Timestamp.fromDate(date);
+      await this.certificateService.createCertificate({ studentName, courseName, completionDate: ts, certificateCode });
+      this.lastCreatedCode = certificateCode;
+      this.certStatusMessage = 'Certificado emitido correctamente.';
+      this.certStatusOk = true;
+      this.certificateForm = { studentName: '', courseName: '', completionDateHtml: '', certificateCode: '' };
+    } catch (e) {
+      console.error(e);
+      this.certStatusMessage = 'Error al emitir el certificado.';
+      this.certStatusOk = false;
+    }
   }
 }

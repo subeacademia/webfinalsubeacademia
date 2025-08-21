@@ -1,0 +1,41 @@
+:host {
+	display: block;
+	perspective: 1000px;
+}
+.card-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transition: transform 0.8s;
+	transform-style: preserve-3d;
+	cursor: pointer;
+}
+:host(:hover) .card-inner {
+	transform: rotateY(180deg);
+}
+.card-face {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	border-radius: 0.75rem;
+	background-color: rgba(31, 41, 55, 0.8);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.card-face--front {
+}
+.card-face--back {
+	transform: rotateY(180deg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.icon-wrapper {
+	display: inline-flex;
+	padding: 1.25rem;
+	border-radius: 9999px;
+	background-color: rgba(55, 65, 81, 0.5);
+}
+
+
