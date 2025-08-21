@@ -227,8 +227,10 @@ export class GenerativeAiService {
       const requestBody = {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          maxOutputTokens: 1000,
-          temperature: 0.7,
+          maxOutputTokens: 800,
+          temperature: 0.3, // Temperatura más baja para respuestas más consistentes
+          topP: 0.8,
+          topK: 40,
         }
       };
 

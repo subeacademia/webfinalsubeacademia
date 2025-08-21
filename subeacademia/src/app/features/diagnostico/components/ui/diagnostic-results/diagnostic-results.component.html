@@ -19,6 +19,15 @@
       <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-in-delayed">
         Tu evaluación personalizada está lista. Descubre tu nivel de madurez en IA y recibe un plan de acción estratégico diseñado específicamente para ti.
       </p>
+      
+      <!-- Botón de prueba para generar datos de ejemplo -->
+      <div class="mt-6">
+        <button 
+          (click)="generateTestData()"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg">
+          🔧 Generar Datos de Prueba
+        </button>
+      </div>
     </div>
 
     <!-- Sección de Gráficos y Métricas -->
@@ -37,7 +46,7 @@
         <div class="mb-6">
           <!-- Gráfico de Barras de Competencias -->
           <app-competency-bar-chart 
-            [competencyScores]="getCompetencyScoresForChart()"
+            [competencyScores]="competencyScoresForChart"
             class="mb-6">
           </app-competency-bar-chart>
           
@@ -105,7 +114,7 @@
           </div>
         
         <div class="mb-6">
-          <app-semaforo-ares *ngIf="scores?.ares" [aresByPhase]="scores.ares"></app-semaforo-ares>
+          <app-semaforo-ares *ngIf="scores?.ares" [aresByPhase]="aresDataForSemaforo"></app-semaforo-ares>
           <div *ngIf="!scores?.ares" class="text-center text-gray-500 py-8">
             <p>No hay datos ARES disponibles</p>
           </div>

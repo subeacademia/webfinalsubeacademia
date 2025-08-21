@@ -72,15 +72,41 @@ export class StepObjetivoComponent implements OnInit {
   async getObjectiveSuggestions(): Promise<void> {
     this.isLoadingSuggestions = true;
     
+    // Limpiar sugerencias anteriores y selección
+    this.suggestions = [];
+    this.selectedSuggestions = [];
+    
     try {
       // Obtener datos del contexto del servicio de estado
       const contextoData = this.stateService.getContextoData();
+      const segmento = this.stateService.form.get('segmento')?.value;
+      
       console.log('📊 Datos del contexto obtenidos:', contextoData);
+      console.log('🎯 Segmento del usuario:', segmento);
       
       if (contextoData && contextoData.industria && contextoData.tamano && contextoData.presupuesto) {
-        const contextPrompt = `Basado en una empresa del sector "${contextoData.industria}", con un tamaño de "${contextoData.tamano}" y un presupuesto de "${contextoData.presupuesto}", genera 5 objetivos de negocio concisos y accionables para un proyecto de inteligencia artificial. Devuelve solo un array JSON de strings. Ejemplo: ["Optimizar la logística de entrega en un 15%", "Reducir el tiempo de respuesta al cliente a menos de 5 minutos", "Personalizar las campañas de marketing para aumentar la conversión un 10%"]`;
+        // Crear un prompt más personalizado y detallado
+        const contextPrompt = `Eres un consultor experto en transformación digital e IA. 
 
-        console.log('🤖 Enviando prompt a IA:', contextPrompt);
+Basado en el siguiente perfil de empresa, genera exactamente 4 objetivos de negocio específicos, accionables y personalizados para implementar IA:
+
+**Perfil de la Empresa:**
+- Sector/Industria: ${contextoData.industria}
+- Tamaño: ${contextoData.tamano}
+- Presupuesto disponible: ${contextoData.presupuesto}
+- Tipo de organización: ${segmento || 'empresa'}
+
+**Instrucciones:**
+1. Genera exactamente 4 objetivos diferentes
+2. Cada objetivo debe ser específico para la industria y tamaño mencionados
+3. Considera el presupuesto disponible para ser realista
+4. Los objetivos deben ser medibles y accionables
+5. Devuelve SOLO un array JSON de strings, sin texto adicional
+
+**Ejemplo de formato esperado:**
+["Objetivo 1 específico para la industria", "Objetivo 2 específico para la industria", "Objetivo 3 específico para la industria", "Objetivo 4 específico para la industria"]`;
+
+        console.log('🤖 Enviando prompt personalizado a IA:', contextPrompt);
 
         // Usar el servicio de IA para generar sugerencias
         const response = await this.generativeAiService.generateText(contextPrompt);
@@ -88,8 +114,9 @@ export class StepObjetivoComponent implements OnInit {
           try {
             const parsedSuggestions = JSON.parse(response);
             if (Array.isArray(parsedSuggestions) && parsedSuggestions.length > 0) {
-              this.suggestions = parsedSuggestions;
-              console.log('✅ Sugerencias generadas por IA:', this.suggestions);
+              // Limitar a máximo 4 sugerencias
+              this.suggestions = parsedSuggestions.slice(0, 4);
+              console.log('✅ Sugerencias personalizadas generadas por IA:', this.suggestions);
             } else {
               console.warn('⚠️ Respuesta de IA no es un array válido:', parsedSuggestions);
               this.setDefaultSuggestions();
@@ -116,13 +143,71 @@ export class StepObjetivoComponent implements OnInit {
   }
 
   private setDefaultSuggestions(): void {
+    // Intentar obtener al menos la industria para personalizar las sugerencias por defecto
+    const contextoData = this.stateService.getContextoData();
+    const industria = contextoData?.industria;
+    
+    if (industria) {
+      // Sugerencias específicas por industria
+      const industrySuggestions: Record<string, string[]> = {
+        'tecnologia': [
+          'Automatizar el desarrollo de software con herramientas de IA generativa',
+          'Implementar análisis predictivo para mejorar la experiencia del usuario',
+          'Optimizar la infraestructura cloud con IA para reducir costos',
+          'Crear chatbots inteligentes para soporte técnico 24/7'
+        ],
+        'salud': [
+          'Implementar diagnóstico asistido por IA para mejorar la precisión médica',
+          'Automatizar la gestión de citas y recordatorios para pacientes',
+          'Optimizar la gestión de inventario de medicamentos con IA predictiva',
+          'Crear sistemas de monitoreo remoto de pacientes con IA'
+        ],
+        'finanzas': [
+          'Implementar detección de fraude en tiempo real con IA',
+          'Automatizar la evaluación de riesgo crediticio con machine learning',
+          'Optimizar la gestión de carteras de inversión con IA predictiva',
+          'Crear chatbots financieros para atención al cliente'
+        ],
+        'retail': [
+          'Implementar recomendaciones personalizadas de productos con IA',
+          'Optimizar la gestión de inventario con IA predictiva',
+          'Automatizar la atención al cliente con chatbots inteligentes',
+          'Crear análisis de sentimiento para mejorar la experiencia del cliente'
+        ],
+        'manufactura': [
+          'Implementar mantenimiento predictivo con sensores IoT y IA',
+          'Optimizar la calidad del producto con visión por computadora',
+          'Automatizar la planificación de producción con IA',
+          'Crear sistemas de control de calidad inteligentes'
+        ],
+        'educacion': [
+          'Implementar tutoría personalizada con IA adaptativa',
+          'Automatizar la evaluación de tareas y exámenes',
+          'Crear contenido educativo personalizado con IA generativa',
+          'Optimizar la gestión administrativa con IA'
+        ]
+      };
+      
+      // Buscar sugerencias específicas para la industria
+      const normalizedIndustria = industria.toLowerCase();
+      for (const [key, suggestions] of Object.entries(industrySuggestions)) {
+        if (normalizedIndustria.includes(key) || key.includes(normalizedIndustria)) {
+          this.suggestions = suggestions;
+          console.log('✅ Sugerencias por defecto específicas para industria:', industria);
+          return;
+        }
+      }
+    }
+    
+    // Sugerencias genéricas si no hay industria específica
     this.suggestions = [
       'Optimizar procesos internos para aumentar la eficiencia operativa',
       'Mejorar la experiencia del cliente mediante personalización con IA',
       'Aumentar las ventas a través de análisis predictivo y automatización',
-      'Reducir costos operativos mediante automatización inteligente',
-      'Mejorar la toma de decisiones con análisis de datos en tiempo real'
+      'Reducir costos operativos mediante automatización inteligente'
     ];
+    
+    console.log('✅ Sugerencias genéricas por defecto aplicadas');
   }
 
   toggleSuggestion(suggestion: string): void {
@@ -135,7 +220,25 @@ export class StepObjetivoComponent implements OnInit {
 
   applySelectedSuggestions(): void {
     if (this.selectedSuggestions.length > 0) {
-      const combinedText = this.selectedSuggestions.join('. ');
+      // Combinar sugerencias de manera más coherente
+      let combinedText = '';
+      
+      if (this.selectedSuggestions.length === 1) {
+        combinedText = this.selectedSuggestions[0];
+      } else {
+        // Para múltiples sugerencias, crear un texto más estructurado
+        const objectives = this.selectedSuggestions.map((suggestion, index) => {
+          // Limpiar la sugerencia y asegurar que termine con punto
+          let cleanSuggestion = suggestion.trim();
+          if (!cleanSuggestion.endsWith('.')) {
+            cleanSuggestion += '.';
+          }
+          return cleanSuggestion;
+        });
+        
+        combinedText = `Mi objetivo principal con la implementación de IA en mi organización es: ${objectives.join(' ')}`;
+      }
+      
       this.objectiveForm.patchValue({
         mainObjective: combinedText
       });
@@ -149,6 +252,9 @@ export class StepObjetivoComponent implements OnInit {
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
         textarea.focus();
       }
+      
+      // Mostrar mensaje de confirmación
+      console.log('✅ Sugerencias aplicadas:', combinedText);
     }
   }
 

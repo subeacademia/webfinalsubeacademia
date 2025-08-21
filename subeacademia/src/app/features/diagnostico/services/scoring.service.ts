@@ -125,15 +125,36 @@ export class ScoringService {
         return scores.sort((a, b) => a.score - b.score).slice(0, 3);
     }
 
-    private getCompetencyScore(level: string): number {
-        const scoreMap: { [key: string]: number } = {
-            'incipiente': 20,
-            'basico': 40,
-            'intermedio': 60,
-            'avanzado': 80,
-            'lider': 100
-        };
-        return scoreMap[level] || 0;
+    private getCompetencyScore(level: string | number): number {
+        console.log(`🔍 getCompetencyScore llamado con nivel: ${level}, tipo: ${typeof level}`);
+        
+        let score: number;
+        
+        // Si es un número (1-5), convertirlo directamente a score (0-100)
+        if (typeof level === 'number') {
+            if (level >= 1 && level <= 5) {
+                score = Math.round((level / 5) * 100);
+                console.log(`📊 Nivel numérico ${level} convertido a score ${score}`);
+            } else {
+                score = 0;
+                console.warn(`⚠️ Nivel numérico ${level} fuera de rango, score = 0`);
+            }
+        } else {
+            // Si es un string, usar el mapeo existente
+            const scoreMap: { [key: string]: number } = {
+                'incipiente': 20,
+                'basico': 40,
+                'intermedio': 60,
+                'avanzado': 80,
+                'lider': 100
+            };
+            
+            score = scoreMap[level] || 0;
+            console.log(`📊 Nivel string "${level}" mapeado a score ${score}`);
+        }
+        
+        console.log(`📊 Nivel ${level} mapeado a score ${score}`);
+        return score;
     }
 
     private generateFallbackActionPlan(): string {
@@ -181,6 +202,7 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         // Regla simple: promedio por dimensión de valores 1-5, 0 se excluye; escala a 0-100.
         const byDim: Record<string, number[]> = {};
         console.log('🔍 Datos ARES recibidos en scoring:', form.ares);
+        console.log('🔍 ARES_ITEMS disponibles:', ARES_ITEMS);
         
         // Si no hay datos ARES, devolver scores vacíos
         if (!form.ares || Object.keys(form.ares).length === 0) {
@@ -190,10 +212,13 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         
         for (const item of ARES_ITEMS) {
             const raw = (form.ares as any)?.[item.id] ?? null;
+            console.log(`🔍 Procesando item ARES ${item.id}: valor=${raw}, dimensión=${item.dimension}`);
             if (raw === null || raw === 0) continue; // 0 = N/A
             if (!byDim[item.dimension]) byDim[item.dimension] = [];
             byDim[item.dimension].push(Number(raw));
         }
+        
+        console.log('🔍 Datos agrupados por dimensión:', byDim);
         
         const scores: AresScoresByDimension = {};
         let sumAll = 0;
@@ -218,6 +243,12 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         // El estado devuelve competencias directamente desde competenciasForm
         const niveles = form?.competencias ?? {};
         console.log('🔍 Datos de competencias recibidos en scoring:', niveles);
+        console.log('🔍 Form completo recibido:', form);
+        console.log('🔍 Tipos de datos:', {
+            competencias: typeof niveles,
+            keys: Object.keys(niveles),
+            values: Object.values(niveles)
+        });
         
         // Si no hay datos, devolver array vacío
         if (Object.keys(niveles).length === 0) {
@@ -226,7 +257,9 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
         }
         
         const out = Object.entries(niveles).map(([competenciaId, nivel]) => {
-            const puntaje = nivel ? NIVEL_TO_SCORE[nivel as NivelCompetencia] : 0;
+            console.log(`🔍 Procesando competencia ${competenciaId}: nivel=${nivel}, tipo=${typeof nivel}`);
+            // Usar el método privado getCompetencyScore en lugar de NIVEL_TO_SCORE directamente
+            const puntaje = nivel ? this.getCompetencyScore(nivel) : 0;
             console.log(`📊 Competencia ${competenciaId}: nivel=${nivel}, puntaje=${puntaje}`);
             return { competenciaId, puntaje, nivel: (nivel || 'incipiente') as NivelCompetencia };
         });

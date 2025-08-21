@@ -49,7 +49,9 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     
     try {
       const diagnosticData = this.stateService.getDiagnosticData();
-      console.log('📊 Datos del diagnóstico:', diagnosticData);
+      console.log('📊 Datos del diagnóstico completos:', diagnosticData);
+      console.log('📊 Datos de competencias:', diagnosticData.competencias);
+      console.log('📊 Datos ARES:', diagnosticData.ares);
       
       // 1. Calcula y muestra los scores inmediatamente.
       const ares = this.scoringService.computeAresScore(diagnosticData);
@@ -57,11 +59,33 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       this.scores = { ares, competencias };
       
       console.log('📈 Scores calculados:', this.scores);
+      console.log('📈 Scores ARES:', this.scores.ares);
+      console.log('📈 Scores competencias:', this.scores.competencias);
+      
+      // Verificar el formato de los datos de competencias
+      if (Array.isArray(this.scores.competencias)) {
+        console.log('📊 Formato de competencias: ARRAY');
+        this.scores.competencias.forEach((comp: any, index: number) => {
+          console.log(`📊 Competencia ${index}:`, comp);
+        });
+      } else {
+        console.log('📊 Formato de competencias: OBJETO');
+        console.log('📊 Claves de competencias:', Object.keys(this.scores.competencias || {}));
+      }
 
       // 2. Prepara los datos del gráfico radar
       this.prepareRadarChartData();
 
-      // 3. Activar loader y llamar a la IA para generar el reporte detallado.
+      // 3. Forzar la detección de cambios para los componentes hijos
+      setTimeout(() => {
+        console.log('🔄 Forzando detección de cambios para componentes hijos');
+        console.log('🔄 Estado final de scores:', this.scores);
+        console.log('🔄 Llamando a competencyScoresForChart:', this.competencyScoresForChart);
+        console.log('🔄 Llamando a aresDataForSemaforo:', this.aresDataForSemaforo);
+        this.scores = { ...this.scores };
+      }, 200);
+
+      // 4. Activar loader y llamar a la IA para generar el reporte detallado.
       this.isGeneratingReport = true;
       this.generateReport(diagnosticData);
       
@@ -383,26 +407,141 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     this.generateReport(diagnosticData);
   }
 
+  // Getters para los datos de los gráficos
+  get competencyScoresForChart(): Array<{name: string, score: number}> {
+    console.log('🔍 GETTER competencyScoresForChart ejecutado');
+    const result = this.getCompetencyScoresForChart();
+    console.log('🔍 GETTER competencyScoresForChart retorna:', result);
+    return result;
+  }
+
+  get aresDataForSemaforo(): Record<string, any> {
+    return this.getAresDataForSemaforo();
+  }
+
   // Método para convertir datos de competencias al formato del gráfico de barras
   getCompetencyScoresForChart(): Array<{name: string, score: number}> {
-    if (!this.scores?.competencias) return [];
+    console.log('🔍 getCompetencyScoresForChart() llamado - INICIO');
+    console.log('🔍 Estado actual de scores:', this.scores);
+    
+    if (!this.scores?.competencias) {
+      console.warn('⚠️ No hay scores de competencias disponibles');
+      return [];
+    }
+    
+    console.log('🔍 Obteniendo scores para gráfico de barras:', this.scores.competencias);
     
     if (Array.isArray(this.scores.competencias)) {
       // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
-      return this.scores.competencias.map((comp: any) => {
+      const result = this.scores.competencias.map((comp: any) => {
         const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+        const score = comp.puntaje || 0;
+        const name = competency?.nameKey || comp.competenciaId;
+        console.log(`📊 Competencia ${comp.competenciaId}: ${name} = ${score} (nivel: ${comp.nivel})`);
         return {
-          name: competency?.nameKey || comp.competenciaId,
-          score: comp.puntaje || 0
+          name: name,
+          score: score
         };
       });
+      
+      console.log('📈 Scores formateados para gráfico de barras:', result);
+      return result;
     } else {
       // Fallback para formato de objeto
-      return Object.entries(this.scores.competencias).map(([name, score]) => ({
+      const result = Object.entries(this.scores.competencias).map(([name, score]) => ({
         name,
         score: typeof score === 'number' ? score : 0
       }));
+      
+      console.log('📈 Scores formateados para gráfico de barras (fallback):', result);
+      return result;
     }
+  }
+
+  // Método para obtener datos ARES en el formato correcto para el semáforo
+  getAresDataForSemaforo(): Record<string, any> {
+    console.log('🔍 getAresDataForSemaforo() llamado');
+    console.log('🔍 Estado actual de scores:', this.scores);
+    
+    if (!this.scores?.ares) {
+      console.warn('⚠️ No hay scores ARES disponibles');
+      return {};
+    }
+    
+    console.log('🔍 Obteniendo datos ARES para semáforo:', this.scores.ares);
+    
+    // Mapear las dimensiones ARES a las fases del semáforo
+    const aresData: Record<string, any> = {};
+    
+    // F1 - Preparación: datos, talento, gobernanza
+    if (this.scores.ares.datos || this.scores.ares.talento || this.scores.ares.gobernanza) {
+      const scores = [this.scores.ares.datos, this.scores.ares.talento, this.scores.ares.gobernanza].filter(s => s !== undefined);
+      aresData['F1'] = {
+        score: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        total: 100,
+        items: []
+      };
+      console.log(`📊 F1 - Preparación: scores=${scores}, promedio=${aresData['F1'].score}`);
+    }
+    
+    // F2 - Diseño: valor, etica, riesgos, transparencia
+    if (this.scores.ares.valor || this.scores.ares.etica || this.scores.ares.riesgos || this.scores.ares.transparencia) {
+      const scores = [this.scores.ares.valor, this.scores.ares.etica, this.scores.ares.riesgos, this.scores.ares.transparencia].filter(s => s !== undefined);
+      aresData['F2'] = {
+        score: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        total: 100,
+        items: []
+      };
+      console.log(`📊 F2 - Diseño: scores=${scores}, promedio=${aresData['F2'].score}`);
+    }
+    
+    // F3 - Desarrollo: tecnologia, integracion, capacidad
+    if (this.scores.ares.tecnologia || this.scores.ares.integracion || this.scores.ares.capacidad) {
+      const scores = [this.scores.ares.tecnologia, this.scores.ares.integracion, this.scores.ares.capacidad].filter(s => s !== undefined);
+      aresData['F3'] = {
+        score: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        total: 100,
+        items: []
+      };
+      console.log(`📊 F3 - Desarrollo: scores=${scores}, promedio=${aresData['F3'].score}`);
+    }
+    
+    // F4 - Operación: operacion, seguridad, cumplimiento
+    if (this.scores.ares.operacion || this.scores.ares.seguridad || this.scores.ares.cumplimiento) {
+      const scores = [this.scores.ares.operacion, this.scores.ares.seguridad, this.scores.ares.cumplimiento].filter(s => s !== undefined);
+      aresData['F4'] = {
+        score: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        total: 100,
+        items: []
+      };
+      console.log(`📊 F4 - Operación: scores=${scores}, promedio=${aresData['F4'].score}`);
+    }
+    
+    // F5 - Escalamiento: adopcion, sostenibilidad
+    if (this.scores.ares.adopcion || this.scores.ares.sostenibilidad) {
+      const scores = [this.scores.ares.adopcion, this.scores.ares.sostenibilidad].filter(s => s !== undefined);
+      aresData['F5'] = {
+        score: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+        total: 100,
+        items: []
+      };
+      console.log(`📊 F5 - Escalamiento: scores=${scores}, promedio=${aresData['F5'].score}`);
+    }
+    
+    // Si no hay datos mapeados, crear fases por defecto
+    if (Object.keys(aresData).length === 0) {
+      console.log('⚠️ No hay datos ARES mapeados, creando fases por defecto');
+      ['F1', 'F2', 'F3', 'F4', 'F5'].forEach(phase => {
+        aresData[phase] = {
+          score: 0,
+          total: 100,
+          items: []
+        };
+      });
+    }
+    
+    console.log('📈 Datos ARES formateados para semáforo:', aresData);
+    return aresData;
   }
 
   // Métodos auxiliares para el nuevo diseño
@@ -503,6 +642,95 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       console.error('❌ Error al descargar el plan:', error);
       alert('Error al descargar el plan. Por favor, intenta de nuevo.');
     }
+  }
+
+  // Método para generar datos de prueba
+  generateTestData(): void {
+    console.log('🧪 Generando datos de prueba...');
+    
+    // Generar datos ARES de prueba
+    const testAresData = {
+      datos: 4,
+      talento: 3,
+      gobernanza: 4,
+      valor: 3,
+      etica: 4,
+      riesgos: 3,
+      transparencia: 4,
+      tecnologia: 3,
+      integracion: 4,
+      capacidad: 3,
+      operacion: 4,
+      seguridad: 3,
+      cumplimiento: 4,
+      adopcion: 3,
+      sostenibilidad: 4
+    };
+    
+    // Generar datos de competencias de prueba
+    const testCompetenciasData = {
+      pensamiento_critico: 4,
+      resolucion_problemas: 3,
+      alfabetizacion_datos: 4,
+      comunicacion_efectiva: 3,
+      colaboracion_equipo: 4,
+      creatividad_innovacion: 3,
+      diseno_tecnologico: 4,
+      automatizacion_ia: 3,
+      seguridad_privacidad: 4,
+      etica_responsabilidad: 3,
+      sostenibilidad: 4,
+      aprendizaje_continuo: 3,
+      liderazgo_ia: 4
+    };
+    
+    // Crear datos de diagnóstico de prueba
+    const testDiagnosticData = {
+      contexto: {
+        industria: 'Tecnología',
+        tamano: 'Mediana',
+        presupuesto: 'Alto'
+      },
+      ares: testAresData,
+      competencias: testCompetenciasData,
+      objetivo: 'Mejorar la madurez en IA' as any,
+      lead: {
+        nombre: 'Usuario de Prueba',
+        email: 'test@example.com',
+        telefono: '+1234567890',
+        aceptaComunicaciones: true
+      },
+      segmento: 'empresa' as any
+    } as any;
+    
+    console.log('🧪 Datos de prueba generados:', testDiagnosticData);
+    
+    // Calcular scores con los datos de prueba
+    const ares = this.scoringService.computeAresScore(testDiagnosticData);
+    const competencias = this.scoringService.computeCompetencyScores(testDiagnosticData);
+    this.scores = { ares, competencias };
+    
+    console.log('🧪 Scores calculados con datos de prueba:', this.scores);
+    console.log('🧪 Scores ARES:', ares);
+    console.log('🧪 Scores competencias:', competencias);
+    console.log('🧪 Tipo de competencias:', typeof competencias, Array.isArray(competencias));
+    
+    if (Array.isArray(competencias)) {
+      competencias.forEach((comp: any, index: number) => {
+        console.log(`🧪 Competencia ${index}:`, comp);
+      });
+    }
+    
+    // Preparar datos del gráfico radar
+    this.prepareRadarChartData();
+    
+    // Forzar actualización de componentes hijos
+    setTimeout(() => {
+      console.log('🔄 Forzando actualización con datos de prueba');
+      console.log('🔄 Estado final de scores:', this.scores);
+      console.log('🔄 Llamando a competencyScoresForChart:', this.competencyScoresForChart);
+      this.scores = { ...this.scores };
+    }, 100);
   }
 
   private generatePlanContent(): string {

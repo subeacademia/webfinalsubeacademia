@@ -346,31 +346,81 @@ export class DiagnosticStateService {
 
     // Método para verificar si un paso está completo
     isStepComplete(step: string): boolean {
+        console.log(`🔍 Verificando paso: ${step}`);
+        
         switch (step) {
             case 'contexto':
-                return !!this.getContextoData();
+                const contextoData = this.getContextoData();
+                const hasContexto = !!contextoData && Object.keys(contextoData).length > 0;
+                console.log(`🔍 Contexto: ${hasContexto ? '✅' : '❌'}`, contextoData);
+                return hasContexto;
+                
             case 'ares':
                 const aresData = this.aresForm.value;
-                return Object.keys(aresData).length > 0 && 
+                const hasAres = Object.keys(aresData).length > 0 && 
                        Object.values(aresData).every(value => 
                            value !== null && value !== undefined && value !== '' && 
                            typeof value === 'number' && value >= 1 && value <= 5
                        );
+                console.log(`🔍 ARES: ${hasAres ? '✅' : '❌'}`, aresData);
+                return hasAres;
+                
             case 'competencias':
                 const competenciasData = this.competenciasForm.value;
-                return Object.keys(competenciasData).length > 0 && 
+                const hasCompetencias = Object.keys(competenciasData).length > 0 && 
                        Object.values(competenciasData).every(value => 
                            value !== null && value !== undefined && value !== '' && 
                            typeof value === 'number' && value >= 1 && value <= 5
                        );
+                console.log(`🔍 Competencias: ${hasCompetencias ? '✅' : '❌'}`, competenciasData);
+                return hasCompetencias;
+                
             case 'objetivo':
-                return !!this.form.get('objetivo')?.value;
+                const objetivo = this.form.get('objetivo')?.value;
+                const hasObjetivo = !!objetivo;
+                console.log(`🔍 Objetivo: ${hasObjetivo ? '✅' : '❌'}`, objetivo);
+                return hasObjetivo;
+                
             case 'lead':
                 const leadData = this.leadForm.value;
-                return leadData.nombre && leadData.email;
+                const hasLead = leadData.nombre && leadData.email;
+                console.log(`🔍 Lead: ${hasLead ? '✅' : '❌'}`, leadData);
+                return hasLead;
+                
             default:
+                console.log(`🔍 Paso desconocido: ${step}`);
                 return false;
         }
+    }
+
+    // Método para verificar si el diagnóstico está completamente terminado
+    isDiagnosticComplete(): boolean {
+        console.log('🔍 isDiagnosticComplete() llamado');
+        
+        // Si estamos en la página de resultados, considerar el diagnóstico como completo
+        if (window.location.pathname.includes('/resultados')) {
+            console.log('✅ En página de resultados - diagnóstico considerado completo');
+            return true;
+        }
+        
+        const allSteps = ['contexto', 'ares', 'competencias', 'objetivo', 'lead'];
+        const stepResults = allSteps.map(step => {
+            const isComplete = this.isStepComplete(step);
+            console.log(`🔍 Paso ${step}: ${isComplete ? '✅' : '❌'}`);
+            return isComplete;
+        });
+        
+        const allComplete = stepResults.every(result => result);
+        console.log(`🔍 Diagnóstico completo: ${allComplete ? '✅' : '❌'}`);
+        
+        return allComplete;
+    }
+
+    // Método para obtener el progreso general del diagnóstico
+    getDiagnosticProgress(): number {
+        const allSteps = ['contexto', 'ares', 'competencias', 'objetivo', 'lead'];
+        const completedSteps = allSteps.filter(step => this.isStepComplete(step));
+        return Math.round((completedSteps.length / allSteps.length) * 100);
     }
 
     // Métodos de persistencia
@@ -393,6 +443,8 @@ export class DiagnosticStateService {
                 contextoValues: contextoValues, // Solo los valores, no los controles
                 isCompleted: this._isCompleted()
             };
+            
+            console.log('💾 Guardando en localStorage:', data);
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         } catch (error) {
             console.warn('No se pudo guardar en localStorage:', error);
@@ -473,7 +525,7 @@ export class DiagnosticStateService {
 
     // Método para obtener todos los datos del diagnóstico
     getDiagnosticData(): any {
-        return {
+        const data = {
             contexto: this.getContextoData(),
             ares: this.aresForm.value,
             competencias: this.competenciasForm.value,
@@ -481,6 +533,14 @@ export class DiagnosticStateService {
             lead: this.leadForm.value,
             segmento: this.form.get('segmento')?.value
         };
+        
+        console.log('🔍 getDiagnosticData() llamado');
+        console.log('🔍 Datos del contexto:', data.contexto);
+        console.log('🔍 Datos ARES:', data.ares);
+        console.log('🔍 Datos competencias:', data.competencias);
+        console.log('🔍 Datos completos:', data);
+        
+        return data;
     }
 
     // Método para notificar cambios en el progreso
