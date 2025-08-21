@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { Observable, Subject, of } from 'rxjs';
 import { takeUntil, finalize, switchMap, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
 import { GenerativeAiService, DiagnosticAnalysisData } from '../../../../../core/ai/generative-ai.service';
@@ -12,6 +13,7 @@ import { CardComponent } from '../../../../../shared/ui-kit/card/card.component'
 import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
 import { ContentService } from '../../../../../core/services/content.service';
 import { PdfService } from '../../../services/pdf.service';
+import { ToastService } from '../../../../../core/ui/toast/toast.service';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -46,6 +48,8 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
     private generativeAiService: GenerativeAiService,
     private contentService: ContentService,
     private pdfService: PdfService,
+    private router: Router,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) {
     // Usar afterNextRender para asegurar que la vista esté lista para el PDF
@@ -130,6 +134,70 @@ export class DiagnosticResultsComponent implements OnInit, OnDestroy {
     } else {
       console.error('No se encontró el elemento #pdf-content o faltan datos para generar el PDF.');
     }
+  }
+
+  guardarPlan(): void {
+    // Generar y descargar el PDF del plan
+    this.generateAndDownloadPdf();
+    
+    // Mostrar mensaje de confirmación
+    this.toastService.success('Plan guardado exitosamente');
+  }
+
+  compartirResultados(): void {
+    // Implementar lógica para compartir resultados
+    if (navigator.share && this.diagnosticData) {
+      const shareData = {
+        title: 'Mis Resultados del Diagnóstico de IA',
+        text: `He completado mi diagnóstico de competencias en IA. Mi puntuación general es ${this.calculateAverageScore()}%. ¡Descubre tus competencias también!`,
+        url: window.location.href
+      };
+      
+      navigator.share(shareData).catch((error) => {
+        console.log('Error al compartir:', error);
+        this.fallbackShare();
+      });
+    } else {
+      this.fallbackShare();
+    }
+  }
+
+  private fallbackShare(): void {
+    // Fallback para navegadores que no soportan Web Share API
+    const url = window.location.href;
+    const text = `He completado mi diagnóstico de competencias en IA. ¡Descubre las tuyas en: ${url}`;
+    
+    // Copiar al portapapeles
+    navigator.clipboard.writeText(text).then(() => {
+      this.toastService.success('Enlace copiado al portapapeles. ¡Compártelo con tu equipo!');
+    }).catch(() => {
+      // Fallback adicional
+      const copied = prompt('Copia este enlace para compartir:', url);
+      if (copied) {
+        this.toastService.info('Enlace copiado manualmente');
+      }
+    });
+  }
+
+  contactarWhatsApp(): void {
+    const phoneNumber = '+56912345678'; // Número de WhatsApp (ajustar según necesidad)
+    const message = encodeURIComponent('Hola, me gustaría obtener más información sobre el plan de acción de mi diagnóstico de IA.');
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    
+    window.open(whatsappUrl, '_blank');
+    this.toastService.info('Abriendo WhatsApp...');
+  }
+
+  contactoDirecto(): void {
+    // Navegar a la página de contacto
+    this.router.navigate(['/contacto']);
+    this.toastService.info('Redirigiendo al formulario de contacto...');
+  }
+
+  private calculateAverageScore(): number {
+    if (this.competencyResults.length === 0) return 0;
+    const total = this.competencyResults.reduce((sum, comp) => sum + comp.score, 0);
+    return Math.round(total / this.competencyResults.length);
   }
 
   private startLoadingMessages(): void {

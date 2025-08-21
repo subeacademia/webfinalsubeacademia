@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
@@ -13,15 +13,16 @@ import { AnimationService } from '../../../../../core/services/animation.service
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { COMPETENCIAS } from '../../../data/competencias';
+import { SocialShareModalComponent } from '../social-share-modal/social-share-modal.component';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective],
+  imports: [CommonModule, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective, SocialShareModalComponent],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
-export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewInit {
+export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('resultsContainer') resultsContainer!: ElementRef;
   
   private stateService = inject(DiagnosticStateService);
@@ -43,6 +44,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   public radarChartData!: ChartConfiguration<'radar'>['data'];
   private finalScores: number[] = [];
   private finalLabels: string[] = [];
+
+  showShareModal = false;
 
   ngOnInit(): void {
     console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado');
@@ -405,6 +408,63 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     console.log('🔄 Reintentando generación del reporte...');
     const diagnosticData = this.stateService.getDiagnosticData();
     this.generateReport(diagnosticData);
+  }
+
+  compartirResultados(): void {
+    this.showShareModal = true;
+  }
+
+  onShareModalClose(): void {
+    this.showShareModal = false;
+  }
+
+  onShareResults(platforms: string[]): void {
+    console.log('Compartiendo en plataformas:', platforms);
+    
+    // Aquí puedes implementar la lógica específica para cada plataforma
+    platforms.forEach(platform => {
+      switch (platform) {
+        case 'linkedin':
+          this.shareOnLinkedIn();
+          break;
+        case 'facebook':
+          this.shareOnFacebook();
+          break;
+        case 'instagram':
+          this.shareOnInstagram();
+          break;
+        case 'tiktok':
+          this.shareOnTikTok();
+          break;
+      }
+    });
+    
+    this.showShareModal = false;
+  }
+
+  private shareOnLinkedIn(): void {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent('Resultados de mi diagnóstico de IA - SubeAcademia');
+    const summary = encodeURIComponent('He completado mi diagnóstico de competencias en IA. ¡Descubre tus fortalezas!');
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`;
+    window.open(linkedInUrl, '_blank');
+  }
+
+  private shareOnFacebook(): void {
+    const url = encodeURIComponent(window.location.href);
+    const quote = encodeURIComponent('He completado mi diagnóstico de competencias en IA. ¡Descubre tus fortalezas!');
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${quote}`;
+    window.open(facebookUrl, '_blank');
+  }
+
+  private shareOnInstagram(): void {
+    // Instagram no tiene API de compartir directa, mostrar instrucciones
+    alert('Para compartir en Instagram:\n1. Toma una captura de pantalla de tus resultados\n2. Compártela en tu historia o feed\n3. Agrega el hashtag #SubeAcademia');
+  }
+
+  private shareOnTikTok(): void {
+    // TikTok no tiene API de compartir directa, mostrar instrucciones
+    alert('Para compartir en TikTok:\n1. Toma una captura de pantalla de tus resultados\n2. Crea un video creativo\n3. Agrega el hashtag #SubeAcademia');
   }
 
   // Getters para los datos de los gráficos
@@ -781,5 +841,9 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     content += 'Contacto: +56 9 8228 1888 | WhatsApp: +56 9 8228 1888\n';
     
     return content;
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup si es necesario
   }
 }
