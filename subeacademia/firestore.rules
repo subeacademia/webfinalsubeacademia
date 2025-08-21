@@ -31,6 +31,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Historia (hitos)
+    match /history/{id} {
+      allow read: if true; // visible públicamente
+      allow create, update, delete: if isAdmin(); // solo administradores pueden modificar
+    }
+
     // Settings del sitio
     match /settings/{doc} {
       allow read: if true;

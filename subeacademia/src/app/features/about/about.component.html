@@ -92,6 +92,7 @@
         <app-flippable-profile-card *ngFor="let collaborator of (collaborators$ | async) || collaboratorsFallback" 
                                     [name]="collaborator.name"
                                     [imageUrl]="collaborator.logoUrl"
+                                    [subtitle]="collaborator.type"
                                     [description]="collaborator.description">
         </app-flippable-profile-card>
       </div>
