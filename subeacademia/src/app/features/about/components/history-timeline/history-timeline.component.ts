@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import * as animeImport from 'animejs';
-const anime = (animeImport as any).default ?? (animeImport as any);
+import * as AnimeNS from 'animejs';
+const animeFn: any = (AnimeNS as any).default ?? (AnimeNS as any);
 import { HistoryService } from '../../../../core/data/history.service';
 import { HistoryEvent } from '../../../../core/models/history-event.model';
 import { Observable, map } from 'rxjs';
@@ -33,12 +33,12 @@ export class HistoryTimelineComponent implements AfterViewInit {
     const io = new IntersectionObserver((entries) => {
       const anyVisible = entries.some(e => e.isIntersecting);
       if (!anyVisible) return;
-      anime({
+      animeFn({
         targets: timelineItems,
         translateY: [40, 0],
         opacity: [0, 1],
         easing: 'easeOutQuad',
-        delay: anime.stagger(200, { start: 150 })
+        delay: (AnimeNS as any).stagger(200, { start: 150 })
       });
       io.disconnect();
     }, { threshold: 0.05 });

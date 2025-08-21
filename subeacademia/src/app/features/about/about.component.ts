@@ -2,8 +2,8 @@ import { AfterViewInit, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
-import * as animeImport from 'animejs';
-const anime = (animeImport as any).default ?? (animeImport as any);
+import * as AnimeNS from 'animejs';
+const animeFn: any = (AnimeNS as any).default ?? (AnimeNS as any);
 import { CollaboratorsService } from '../../core/data/collaborators.service';
 import { Observable, map } from 'rxjs';
 import { Collaborator } from '../../core/models/collaborator.model';
@@ -30,6 +30,7 @@ interface TeamMember {
 export class AboutComponent implements AfterViewInit {
   selectedMember: TeamMember | null = null;
   collaborators$: Observable<Collaborator[]> | undefined;
+  collaboratorsFallback: Collaborator[] = [];
 
   activeTab = 'mision';
   philosophyTabs = [
@@ -105,6 +106,7 @@ export class AboutComponent implements AfterViewInit {
       { name: 'Ignacio Lipski', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=IL', description: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.', website: '#', type: 'Cliente Destacado' },
       { name: 'Carlos Baldovinos', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=CB', description: 'Análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.', website: '#', type: 'Partner Tecnológico' },
     ];
+    this.collaboratorsFallback = fallback;
     this.collaborators$ = this.collaboratorsService.getCollaborators().pipe(
       map(list => (list && list.length ? list : fallback))
     );
@@ -125,19 +127,11 @@ export class AboutComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const tabs = document.querySelectorAll('.philosophy-content');
     if (!tabs || tabs.length === 0) return;
-    anime({ targets: tabs, opacity: [0, 1], duration: 600, delay: 150, easing: 'easeOutQuad' });
+    animeFn({ targets: tabs, opacity: [0, 1], duration: 600, delay: 150, easing: 'easeOutQuad' });
   }
 
   setActiveTab(id: string): void {
     if (this.activeTab === id) return;
-    const current = document.querySelector('.philosophy-content.active-tab');
-    const next = document.querySelector(`.philosophy-content[data-id="${id}"]`);
-    if (current) {
-      anime({ targets: current, opacity: [1, 0], translateY: [0, 10], duration: 300, easing: 'easeInQuad' });
-    }
-    if (next) {
-      anime({ targets: next, opacity: [0, 1], translateY: [10, 0], duration: 400, delay: 120, easing: 'easeOutQuad' });
-    }
     this.activeTab = id;
   }
 }

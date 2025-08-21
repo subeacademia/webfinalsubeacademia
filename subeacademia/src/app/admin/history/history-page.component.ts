@@ -83,10 +83,10 @@ export class HistoryPageComponent {
   editingId = signal<string | null>(null);
 
   form = this.fb.nonNullable.group({
-    order: [0, []],
-    year: [2024, [Validators.required, Validators.min(1900)]],
-    title: ['', [Validators.required, Validators.minLength(3)]],
-    description: ['', [Validators.required, Validators.minLength(10)]],
+    order: [0],
+    year: [2024, [Validators.required]],
+    title: ['', [Validators.required]],
+    description: ['', [Validators.required]],
   });
 
   constructor(){
@@ -98,6 +98,7 @@ export class HistoryPageComponent {
   close(){ this.isOpen.set(false); }
 
   async save(){
+    if (this.form.invalid) return;
     const val = this.form.getRawValue();
     const id = this.editingId();
     if (id) await this.svc.update(id, val);
