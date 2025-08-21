@@ -159,15 +159,16 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-/* Gradientes y sombras mejoradas */
+/* Fondo consistente con el tema (evita parpadeo blanco al girar) */
 .flip-card-back,
 .collaborator-card-back {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: var(--card);
+  border: 1px solid var(--border);
 }
 
 .dark .flip-card-back,
 .dark .collaborator-card-back {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: var(--card);
 }
 
 /* Asegurar que las tarjetas no se superpongan */
