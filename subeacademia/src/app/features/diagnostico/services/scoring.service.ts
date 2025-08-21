@@ -250,10 +250,14 @@ Una vez que hayas completado estas micro-acciones, estarás listo para el siguie
             values: Object.values(niveles)
         });
         
-        // Si no hay datos, devolver array vacío
+        // Si no hay datos, devolver TODAS las competencias con puntaje 0 para garantizar visualización del gráfico
         if (Object.keys(niveles).length === 0) {
-            console.warn('⚠️ No hay datos de competencias para procesar');
-            return [];
+            console.warn('⚠️ No hay datos de competencias para procesar. Devolviendo todas las competencias con puntaje 0.');
+            return COMPETENCIAS.map(comp => ({
+                competenciaId: comp.id,
+                puntaje: 0,
+                nivel: 'incipiente' as NivelCompetencia
+            }));
         }
         
         const out = Object.entries(niveles).map(([competenciaId, nivel]) => {

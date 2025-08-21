@@ -1,5 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration } from 'chart.js';
 
 export interface CompetencyScore {
   name: string;
@@ -9,7 +11,7 @@ export interface CompetencyScore {
 @Component({
   selector: 'app-competency-bar-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BaseChartDirective],
   template: `
     <div class="competency-chart-container">
       <div class="mb-4">
@@ -21,33 +23,43 @@ export interface CompetencyScore {
         </p>
         <!-- Debug info -->
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Datos recibidos: {{ competencyScores.length || 0 }} competencias
+          Datos recibidos: {{ (chartData?.labels?.length || competencyScores.length || 0) }} competencias
         </p>
       </div>
       
-      <!-- Gráfico de barras simple con HTML/CSS -->
-      <div class="simple-bar-chart">
-        <div *ngIf="!competencyScores || competencyScores.length === 0" class="text-center py-8 text-gray-500">
-          <p>Cargando competencias...</p>
+      <!-- Gráfico de barras con ng2-charts si hay chartData; si no, fallback HTML/CSS -->
+      <ng-container *ngIf="chartData; else fallbackBars">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+          <canvas baseChart
+                  [data]="chartData"
+                  [type]="'bar'"
+                  [options]="barOptions"
+                  class="max-h-[520px]">
+          </canvas>
         </div>
-        
-        <!-- Barras de competencias -->
-        <div *ngFor="let item of competencyScores; let i = index" 
-             class="bar-item mb-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ item.name }}</span>
-            <span class="text-sm font-bold" [style.color]="getScoreColor(item.score)">{{ item.score }}%</span>
+      </ng-container>
+      <ng-template #fallbackBars>
+        <div class="simple-bar-chart">
+          <div *ngIf="!competencyScores || competencyScores.length === 0" class="text-center py-8 text-gray-500">
+            <p>Cargando competencias...</p>
           </div>
-          
-          <!-- Barra de progreso -->
-          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 relative">
-            <div class="h-4 rounded-full transition-all duration-1000 ease-out"
-                 [style.width.%]="item.score"
-                 [style.background-color]="getScoreColor(item.score)">
+          <!-- Barras de competencias -->
+          <div *ngFor="let item of competencyScores; let i = index" 
+               class="bar-item mb-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+              <span class="text-sm font-bold" [style.color]="getScoreColor(item.score)">{{ item.score }}%</span>
+            </div>
+            <!-- Barra de progreso -->
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 relative">
+              <div class="h-4 rounded-full transition-all duration-1000 ease-out"
+                   [style.width.%]="item.score"
+                   [style.background-color]="getScoreColor(item.score)">
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </ng-template>
       
       <!-- Leyenda de colores -->
       <div class="mt-6 flex flex-wrap gap-4 justify-center text-sm">
@@ -112,6 +124,26 @@ export interface CompetencyScore {
 })
 export class CompetencyBarChartComponent implements OnChanges {
   @Input() competencyScores: CompetencyScore[] = [];
+  @Input() chartData?: ChartConfiguration<'bar'>['data'];
+
+  public barOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        min: 0,
+        max: 100,
+        grid: { display: false }
+      },
+      y: {
+        grid: { display: false }
+      }
+    },
+    plugins: {
+      legend: { display: false }
+    }
+  };
 
   ngOnChanges(changes: SimpleChanges): void {
     console.log('🔄 ngOnChanges llamado en CompetencyBarChartComponent');

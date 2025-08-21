@@ -277,22 +277,37 @@ export class StepLeadComponent implements OnInit {
         // Marcar como completado
         this.stateService.markAsCompleted();
         
-        // Intentar guardar en Firestore
+        // Intentar guardar en Firestore: diagnostics (puede requerir auth)
+        const diagnosticData = this.stateService.getDiagnosticData();
         try {
-          const diagnosticData = this.stateService.getDiagnosticData();
-          
           const docData = {
             diagnosticData,
             lead: formData,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           };
-          
           const docRef = await addDoc(collection(this.firestore, 'diagnostics'), docData);
           console.log('✅ Diagnóstico guardado en Firestore con ID:', docRef.id);
         } catch (firestoreError) {
-          console.warn('⚠️ No se pudo guardar en Firestore, pero continuando con el diagnóstico:', firestoreError);
-          // Continuar aunque falle Firestore
+          console.warn('⚠️ No se pudo guardar en diagnostics (podría requerir autenticación). Continuamos:', firestoreError);
+        }
+
+        // Guardar siempre el lead en su colección, independientemente del resultado anterior
+        try {
+          const leadPayload = {
+            nombre: formData.nombre,
+            email: formData.email,
+            telefono: formData.telefono || null,
+            aceptaComunicaciones: !!formData.aceptaComunicaciones,
+            timestamp: serverTimestamp(),
+            source: 'diagnostico',
+            diagnosticData
+          };
+          await addDoc(collection(this.firestore, 'leads'), leadPayload);
+          console.log('✅ Lead guardado en Firestore (colección leads)');
+        } catch (leadError) {
+          console.error('❌ Error al guardar el lead en Firestore:', leadError);
+          alert('No pudimos guardar tus datos de contacto. Por favor, intenta nuevamente.');
         }
         
         // Navegar a resultados

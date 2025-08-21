@@ -42,6 +42,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
   // Datos del gráfico radar
   public radarChartData!: ChartConfiguration<'radar'>['data'];
+  public competencyChartData?: ChartConfiguration<'bar'>['data'];
   private finalScores: number[] = [];
   private finalLabels: string[] = [];
 
@@ -107,8 +108,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
   ngAfterViewInit(): void {
     // Animar el número del puntaje final
-    if (this.scores?.ares?.total) {
-      this.animationService.countUp('#score-final', this.scores.ares.total);
+    if (this.scores?.ares?.promedio !== undefined) {
+      this.animationService.countUp('#total-score', this.scores.ares.promedio);
     }
 
     // Animar la aparición de elementos en secuencia
@@ -145,6 +146,19 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
         pointHoverBackgroundColor: '#fff',
         pointHoverBorderColor: 'rgb(54, 162, 235)'
       }]
+    };
+
+    // Preparar datos para gráfico de barras horizontal
+    this.competencyChartData = {
+      labels: labels,
+      datasets: [
+        {
+          data: finalScores,
+          label: 'Competencias (%)',
+          backgroundColor: finalScores.map(v => this.getBarColor(v)),
+          borderWidth: 0
+        }
+      ]
     };
 
     // Llama a las animaciones después de que los datos estén listos
@@ -200,13 +214,26 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       }]
     };
 
+    // Además preparar chartData para barras
+    this.competencyChartData = {
+      labels: [...this.finalLabels],
+      datasets: [
+        {
+          data: [...this.finalScores],
+          label: 'Competencias (%)',
+          backgroundColor: this.finalScores.map(v => this.getBarColor(v)),
+          borderWidth: 0
+        }
+      ]
+    };
+
     console.log('📊 Gráfico radar inicializado con datos:', this.radarChartData);
   }
 
   private animateResults(): void {
     // Animación de conteo para el puntaje total
-    if (this.scores?.ares?.total) {
-      this.animationService.countUp('#total-score', this.scores.ares.total);
+    if (this.scores?.ares?.promedio !== undefined) {
+      this.animationService.countUp('#total-score', this.scores.ares.promedio);
     }
 
     // Animación de aparición para el gráfico
@@ -870,6 +897,14 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     }
 
     return Math.round((competenciasAvg + aresAvg) / 2);
+  }
+
+  private getBarColor(score: number): string {
+    if (score >= 80) return '#22c55e';
+    if (score >= 60) return '#3b82f6';
+    if (score >= 40) return '#eab308';
+    if (score >= 20) return '#f97316';
+    return '#ef4444';
   }
 
   getQuickInsights(): Array<{ type: string; title: string; description: string }>{

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, query, orderBy, getDocs, deleteDoc, doc } from '@angular/fire/firestore';
+import { Firestore, collection, query, orderBy, getDocs, deleteDoc, doc, collectionData } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 interface Lead {
   id: string;
@@ -18,7 +19,7 @@ interface Lead {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="p-6">
+    <div class="p-6" *ngIf="leads$ | async as leads; else loading">
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Gestión de Leads
@@ -53,7 +54,7 @@ interface Lead {
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Aceptan Comunicaciones</p>
-              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ leadsAceptanComunicaciones }}</p>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ getLeadsAceptanComunicaciones(leads) }}</p>
             </div>
           </div>
         </div>
@@ -67,7 +68,7 @@ interface Lead {
             </div>
             <div class="ml-4">
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Este Mes</p>
-              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ leadsEsteMes }}</p>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ getLeadsEsteMes(leads) }}</p>
             </div>
           </div>
         </div>
@@ -178,12 +179,16 @@ interface Lead {
         </div>
       </div>
     </div>
+    <ng-template #loading>
+      <div class="p-6 text-center text-gray-500">Cargando leads...</div>
+    </ng-template>
   `,
   styleUrls: []
 })
 export class AdminLeadsComponent implements OnInit {
   private readonly firestore = inject(Firestore);
   
+  leads$: Observable<Lead[]>;
   leads: Lead[] = [];
   isLoading = true;
 
@@ -196,14 +201,10 @@ export class AdminLeadsComponent implements OnInit {
       this.isLoading = true;
       const leadsRef = collection(this.firestore, 'leads');
       const q = query(leadsRef, orderBy('timestamp', 'desc'));
-      const querySnapshot = await getDocs(q);
-      
-      this.leads = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Lead[];
-      
-      console.log('✅ Leads cargados:', this.leads.length);
+      this.leads$ = collectionData(q, { idField: 'id' }) as Observable<Lead[]>;
+      // Mantener una copia local para acciones sincrónicas cuando sea necesario
+      this.leads$.subscribe(data => this.leads = data);
+      console.log('✅ Leads en streaming habilitados');
     } catch (error) {
       console.error('❌ Error al cargar leads:', error);
     } finally {
@@ -251,18 +252,17 @@ export class AdminLeadsComponent implements OnInit {
     }
   }
 
-  get leadsAceptanComunicaciones(): number {
-    return this.leads.filter(lead => lead.aceptaComunicaciones).length;
-  }
-
-  get leadsEsteMes(): number {
+  getLeadsEsteMes(list: Lead[]): number {
     const ahora = new Date();
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
-    
-    return this.leads.filter(lead => {
+    return list.filter(lead => {
       if (!lead.timestamp) return false;
-      const fechaLead = lead.timestamp.toDate ? lead.timestamp.toDate() : new Date(lead.timestamp);
+      const fechaLead = (lead.timestamp as any)?.toDate ? (lead.timestamp as any).toDate() : new Date(lead.timestamp as any);
       return fechaLead >= inicioMes;
     }).length;
+  }
+
+  getLeadsAceptanComunicaciones(list: Lead[]): number {
+    return (list || []).filter(l => !!l.aceptaComunicaciones).length;
   }
 }
