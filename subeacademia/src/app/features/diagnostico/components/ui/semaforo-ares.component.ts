@@ -12,47 +12,45 @@ export interface AresPhaseScore {
 	standalone: true,
 	imports: [CommonModule],
     template: `
-        <div class="flex flex-col gap-6">
-            <h3 class="text-xl font-semibold text-center text-gray-200">Estado ARES por Fase</h3>
-            
-            <div class="flex flex-wrap gap-6 justify-center">
+        <div class="flex flex-col gap-4 overflow-hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 justify-items-center">
                 <div 
                     *ngFor="let phase of phases; let i = index" 
-                    class="flex flex-col items-center p-6 rounded-xl transition-all duration-300 hover:scale-105"
+                    class="flex flex-col items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 w-full max-w-[180px]"
                     [ngClass]="getPhaseClass(phase)">
                     
                     <!-- Etiqueta de la fase -->
-                    <div class="text-sm font-medium text-gray-400 mb-4">{{ getPhaseLabel(phase) }}</div>
+                    <div class="text-xs font-medium text-gray-400 mb-3 text-center">{{ getPhaseLabel(phase) }}</div>
                     
                     <!-- Semáforo vertical -->
-                    <div class="relative mb-4">
+                    <div class="relative mb-3">
                         <!-- Contenedor del semáforo -->
-                        <div class="w-20 h-32 bg-gray-800 rounded-full border-4 border-gray-700 relative flex flex-col justify-between p-2">
+                        <div class="w-16 h-28 bg-gray-800 rounded-full border-4 border-gray-700 relative flex flex-col justify-between p-1.5">
                             <!-- Luz roja (crítico) -->
                             <div 
                                 #redLight
-                                class="w-12 h-12 rounded-full mx-auto transition-all duration-500"
+                                class="w-8 h-8 rounded-full mx-auto transition-all duration-500"
                                 [ngClass]="getLightClass(phase, 'red')">
                             </div>
                             
                             <!-- Luz amarilla (atención) -->
                             <div 
                                 #yellowLight
-                                class="w-12 h-12 rounded-full mx-auto transition-all duration-500"
+                                class="w-8 h-8 rounded-full mx-auto transition-all duration-500"
                                 [ngClass]="getLightClass(phase, 'yellow')">
                             </div>
                             
                             <!-- Luz verde (excelente) -->
                             <div 
                                 #greenLight
-                                class="w-12 h-12 rounded-full mx-auto transition-all duration-500"
+                                class="w-8 h-8 rounded-full mx-auto transition-all duration-500"
                                 [ngClass]="getLightClass(phase, 'green')">
                             </div>
                         </div>
                         
                         <!-- Indicador de estado activo -->
-                        <div class="absolute -right-2 top-1/2 transform -translate-y-1/2">
-                            <div class="w-4 h-4 rounded-full bg-white shadow-lg"
+                        <div class="absolute right-1 top-1/2 transform -translate-y-1/2">
+                            <div class="w-3.5 h-3.5 rounded-full bg-white shadow-lg"
                                  [ngClass]="getActiveIndicatorClass(phase)">
                             </div>
                         </div>
@@ -60,13 +58,13 @@ export interface AresPhaseScore {
                     
                     <!-- Score y estado -->
                     <div class="text-center">
-                        <div class="text-3xl font-bold mb-2" [ngClass]="getScoreTextClass(phase)">
+                        <div class="text-2xl font-bold mb-1" [ngClass]="getScoreTextClass(phase)">
                             {{ getPhaseScore(phase) }}
                         </div>
-                        <div class="text-xs text-gray-400 mb-2">
+                        <div class="text-[10px] text-gray-400 mb-1">
                             / {{ getPhaseTotal(phase) }}
                         </div>
-                        <div class="text-sm font-medium px-3 py-1 rounded-full" [ngClass]="getStatusBadgeClass(phase)">
+                        <div class="text-xs font-medium px-2 py-0.5 rounded-full" [ngClass]="getStatusBadgeClass(phase)">
                             {{ getPhaseStatus(phase) }}
                         </div>
                     </div>

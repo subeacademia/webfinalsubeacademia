@@ -843,6 +843,92 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     return content;
   }
 
+  // =====================
+  // Insights y Score General
+  // =====================
+  getGeneralScore(): number {
+    if (!this.scores) return 0;
+
+    // Promedio de competencias
+    let competenciasAvg = 0;
+    if (this.scores.competencias) {
+      if (Array.isArray(this.scores.competencias)) {
+        const values = this.scores.competencias.map((c: any) => typeof c.puntaje === 'number' ? c.puntaje : 0);
+        competenciasAvg = values.length ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 0;
+      } else {
+        const values = Object.values(this.scores.competencias).map((v: any) => typeof v === 'number' ? v : 0) as number[];
+        competenciasAvg = values.length ? values.reduce((a: number, b: number) => a + b, 0) / values.length : 0;
+      }
+    }
+
+    // Promedio ARES
+    let aresAvg = 0;
+    if (this.scores.ares) {
+      const entries = Object.entries(this.scores.ares).filter(([key]) => key !== 'promedio');
+      const values = entries.map(([, v]) => typeof v === 'number' ? v : 0) as number[];
+      aresAvg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+    }
+
+    return Math.round((competenciasAvg + aresAvg) / 2);
+  }
+
+  getQuickInsights(): Array<{ type: string; title: string; description: string }>{
+    const insights: Array<{ type: string; title: string; description: string }> = [];
+
+    if (this.scores?.competencias) {
+      const topComp = this.getTopCompetencies()[0];
+      if (topComp && topComp.score >= 80) {
+        insights.push({
+          type: 'success',
+          title: 'Fortaleza Identificada',
+          description: `${topComp.name} es tu área más fuerte`
+        });
+      }
+    }
+
+    if (this.scores?.ares) {
+      const lowestPhase = this.getAresPhases().sort((a, b) => a.score - b.score)[0];
+      if (lowestPhase && lowestPhase.score < 60) {
+        insights.push({
+          type: 'warning',
+          title: 'Área de Oportunidad',
+          description: `${lowestPhase.name} necesita atención prioritaria`
+        });
+      }
+    }
+
+    insights.push({
+      type: 'info',
+      title: 'Próximo Paso',
+      description: 'Revisa el plan de acción completo para priorizar tareas'
+    });
+
+    return insights;
+  }
+
+  getInsightBorderColor(type: string): string {
+    switch (type) {
+      case 'success': return 'border-green-500';
+      case 'warning': return 'border-yellow-500';
+      case 'info': return 'border-blue-500';
+      default: return 'border-gray-500';
+    }
+  }
+
+  getInsightDotColor(type: string): string {
+    switch (type) {
+      case 'success': return 'bg-green-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'info': return 'bg-blue-500';
+      default: return 'bg-gray-500';
+    }
+  }
+
+  showDetailedInsights(): void {
+    // Placeholder para interacción futura (modal o navegación)
+    console.log('Mostrando insights detallados...');
+  }
+
   ngOnDestroy(): void {
     // Cleanup si es necesario
   }
