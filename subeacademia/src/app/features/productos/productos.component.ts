@@ -86,7 +86,7 @@ import { ValuePropositionCardComponent } from '../../shared/ui/value-proposition
       <div class="mt-20 py-16 bg-gray-800/50 rounded-xl">
         <div class="container mx-auto px-6">
           <h2 class="text-4xl font-bold text-center text-white mb-12">El Enfoque <span class="text-cyan-400">Sube-Academia</span></h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8" [appAnimateOnScroll]="'.value-card'">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-4" [appAnimateOnScroll]="'.value-card'">
 
             <!-- Tarjeta 1: Personalización -->
             <app-value-proposition-card 

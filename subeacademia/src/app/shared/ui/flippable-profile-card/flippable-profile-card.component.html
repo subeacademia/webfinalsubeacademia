@@ -1,0 +1,17 @@
+<div class="flip-card" (click)="toggle()">
+  <div class="flip-card-inner" [class.flipped]="flipped">
+    <div class="card-face card-face--front bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+      <div class="flex flex-col items-center text-center h-full">
+        <img [src]="imageUrl" [alt]="name" class="w-24 h-24 rounded-full object-contain mb-3 border-4 border-indigo-100 dark:border-indigo-900" />
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ name }}</h3>
+        <p *ngIf="subtitle" class="text-indigo-600 dark:text-indigo-400 font-medium text-sm mb-2">{{ subtitle }}</p>
+      </div>
+    </div>
+    <div class="card-face card-face--back">
+      <h3 class="text-lg font-semibold mb-3">{{ name }}</h3>
+      <p class="text-sm leading-relaxed">{{ description }}</p>
+    </div>
+  </div>
+</div>
+
+

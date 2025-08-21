@@ -27,6 +27,8 @@ import { Subject, takeUntil } from 'rxjs';
       <a class="btn w-full" routerLink="/admin/certificados">Certificados</a>
       <a class="btn w-full" routerLink="/admin/media">Media</a>
       <a class="btn w-full" routerLink="/admin/logos">Logos</a>
+      <a class="btn w-full" routerLink="/admin/history">Historia</a>
+      <a class="btn w-full" routerLink="/admin/collaborators">Colaboradores</a>
       <a class="btn w-full" routerLink="/admin/leads">Leads</a>
       <a class="btn w-full" routerLink="/admin/settings">Ajustes</a>
       <button class="btn w-full" (click)="logout()">Cerrar sesión</button>

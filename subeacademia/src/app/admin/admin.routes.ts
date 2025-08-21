@@ -30,6 +30,8 @@ export const ADMIN_ROUTES: Routes = [
 
       { path: 'media', loadComponent: () => import('./media/media-page.component').then(m => m.MediaPageComponent), canActivate: [AdminGuard] },
       { path: 'logos', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
+      { path: 'history', loadComponent: () => import('./history/history-page.component').then(m => m.HistoryPageComponent), canActivate: [AdminGuard] },
+      { path: 'collaborators', loadComponent: () => import('./collaborators/collaborators-page.component').then(m => m.CollaboratorsPageComponent), canActivate: [AdminGuard] },
       { path: 'leads', loadComponent: () => import('./leads/admin-leads.component').then(m => m.AdminLeadsComponent), canActivate: [AdminGuard] },
       { path: 'settings', loadComponent: () => import('./settings/settings-page.component').then(m => m.SettingsPageComponent), canActivate: [AdminGuard] },
       { path: '**', redirectTo: 'posts' }

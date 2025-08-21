@@ -1,7 +1,14 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+import * as animeImport from 'animejs';
+const anime = (animeImport as any).default ?? (animeImport as any);
+import { CollaboratorsService } from '../../core/data/collaborators.service';
+import { Observable, map } from 'rxjs';
+import { Collaborator } from '../../core/models/collaborator.model';
+import { FlippableProfileCardComponent } from '../../shared/ui/flippable-profile-card/flippable-profile-card.component';
+import { HistoryTimelineComponent } from './components/history-timeline/history-timeline.component';
 
 interface TeamMember {
   name: string;
@@ -16,12 +23,20 @@ interface TeamMember {
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent],
+  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent, FlippableProfileCardComponent, HistoryTimelineComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css']
 })
-export class AboutComponent {
+export class AboutComponent implements AfterViewInit {
   selectedMember: TeamMember | null = null;
+  collaborators$: Observable<Collaborator[]> | undefined;
+
+  activeTab = 'mision';
+  philosophyTabs = [
+    { id: 'mision', title: 'Misión', content: 'Impulsar la evolución de profesionales y empresas a través de una educación en IA profundamente personalizada y práctica, transformando el paradigma de la enseñanza hacia el aprendizaje efectivo (matética).' },
+    { id: 'vision', title: 'Visión', content: 'Ser el referente en Latinoamérica en la formación de talento en Inteligencia Artificial, reconocidos por nuestra metodología innovadora que garantiza resultados tangibles y de alto impacto.' },
+    { id: 'valores', title: 'Valores', content: 'Excelencia, Innovación Constante, Integridad y un Compromiso real con el éxito de cada uno de nuestros estudiantes y socios.' }
+  ];
 
   founders: TeamMember[] = [
     {
@@ -82,15 +97,18 @@ export class AboutComponent {
     }
   ];
 
-  collaborators = [
-    { name: 'Nataly Saavedra', role: 'Abogada Especialista', bio: 'Especialista en derecho tecnológico y regulaciones de IA con amplia experiencia en compliance y gobernanza digital.' },
-    { name: 'Lina Barraza', role: 'Psicóloga Clínica', bio: 'Experta en psicología organizacional y desarrollo de competencias humanas para la era de la IA.' },
-    { name: 'Ignacio Lipski', role: 'Marketing Digital', bio: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.' },
-    { name: 'Carlos Baldovinos', role: 'Geógrafo', bio: 'Especialista en análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.' },
-    { name: 'Jorge Vásquez', role: 'Historiador y experto en Robótica', bio: 'Investigador interdisciplinario que combina historia de la tecnología con innovación en robótica e IA.' },
-    { name: 'Diego Ramirez', role: 'Psicólogo Organizacional', bio: 'Consultor en desarrollo organizacional y adaptación humana a entornos tecnológicos avanzados.' },
-    { name: 'Nicolás Valenzuela', role: 'Ingeniero de IA', bio: 'Desarrollador de sistemas de IA con especialización en machine learning y ética computacional.' },
-  ];
+  constructor(private collaboratorsService: CollaboratorsService) {
+    // Fallback local si la colección está vacía
+    const fallback: Collaborator[] = [
+      { name: 'Nataly Saavedra', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=NS', description: 'Especialista en derecho tecnológico y regulaciones de IA con amplia experiencia en compliance y gobernanza digital.', website: '#', type: 'Partner Académico' },
+      { name: 'Lina Barraza', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=LB', description: 'Psicología organizacional y desarrollo de competencias humanas para la era de la IA.', website: '#', type: 'Partner Académico' },
+      { name: 'Ignacio Lipski', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=IL', description: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.', website: '#', type: 'Cliente Destacado' },
+      { name: 'Carlos Baldovinos', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=CB', description: 'Análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.', website: '#', type: 'Partner Tecnológico' },
+    ];
+    this.collaborators$ = this.collaboratorsService.getCollaborators().pipe(
+      map(list => (list && list.length ? list : fallback))
+    );
+  }
 
   toggleFlip(member: TeamMember): void {
     member.flipped = !member.flipped;
@@ -102,6 +120,25 @@ export class AboutComponent {
 
   closeModal(): void {
     this.selectedMember = null;
+  }
+
+  ngAfterViewInit(): void {
+    const tabs = document.querySelectorAll('.philosophy-content');
+    if (!tabs || tabs.length === 0) return;
+    anime({ targets: tabs, opacity: [0, 1], duration: 600, delay: 150, easing: 'easeOutQuad' });
+  }
+
+  setActiveTab(id: string): void {
+    if (this.activeTab === id) return;
+    const current = document.querySelector('.philosophy-content.active-tab');
+    const next = document.querySelector(`.philosophy-content[data-id="${id}"]`);
+    if (current) {
+      anime({ targets: current, opacity: [1, 0], translateY: [0, 10], duration: 300, easing: 'easeInQuad' });
+    }
+    if (next) {
+      anime({ targets: next, opacity: [0, 1], translateY: [10, 0], duration: 400, delay: 120, easing: 'easeOutQuad' });
+    }
+    this.activeTab = id;
   }
 }
 

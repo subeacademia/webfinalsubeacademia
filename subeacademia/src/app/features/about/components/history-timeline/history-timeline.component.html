@@ -1,0 +1,15 @@
+<div class="timeline-container">
+  <div class="timeline-line"></div>
+  <div *ngFor="let event of events$ | async; let i = index" 
+       class="timeline-item-container"
+       [class.left]="i % 2 === 0" 
+       [class.right]="i % 2 !== 0">
+    <div class="timeline-dot"></div>
+    <div class="timeline-content">
+      <h3 class="font-bold text-xl text-cyan-400">{{ event.year }} - {{ event.title }}</h3>
+      <p class="mt-2 text-gray-300">{{ event.description }}</p>
+    </div>
+  </div>
+</div>
+
+
