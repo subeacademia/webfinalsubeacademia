@@ -1,13 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Firestore, collection, query, orderBy, getDocs, deleteDoc, doc, collectionData } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 interface Lead {
   id: string;
   nombre: string;
   email: string;
-  telefono: string;
+  telefono: string | null;
   aceptaComunicaciones: boolean;
   timestamp: any;
   source: string;
@@ -201,7 +202,29 @@ export class AdminLeadsComponent implements OnInit {
       this.isLoading = true;
       const leadsRef = collection(this.firestore, 'leads');
       const q = query(leadsRef, orderBy('timestamp', 'desc'));
-      this.leads$ = collectionData(q, { idField: 'id' }) as Observable<Lead[]>;
+      this.leads$ = (collectionData(q, { idField: 'id' }) as Observable<any[]>).pipe(
+        map((items: any[]) => {
+          return (items || []).map((raw: any) => {
+            const mapped: Lead = {
+              id: raw.id,
+              nombre: raw.nombre || raw.name || 'Sin nombre',
+              email: raw.email || '',
+              telefono: raw.telefono || raw.phone || null,
+              aceptaComunicaciones: !!raw.aceptaComunicaciones,
+              // Fallbacks para distintos nombres de campos de fecha
+              timestamp: raw.timestamp || raw.fecha_creacion || raw.createdAt || raw.fecha || raw.updatedAt || null,
+              source: raw.source || raw.fuente || 'diagnostico',
+              diagnosticData: raw.diagnosticData || null
+            };
+            return mapped;
+          });
+        }),
+        catchError((error) => {
+          console.error('❌ Error al cargar leads (permisos o conectividad):', error);
+          alert('No se pudieron cargar los leads. Verifica que tu usuario tenga permisos de admin.');
+          return of([]);
+        })
+      ) as Observable<Lead[]>;
       // Mantener una copia local para acciones sincrónicas cuando sea necesario
       this.leads$.subscribe(data => this.leads = data);
       console.log('✅ Leads en streaming habilitados');

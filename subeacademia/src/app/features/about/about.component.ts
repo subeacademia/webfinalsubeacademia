@@ -7,7 +7,6 @@ const animeFn: any = (AnimeNS as any).default ?? (AnimeNS as any);
 import { CollaboratorsService } from '../../core/data/collaborators.service';
 import { Observable, map } from 'rxjs';
 import { Collaborator } from '../../core/models/collaborator.model';
-import { FlippableProfileCardComponent } from '../../shared/ui/flippable-profile-card/flippable-profile-card.component';
 import { HistoryTimelineComponent } from './components/history-timeline/history-timeline.component';
 
 interface TeamMember {
@@ -23,7 +22,7 @@ interface TeamMember {
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent, FlippableProfileCardComponent, HistoryTimelineComponent],
+  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent, HistoryTimelineComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css']
 })
@@ -31,6 +30,8 @@ export class AboutComponent implements AfterViewInit {
   selectedMember: TeamMember | null = null;
   collaborators$: Observable<Collaborator[]> | undefined;
   collaboratorsFallback: Collaborator[] = [];
+  collaboratorCards$: Observable<TeamMember[]> | undefined;
+  collaboratorCardsFallback: TeamMember[] = [];
 
   activeTab = 'mision';
   philosophyTabs = [
@@ -101,14 +102,35 @@ export class AboutComponent implements AfterViewInit {
   constructor(private collaboratorsService: CollaboratorsService) {
     // Fallback local si la colección está vacía
     const fallback: Collaborator[] = [
-      { name: 'Nataly Saavedra', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=NS', description: 'Especialista en derecho tecnológico y regulaciones de IA con amplia experiencia en compliance y gobernanza digital.', website: '#', type: 'Partner Académico' },
-      { name: 'Lina Barraza', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=LB', description: 'Psicología organizacional y desarrollo de competencias humanas para la era de la IA.', website: '#', type: 'Partner Académico' },
-      { name: 'Ignacio Lipski', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=IL', description: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.', website: '#', type: 'Cliente Destacado' },
-      { name: 'Carlos Baldovinos', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=CB', description: 'Análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.', website: '#', type: 'Partner Tecnológico' },
+      { name: 'Nicolás Valenzuela', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=NV', description: 'Ingeniero de IA con foco en soluciones aplicadas y MLOps.', website: '#', type: 'Partner Tecnológico' },
+      { name: 'Diego Ramírez', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=DR', description: 'Magíster en Gestión de RRHH y experto en IA para el desarrollo del talento.', website: '#', type: 'Partner Académico' },
+      { name: 'Pablo Soto', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=PS', description: 'Especialista en SIG e inteligencia geoespacial con IA.', website: '#', type: 'Partner Académico' },
+      { name: 'Ignacio Villarroel', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=IV', description: 'Investigador en cómputo cuántico y su integración con IA.', website: '#', type: 'Partner Tecnológico' },
     ];
     this.collaboratorsFallback = fallback;
+    // Fallback ya mapeado a TeamMember por si no hay datos de Firestore al hidratar
+    this.collaboratorCardsFallback = fallback.map((c): TeamMember => ({
+      name: c.name || '',
+      role: c.type || '',
+      imageUrl: c.logoUrl || '',
+      linkedinUrl: c.website || '#',
+      bio: c.description || '',
+      fullBio: (c.description ? c.description.split(/\n+|\.\s+/).map(s => s.trim()).filter(Boolean) : [])
+    }));
     this.collaborators$ = this.collaboratorsService.getCollaborators().pipe(
       map(list => (list && list.length ? list : fallback))
+    );
+
+    // Mapea colaboradores al formato de TeamMember para reutilizar el mismo estilo de tarjetas
+    this.collaboratorCards$ = this.collaborators$.pipe(
+      map((items) => items.map((c): TeamMember => ({
+        name: c.name,
+        role: c.type ?? '',
+        imageUrl: c.logoUrl,
+        linkedinUrl: c.website ?? '#',
+        bio: c.description ?? '',
+        fullBio: (c.description ? c.description.split(/\n+|\.\s+/).map(s => s.trim()).filter(Boolean) : [])
+      })))
     );
   }
 

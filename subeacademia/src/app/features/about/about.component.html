@@ -79,22 +79,51 @@
     </div>
   </section>
 
-  <!-- 2. SOCIOS COLABORADORES -->
+  <!-- 2. SOCIOS COLABORADORES (mismo estilo que fundadores) -->
   <section class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center mb-16">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'about.collaborators_title' | i18nTranslate }}</h2>
-        <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Expertos especializados que complementan nuestro equipo con conocimientos únicos</p>
+        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Nuestros Socios Colaboradores</h2>
+        <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Aliados expertos que complementan al equipo con conocimiento especializado.</p>
+        <p class="mt-4 text-base text-gray-600 dark:text-gray-400">Como empresa, certificamos y validamos las competencias en IA de los siguientes expertos que colaboran con nosotros.</p>
       </div>
 
-      <h2 class="text-4xl font-bold text-center mt-24 mb-12">Nuestros Socios Colaboradores</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-        <app-flippable-profile-card *ngFor="let collaborator of (collaborators$ | async) || collaboratorsFallback" 
-                                    [name]="collaborator.name"
-                                    [imageUrl]="collaborator.logoUrl"
-                                    [subtitle]="collaborator.type"
-                                    [description]="collaborator.description">
-        </app-flippable-profile-card>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          *ngFor="let member of (collaboratorCards$ | async) || collaboratorCardsFallback"
+          class="flip-card group cursor-pointer overflow-hidden"
+          [class.flipped]="member.flipped"
+          (click)="toggleFlip(member)"
+        >
+          <div class="flip-card-inner relative w-full h-full">
+            <!-- Frente -->
+            <div class="flip-card-front bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center text-center h-full overflow-hidden">
+              <img [src]="member.imageUrl" [alt]="member.name" class="w-28 h-28 rounded-full object-cover mb-3 border-4 border-indigo-100 dark:border-indigo-900 flex-shrink-0" />
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ member.name }}</h3>
+              <p class="text-indigo-600 dark:text-indigo-400 font-medium text-sm mb-2">{{ member.role }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-300 flex-1 leading-relaxed">{{ member.bio }}</p>
+              <a class="mt-3 inline-flex items-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium" [href]="member.linkedinUrl" target="_blank" (click)="$event.stopPropagation()">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0  1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z"/>
+                </svg>
+                LinkedIn
+              </a>
+            </div>
+            <!-- Reverso -->
+            <div class="flip-card-back absolute inset-0 bg-gray-800 text-gray-300 rounded-xl shadow-lg border border-indigo-700 p-4 flex flex-col overflow-hidden">
+              <h3 class="text-lg font-semibold text-white mb-3 text-center">{{ member.name }}</h3>
+              <ul class="text-sm space-y-2 flex-1 overflow-y-auto pr-1">
+                <li *ngFor="let line of member.fullBio" class="flex items-start">
+                  <span class="text-indigo-400 mr-2 mt-1 flex-shrink-0">•</span>
+                  <span>{{ line }}</span>
+                </li>
+              </ul>
+              <div class="mt-3 text-right">
+                <button class="px-3 py-2 text-sm rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors" (click)="toggleFlip(member); $event.stopPropagation()">Volver</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>

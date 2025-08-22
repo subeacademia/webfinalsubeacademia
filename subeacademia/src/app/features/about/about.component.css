@@ -47,6 +47,10 @@
   position: relative;
 }
 
+.collaborator-card.flipped .collaborator-card-inner {
+  transform: rotateY(180deg);
+}
+
 .collaborator-card:hover .collaborator-card-inner {
   transform: rotateY(180deg);
 }

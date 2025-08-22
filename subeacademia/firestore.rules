@@ -31,6 +31,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Socios colaboradores
+    match /collaborators/{id} {
+      allow read: if true; // visibles públicamente y desde el admin
+      allow create, update, delete: if isAdmin(); // gestión solo para admins
+    }
+
     // Historia (hitos)
     match /history/{id} {
       allow read: if true; // visible públicamente

@@ -48,6 +48,45 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   educationLogos: Logo[] = [];
   companyLogos$: Observable<Logo[]>;
   educationLogos$: Observable<Logo[]>;
+  roadmapPhases: Array<{ id: number; title: string; short: string; details: string; iconGradient: string }>= [
+    {
+      id: 1,
+      title: 'Diagnóstico Inicial',
+      short: 'Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente y personalizado.',
+      details: 'Aplicamos el Framework ARES-AI© para evaluar 13 competencias, mapeamos casos de uso y medimos preparación técnica, de datos, procesos y cultura. Entregamos un informe con oportunidades, quick wins y riesgos.',
+      iconGradient: 'from-blue-500 to-purple-600'
+    },
+    {
+      id: 2,
+      title: 'Plan de Capacitación',
+      short: 'Roadmap personalizado para desarrollar las 13 competencias clave de manera progresiva.',
+      details: 'Diseñamos un plan 50/50: base estándar + personalización a tu contexto. Incluye rutas por rol, metas trimestrales, micro‑habilidades, proyectos guiados y evaluación continua con AVE‑AI.',
+      iconGradient: 'from-green-500 to-teal-600'
+    },
+    {
+      id: 3,
+      title: 'Implementación Guiada',
+      short: 'Acompañamiento experto para aplicar IA de forma responsable y efectiva en tu organización.',
+      details: 'Co‑creamos pilotos y PoCs enfocados en impacto. Priorizamos seguridad, compliance, costo y mantenibilidad. Transferimos conocimiento y establecemos estándares de código y MLOps.',
+      iconGradient: 'from-orange-500 to-red-600'
+    },
+    {
+      id: 4,
+      title: 'Mejora Continua',
+      short: 'Métricas y seguimiento continuo para asegurar impacto sostenible y crecimiento constante.',
+      details: 'Definimos KPIs de negocio y aprendizaje, ejecutamos revisiones mensuales, experimentos A/B y refactorizaciones. Usamos retroalimentación de usuarios para iterar el producto de IA.',
+      iconGradient: 'from-pink-500 to-fuchsia-600'
+    },
+    {
+      id: 5,
+      title: 'Escalamiento y Gobierno',
+      short: 'Expansión, seguridad y gobierno de IA con prácticas responsables y escalables.',
+      details: 'Creamos playbooks de gobierno, riesgos y seguridad, habilitamos observabilidad, control de costos, gestión de modelos y cumplimiento, y desplegamos en múltiples equipos.',
+      iconGradient: 'from-indigo-500 to-blue-600'
+    }
+  ];
+  // Estado de tarjetas volteadas
+  private flippedSet = new Set<number>();
   logosDePrueba: Logo[] = [
     {
       id: '1',
@@ -201,6 +240,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.navigate(['/', lang, 'contacto']);
   }
 
+  toggleFlip(phaseId: number): void {
+    if (this.flippedSet.has(phaseId)) {
+      this.flippedSet.delete(phaseId);
+    } else {
+      this.flippedSet.add(phaseId);
+    }
+  }
+
+  isFlipped(phaseId: number): boolean {
+    return this.flippedSet.has(phaseId);
+  }
+
   ngAfterViewInit(): void {
     // Aseguramos que el título sea visible
     const titleEl = document.querySelector('#hero-title');
@@ -208,6 +259,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       (titleEl as HTMLElement).style.opacity = '1';
       (titleEl as HTMLElement).style.visibility = 'visible';
     }
+
+    // Animaciones de entrada para la sección de fases
+    setTimeout(() => {
+      this.animationService.staggerFromBottom('.phase-card');
+    }, 200);
   }
 
   ngOnDestroy(): void {

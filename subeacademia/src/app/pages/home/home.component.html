@@ -88,70 +88,51 @@
       </p>
     </div>
     
-    <!-- Pasos del proceso con diseño de tarjetas -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6" role="list" aria-label="Pasos del proceso de madurez en IA" [appAnimateOnScroll]="'.phase-card'">
-      <div class="group" role="listitem">
-        <div class="card card-interactive phase-card bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            1
-          </div>
-          <div class="pt-20 pb-6 px-6">
-            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Diagnóstico Inicial</h3>
-            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente y personalizado.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="group" role="listitem">
-        <div class="card card-interactive phase-card bg-gradient-to-br from-green-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.1s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            2
-          </div>
-          <div class="pt-20 pb-6 px-6">
-            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Plan de Capacitación</h3>
-            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Roadmap personalizado para desarrollar las 13 competencias clave de manera progresiva.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="group" role="listitem">
-        <div class="card card-interactive phase-card bg-gradient-to-br from-orange-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.2s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            3
-          </div>
-          <div class="pt-20 pb-6 px-6">
-            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Implementación Guiada</h3>
-            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Acompañamiento experto para aplicar IA de forma responsable y efectiva en tu organización.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="group" role="listitem">
-        <div class="card card-interactive phase-card bg-gradient-to-br from-purple-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.3s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            4
-          </div>
-          <div class="pt-20 pb-6 px-6">
-            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Mejora Continua</h3>
-            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Métricas y seguimiento continuo para asegurar impacto sostenible y crecimiento constante.</p>
-          </div>
-        </div>
-      </div>
-      
-      <div class="group" role="listitem">
-        <div class="card card-interactive phase-card bg-gradient-to-br from-indigo-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.4s;">
-          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            5
-          </div>
-          <div class="pt-20 pb-6 px-6">
-            <h3 class="font-bold text-xl mb-4 text-slate-800 dark:text-white">Escalamiento y Gobierno</h3>
-            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Expansión, seguridad y gobierno de IA con prácticas responsables y escalables.</p>
+    <!-- Pasos del proceso con tarjetas tipo flashcard (frente/reverso) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" role="list" aria-label="Pasos del proceso de madurez en IA" [appAnimateOnScroll]="'.phase-card'">
+      <div class="group" role="listitem" *ngFor="let phase of roadmapPhases">
+        <div
+          class="phase-card flip-card cursor-pointer focus:outline-none"
+          [class.is-flipped]="isFlipped(phase.id)"
+          tabindex="0"
+          role="button"
+          [attr.aria-pressed]="isFlipped(phase.id)"
+          [attr.aria-label]="(isFlipped(phase.id) ? 'Ocultar detalles de ' : 'Ver detalles de ') + phase.title"
+          (click)="toggleFlip(phase.id)"
+          (keyup.enter)="toggleFlip(phase.id)"
+        >
+          <div class="flip-inner">
+            <!-- Frente -->
+            <div class="flip-front relative card card-interactive bg-gradient-to-br from-white to-slate-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden">
+              <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300 rounded-full bg-gradient-to-br" [ngClass]="phase.iconGradient" aria-hidden="true">
+                <div class="w-full h-full flex items-center justify-center">{{ phase.id }}</div>
+              </div>
+              <div class="flip-body pt-16 pb-5 px-4">
+                <h3 class="font-bold text-xl mb-3 text-slate-800 dark:text-white">{{ phase.title }}</h3>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed">{{ phase.short }}</p>
+                <div class="mt-4 text-sm text-blue-600 dark:text-blue-300">Click para ver más</div>
+              </div>
+            </div>
+
+            <!-- Reverso -->
+            <div class="flip-back relative card card-interactive bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-2xl overflow-hidden">
+              <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 text-white text-2xl font-bold shadow-lg rounded-full bg-gradient-to-br" [ngClass]="phase.iconGradient" aria-hidden="true">
+                <div class="w-full h-full flex items-center justify-center">{{ phase.id }}</div>
+              </div>
+              <div class="flip-body pt-16 pb-5 px-4 back-scroll">
+                <h3 class="font-bold text-xl mb-3 text-slate-800 dark:text-white">{{ phase.title }}</h3>
+                <p class="text-slate-700 dark:text-slate-300 leading-relaxed">{{ phase.details }}</p>
+                <div class="mt-4 text-sm text-slate-500 dark:text-slate-400">Presiona nuevamente para volver</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Modal eliminado: ahora las tarjetas muestran los detalles al darse vuelta (flip) -->
 
 <!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" MEJORADA -->
 <section class="py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative overflow-hidden" role="region" aria-labelledby="solutions-title">

@@ -22,6 +22,7 @@ import { MediaService } from '../../core/data/media.service';
         <tr class="text-left bg-white/5">
           <th class="p-3">Logo</th>
           <th class="p-3">Nombre</th>
+          <th class="p-3">Rol</th>
           <th class="p-3">Tipo</th>
           <th class="p-3">Sitio</th>
           <th class="p-3 text-right">Acciones</th>
@@ -33,6 +34,7 @@ import { MediaService } from '../../core/data/media.service';
             <img [src]="c.logoUrl" alt="logo" class="h-10 w-auto object-contain bg-white/5 rounded" />
           </td>
           <td class="p-3 font-medium">{{ c.name }}</td>
+          <td class="p-3">{{ c.role || '-' }}</td>
           <td class="p-3">{{ c.type }}</td>
           <td class="p-3"><a class="text-blue-400 hover:underline" [href]="c.website" target="_blank">{{ c.website }}</a></td>
           <td class="p-3 text-right space-x-2">
@@ -54,6 +56,10 @@ import { MediaService } from '../../core/data/media.service';
           <label class="grid gap-1">
             <span class="text-xs text-[var(--muted)]">Nombre</span>
             <input class="input" formControlName="name" />
+          </label>
+          <label class="grid gap-1">
+            <span class="text-xs text-[var(--muted)]">Rol</span>
+            <input class="input" formControlName="role" placeholder="Ej: Ingeniero de IA" />
           </label>
           <label class="grid gap-1">
             <span class="text-xs text-[var(--muted)]">Tipo</span>
@@ -106,6 +112,7 @@ export class CollaboratorsPageComponent {
 
   form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
+    role: [''],
     logoUrl: ['', [Validators.required]],
     website: ['', [Validators.required, Validators.pattern(/^https?:\/\//i)]],
     description: ['', [Validators.required, Validators.minLength(10)]],
@@ -119,7 +126,7 @@ export class CollaboratorsPageComponent {
   openCreate(){
     this.editingId.set(null);
     this.previewUrl.set(null);
-    this.form.reset({ name:'', logoUrl:'', website:'', description:'', type:'Partner Tecnológico' });
+    this.form.reset({ name:'', role:'', logoUrl:'', website:'', description:'', type:'Partner Tecnológico' });
     this.isOpen.set(true);
   }
   openEdit(c: Collaborator){

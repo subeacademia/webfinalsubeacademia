@@ -45,12 +45,12 @@ async function main() {
   }
   console.log('Seed listo');
 
-  // Seed básico de colaboradores si no existen (idempotente por nombre)
+  // Seed de colaboradores principales (idempotente por nombre)
   const collaborators = [
-    { name: 'Nataly Saavedra', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=NS', description: 'Especialista en derecho tecnológico y regulaciones de IA con amplia experiencia en compliance y gobernanza digital.', website: 'https://example.com', type: 'Partner Académico' },
-    { name: 'Lina Barraza', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=LB', description: 'Psicología organizacional y desarrollo de competencias humanas para la era de la IA.', website: 'https://example.com', type: 'Partner Académico' },
-    { name: 'Ignacio Lipski', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=IL', description: 'Estratega de marketing digital especializado en tecnologías emergentes y transformación digital.', website: 'https://example.com', type: 'Cliente Destacado' },
-    { name: 'Carlos Baldovinos', logoUrl: 'https://placehold.co/200x64/111827/22d3ee?text=CB', description: 'Análisis geoespacial y aplicaciones de IA en ciencias de la tierra y medio ambiente.', website: 'https://example.com', type: 'Partner Tecnológico' },
+    { name: 'Nicolás Valenzuela', role: 'Ingeniero de IA', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=NV', description: 'Ingeniero de IA con foco en soluciones aplicadas y MLOps.', website: 'https://example.com', type: 'Partner Tecnológico' },
+    { name: 'Diego Ramírez', role: 'Psicólogo Organizacional', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=DR', description: 'Magíster en Gestión de RRHH y experto en IA para el desarrollo del talento.', website: 'https://example.com', type: 'Partner Académico' },
+    { name: 'Pablo Soto', role: 'Geógrafo experto en IA', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=PS', description: 'Especialista en SIG e inteligencia geoespacial con IA.', website: 'https://example.com', type: 'Partner Académico' },
+    { name: 'Ignacio Villarroel', role: 'Científico Cuántico y Experto en IA', logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=IV', description: 'Investigador en cómputo cuántico y su integración con IA.', website: 'https://example.com', type: 'Partner Tecnológico' },
   ];
   for (const c of collaborators) {
     const exists = await db.collection('collaborators').where('name','==',c.name).limit(1).get();
