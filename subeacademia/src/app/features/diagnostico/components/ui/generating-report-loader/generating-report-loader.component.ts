@@ -138,12 +138,11 @@ export class GeneratingReportLoaderComponent implements AfterViewInit, OnDestroy
 
   currentMessage = 'Iniciando análisis...';
   private messages = [
-    'Analizando tus respuestas del diagnóstico...',
-    'Evaluando competencias y fortalezas...',
-    'Procesando datos con IA avanzada...',
-    'Generando recomendaciones personalizadas...',
-    'Creando tu plan de acción estratégico...',
-    'Finalizando reporte personalizado...'
+    'Analizando tus respuestas...',
+    'Consultando a nuestra IA...',
+    'Construyendo tu plan de acción...',
+    'Cruzando datos para un feedback preciso...',
+    'Preparando una respuesta detallada...'
   ];
   private messageIndex = 0;
   private messageInterval: any;

@@ -77,34 +77,40 @@ export class StepObjetivoComponent implements OnInit {
     this.selectedSuggestions = [];
     
     try {
-      // Obtener datos del contexto del servicio de estado
+      // Obtener datos del diagnóstico para personalizar al máximo
       const contextoData = this.stateService.getContextoData();
       const segmento = this.stateService.form.get('segmento')?.value;
+      const aresData = this.stateService.aresForm.value;
+      const competenciasData = this.stateService.competenciasForm.value;
       
       console.log('📊 Datos del contexto obtenidos:', contextoData);
       console.log('🎯 Segmento del usuario:', segmento);
       
       if (contextoData && contextoData.industria && contextoData.tamano && contextoData.presupuesto) {
-        // Crear un prompt más personalizado y detallado
-        const contextPrompt = `Eres un consultor experto en transformación digital e IA. 
+        // Crear un prompt más personalizado y detallado con todo el diagnóstico disponible
+        const contextPrompt = `Eres un consultor experto en transformación digital e IA.
 
-Basado en el siguiente perfil de empresa, genera exactamente 4 objetivos de negocio específicos, accionables y personalizados para implementar IA:
+Basado en el siguiente perfil y resultados preliminares del diagnóstico, genera EXACTAMENTE 4 objetivos de negocio específicos, accionables y personalizados para implementar IA.
 
-**Perfil de la Empresa:**
+Perfil de la organización:
 - Sector/Industria: ${contextoData.industria}
 - Tamaño: ${contextoData.tamano}
 - Presupuesto disponible: ${contextoData.presupuesto}
-- Tipo de organización: ${segmento || 'empresa'}
+- Segmento/Tipo de organización: ${segmento || 'empresa'}
 
-**Instrucciones:**
-1. Genera exactamente 4 objetivos diferentes
-2. Cada objetivo debe ser específico para la industria y tamaño mencionados
-3. Considera el presupuesto disponible para ser realista
-4. Los objetivos deben ser medibles y accionables
-5. Devuelve SOLO un array JSON de strings, sin texto adicional
+Resultados del diagnóstico (valores 1-5):
+- ARES (dimensiones clave): ${JSON.stringify(aresData)}
+- Competencias (habilidades): ${JSON.stringify(competenciasData)}
 
-**Ejemplo de formato esperado:**
-["Objetivo 1 específico para la industria", "Objetivo 2 específico para la industria", "Objetivo 3 específico para la industria", "Objetivo 4 específico para la industria"]`;
+Instrucciones:
+1) Devuelve exactamente 4 objetivos distintos enfocados en resultados de negocio.
+2) Aterriza los objetivos a la industria, tamaño y presupuesto informados.
+3) Usa el diagnóstico (ARES/competencias) para priorizar dónde impactar primero.
+4) Cada objetivo debe ser medible (incluye una métrica/indicador) y accionable.
+5) Responde SOLO con un array JSON de strings sin texto adicional.
+
+Ejemplo de salida válida:
+["Reducir el tiempo de ciclo en un 25% mediante automatización de procesos en atención al cliente", "...", "...", "..."]`;
 
         console.log('🤖 Enviando prompt personalizado a IA:', contextPrompt);
 
@@ -112,7 +118,10 @@ Basado en el siguiente perfil de empresa, genera exactamente 4 objetivos de nego
         const response = await this.generativeAiService.generateText(contextPrompt);
         if (response) {
           try {
-            const parsedSuggestions = JSON.parse(response);
+            // Algunas veces la IA envía texto con explicaciones o ```json
+            const jsonMatch = response.match(/\[([\s\S]*?)\]/);
+            const rawJson = jsonMatch ? `[${jsonMatch[1]}]` : response;
+            const parsedSuggestions = JSON.parse(rawJson);
             if (Array.isArray(parsedSuggestions) && parsedSuggestions.length > 0) {
               // Limitar a máximo 4 sugerencias
               this.suggestions = parsedSuggestions.slice(0, 4);
@@ -143,9 +152,18 @@ Basado en el siguiente perfil de empresa, genera exactamente 4 objetivos de nego
   }
 
   private setDefaultSuggestions(): void {
-    // Intentar obtener al menos la industria para personalizar las sugerencias por defecto
+    // Intentar generar sugerencias heurísticas usando el contexto disponible
     const contextoData = this.stateService.getContextoData();
+    const segmento = this.stateService.form.get('segmento')?.value as string | null;
     const industria = contextoData?.industria;
+    const presupuesto = contextoData?.presupuesto;
+
+    const heuristic = this.buildHeuristicSuggestions({ industria: industria || null, tamano: contextoData?.tamano || null, presupuesto: presupuesto || null }, segmento || null);
+    if (heuristic.length === 4) {
+      this.suggestions = heuristic;
+      console.log('✅ Sugerencias heurísticas generadas (fallback inteligente):', this.suggestions);
+      return;
+    }
     
     if (industria) {
       // Sugerencias específicas por industria
@@ -208,6 +226,43 @@ Basado en el siguiente perfil de empresa, genera exactamente 4 objetivos de nego
     ];
     
     console.log('✅ Sugerencias genéricas por defecto aplicadas');
+  }
+
+  // Fallback inteligente cuando la IA remota no responde o el contexto es parcial
+  private buildHeuristicSuggestions(contexto: { industria: string | null; tamano: string | null; presupuesto: string | null }, segmento: string | null): string[] {
+    if (!contexto.industria && !contexto.presupuesto && !segmento) {
+      return [];
+    }
+
+    const ind = (contexto.industria || '').toLowerCase();
+    const pres = (contexto.presupuesto || '').toLowerCase();
+    const seg = (segmento || 'organización');
+
+    const byIndustry = () => {
+      if (ind.includes('salud')) return ['telesoporte y triage de pacientes', 'gestión de citas e inasistencias'];
+      if (ind.includes('finan')) return ['detección de fraude en tiempo real', 'scoring de riesgo crediticio'];
+      if (ind.includes('retail') || ind.includes('consumo') || ind.includes('e-commerce')) return ['recomendaciones personalizadas', 'optimización de inventario'];
+      if (ind.includes('manufact')) return ['mantenimiento predictivo', 'control de calidad con visión'];
+      if (ind.includes('educ')) return ['tutoría adaptativa', 'automatización de evaluación'];
+      return ['automatización back-office', 'asistentes para atención'];
+    };
+
+    const [focus1, focus2] = byIndustry();
+
+    let presupuestoNota = 'con foco en quick wins';
+    if (pres.includes('bajo')) presupuestoNota = 'priorizando herramientas low-code/no-code';
+    else if (pres.includes('medio')) presupuestoNota = 'comenzando con 1–2 PoC y métricas claras';
+    else if (pres.includes('alto') || pres.includes('muy')) presupuestoNota = 'incluyendo MLOps y escalamiento a producción';
+
+    // Cuatro objetivos concretos y medibles
+    const objs: string[] = [
+      `Implementar ${focus1} para ${seg} y reducir tiempos en 20–30% en 90 días (${presupuestoNota}).`,
+      `Desplegar ${focus2} para ${seg} logrando +10–15% en KPI principal en 6 meses (${presupuestoNota}).`,
+      `Establecer governance y métricas de impacto de IA (OKRs trimestrales) alineadas a presupuesto ${contexto.presupuesto || 'estimado'}.`,
+      `Capacitar al equipo clave y documentar 3 casos de uso priorizados para pasar a piloto en 60–90 días.`
+    ];
+
+    return objs;
   }
 
   toggleSuggestion(suggestion: string): void {

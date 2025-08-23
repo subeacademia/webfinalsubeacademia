@@ -2,6 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Firestore, collection, collectionData, query, where, orderBy, limit, getDocs, startAfter } from '@angular/fire/firestore';
 import { Observable, of, defer } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ContentService {
@@ -18,7 +19,11 @@ export class ContentService {
     ];
     if (typeof cursorPublishedAt === 'number') parts.splice(2, 0, startAfter(cursorPublishedAt));
     const qRef = query(colRef, ...parts as any);
-    return defer(() => collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>);
+    return (defer(() => collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>))
+      .pipe(
+        // En caso de requerir índice, no bloquear navegación (resolver), devolver []
+        catchError(() => of([]))
+      );
   }
 
   listCourses(_lang: string, size = 12, cursorPublishedAt?: number | null): Observable<any[]> {
@@ -31,7 +36,10 @@ export class ContentService {
     ];
     if (typeof cursorPublishedAt === 'number') parts.splice(2, 0, startAfter(cursorPublishedAt));
     const qRef = query(colRef, ...parts as any);
-    return defer(() => collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>);
+    return (defer(() => collectionData(qRef, { idField: 'id' }) as unknown as Observable<any[]>))
+      .pipe(
+        catchError(() => of([]))
+      );
   }
 }
 

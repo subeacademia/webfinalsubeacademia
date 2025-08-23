@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AresItem, DiagnosticoFormValue, NivelCompetencia, Segment } from '../data/diagnostic.models';
 import { ARES_ITEMS } from '../data/ares-items';
@@ -62,10 +63,15 @@ export class DiagnosticStateService {
 		aceptaComunicaciones: this.fb.control<boolean | null>(false),
 	});
 
+	// Estado central basado en BehaviorSubject
+	private readonly _state$ = new BehaviorSubject<any>(null);
+	readonly state$ = this._state$.asObservable();
+
     constructor() {
         this.initializeForms();
         this.loadFromStorage();
         this.setupFormSubscriptions();
+        this.emitState();
     }
 
     private initializeForms(): void {
@@ -91,18 +97,22 @@ export class DiagnosticStateService {
         this.form.valueChanges.subscribe(() => {
             this.saveToStorage();
             this.notifyProgressChange();
+            this.emitState();
         });
         this.aresForm.valueChanges.subscribe(() => {
             this.saveToStorage();
             this.notifyProgressChange();
+            this.emitState();
         });
         this.competenciasForm.valueChanges.subscribe(() => {
             this.saveToStorage();
             this.notifyProgressChange();
+            this.emitState();
         });
         this.leadForm.valueChanges.subscribe(() => {
             this.saveToStorage();
             this.notifyProgressChange();
+            this.emitState();
         });
         
         // Suscripción a los controles de contexto
@@ -111,6 +121,7 @@ export class DiagnosticStateService {
                 control.valueChanges.subscribe(() => {
                     this.saveToStorage();
                     this.notifyProgressChange();
+                    this.emitState();
                 });
             }
         });
@@ -228,6 +239,7 @@ export class DiagnosticStateService {
     markAsCompleted(): void {
         this._isCompleted.set(true);
         this.saveToStorage();
+        this.emitState();
     }
 
     // Método para calcular el progreso basado en la ruta y el estado de los formularios
@@ -444,16 +456,16 @@ export class DiagnosticStateService {
                 isCompleted: this._isCompleted()
             };
             
-            console.log('💾 Guardando en localStorage:', data);
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+            console.log('💾 Guardando en sessionStorage:', data);
+            sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
         } catch (error) {
-            console.warn('No se pudo guardar en localStorage:', error);
+            console.warn('No se pudo guardar en sessionStorage:', error);
         }
     }
 
     private loadFromStorage(): void {
         try {
-            const stored = localStorage.getItem(this.STORAGE_KEY);
+            const stored = sessionStorage.getItem(this.STORAGE_KEY);
             if (stored) {
                 const data = JSON.parse(stored);
                 
@@ -503,7 +515,7 @@ export class DiagnosticStateService {
                 }
             }
         } catch (error) {
-            console.warn('No se pudo cargar desde localStorage:', error);
+            console.warn('No se pudo cargar desde sessionStorage:', error);
         }
     }
 
@@ -520,7 +532,8 @@ export class DiagnosticStateService {
             delete this.contextoControls[key];
         });
         
-        localStorage.removeItem(this.STORAGE_KEY);
+        sessionStorage.removeItem(this.STORAGE_KEY);
+        this.emitState();
     }
 
     // Método para obtener todos los datos del diagnóstico
@@ -547,6 +560,59 @@ export class DiagnosticStateService {
     private notifyProgressChange(): void {
         this._progressChanged.set(this._progressChanged() + 1);
     }
+
+	// Emitir el estado centralizado
+	private emitState(): void {
+		const state = {
+			form: this.form.value,
+			contexto: this.getContextoData(),
+			ares: this.aresForm.value,
+			competencias: this.competenciasForm.value,
+			lead: this.leadForm.value,
+			isCompleted: this._isCompleted(),
+			progress: this.getDiagnosticProgress()
+		};
+		this._state$.next(state);
+	}
+
+	// Utilidades públicas para navegación/gating desde componentes de UI
+	getCurrentStepKeyFromRoute(currentRoute: string): 'inicio' | 'contexto' | 'ares' | 'competencias' | 'objetivo' | 'lead' | 'resultados' {
+		const match = currentRoute.match(/\/diagnostico(\/.*)?$/);
+		const path = match?.[1] || '';
+		if (path.includes('resultados')) return 'resultados';
+		if (path.includes('contacto') || path.includes('lead')) return 'lead';
+		if (path.includes('objetivo')) return 'objetivo';
+		if (path.includes('competencias')) return 'competencias';
+		if (path.includes('ares')) return 'ares';
+		if (path.includes('contexto')) return 'contexto';
+		return 'inicio';
+	}
+
+	canProceedFromRoute(currentRoute: string): boolean {
+		const key = this.getCurrentStepKeyFromRoute(currentRoute);
+		switch (key) {
+			case 'contexto':
+				return this.isStepComplete('contexto');
+			case 'ares': {
+				// Permitir avanzar entre subpasos F1-F4 sin bloquear, pero exigir completitud al salir de F4
+				const isAtF4 = /\/ares\/F4$/.test(currentRoute);
+				return isAtF4 ? this.isStepComplete('ares') : true;
+			}
+			case 'competencias': {
+				// Permitir avanzar entre subpasos 1-3 sin bloquear, pero exigir completitud al salir de 3
+				const isAtLast = /\/competencias\/3$/.test(currentRoute);
+				return isAtLast ? this.isStepComplete('competencias') : true;
+			}
+			case 'objetivo':
+				return this.isStepComplete('objetivo');
+			case 'lead':
+				return this.isStepComplete('lead');
+			case 'resultados':
+				return true;
+			default:
+				return true;
+		}
+	}
 }
 
 

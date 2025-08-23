@@ -12,7 +12,9 @@ import { Course } from '../models';
 })
 export class GenerativeAiService {
   private coursesService = inject(CoursesService);
-  private readonly geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${environment.geminiApiKey}`;
+  private readonly geminiApiUrl = environment.geminiApiKey
+    ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${environment.geminiApiKey}`
+    : '';
 
   generateActionPlan(diagnosticData: DiagnosticoFormValue, scores: DiagnosticoScores, additionalPrompt?: string): Observable<DiagnosticReport | null> {
     console.log('🤖 Generando plan de acción con datos:', { diagnosticData, scores });
@@ -33,8 +35,11 @@ export class GenerativeAiService {
           }
         };
 
-        return from(
-          fetch(this.geminiApiUrl, {
+        const doFetch = async () => {
+          const url = this.geminiApiUrl || environment.backendIaUrl;
+          if (!url) throw new Error('No Gemini API key or backendIaUrl configured');
+          const endpoint = this.geminiApiUrl ? url : `${url.replace(/\/$/, '')}/api/gemini`;
+          return fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody),
@@ -52,8 +57,9 @@ export class GenerativeAiService {
             }
             console.log('📄 Respuesta de Gemini:', responseText);
             return JSON.parse(responseText) as DiagnosticReport;
-          })
-        );
+          });
+        };
+        return from(doFetch());
       }),
       tap(response => console.log('Reporte de IA recibido:', response)),
       catchError(error => {

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, addDoc, collection, collectionData, query, where, orderBy } from '@angular/fire/firestore';
+import { Firestore, addDoc, collection, collectionData, query, where, orderBy, doc, docData } from '@angular/fire/firestore';
 import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
 import { Observable, map } from 'rxjs';
 
@@ -44,6 +44,11 @@ export class DiagnosticsService {
 			const docRef = await addDoc(col, payload as any);
 			return docRef.id;
 		}
+	}
+
+	getById(id: string) {
+		const ref = doc(this.firestore, `diagnostics/${id}`);
+		return docData(ref, { idField: 'id' });
 	}
 
 	async saveDiagnostic(payload: DiagnosticoPersistedPayload & { userId?: string; fecha?: Date; puntajeGeneral?: number; objetivo?: string; industria?: string; analysisContent?: any }, userId: string): Promise<string> {

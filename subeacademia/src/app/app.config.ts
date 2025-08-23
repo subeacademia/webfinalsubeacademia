@@ -125,7 +125,13 @@ export const appConfig: ApplicationConfig = {
       deps: [DOCUMENT],
       multi: true,
     },
-    // ThemeService aplica el modo en su constructor; no necesitamos APP_INITIALIZER
+    // Inicializar el tema al inicio (seguro en SSR por chequeo de plataforma dentro del servicio)
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [ThemeService],
+      useFactory: (theme: ThemeService) => () => theme.init(),
+    },
     // Nota: quitamos APP_INITIALIZER que inyectaba FirebaseDataService para evitar inicializar Firestore en SSR
     // Nota: evitamos tocar Firebase en APP_INITIALIZER para no romper la hidración/SSR
   ],

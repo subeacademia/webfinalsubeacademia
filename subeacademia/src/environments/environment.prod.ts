@@ -19,7 +19,8 @@ export const environment = {
   backendIaUrl: "PON_AQUI_TU_ENDPOINT_VERCEL",
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
-  // API Key de Google Gemini
+  // API Key de Google Gemini (NUNCA hardcodear en repositorio público)
+  // Se espera en runtime vía window.__env.geminiApiKey o usar backendIaUrl
   geminiApiKey: 'TU_API_KEY_AQUI',
   // No se usan emuladores en prod
   useEmulators: false,

@@ -141,7 +141,19 @@ export class CompetencyBarChartComponent implements OnChanges {
       }
     },
     plugins: {
-      legend: { display: false }
+      legend: { display: false },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          title: (items: any) => {
+            return items?.[0]?.label || '';
+          },
+          label: (item: any) => {
+            const value = item?.parsed?.x ?? item?.parsed;
+            return ` ${value}%`;
+          }
+        }
+      }
     }
   };
 

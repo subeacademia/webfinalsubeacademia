@@ -16,11 +16,14 @@ interface CompetencyScore {
             
             <!-- Gráfico de barras simple como fallback -->
             <div class="space-y-3">
-                <div *ngFor="let item of data" class="flex items-center space-x-3">
-                    <div class="w-24 text-sm text-gray-300 truncate">{{ item.name }}</div>
-                    <div class="flex-1 bg-gray-700 rounded-full h-3">
+                <div *ngFor="let item of data" class="flex items-center space-x-3 group">
+                    <div class="w-24 text-sm text-gray-300 truncate" [title]="item.name">{{ item.name }}</div>
+                    <div class="flex-1 bg-gray-700 rounded-full h-3 relative">
                         <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500"
                              [style.width.%]="item.score"></div>
+                        <div class="absolute right-1 -top-8 px-2 py-1 text-xs bg-black/80 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                          {{ item.score }}%
+                        </div>
                     </div>
                     <div class="w-12 text-right text-sm font-semibold text-gray-200">{{ item.score }}</div>
                 </div>

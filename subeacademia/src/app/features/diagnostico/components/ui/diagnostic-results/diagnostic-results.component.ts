@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
@@ -14,6 +15,7 @@ import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { COMPETENCIAS } from '../../../data/competencias';
 import { SocialShareModalComponent } from '../social-share-modal/social-share-modal.component';
+import { ToastService } from '../../../../../core/ui/toast/toast.service';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -31,6 +33,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private diagnosticsService = inject(DiagnosticsService);
   private pdfService = inject(PdfService);
   private animationService = inject(AnimationService);
+  private toastService = inject(ToastService);
+  private route = inject(ActivatedRoute);
 
   scores: any;
   report: DiagnosticReport | null = null;
@@ -52,6 +56,32 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado');
     
     try {
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        // Modo sólo lectura desde Firestore por ID
+        this.diagnosticsService.getById(id).subscribe((doc: any) => {
+          try {
+            const diagnosticData = doc?.diagnosticData || doc?.form || {};
+            const scores = doc?.scores || null;
+            if (scores) {
+              this.scores = scores;
+            } else {
+              this.scores = {
+                ares: this.scoringService.computeAresScore(diagnosticData),
+                competencias: this.scoringService.computeCompetencyScores(diagnosticData)
+              } as any;
+            }
+            this.prepareRadarChartData();
+            this.report = doc?.report || null;
+            this.isGeneratingReport = false;
+            this.isLoadingReport = false;
+          } catch (e) {
+            console.error('Error procesando doc diagnóstico:', e);
+            this.loadingError = true; this.isLoadingReport = false; this.isGeneratingReport = false;
+          }
+        });
+        return;
+      }
       const diagnosticData = this.stateService.getDiagnosticData();
       console.log('📊 Datos del diagnóstico completos:', diagnosticData);
       console.log('📊 Datos de competencias:', diagnosticData.competencias);
@@ -399,6 +429,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   async generatePdf(): Promise<void> {
     if (!this.report || !this.scores) {
       console.error('❌ No hay reporte o scores para generar PDF');
+      this.toastService.error('No hay datos suficientes para generar el PDF.');
       return;
     }
 
@@ -415,18 +446,18 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
             this.scores,
             this.resultsContainer.nativeElement
           );
-
+          this.toastService.success('PDF generado y descargado correctamente.');
           console.log('✅ PDF generado exitosamente');
         } else {
           console.error('❌ No se encontró el contenedor de resultados');
-          alert('Error: No se pudo encontrar el contenido para generar el PDF');
+          this.toastService.error('No se encontró el contenido para generar el PDF.');
         }
         this.isGeneratingPdf = false;
       }, 2500); // Esperar 2.5 segundos para que las animaciones terminen
 
     } catch (error) {
       console.error('❌ Error al generar PDF:', error);
-      alert('Error al generar el PDF. Por favor, intenta de nuevo.');
+      this.toastService.error('Error al generar el PDF. Intenta nuevamente.');
       this.isGeneratingPdf = false;
     }
   }

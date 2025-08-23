@@ -1,7 +1,7 @@
 <div class="max-w-3xl mx-auto animate-fade-in">
   <div class="text-center mb-8">
-    <h2 class="text-3xl font-bold text-white mb-4">Objetivo Principal</h2>
-    <p class="text-lg text-gray-300">Cuéntanos cuál es tu objetivo principal con la implementación de IA en tu organización</p>
+    <h2 class="text-3xl font-bold text-[var(--fg)] mb-4">Objetivo Principal</h2>
+    <p class="text-lg text-[var(--muted)]">Cuéntanos cuál es tu objetivo principal con la implementación de IA en tu organización</p>
   </div>
 
   <div class="mb-8 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-6 border border-blue-700/30">
@@ -12,7 +12,7 @@
         </svg>
       </div>
       <div class="flex-1">
-        <h3 class="text-xl font-semibold text-white">Sugerencias Personalizadas con IA</h3>
+        <h3 class="text-xl font-semibold text-[var(--fg)]">Sugerencias Personalizadas con IA</h3>
         <p *ngIf="selectedSuggestions.length > 0" class="text-sm text-blue-200 mt-1">
           {{ selectedSuggestions.length }} de {{ suggestions.length }} sugerencias seleccionadas
         </p>
@@ -47,7 +47,7 @@
                 <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full flex items-center justify-center mr-3">
                   <span>{{ i + 1 }}</span>
                 </div>
-                <span class="font-medium text-white group-hover:text-blue-200 transition-colors">{{ suggestion }}</span>
+                <span class="font-medium text-[var(--fg)] group-hover:text-blue-200 transition-colors">{{ suggestion }}</span>
               </div>
             </div>
           </div>
@@ -68,7 +68,7 @@
           
           <button type="button" 
                   (click)="selectedSuggestions = []"
-                  class="px-4 py-2 border border-white/30 text-white rounded-lg font-medium hover:bg-white/10 transition-colors">
+                  class="px-4 py-2 border border-[var(--border)] text-[var(--fg)] rounded-lg font-medium hover:bg-[var(--card)] transition-colors">
             Limpiar selección
           </button>
         </div>
@@ -84,7 +84,7 @@
         <button type="button" 
                 (click)="getObjectiveSuggestions()"
                 [disabled]="isLoadingSuggestions"
-                class="w-full px-4 py-2 border border-white/30 text-white rounded-lg font-medium hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                class="w-full px-4 py-2 border border-[var(--border)] text-[var(--fg)] rounded-lg font-medium hover:bg-[var(--card)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
           <svg *ngIf="!isLoadingSuggestions" class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
@@ -106,12 +106,12 @@
 
   <form [formGroup]="objectiveForm" (ngSubmit)="onSubmit()" class="space-y-6">
     <div class="form-group">
-      <label for="mainObjective" class="block text-sm font-medium text-gray-200 mb-2">¿Cuál es tu objetivo principal con la implementación de IA? *</label>
-      <textarea id="mainObjective" formControlName="mainObjective" rows="6" placeholder="Describe tu objetivo principal. Por ejemplo: 'Quiero automatizar procesos de atención al cliente para mejorar la eficiencia y reducir costos operativos'" class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"></textarea>
+      <label for="mainObjective" class="block text-sm font-medium text-[var(--fg)] mb-2">¿Cuál es tu objetivo principal con la implementación de IA? *</label>
+      <textarea id="mainObjective" formControlName="mainObjective" rows="6" placeholder="Describe tu objetivo principal. Por ejemplo: 'Quiero automatizar procesos de atención al cliente para mejorar la eficiencia y reducir costos operativos'" class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--input-fg)] placeholder-[var(--input-placeholder)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent transition-colors resize-none"></textarea>
       <div *ngIf="objectiveForm.get('mainObjective')?.invalid && objectiveForm.get('mainObjective')?.touched" class="mt-1 text-red-400 text-sm">
         Por favor describe tu objetivo principal
       </div>
-      <div class="mt-2 text-sm text-gray-400">
+      <div class="mt-2 text-sm text-[var(--muted)]">
         <p>Ejemplos de objetivos comunes:</p>
         <ul class="mt-2 space-y-1 text-left">
           <li>• Automatizar procesos repetitivos</li>

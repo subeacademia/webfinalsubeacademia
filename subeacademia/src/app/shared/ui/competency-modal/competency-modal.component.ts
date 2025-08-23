@@ -65,6 +65,6 @@ export class CompetencyModalComponent implements OnInit, OnChanges {
       'Experto': 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
       'Maestro': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
     };
-    return colors[level] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+    return colors[level] || 'bg-[var(--card)] text-[var(--fg)]';
   }
 }

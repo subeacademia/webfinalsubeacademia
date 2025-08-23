@@ -23,6 +23,7 @@ export const DIAGNOSTICO_ROUTES: Routes = [
       { path: 'objetivo', component: StepObjetivoComponent },
       { path: 'lead', component: StepLeadComponent },
       { path: 'resultados', component: DiagnosticResultsComponent },
+      { path: 'resultados/:id', component: DiagnosticResultsComponent },
     ]
   }
 ];

@@ -1,43 +1,40 @@
-name: Build and Deploy to Hostinger
+name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: ["main"]
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install dependencies
         run: npm ci
         working-directory: subeacademia
-      - name: Build SSG
-        run: npm run build:ssg
-        working-directory: subeacademia
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: subeacademia/dist/subeacademia/browser
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
+      - name: Build (production)
+        run: npm run build
+        working-directory: subeacademia
+        env:
+          # Optionally inject runtime env into window.__env if you use it
+          # RUNTIME_GA4: ${{ secrets.RUNTIME_GA4 }}
+          # RUNTIME_GEMINI: ${{ secrets.RUNTIME_GEMINI }}
+          CI: true
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          name: dist
-          path: dist
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: 46.202.145.250
-          username: u863881186
-          password: "Sube@2025"
-          port: 21
-          local-dir: dist
-          server-dir: public_html/
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: web-subeacademia
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks

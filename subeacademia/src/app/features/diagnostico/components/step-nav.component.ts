@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../services/diagnostic-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
 	selector: 'app-step-nav',
@@ -215,17 +216,37 @@ import { DiagnosticStateService } from '../services/diagnostic-state.service';
                     <span class="text-sm text-blue-300">{{ getMotivationalMessage() }}</span>
                 </div>
             </div>
+
+            <!-- Navegación de pasos -->
+            <div class="flex items-center justify-between gap-4 mt-6">
+                <button (click)="goPrevious()"
+                        class="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Anterior
+                </button>
+
+                <button (click)="goNext()"
+                        [disabled]="!canGoNext"
+                        class="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Siguiente
+                </button>
+            </div>
         </div>
     `,
 	changeDetection: ChangeDetectionStrategy.Default,
 })
-export class StepNavComponent implements OnInit {
+export class StepNavComponent implements OnInit, OnDestroy {
 	@Input() progress: number = 0;
 	private diagnosticStateService = inject(DiagnosticStateService);
 	private router = inject(Router);
 
+	canGoNext = true;
+	private subs = new Subscription();
+
 	ngOnInit(): void {
 		// Inicialización del componente
+		this.updateCanGoNext();
+		this.subs.add(this.diagnosticStateService.state$.subscribe(() => this.updateCanGoNext()));
+		this.subs.add(this.router.events.subscribe(() => this.updateCanGoNext()));
 	}
 
 	getProgressPercentage(): number {
@@ -283,6 +304,11 @@ export class StepNavComponent implements OnInit {
 		return this.diagnosticStateService.isDiagnosticComplete();
 	}
 
+	private updateCanGoNext(): void {
+		const currentUrl = this.router.url;
+		this.canGoNext = this.diagnosticStateService.canProceedFromRoute(currentUrl);
+	}
+
 	navigateToStep(stepIndex: number): void {
 		if (this.isDiagnosticComplete()) {
 			// Navegar al paso específico
@@ -306,6 +332,29 @@ export class StepNavComponent implements OnInit {
 			// Aquí podrías mostrar un toast o notificación al usuario
 			alert('Debes completar todo el diagnóstico antes de poder navegar libremente entre los pasos.');
 		}
+	}
+
+	goNext(): void {
+		this.updateCanGoNext();
+		if (!this.canGoNext) {
+			alert('Completa el paso actual antes de continuar.');
+			return;
+		}
+		const next = this.diagnosticStateService.getNextStepLink(this.router.url);
+		if (next) {
+			this.router.navigate(['/diagnostico', next]);
+		}
+	}
+
+	goPrevious(): void {
+		const prev = this.diagnosticStateService.getPreviousStepLink(this.router.url);
+		if (prev) {
+			this.router.navigate(['/diagnostico', prev]);
+		}
+	}
+
+	ngOnDestroy(): void {
+		this.subs.unsubscribe();
 	}
 }
 

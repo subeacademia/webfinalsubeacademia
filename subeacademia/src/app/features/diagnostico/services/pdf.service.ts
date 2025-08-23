@@ -16,56 +16,96 @@ export class PdfService {
     try {
       console.log('🚀 Iniciando generación de PDF...');
       
-      // Capturar el elemento como imagen
-      const canvas = await html2canvas(elementToCapture, {
-        scale: 2, // Mejor calidad
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      // Crear nuevo PDF
+      // Crear nuevo PDF con márgenes y tipografía consistentes
       const pdf = new jsPDF('p', 'mm', 'a4');
+      const margin = { top: 20, right: 15, bottom: 18, left: 15 };
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const contentWidth = pageWidth - margin.left - margin.right;
 
-      // Añadir título del informe
-      pdf.setFontSize(20);
-      pdf.setTextColor(59, 130, 246); // Blue color
-      pdf.text('Informe de Diagnóstico de IA', 105, 20, { align: 'center' });
-      
-      // Añadir fecha
-      pdf.setFontSize(12);
-      pdf.setTextColor(107, 114, 128); // Gray color
-      pdf.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 105, 30, { align: 'center' });
+      // Renderizar encabezado común
+      const renderHeader = (pageNumber: number) => {
+        pdf.setFontSize(16);
+        pdf.setTextColor(59, 130, 246);
+        pdf.text('Informe de Diagnóstico de IA', pageWidth / 2, margin.top - 5, { align: 'center' });
+        pdf.setFontSize(10);
+        pdf.setTextColor(107, 114, 128);
+        pdf.text(`Generado el ${new Date().toLocaleDateString('es-ES')}`, pageWidth / 2, margin.top + 1, { align: 'center' });
+      };
 
-      // Añadir imagen capturada
-      pdf.addImage(imgData, 'PNG', 0, 40, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Renderizar pie de página con numeración
+      const renderFooter = (pageNumber: number) => {
+        pdf.setFontSize(9);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text(`Página ${pageNumber}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+        pdf.text('Generado por Sube Academ-IA', pageWidth - margin.right, pageHeight - 8, { align: 'right' });
+      };
 
-      // Si la imagen es más alta que una página, añadir páginas adicionales
-      while (heightLeft >= 0) {
-        const position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      let currentPage = 1;
+      renderHeader(currentPage);
+      renderFooter(currentPage);
+
+      // Buscar secciones marcadas para evitar cortes (data-pdf-section)
+      const sections = elementToCapture.querySelectorAll('[data-pdf-section]');
+      const targets: HTMLElement[] = sections.length ? Array.from(sections) as HTMLElement[] : [elementToCapture];
+
+      for (let i = 0; i < targets.length; i++) {
+        const section = targets[i];
+        // Capturar la sección como imagen con alta resolución
+        const canvas = await html2canvas(section, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+        const imgData = canvas.toDataURL('image/png');
+
+        // Calcular tamaño manteniendo aspecto y dentro de márgenes
+        const imgPxWidth = canvas.width;
+        const imgPxHeight = canvas.height;
+        const imgAspect = imgPxWidth / imgPxHeight;
+        let renderW = contentWidth;
+        let renderH = renderW / imgAspect;
+        const maxHeight = pageHeight - margin.top - margin.bottom;
+        if (renderH > maxHeight) {
+          renderH = maxHeight;
+          renderW = renderH * imgAspect;
+        }
+
+        // Si no es la primera sección, añadir nueva página con header/footer
+        if (i > 0) {
+          pdf.addPage();
+          currentPage++;
+          renderHeader(currentPage);
+          renderFooter(currentPage);
+        }
+
+        // Centrar la imagen en el área de contenido
+        const x = margin.left + (contentWidth - renderW) / 2;
+        const y = margin.top + 8; // pequeño offset bajo el encabezado
+        pdf.addImage(imgData, 'PNG', x, y, renderW, renderH, undefined, 'FAST');
       }
 
       // Añadir página de resumen ejecutivo
       pdf.addPage();
+      currentPage++;
+      renderHeader(currentPage);
       this.addExecutiveSummary(pdf, report);
-      
+      renderFooter(currentPage);
+
       // Añadir página de plan de acción
       pdf.addPage();
+      currentPage++;
+      renderHeader(currentPage);
       this.addActionPlan(pdf, report);
+      renderFooter(currentPage);
       
       // Añadir página de métricas
       pdf.addPage();
+      currentPage++;
+      renderHeader(currentPage);
       this.addMetricsPage(pdf, scores);
+      renderFooter(currentPage);
 
       // Guardar el PDF con nombre más descriptivo
       const fileName = `diagnostico-subeacademia-${new Date().toISOString().slice(0,10)}.pdf`;
