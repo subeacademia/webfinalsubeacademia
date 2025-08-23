@@ -1,6 +1,10 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.admin == true ||
@@ -8,21 +12,29 @@ service firebase.storage {
         request.auth.token.email.matches(".*@subeia\\.tech$")
       );
     }
-    // Lectura pública de archivos publicados
+
+    // Lectura pública de archivos en el prefijo public/**
     match /public/{allPaths=**} {
-      allow read: if true;                // público
-      allow write: if isAdmin();
-    }
-    // Zona privada (si la necesitas)
-    match /private/{allPaths=**} {
-      allow read, write: if isAdmin();
-    }
-    
-    // Reportes de diagnóstico generados por Cloud Functions
-    // Hacemos los PDFs legibles públicamente, pero ninguna escritura desde clientes
-    match /reports/{allPaths=**} {
+      // Cualquiera puede leer
       allow read: if true;
-      allow write: if false; // Escrituras solo desde privilegiados (Admin SDK / Functions via Security Rules bypass)
+
+      // Escritura restringida: solo admins o el dueño si sube a public/media/{uid}/**
+      allow write: if isAdmin() || (
+        isSignedIn() && request.resource != null &&
+        request.resource.name.matches('public/media/' + request.auth.uid + '/.*')
+      );
+    }
+
+    // Espacio por usuario: users/{uid}/**
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Por defecto, denegar todo lo demás
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }
+
+ 

@@ -8,6 +8,19 @@
   },
   "functions": {
     "source": "functions"
+  },
+  "hosting": {
+    "public": "dist/subeacademia/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ],
+    "predeploy": [
+      "npm run build"
+    ]
   }
 }
-

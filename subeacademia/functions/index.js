@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const puppeteer = require("puppeteer");
 
 admin.initializeApp();
 
@@ -46,14 +45,23 @@ exports.processLead = functions
     }
   });
 
-// Función para generar PDF con Puppeteer
+// Función para generar PDF con Puppeteer (usando puppeteer-core + @sparticuz/chromium en runtime)
 exports.generatePDF = functions
   .region("us-central1")
   .https.onCall(async (data, context) => {
     try {
+      // Cargas perezosas para evitar peso en deploy
+      const chromium = require('@sparticuz/chromium');
+      const puppeteer = require('puppeteer-core');
+
+      const isLocal = process.env.FUNCTIONS_EMULATOR === 'true' || process.env.NODE_ENV === 'development';
+      const executablePath = isLocal ? undefined : await chromium.executablePath();
+
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        executablePath,
+        args: isLocal ? ['--no-sandbox', '--disable-setuid-sandbox'] : chromium.args,
+        defaultViewport: chromium.defaultViewport,
       });
 
       const page = await browser.newPage();
