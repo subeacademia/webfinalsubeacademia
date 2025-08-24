@@ -20,6 +20,15 @@ jobs:
         run: npm ci
         working-directory: subeacademia
 
+      - name: Inject GEMINI_API_KEY into environment.prod.ts
+        run: |
+          API_ESCAPED=$(printf '%s' "${GEMINI_API_KEY}" | sed -e 's/[\\&|]/\\&/g')
+          sed -E -i "s|geminiApiKey:\s*['\"][^'\"]*['\"]|geminiApiKey: '${API_ESCAPED}'|g" src/environments/environment.prod.ts
+          echo "Updated geminiApiKey in environment.prod.ts"
+        working-directory: subeacademia
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
       - name: Build (production)
         run: npm run build
         working-directory: subeacademia
