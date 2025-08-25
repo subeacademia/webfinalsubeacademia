@@ -1,25 +1,30 @@
 import * as functions from "firebase-functions";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// Importa la nueva biblioteca de Vertex AI
+import { VertexAI } from "@google-cloud/vertexai";
 
-// Inicialización segura de la API
-let genAI: GoogleGenerativeAI | undefined;
-const geminiKey = (functions as any).config().gemini?.key as string | undefined;
+// Inicializa Vertex AI.
+// Utilizará automáticamente las credenciales de la cuenta de servicio de la función.
+const projectId = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT;
+const vertex_ai = new VertexAI({
+  project: projectId as string,
+  location: "us-central1",
+});
 
-if (!geminiKey) {
-  console.error("CRITICAL ERROR: Gemini API key is not configured.");
-} else {
-  genAI = new GoogleGenerativeAI(geminiKey);
-}
+// Modelo de IA a utilizar
+const model = "gemini-1.0-pro-001";
+
+const generativeModel = vertex_ai.getGenerativeModel({
+  model: model,
+  generationConfig: {
+    maxOutputTokens: 2048,
+    temperature: 0.4,
+    topP: 1,
+    topK: 32,
+  },
+});
 
 export const generateObjectives = functions.https.onCall(async (data) => {
-  console.log("Iniciando generateObjectives con data:", data);
-  if (!genAI) {
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      "La API de IA no está inicializada. Revisa la configuración."
-    );
-  }
-
+  console.log("Iniciando generateObjectives v2 con data:", data);
   const contextData = (data as any)?.contextData;
   if (!contextData) {
     console.error("Error: Faltan datos en contextData.");
@@ -38,15 +43,24 @@ export const generateObjectives = functions.https.onCall(async (data) => {
   `;
 
   try {
-    console.log("Llamando a la API de Gemini para objetivos...");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
+    console.log("Llamando a la API de Vertex AI para objetivos...");
+    const request = {
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    };
+    const result = await generativeModel.generateContent(request);
     const response = result.response;
-    const text = response.text();
-    console.log("Respuesta de Gemini recibida para objetivos.");
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.error("Respuesta sin texto para objetivos", JSON.stringify(response));
+      throw new functions.https.HttpsError(
+        "internal",
+        "La respuesta de IA no contiene texto."
+      );
+    }
+    console.log("Respuesta de Vertex AI recibida para objetivos.");
     return { objectives: JSON.parse(text) };
   } catch (error: any) {
-    console.error("Error CRÍTICO llamando a la API de Gemini para objetivos:", error);
+    console.error("Error CRÍTICO llamando a la API de Vertex AI para objetivos:", error);
     throw new functions.https.HttpsError(
       "internal",
       "Falló la generación de objetivos con IA."
@@ -55,14 +69,7 @@ export const generateObjectives = functions.https.onCall(async (data) => {
 });
 
 export const generateDiagnosticReport = functions.https.onCall(async (data) => {
-  console.log("Iniciando generateDiagnosticReport...");
-  if (!genAI) {
-    throw new functions.https.HttpsError(
-      "failed-precondition",
-      "La API de IA no está inicializada. Revisa la configuración."
-    );
-  }
-
+  console.log("Iniciando generateDiagnosticReport v2...");
   const diagnosticData = (data as any)?.diagnosticData;
   if (!diagnosticData) {
     console.error("Error: Faltan datos en diagnosticData.");
@@ -96,15 +103,24 @@ export const generateDiagnosticReport = functions.https.onCall(async (data) => {
   `;
 
   try {
-    console.log("Llamando a la API de Gemini para el reporte...");
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent(prompt);
+    console.log("Llamando a la API de Vertex AI para el reporte...");
+    const request = {
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    };
+    const result = await generativeModel.generateContent(request);
     const response = result.response;
-    const text = response.text();
-    console.log("Respuesta de Gemini recibida para el reporte.");
+    const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      console.error("Respuesta sin texto para reporte", JSON.stringify(response));
+      throw new functions.https.HttpsError(
+        "internal",
+        "La respuesta de IA no contiene texto."
+      );
+    }
+    console.log("Respuesta de Vertex AI recibida para el reporte.");
     return { reportText: text };
   } catch (error: any) {
-    console.error("Error CRÍTICO llamando a la API de Gemini para el reporte:", error);
+    console.error("Error CRÍTICO llamando a la API de Vertex AI para el reporte:", error);
     throw new functions.https.HttpsError(
       "internal",
       "Falló la generación del reporte con IA."

@@ -16,7 +16,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.18.0",
+    "@google-cloud/vertexai": "^1.10.0",
     "@sparticuz/chromium": "latest",
     "cors": "^2.8.5",
     "firebase-admin": "^12.6.0",
