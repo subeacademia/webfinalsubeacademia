@@ -90,10 +90,10 @@
   height: 70px;
   object-fit: contain;
   filter: grayscale(100%);
-  opacity: 0.7;
+  opacity: 0.75;
   transition: all 0.3s ease;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in srgb, var(--card) 85%, transparent);
   padding: 0.5rem;
 }
 
@@ -101,8 +101,8 @@
   filter: grayscale(0%);
   opacity: 1;
   transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--fg) 15%, transparent);
 }
 
 /* Estilos específicos para el carrusel doble */
@@ -113,13 +113,13 @@
 }
 
 .carousel-top .logo-carousel-container {
-  border-top: 2px solid rgba(59, 130, 246, 0.2);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  border-top: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 .carousel-bottom .logo-carousel-container {
-  border-top: 1px solid rgba(139, 92, 246, 0.1);
-  border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 /* Responsive design */

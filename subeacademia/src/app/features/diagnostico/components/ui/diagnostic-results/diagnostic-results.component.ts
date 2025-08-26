@@ -1,6 +1,9 @@
 import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
+import { I18nService } from '../../../../../core/i18n/i18n.service';
+import { SeoService } from '../../../../../core/seo/seo.service';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
 import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
@@ -20,7 +23,7 @@ import { ToastService } from '../../../../../core/ui/toast/toast.service';
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective, SocialShareModalComponent],
+  imports: [CommonModule, I18nTranslatePipe, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective, SocialShareModalComponent],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
@@ -35,6 +38,8 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private animationService = inject(AnimationService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
+  private i18n = inject(I18nService);
+  private seo = inject(SeoService);
 
   scores: any;
   report: DiagnosticReport | null = null;
@@ -122,6 +127,12 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       // 4. Activar loader y llamar a la IA para generar el reporte detallado.
       this.isGeneratingReport = true;
       this.generateReport(diagnosticData);
+
+      // SEO título por idioma
+      try {
+        const title = this.i18n.translate('diagnostico.results.page_title');
+        this.seo.updateTags({ title });
+      } catch {}
       
     } catch (error) {
       console.error('❌ Error al inicializar resultados:', error);

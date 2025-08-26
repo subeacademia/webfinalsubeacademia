@@ -29,8 +29,8 @@
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
 	border-radius: 0.75rem;
-	background-color: rgba(31, 41, 55, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	background-color: color-mix(in srgb, var(--panel) 92%, transparent);
+	border: 1px solid var(--border);
 }
 .card-face--front {
 }
@@ -44,7 +44,7 @@
 	display: inline-flex;
 	padding: 1.25rem;
 	border-radius: 9999px;
-	background-color: rgba(55, 65, 81, 0.5);
+	background-color: color-mix(in srgb, var(--card) 80%, transparent);
 }
 
 

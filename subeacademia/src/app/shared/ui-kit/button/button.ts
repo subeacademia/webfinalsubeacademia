@@ -19,10 +19,10 @@ export class UiButtonComponent {
     const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variantClasses = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-      secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500',
-      ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 border border-gray-300'
-    };
+      primary: 'bg-[var(--primary)] text-[var(--primary-contrast)] hover:[background:color-mix(in_srgb,_var(--primary),_black_10%)] focus:ring-[var(--primary)]',
+      secondary: 'bg-[var(--card)] text-[var(--fg)] hover:bg-[color-mix(in_srgb,_var(--card),_var(--fg)_10%)] border border-[var(--border)] focus:ring-[var(--accent)]',
+      ghost: 'bg-transparent text-[var(--fg)] hover:bg-[color-mix(in_srgb,_var(--panel),_var(--fg)_8%)] border border-[var(--border)] focus:ring-[var(--accent)]'
+    } as const;
     
     const sizeClasses = {
       sm: 'px-3 py-1.5 text-sm',

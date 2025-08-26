@@ -9,13 +9,15 @@ import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { AnimationService } from '../../core/services/animation.service';
 import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
+import { SeoService } from '../../core/seo/seo.service';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, AnimateOnScrollDirective],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, AnimateOnScrollDirective, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -26,7 +28,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly router: Router,
     @Inject(PLATFORM_ID) private platformId: object,
     private readonly logos: LogosService,
-    private readonly animationService: AnimationService
+    private readonly animationService: AnimationService,
+    private readonly seo: SeoService
   ) {
     // Valor por defecto para asegurar que el título se muestre
     this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
@@ -169,6 +172,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         // Configurar título
         this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
         console.log('🏷️ Título del home configurado:', this.tituloHome);
+
+        // SEO dinámico por idioma
+        this.seo.updateTags({
+          title: this.tituloHome,
+          description: 'Formación aplicada en IA con enfoque en resultados y competencias.'
+        });
         
         // Configurar typewriter
         if (typeof document !== 'undefined') {

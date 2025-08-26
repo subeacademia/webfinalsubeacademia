@@ -14,7 +14,7 @@
         </svg>
       </div>
       <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4 animate-slide-in">
-        ¡Felicidades! Has Completado el Diagnóstico
+        {{ 'diagnostico.results.congrats_title' | i18nTranslate }}
       </h1>
       <p class="text-xl text-[var(--muted)] max-w-3xl mx-auto animate-fade-in-delayed">
         Tu evaluación personalizada está lista. Descubre tu nivel de madurez en IA y recibe un plan de acción estratégico diseñado específicamente para ti.
@@ -24,8 +24,8 @@
       <div class="mt-6">
         <button 
           (click)="generateTestData()"
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg">
-          🔧 Generar Datos de Prueba
+          class="px-6 py-3 bg-[var(--primary)] hover:[background:color-mix(in_srgb,_var(--primary),_black_10%)] text-[var(--primary-contrast)] font-semibold rounded-lg transition-colors duration-200 shadow-lg">
+          {{ 'diagnostico.results.generate_test' | i18nTranslate }}
         </button>
       </div>
     </div>
@@ -40,7 +40,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-[var(--fg)]">Análisis de Competencias Clave</h2>
+          <h2 class="text-2xl font-bold text-[var(--fg)]">{{ 'diagnostico.results.section_competencies' | i18nTranslate }}</h2>
         </div>
         
         <div class="mb-4">
@@ -104,7 +104,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-[var(--fg)]">Insights & Recomendaciones</h2>
+          <h2 class="text-2xl font-bold text-[var(--fg)]">{{ 'diagnostico.results.section_insights' | i18nTranslate }}</h2>
         </div>
         
         <!-- Score Card Principal -->
@@ -129,8 +129,8 @@
 
         <!-- Botón de Acción Rápida -->
         <button (click)="showDetailedInsights()" 
-                class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
-          Ver Insights Detallados
+                class="w-full bg-[var(--primary)] hover:[background:color-mix(in_srgb,_var(--primary),_black_10%)] text-[var(--primary-contrast)] font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+          {{ 'diagnostico.results.view_insights' | i18nTranslate }}
         </button>
       </div>
 
@@ -142,20 +142,20 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-[var(--fg)]">Framework ARES-AI</h2>
+          <h2 class="text-2xl font-bold text-[var(--fg)]">{{ 'diagnostico.results.section_framework' | i18nTranslate }}</h2>
         </div>
         
         <!-- Puntaje Total ARES -->
         <div *ngIf="scores?.ares" class="text-center mb-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-200 dark:border-red-700">
-          <div class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">Puntaje Total ARES-AI</div>
+          <div class="text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ 'diagnostico.results.total_score' | i18nTranslate }}</div>
           <div id="total-score" class="text-4xl font-bold text-red-600 dark:text-red-400">0</div>
           <div class="text-sm text-red-600 dark:text-red-400">de 100 puntos</div>
         </div>
       
       <div class="mb-4">
         <app-semaforo-ares *ngIf="scores?.ares" [aresByPhase]="aresDataForSemaforo"></app-semaforo-ares>
-        <div *ngIf="!scores?.ares" class="text-center text-gray-500 py-8">
-          <p>No hay datos ARES disponibles</p>
+        <div *ngIf="!scores?.ares" class="text-center text-[var(--muted)] py-8">
+          <p>{{ 'diagnostico.results.no_ares' | i18nTranslate }}</p>
         </div>
       </div>
 
@@ -180,10 +180,10 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
         </svg>
       </div>
-      <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">¡Diagnóstico Completado!</h2>
+      <h2 class="text-3xl font-bold text-[var(--fg)] mb-4">{{ 'diagnostico.results.completed_title' | i18nTranslate }}</h2>
       <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <div class="text-left">
-          <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+          <h3 class="text-xl font-semibold text-[var(--fg)] mb-3 flex items-center">
             <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -194,7 +194,7 @@
           </p>
         </div>
         <div class="text-left">
-          <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-3 flex items-center">
+          <h3 class="text-xl font-semibold text-[var(--fg)] mb-3 flex items-center">
             <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
@@ -216,7 +216,7 @@
         <div class="bg-[var(--panel)] rounded-2xl shadow-xl p-12 border border-[var(--border)]">
           <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
             <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-full text-sm font-semibold">
-              Informe Generado con IA
+              {{ 'diagnostico.results.generated_with_ai' | i18nTranslate }}
             </div>
           </div>
           
@@ -259,7 +259,7 @@
       <section class="mb-16">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-[var(--fg)] mb-4">
-            Análisis por Dimensión ARES-AI
+            {{ 'diagnostico.results.ares_analysis_title' | i18nTranslate }}
           </h2>
           <p class="text-lg text-[var(--muted)] max-w-2xl mx-auto">
             Evaluación detallada de cada dimensión del framework y su impacto en tu estrategia de adopción de IA
@@ -302,7 +302,7 @@
       <section class="mb-16">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-[var(--fg)] mb-4">
-            Plan de Acción Recomendado por IA
+            {{ 'diagnostico.results.plan_title' | i18nTranslate }}
           </h2>
           <p class="text-lg text-[var(--muted)] max-w-3xl mx-auto">
             Estrategia personalizada basada en tu perfil único para maximizar el impacto de la IA en tu organización

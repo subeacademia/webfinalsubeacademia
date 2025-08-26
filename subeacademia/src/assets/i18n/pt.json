@@ -94,5 +94,38 @@
     "roi_proyectos": "ROI dos Projetos",
     "competencias_equipo": "Competências da Equipe",
     "velocidad_implementacion": "Velocidade de Implementação"
+  },
+  "home": {
+    "cta_primary": "INICIAR DIAGNÓSTICO DE COMPETÊNCIAS EM IA",
+    "cta_secondary": "FALAR COM UM ASSESSOR"
+  },
+  "shared": {
+    "back": "Voltar",
+    "more_about": "Mais sobre"
+  },
+  "diagnostico": {
+    "results": {
+      "page_title": "Resultados do Diagnóstico",
+      "congrats_title": "Parabéns! Você Concluiu o Diagnóstico",
+      "generate_test": "Gerar Dados de Teste",
+      "section_competencies": "Análise de Competências-Chave",
+      "section_insights": "Insights e Recomendações",
+      "view_insights": "Ver Insights Detalhados",
+      "section_framework": "Framework ARES-AI",
+      "total_score": "Pontuação Total ARES-AI",
+      "no_ares": "Não há dados ARES disponíveis",
+      "completed_title": "Diagnóstico Concluído!",
+      "generated_with_ai": "Relatório Gerado com IA",
+      "generating_pdf": "Gerando PDF...",
+      "download_pdf": "Baixar Relatório em PDF",
+      "ares_analysis_title": "Análise por Dimensão ARES-AI",
+      "plan_title": "Plano de Ação Recomendado por IA",
+      "area_mejora": "Área de Melhoria",
+      "priority": "Prioridade",
+      "problem_desc": "Descrição do Problema",
+      "recommended_actions": "Ações Recomendadas",
+      "recommended_course": "Curso Recomendado",
+      "view_course": "Ver Curso"
+    }
   }
 }

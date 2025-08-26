@@ -94,5 +94,38 @@
     "roi_proyectos": "Project ROI",
     "competencias_equipo": "Team Competencies",
     "velocidad_implementacion": "Implementation Speed"
+  },
+  "home": {
+    "cta_primary": "START AI SKILLS DIAGNOSTIC",
+    "cta_secondary": "TALK TO AN ADVISOR"
+  },
+  "shared": {
+    "back": "Back",
+    "more_about": "More about"
+  },
+  "diagnostico": {
+    "results": {
+      "page_title": "Diagnosis Results",
+      "congrats_title": "Congratulations! You Have Completed the Diagnosis",
+      "generate_test": "Generate Test Data",
+      "section_competencies": "Key Competencies Analysis",
+      "section_insights": "Insights & Recommendations",
+      "view_insights": "View Detailed Insights",
+      "section_framework": "ARES-AI Framework",
+      "total_score": "Total ARES-AI Score",
+      "no_ares": "No ARES data available",
+      "completed_title": "Diagnosis Completed!",
+      "generated_with_ai": "Report Generated with AI",
+      "generating_pdf": "Generating PDF...",
+      "download_pdf": "Download PDF Report",
+      "ares_analysis_title": "ARES-AI Dimension Analysis",
+      "plan_title": "AI Recommended Action Plan",
+      "area_mejora": "Improvement Area",
+      "priority": "Priority",
+      "problem_desc": "Problem Description",
+      "recommended_actions": "Recommended Actions",
+      "recommended_course": "Recommended Course",
+      "view_course": "View Course"
+    }
   }
 }

@@ -5,6 +5,20 @@
 
 /* Variables CSS para el tema */
 :root {
+  /* Paleta semántica base (modo claro) */
+  --bg: #ffffff;
+  --fg: #0f172a; /* slate-900 */
+  --muted: #64748b; /* slate-500 */
+  --card: #ffffff;
+  --panel: #f8fafc; /* slate-50 */
+  --border: #e2e8f0; /* slate-200 */
+
+  /* Primarios/Accentos */
+  --primary: #3b82f6; /* primary-500 */
+  --primary-contrast: #ffffff;
+  --accent: #6366f1;
+
+  /* Utilidades existentes */
   --color-primary: #6366f1;
   --color-primary-light: rgba(99, 102, 241, 0.1);
   --color-primary-light-dark: rgba(99, 102, 241, 0.2);
@@ -14,6 +28,19 @@
 }
 
 .dark {
+  /* Paleta semántica base (modo oscuro) */
+  --bg: #0b1220;
+  --fg: #e8eef7;
+  --muted: #a6b0c3;
+  --card: #121a2a;
+  --panel: #0f172a; /* slate-900 aprox */
+  --border: #1f2937; /* slate-800 aprox */
+
+  /* Primarios/Accentos */
+  --primary: #60a5fa; /* primary-400 para mejor contraste en dark */
+  --primary-contrast: #0b1220;
+
+  /* Utilidades existentes */
   --color-primary-light: rgba(99, 102, 241, 0.2);
   --color-primary-light-dark: rgba(99, 102, 241, 0.3);
   --color-accent-light: rgba(99, 102, 241, 0.25);

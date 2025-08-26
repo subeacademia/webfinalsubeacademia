@@ -1,10 +1,11 @@
 import { Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { I18nTranslatePipe } from '../../../core/i18n/i18n.pipe';
 
 @Component({
 	selector: 'app-value-proposition-card',
 	standalone: true,
-	imports: [CommonModule],
+	imports: [CommonModule, I18nTranslatePipe],
 	templateUrl: './value-proposition-card.component.html',
 	styleUrls: ['./value-proposition-card.component.css']
 })
