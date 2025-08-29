@@ -96,8 +96,17 @@
     "velocidad_implementacion": "Implementation Speed"
   },
   "home": {
-    "cta_primary": "START AI SKILLS DIAGNOSTIC",
-    "cta_secondary": "TALK TO AN ADVISOR"
+    "cta_primary": "Start Your Free AI Maturity Diagnostic",
+    "cta_secondary": "Talk to an Advisor Now",
+    "hero_title": "Develop the 13 Key Competencies",
+    "hero_subtitle": "Discover your AI maturity level and transform your organization with our intelligent diagnostic based on the ARES-AI© Framework",
+    "roadmap_title": "Your Roadmap to AI Maturity",
+    "roadmap_subtitle": "Based on our proven and validated ARES-AI© Framework",
+    "solutions_title": "Our Solutions for Digital Transformation",
+    "solutions_subtitle": "Tools and services designed to accelerate your AI adoption responsibly",
+    "trust_title": "They Trust Us",
+    "trust_subtitle": "Join the organizations already transforming their future with AI",
+    "cta_final": "Start Now"
   },
   "shared": {
     "back": "Back",

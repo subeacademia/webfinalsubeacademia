@@ -100,3 +100,109 @@ section { scroll-margin-top: 80px; }
 .flip-body h3 { font-size: 1.125rem; }
 .flip-body p { font-size: 0.95rem; }
 
+/* Estilos mejorados para los botones CTA principales */
+.hero-cta-buttons {
+  position: relative;
+  z-index: 20;
+}
+
+/* Botón primario con efectos mejorados */
+.hero-cta-buttons app-ui-button[variant="primary"] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-cta-buttons app-ui-button[variant="primary"]:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+}
+
+.hero-cta-buttons app-ui-button[variant="primary"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.hero-cta-buttons app-ui-button[variant="primary"]:hover::before {
+  left: 100%;
+}
+
+/* Botón secundario con efectos mejorados */
+.hero-cta-buttons app-ui-button[variant="ghost"] {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-cta-buttons app-ui-button[variant="ghost"]:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+}
+
+/* Efectos de partículas para los botones */
+.hero-cta-buttons app-ui-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.hero-cta-buttons app-ui-button:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 0;
+}
+
+/* Responsive para botones en móviles */
+@media (max-width: 640px) {
+  .hero-cta-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hero-cta-buttons app-ui-button {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+/* Animación de entrada para los botones */
+@keyframes buttonSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-cta-buttons app-ui-button {
+  animation: buttonSlideIn 0.8s ease-out forwards;
+}
+
+.hero-cta-buttons app-ui-button:nth-child(2) {
+  animation-delay: 0.2s;
+}
+

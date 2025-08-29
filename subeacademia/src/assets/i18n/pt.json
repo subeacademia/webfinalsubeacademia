@@ -96,8 +96,17 @@
     "velocidad_implementacion": "Velocidade de Implementação"
   },
   "home": {
-    "cta_primary": "INICIAR DIAGNÓSTICO DE COMPETÊNCIAS EM IA",
-    "cta_secondary": "FALAR COM UM ASSESSOR"
+    "cta_primary": "Inicie seu diagnóstico gratuito de maturidade em IA",
+    "cta_secondary": "Fale com um assessor agora",
+    "hero_title": "Desenvolva as 13 competências-chave",
+    "hero_subtitle": "Descubra seu nível de maturidade em IA e transforme sua organização com nosso diagnóstico inteligente baseado no Framework ARES-AI©",
+    "roadmap_title": "Sua Rota para a Maturidade em IA",
+    "roadmap_subtitle": "Baseado em nosso Framework ARES-AI© comprovado e validado",
+    "solutions_title": "Nossas Soluções para a Transformação Digital",
+    "solutions_subtitle": "Ferramentas e serviços projetados para acelerar sua adoção de IA de forma responsável",
+    "trust_title": "Eles Confiam em Nós",
+    "trust_subtitle": "Junte-se às organizações que já estão transformando seu futuro com IA",
+    "cta_final": "Começar Agora"
   },
   "shared": {
     "back": "Voltar",
