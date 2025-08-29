@@ -101,7 +101,9 @@
   },
   "shared": {
     "back": "Volver",
-    "more_about": "Más sobre"
+    "more_about": "Más sobre",
+    "next": "Siguiente",
+    "cancel": "Cancelar"
   },
   "diagnostico": {
     "results": {
@@ -126,6 +128,74 @@
       "recommended_actions": "Acciones Recomendadas",
       "recommended_course": "Curso Recomendado",
       "view_course": "Ver Curso"
+    }
+    ,
+    "loader": {
+      "title": "Generando tu Reporte Personalizado",
+      "subtitle": "Nuestra IA está analizando tus respuestas para crear recomendaciones únicas",
+      "step1": "Analizando respuestas del diagnóstico",
+      "step2": "Evaluando competencias y fortalezas",
+      "step3": "Generando plan de acción personalizado",
+      "msg1": "Iniciando análisis...",
+      "msg2": "Analizando tus respuestas...",
+      "msg3": "Consultando a nuestra IA...",
+      "msg4": "Construyendo tu plan de acción...",
+      "msg5": "Cruzando datos para un feedback preciso..."
+    },
+    "competency_chart": {
+      "subtitle": "Porcentaje de competencia por área",
+      "data_received": "Datos recibidos",
+      "loading": "Cargando competencias...",
+      "legend": {
+        "excellent": "Excelente (80-100)",
+        "good": "Bueno (60-79)",
+        "fair": "Regular (40-59)",
+        "low": "Bajo (20-39)",
+        "critical": "Crítico (0-19)"
+      }
+    }
+    ,
+    "radar": {
+      "title": "Perfil de Competencias",
+      "no_data": "No hay datos de competencias disponibles",
+      "complete_prompt": "Completa el diagnóstico para ver tu perfil",
+      "debug": "Debug Info:",
+      "total": "Total competencias",
+      "avg": "Promedio",
+      "max": "Máximo",
+      "min": "Mínimo"
+    },
+    "share": {
+      "title": "Compartir Resultados",
+      "subtitle": "Selecciona las redes sociales donde quieres compartir tus resultados del diagnóstico de IA",
+      "share": "Compartir",
+      "copy": "Copiar enlace",
+      "copied": "¡Enlace copiado!"
+    },
+    "step_objetivo": {
+      "title": "Objetivo Principal",
+      "subtitle": "Cuéntanos cuál es tu objetivo principal con la implementación de IA en tu organización",
+      "ai_suggestions": "Sugerencias Personalizadas con IA",
+      "selected_count": "Seleccionadas",
+      "generating": "Generando sugerencias personalizadas...",
+      "based_on_profile": "Basado en tu perfil, aquí tienes algunas sugerencias de objetivos que podrían ser relevantes:",
+      "apply": "Aplicar",
+      "clear": "Limpiar selección",
+      "selected_prefix": "Seleccionaste",
+      "selected_suffix": "sugerencia(s). Al aplicarlas, se combinarán en el campo de texto principal.",
+      "regenerating": "Regenerando...",
+      "regenerate": "Regenerar sugerencias",
+      "regenerate_hint": "Si no estás satisfecho con las sugerencias, puedes generar nuevas opciones personalizadas.",
+      "no_suggestions": "No se pudieron generar sugerencias en este momento. Puedes escribir tu objetivo personalizado abajo.",
+      "question": "¿Cuál es tu objetivo principal con la implementación de IA? *",
+      "placeholder": "Describe tu objetivo principal. Por ejemplo: 'Quiero automatizar procesos de atención al cliente para mejorar la eficiencia y reducir costos operativos'",
+      "error": "Por favor describe tu objetivo principal",
+      "examples_title": "Ejemplos de objetivos comunes:",
+      "example_1": "Automatizar procesos repetitivos",
+      "example_2": "Mejorar la toma de decisiones con datos",
+      "example_3": "Optimizar la experiencia del cliente",
+      "example_4": "Reducir costos operativos",
+      "example_5": "Acelerar la innovación de productos"
     }
   }
 }

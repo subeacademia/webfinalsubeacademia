@@ -1,13 +1,15 @@
 import { Component, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { I18nService } from '../../../../../core/i18n/i18n.service';
+import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-generating-report-loader',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, I18nTranslatePipe],
   template: `
     <div class="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50">
-      <div class="bg-white/10 backdrop-blur-md rounded-3xl p-12 border border-white/20 shadow-2xl max-w-md w-full mx-4">
+      <div class="bg-[var(--panel)]/90 backdrop-blur-md rounded-3xl p-12 border border-[var(--border)] shadow-2xl max-w-md w-full mx-4">
         <!-- Logo/Icono animado -->
         <div class="text-center mb-8">
           <div class="relative w-24 h-24 mx-auto mb-6">
@@ -28,11 +30,11 @@ import { CommonModule } from '@angular/common';
         
         <!-- Texto principal -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-white mb-3">
-            Generando tu Reporte Personalizado
+          <h2 class="text-2xl font-bold text-[var(--fg)] mb-3">
+            {{ 'diagnostico.loader.title' | i18nTranslate }}
           </h2>
-          <p class="text-blue-200 text-lg leading-relaxed">
-            Nuestra IA está analizando tus respuestas para crear recomendaciones únicas
+          <p class="text-[var(--muted)] text-lg leading-relaxed">
+            {{ 'diagnostico.loader.subtitle' | i18nTranslate }}
           </p>
         </div>
         
@@ -40,26 +42,26 @@ import { CommonModule } from '@angular/common';
         <div class="space-y-4 mb-8">
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span class="text-green-200 text-sm">Analizando respuestas del diagnóstico</span>
+            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step1' | i18nTranslate }}</span>
           </div>
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
-            <span class="text-blue-200 text-sm">Evaluando competencias y fortalezas</span>
+            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step2' | i18nTranslate }}</span>
           </div>
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style="animation-delay: 1s"></div>
-            <span class="text-purple-200 text-sm">Generando plan de acción personalizado</span>
+            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step3' | i18nTranslate }}</span>
           </div>
         </div>
         
         <!-- Barra de progreso -->
-        <div class="w-full bg-white/10 rounded-full h-2 mb-6">
+        <div class="w-full bg-[var(--border)] rounded-full h-2 mb-6">
           <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full animate-pulse" style="width: 85%"></div>
         </div>
         
         <!-- Mensaje de estado -->
         <div class="text-center">
-          <p class="text-white/80 text-sm font-medium">
+          <p class="text-[var(--muted)] text-sm font-medium">
             {{ currentMessage }}
           </p>
           <div class="flex justify-center space-x-1 mt-3">
@@ -136,19 +138,28 @@ export class GeneratingReportLoaderComponent implements AfterViewInit, OnDestroy
   @ViewChild('loaderSvg') loaderSvg!: ElementRef;
   @ViewChild('progressCircle') progressCircle!: ElementRef;
 
-  currentMessage = 'Iniciando análisis...';
-  private messages = [
-    'Analizando tus respuestas...',
-    'Consultando a nuestra IA...',
-    'Construyendo tu plan de acción...',
-    'Cruzando datos para un feedback preciso...',
-    'Preparando una respuesta detallada...'
-  ];
+  currentMessage = '';
+  private messages: string[] = [];
   private messageIndex = 0;
   private messageInterval: any;
+  
+  constructor(private readonly i18n: I18nService) {
+    this.loadMessages();
+  }
 
   ngAfterViewInit(): void {
     this.startMessageRotation();
+  }
+
+  private loadMessages(): void {
+    this.messages = [
+      this.i18n.translate('diagnostico.loader.msg1'),
+      this.i18n.translate('diagnostico.loader.msg2'),
+      this.i18n.translate('diagnostico.loader.msg3'),
+      this.i18n.translate('diagnostico.loader.msg4'),
+      this.i18n.translate('diagnostico.loader.msg5'),
+    ];
+    this.currentMessage = this.messages[0] || '';
   }
 
   private startMessageRotation(): void {

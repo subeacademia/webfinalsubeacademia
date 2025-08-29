@@ -4,11 +4,13 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
+import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-step-objetivo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, I18nTranslatePipe],
   templateUrl: './step-objetivo.component.html',
   styles: [`
     .animate-fade-in {
@@ -115,7 +117,7 @@ Ejemplo de salida válida:
         console.log('🤖 Enviando prompt personalizado a IA:', contextPrompt);
 
         // Usar el servicio de IA para generar sugerencias
-        const response = await this.generativeAiService.generateText(contextPrompt);
+        const response = await firstValueFrom(this.generativeAiService.generateContent(contextPrompt));
         if (response) {
           try {
             // Algunas veces la IA envía texto con explicaciones o ```json

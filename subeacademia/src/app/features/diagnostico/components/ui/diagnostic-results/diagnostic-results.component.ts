@@ -330,7 +330,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   }
 
   private generateReport(diagnosticData: any): void {
-    console.log('🤖 Iniciando generación del reporte con Gemini...');
+    console.log('🤖 Iniciando generación del reporte con IA (backend)...');
     this.isLoadingReport = true;
     this.loadingError = false;
     
@@ -338,27 +338,38 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     const weakestCompetency = this.identifyWeakestCompetency();
     const ctaPrompt = this.generateCTAPrompt(weakestCompetency);
     
-    this.generativeAiService.generateActionPlan(diagnosticData, this.scores, ctaPrompt)
+    // Construir un prompt combinando datos del diagnóstico y CTA adicional
+    const payload = {
+      diagnosticData,
+      scores: this.scores,
+      ctaPrompt
+    };
+    const prompt = `Genera un reporte diagnóstico en JSON compacto basado en: ${JSON.stringify(payload)}`;
+
+    this.generativeAiService.generateContent(prompt)
       .subscribe({
-        next: (report) => {
-          console.log('✅ Reporte generado con Gemini:', report);
-          if (report) {
-            this.report = report;
-            // 3. Guarda el reporte en Firestore.
-            this.diagnosticsService.saveDiagnosticWithReport(report, this.scores, diagnosticData).then(docRef => {
-              console.log('💾 Reporte guardado en Firestore:', docRef);
-            }).catch(error => {
-              console.warn('⚠️ No se pudo guardar en Firestore:', error);
-            });
-          } else {
-            console.error('❌ No se pudo generar el reporte con Gemini');
+        next: (reportText: string) => {
+          try {
+            const parsedReport = JSON.parse(reportText) as DiagnosticReport;
+            this.report = parsedReport;
+            this.diagnosticsService
+              .saveDiagnosticWithReport(parsedReport, this.scores, diagnosticData)
+              .then(docRef => {
+                console.log('💾 Reporte guardado en Firestore:', docRef);
+              })
+              .catch((error: unknown) => {
+                console.warn('⚠️ No se pudo guardar en Firestore:', error);
+              });
+            this.loadingError = false;
+          } catch (e) {
+            console.error('❌ Error parseando respuesta de IA:', e, reportText);
             this.loadingError = true;
           }
           this.isLoadingReport = false;
           this.isGeneratingReport = false;
         },
-        error: (error) => {
-          console.error('❌ Error al generar reporte con Gemini:', error);
+        error: (error: unknown) => {
+          console.error('❌ Error al generar reporte con IA:', error);
           this.loadingError = true;
           this.isLoadingReport = false;
           this.isGeneratingReport = false;

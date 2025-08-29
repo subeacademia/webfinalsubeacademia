@@ -101,7 +101,9 @@
   },
   "shared": {
     "back": "Back",
-    "more_about": "More about"
+    "more_about": "More about",
+    "next": "Next",
+    "cancel": "Cancel"
   },
   "diagnostico": {
     "results": {
@@ -126,6 +128,74 @@
       "recommended_actions": "Recommended Actions",
       "recommended_course": "Recommended Course",
       "view_course": "View Course"
+    }
+    ,
+    "loader": {
+      "title": "Generating Your Personalized Report",
+      "subtitle": "Our AI is analyzing your responses to create unique recommendations",
+      "step1": "Analyzing diagnosis responses",
+      "step2": "Evaluating competencies and strengths",
+      "step3": "Generating personalized action plan",
+      "msg1": "Starting analysis...",
+      "msg2": "Analyzing your responses...",
+      "msg3": "Consulting our AI...",
+      "msg4": "Building your action plan...",
+      "msg5": "Cross-referencing data for precise feedback..."
+    },
+    "competency_chart": {
+      "subtitle": "Competency percentage by area",
+      "data_received": "Data received",
+      "loading": "Loading competencies...",
+      "legend": {
+        "excellent": "Excellent (80-100)",
+        "good": "Good (60-79)",
+        "fair": "Fair (40-59)",
+        "low": "Low (20-39)",
+        "critical": "Critical (0-19)"
+      }
+    }
+    ,
+    "radar": {
+      "title": "Competency Profile",
+      "no_data": "No competency data available",
+      "complete_prompt": "Complete the diagnosis to see your profile",
+      "debug": "Debug Info:",
+      "total": "Total competencies",
+      "avg": "Average",
+      "max": "Max",
+      "min": "Min"
+    },
+    "share": {
+      "title": "Share Results",
+      "subtitle": "Select the social networks to share your AI diagnosis results",
+      "share": "Share",
+      "copy": "Copy link",
+      "copied": "Link copied!"
+    },
+    "step_objetivo": {
+      "title": "Main Objective",
+      "subtitle": "Tell us your main objective with AI implementation in your organization",
+      "ai_suggestions": "AI-Powered Suggestions",
+      "selected_count": "Selected",
+      "generating": "Generating personalized suggestions...",
+      "based_on_profile": "Based on your profile, here are suggested objectives that may be relevant:",
+      "apply": "Apply",
+      "clear": "Clear selection",
+      "selected_prefix": "You selected",
+      "selected_suffix": "suggestion(s). Applying will merge them into the main text field.",
+      "regenerating": "Regenerating...",
+      "regenerate": "Regenerate suggestions",
+      "regenerate_hint": "If you are not satisfied, you can generate new personalized options.",
+      "no_suggestions": "Suggestions could not be generated at this time. You can write your custom objective below.",
+      "question": "What is your main objective with AI implementation? *",
+      "placeholder": "Describe your main objective. For example: 'I want to automate customer support processes to improve efficiency and reduce operating costs'",
+      "error": "Please describe your main objective",
+      "examples_title": "Examples of common objectives:",
+      "example_1": "Automate repetitive processes",
+      "example_2": "Improve data-driven decision making",
+      "example_3": "Optimize customer experience",
+      "example_4": "Reduce operating costs",
+      "example_5": "Accelerate product innovation"
     }
   }
 }

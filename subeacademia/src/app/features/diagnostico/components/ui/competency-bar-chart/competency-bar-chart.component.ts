@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
+import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
 
 export interface CompetencyScore {
   name: string;
@@ -11,25 +12,25 @@ export interface CompetencyScore {
 @Component({
   selector: 'app-competency-bar-chart',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, BaseChartDirective, I18nTranslatePipe],
   template: `
     <div class="competency-chart-container">
       <div class="mb-4">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-          Análisis de Competencias
+        <h3 class="text-lg font-semibold text-[var(--fg)] mb-2">
+          {{ 'diagnostico.results.section_competencies' | i18nTranslate }}
         </h3>
-        <p class="text-sm text-gray-600 dark:text-gray-400">
-          Porcentaje de competencia por área
+        <p class="text-sm text-[var(--muted)]">
+          {{ 'diagnostico.competency_chart.subtitle' | i18nTranslate }}
         </p>
         <!-- Debug info -->
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Datos recibidos: {{ (chartData?.labels?.length || competencyScores.length || 0) }} competencias
+        <p class="text-xs text-[var(--muted)] mt-1">
+          {{ 'diagnostico.competency_chart.data_received' | i18nTranslate }}: {{ (chartData?.labels?.length || competencyScores.length || 0) }}
         </p>
       </div>
       
       <!-- Gráfico de barras con ng2-charts si hay chartData; si no, fallback HTML/CSS -->
       <ng-container *ngIf="chartData; else fallbackBars">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+        <div class="bg-[var(--card)] rounded-lg p-4 shadow border border-[var(--border)]">
           <canvas baseChart
                   [data]="chartData"
                   [type]="'bar'"
@@ -40,18 +41,18 @@ export interface CompetencyScore {
       </ng-container>
       <ng-template #fallbackBars>
         <div class="simple-bar-chart">
-          <div *ngIf="!competencyScores || competencyScores.length === 0" class="text-center py-8 text-gray-500">
-            <p>Cargando competencias...</p>
+          <div *ngIf="!competencyScores || competencyScores.length === 0" class="text-center py-8 text-[var(--muted)]">
+            <p>{{ 'diagnostico.competency_chart.loading' | i18nTranslate }}</p>
           </div>
           <!-- Barras de competencias -->
           <div *ngFor="let item of competencyScores; let i = index" 
-               class="bar-item mb-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow">
+               class="bar-item mb-3 p-3 bg-[var(--card)] rounded-lg shadow border border-[var(--border)]">
             <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ item.name }}</span>
+              <span class="text-sm font-medium text-[var(--fg)]/80">{{ item.name }}</span>
               <span class="text-sm font-bold" [style.color]="getScoreColor(item.score)">{{ item.score }}%</span>
             </div>
             <!-- Barra de progreso -->
-            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 relative">
+            <div class="w-full bg-[var(--border)] rounded-full h-4 relative">
               <div class="h-4 rounded-full transition-all duration-1000 ease-out"
                    [style.width.%]="item.score"
                    [style.background-color]="getScoreColor(item.score)">
@@ -65,23 +66,23 @@ export interface CompetencyScore {
       <div class="mt-6 flex flex-wrap gap-4 justify-center text-sm">
         <div class="flex items-center">
           <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Excelente (80-100)</span>
+          <span class="text-[var(--muted)] font-medium">{{ 'diagnostico.competency_chart.legend.excellent' | i18nTranslate }}</span>
         </div>
         <div class="flex items-center">
           <div class="w-4 h-4 bg-blue-500 rounded mr-2"></div>
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Bueno (60-79)</span>
+          <span class="text-[var(--muted)] font-medium">{{ 'diagnostico.competency_chart.legend.good' | i18nTranslate }}</span>
         </div>
         <div class="flex items-center">
           <div class="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Regular (40-59)</span>
+          <span class="text-[var(--muted)] font-medium">{{ 'diagnostico.competency_chart.legend.fair' | i18nTranslate }}</span>
         </div>
         <div class="flex items-center">
           <div class="w-4 h-4 bg-orange-500 rounded mr-2"></div>
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Bajo (20-39)</span>
+          <span class="text-[var(--muted)] font-medium">{{ 'diagnostico.competency_chart.legend.low' | i18nTranslate }}</span>
         </div>
         <div class="flex items-center">
           <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Crítico (0-19)</span>
+          <span class="text-[var(--muted)] font-medium">{{ 'diagnostico.competency_chart.legend.critical' | i18nTranslate }}</span>
         </div>
       </div>
     </div>

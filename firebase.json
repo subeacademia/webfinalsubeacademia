@@ -22,5 +22,30 @@
         "functions"
       ]
     }
-  ]
+  ],
+  "hosting": {
+    "public": "dist/subeacademia/browser",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/generate",
+        "function": "generateContent"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      }
+    ]
+  }
 }

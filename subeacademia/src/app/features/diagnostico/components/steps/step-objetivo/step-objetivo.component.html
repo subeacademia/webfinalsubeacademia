@@ -1,7 +1,7 @@
 <div class="max-w-3xl mx-auto animate-fade-in">
   <div class="text-center mb-8">
-    <h2 class="text-3xl font-bold text-[var(--fg)] mb-4">Objetivo Principal</h2>
-    <p class="text-lg text-[var(--muted)]">Cuéntanos cuál es tu objetivo principal con la implementación de IA en tu organización</p>
+    <h2 class="text-3xl font-bold text-[var(--fg)] mb-4">{{ 'diagnostico.step_objetivo.title' | i18nTranslate }}</h2>
+    <p class="text-lg text-[var(--muted)]">{{ 'diagnostico.step_objetivo.subtitle' | i18nTranslate }}</p>
   </div>
 
   <div class="mb-8 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-6 border border-blue-700/30">
@@ -12,20 +12,20 @@
         </svg>
       </div>
       <div class="flex-1">
-        <h3 class="text-xl font-semibold text-[var(--fg)]">Sugerencias Personalizadas con IA</h3>
+        <h3 class="text-xl font-semibold text-[var(--fg)]">{{ 'diagnostico.step_objetivo.ai_suggestions' | i18nTranslate }}</h3>
         <p *ngIf="selectedSuggestions.length > 0" class="text-sm text-blue-200 mt-1">
-          {{ selectedSuggestions.length }} de {{ suggestions.length }} sugerencias seleccionadas
+          {{ 'diagnostico.step_objetivo.selected_count' | i18nTranslate }}: {{ selectedSuggestions.length }}/{{ suggestions.length }}
         </p>
       </div>
     </div>
     
     <div *ngIf="isLoadingSuggestions" class="text-center py-8">
       <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-blue-200">Generando sugerencias personalizadas...</p>
+      <p class="text-blue-200">{{ 'diagnostico.step_objetivo.generating' | i18nTranslate }}</p>
     </div>
 
     <div *ngIf="!isLoadingSuggestions && suggestions.length > 0" class="space-y-3">
-      <p class="text-blue-100 text-sm mb-4">Basado en tu perfil, aquí tienes algunas sugerencias de objetivos que podrían ser relevantes:</p>
+      <p class="text-blue-100 text-sm mb-4">{{ 'diagnostico.step_objetivo.based_on_profile' | i18nTranslate }}</p>
       
       <!-- Sugerencias con checkboxes para selección múltiple -->
       <div class="grid gap-3">
@@ -63,19 +63,18 @@
             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
-            Aplicar {{ selectedSuggestions.length }} sugerencia{{ selectedSuggestions.length > 1 ? 'es' : '' }} seleccionada{{ selectedSuggestions.length > 1 ? 's' : '' }}
+            {{ 'diagnostico.step_objetivo.apply' | i18nTranslate }} {{ selectedSuggestions.length }}
           </button>
           
           <button type="button" 
                   (click)="selectedSuggestions = []"
                   class="px-4 py-2 border border-[var(--border)] text-[var(--fg)] rounded-lg font-medium hover:bg-[var(--card)] transition-colors">
-            Limpiar selección
+            {{ 'diagnostico.step_objetivo.clear' | i18nTranslate }}
           </button>
         </div>
         
         <p class="text-xs text-blue-200 mt-2">
-          Seleccionaste {{ selectedSuggestions.length }} sugerencia{{ selectedSuggestions.length > 1 ? 'es' : '' }}. 
-          Al aplicarlas, se combinarán en el campo de texto principal.
+          {{ 'diagnostico.step_objetivo.selected_prefix' | i18nTranslate }} {{ selectedSuggestions.length }} {{ 'diagnostico.step_objetivo.selected_suffix' | i18nTranslate }}
         </p>
       </div>
 
@@ -91,34 +90,34 @@
           <svg *ngIf="isLoadingSuggestions" class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
-          {{ isLoadingSuggestions ? 'Regenerando...' : 'Regenerar sugerencias' }}
+          {{ (isLoadingSuggestions ? 'diagnostico.step_objetivo.regenerating' : 'diagnostico.step_objetivo.regenerate') | i18nTranslate }}
         </button>
         <p class="text-xs text-blue-200 mt-2 text-center">
-          Si no estás satisfecho con las sugerencias, puedes generar nuevas opciones personalizadas.
+          {{ 'diagnostico.step_objetivo.regenerate_hint' | i18nTranslate }}
         </p>
       </div>
     </div>
 
     <div *ngIf="!isLoadingSuggestions && suggestions.length === 0" class="text-center py-4">
-      <p class="text-blue-200 text-sm">No se pudieron generar sugerencias en este momento. Puedes escribir tu objetivo personalizado abajo.</p>
+      <p class="text-blue-200 text-sm">{{ 'diagnostico.step_objetivo.no_suggestions' | i18nTranslate }}</p>
     </div>
   </div>
 
   <form [formGroup]="objectiveForm" (ngSubmit)="onSubmit()" class="space-y-6">
     <div class="form-group">
-      <label for="mainObjective" class="block text-sm font-medium text-[var(--fg)] mb-2">¿Cuál es tu objetivo principal con la implementación de IA? *</label>
-      <textarea id="mainObjective" formControlName="mainObjective" rows="6" placeholder="Describe tu objetivo principal. Por ejemplo: 'Quiero automatizar procesos de atención al cliente para mejorar la eficiencia y reducir costos operativos'" class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--input-fg)] placeholder-[var(--input-placeholder)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent transition-colors resize-none"></textarea>
+      <label for="mainObjective" class="block text-sm font-medium text-[var(--fg)] mb-2">{{ 'diagnostico.step_objetivo.question' | i18nTranslate }}</label>
+      <textarea id="mainObjective" formControlName="mainObjective" rows="6" [placeholder]="'diagnostico.step_objetivo.placeholder' | i18nTranslate" class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--input-fg)] placeholder-[var(--input-placeholder)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent transition-colors resize-none"></textarea>
       <div *ngIf="objectiveForm.get('mainObjective')?.invalid && objectiveForm.get('mainObjective')?.touched" class="mt-1 text-red-400 text-sm">
-        Por favor describe tu objetivo principal
+        {{ 'diagnostico.step_objetivo.error' | i18nTranslate }}
       </div>
       <div class="mt-2 text-sm text-[var(--muted)]">
-        <p>Ejemplos de objetivos comunes:</p>
+        <p>{{ 'diagnostico.step_objetivo.examples_title' | i18nTranslate }}</p>
         <ul class="mt-2 space-y-1 text-left">
-          <li>• Automatizar procesos repetitivos</li>
-          <li>• Mejorar la toma de decisiones con datos</li>
-          <li>• Optimizar la experiencia del cliente</li>
-          <li>• Reducir costos operativos</li>
-          <li>• Acelerar la innovación de productos</li>
+          <li>• {{ 'diagnostico.step_objetivo.example_1' | i18nTranslate }}</li>
+          <li>• {{ 'diagnostico.step_objetivo.example_2' | i18nTranslate }}</li>
+          <li>• {{ 'diagnostico.step_objetivo.example_3' | i18nTranslate }}</li>
+          <li>• {{ 'diagnostico.step_objetivo.example_4' | i18nTranslate }}</li>
+          <li>• {{ 'diagnostico.step_objetivo.example_5' | i18nTranslate }}</li>
         </ul>
       </div>
     </div>
@@ -128,7 +127,7 @@
         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
         </svg>
-        Siguiente
+        {{ 'shared.next' | i18nTranslate }}
       </button>
     </div>
   </form>
