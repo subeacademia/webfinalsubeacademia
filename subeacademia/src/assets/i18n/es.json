@@ -206,5 +206,17 @@
       "example_4": "Reducir costos operativos",
       "example_5": "Acelerar la innovación de productos"
     }
-  }
+  },
+  "diagnostic.objective.title": "Define tu Objetivo Principal",
+  "diagnostic.objective.description": "Describe cuál es tu principal desafío o meta de desarrollo profesional en este momento. Nuestra IA te ayudará a definir objetivos claros.",
+  "diagnostic.objective.textAreaLabel": "Mi desafío o meta es...",
+  "diagnostic.objective.textAreaPlaceholder": "Ej: 'Quiero mejorar cómo presento mis ideas en reuniones importantes' o 'Necesito aprender a delegar tareas de forma más efectiva'.",
+  "diagnostic.objective.generateButton": "Generar Objetivos con IA",
+  "diagnostic.objective.generatingButton": "Generando...",
+  "diagnostic.objective.selectTitle": "Selecciona el objetivo que mejor te represente:",
+  "Mejorar mis habilidades de liderazgo": "Mejorar mis habilidades de liderazgo",
+  "Desarrollar mi inteligencia emocional": "Desarrollar mi inteligencia emocional",
+  "Aumentar mi productividad y gestión del tiempo": "Aumentar mi productividad y gestión del tiempo",
+  "Mejorar la comunicación con mi equipo": "Mejorar la comunicación con mi equipo",
+  "Otra": "Otra (la describiré más adelante)"
 }

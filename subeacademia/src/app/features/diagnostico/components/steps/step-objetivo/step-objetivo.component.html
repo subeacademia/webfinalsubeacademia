@@ -1,134 +1,47 @@
-<div class="max-w-3xl mx-auto animate-fade-in">
-  <div class="text-center mb-8">
-    <h2 class="text-3xl font-bold text-[var(--fg)] mb-4">{{ 'diagnostico.step_objetivo.title' | i18nTranslate }}</h2>
-    <p class="text-lg text-[var(--muted)]">{{ 'diagnostico.step_objetivo.subtitle' | i18nTranslate }}</p>
-  </div>
+<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
+  <form [formGroup]="objetivoForm">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ 'diagnostico.step_objetivo.title' | i18nTranslate }}</h2>
+    <p class="text-gray-600 dark:text-gray-300 mb-6">{{ 'diagnostico.step_objetivo.subtitle' | i18nTranslate }}</p>
 
-  <div class="mb-8 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-6 border border-blue-700/30">
-    <div class="flex items-center mb-4">
-      <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h3 class="text-xl font-semibold text-[var(--fg)]">{{ 'diagnostico.step_objetivo.ai_suggestions' | i18nTranslate }}</h3>
-        <p *ngIf="selectedSuggestions.length > 0" class="text-sm text-blue-200 mt-1">
-          {{ 'diagnostico.step_objetivo.selected_count' | i18nTranslate }}: {{ selectedSuggestions.length }}/{{ suggestions.length }}
-        </p>
-      </div>
-    </div>
-    
-    <div *ngIf="isLoadingSuggestions" class="text-center py-8">
-      <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-blue-200">{{ 'diagnostico.step_objetivo.generating' | i18nTranslate }}</p>
+    <!-- 1. Campo de texto para el usuario -->
+    <div class="mb-6">
+      <label for="descripcion" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'diagnostico.step_objetivo.question' | i18nTranslate }}</label>
+      <textarea id="descripcion" formControlName="descripcion" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [placeholder]="'diagnostico.step_objetivo.placeholder' | i18nTranslate"></textarea>
     </div>
 
-    <div *ngIf="!isLoadingSuggestions && suggestions.length > 0" class="space-y-3">
-      <p class="text-blue-100 text-sm mb-4">{{ 'diagnostico.step_objetivo.based_on_profile' | i18nTranslate }}</p>
-      
-      <!-- Sugerencias con checkboxes para selección múltiple -->
-      <div class="grid gap-3">
-        <div *ngFor="let suggestion of suggestions; let i = index" 
-             class="text-left p-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-all duration-200 hover:scale-105 group cursor-pointer"
-             (click)="toggleSuggestion(suggestion)">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <div class="flex items-center mb-2">
-                <!-- Checkbox para selección múltiple -->
-                <div class="w-5 h-5 border-2 border-white/40 rounded mr-3 flex items-center justify-center transition-colors"
-                     [class.bg-blue-500]="selectedSuggestions.includes(suggestion)"
-                     [class.border-blue-500]="selectedSuggestions.includes(suggestion)">
-                  <svg *ngIf="selectedSuggestions.includes(suggestion)" class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                  </svg>
-                </div>
-                
-                <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs rounded-full flex items-center justify-center mr-3">
-                  <span>{{ i + 1 }}</span>
-                </div>
-                <span class="font-medium text-[var(--fg)] group-hover:text-blue-200 transition-colors">{{ suggestion }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Botones de acción para las sugerencias seleccionadas -->
-      <div *ngIf="selectedSuggestions.length > 0" class="mt-4 pt-4 border-t border-white/20">
-        <div class="flex flex-col sm:flex-row gap-3">
-          <button type="button" 
-                  (click)="applySelectedSuggestions()"
-                  class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105">
-            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            {{ 'diagnostico.step_objetivo.apply' | i18nTranslate }} {{ selectedSuggestions.length }}
-          </button>
-          
-          <button type="button" 
-                  (click)="selectedSuggestions = []"
-                  class="px-4 py-2 border border-[var(--border)] text-[var(--fg)] rounded-lg font-medium hover:bg-[var(--card)] transition-colors">
-            {{ 'diagnostico.step_objetivo.clear' | i18nTranslate }}
-          </button>
-        </div>
-        
-        <p class="text-xs text-blue-200 mt-2">
-          {{ 'diagnostico.step_objetivo.selected_prefix' | i18nTranslate }} {{ selectedSuggestions.length }} {{ 'diagnostico.step_objetivo.selected_suffix' | i18nTranslate }}
-        </p>
-      </div>
-
-      <!-- Botón para regenerar sugerencias -->
-      <div class="mt-4 pt-4 border-t border-white/20">
-        <button type="button" 
-                (click)="getObjectiveSuggestions()"
-                [disabled]="isLoadingSuggestions"
-                class="w-full px-4 py-2 border border-[var(--border)] text-[var(--fg)] rounded-lg font-medium hover:bg-[var(--card)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          <svg *ngIf="!isLoadingSuggestions" class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          <svg *ngIf="isLoadingSuggestions" class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
-          {{ (isLoadingSuggestions ? 'diagnostico.step_objetivo.regenerating' : 'diagnostico.step_objetivo.regenerate') | i18nTranslate }}
-        </button>
-        <p class="text-xs text-blue-200 mt-2 text-center">
-          {{ 'diagnostico.step_objetivo.regenerate_hint' | i18nTranslate }}
-        </p>
-      </div>
-    </div>
-
-    <div *ngIf="!isLoadingSuggestions && suggestions.length === 0" class="text-center py-4">
-      <p class="text-blue-200 text-sm">{{ 'diagnostico.step_objetivo.no_suggestions' | i18nTranslate }}</p>
-    </div>
-  </div>
-
-  <form [formGroup]="objectiveForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <div class="form-group">
-      <label for="mainObjective" class="block text-sm font-medium text-[var(--fg)] mb-2">{{ 'diagnostico.step_objetivo.question' | i18nTranslate }}</label>
-      <textarea id="mainObjective" formControlName="mainObjective" rows="6" [placeholder]="'diagnostico.step_objetivo.placeholder' | i18nTranslate" class="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--input-fg)] placeholder-[var(--input-placeholder)] focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent transition-colors resize-none"></textarea>
-      <div *ngIf="objectiveForm.get('mainObjective')?.invalid && objectiveForm.get('mainObjective')?.touched" class="mt-1 text-red-400 text-sm">
-        {{ 'diagnostico.step_objetivo.error' | i18nTranslate }}
-      </div>
-      <div class="mt-2 text-sm text-[var(--muted)]">
-        <p>{{ 'diagnostico.step_objetivo.examples_title' | i18nTranslate }}</p>
-        <ul class="mt-2 space-y-1 text-left">
-          <li>• {{ 'diagnostico.step_objetivo.example_1' | i18nTranslate }}</li>
-          <li>• {{ 'diagnostico.step_objetivo.example_2' | i18nTranslate }}</li>
-          <li>• {{ 'diagnostico.step_objetivo.example_3' | i18nTranslate }}</li>
-          <li>• {{ 'diagnostico.step_objetivo.example_4' | i18nTranslate }}</li>
-          <li>• {{ 'diagnostico.step_objetivo.example_5' | i18nTranslate }}</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="pt-4">
-      <button type="submit" [disabled]="objectiveForm.invalid" class="w-full btn-primary py-3 px-6 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-        </svg>
-        {{ 'shared.next' | i18nTranslate }}
+    <!-- 2. Botón para generar con IA -->
+    <div class="mb-6 text-center">
+      <button (click)="generateObjectives()" [disabled]="isLoading || objetivoForm.get('descripcion')?.invalid" type="button" class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-purple-500 to-indigo-600 rounded-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoading" class="flex items-center">
+          <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.624l-.219.684-.219-.684a2.25 2.25 0 00-1.402-1.402l-.684-.219.684-.219a2.25 2.25 0 001.402-1.402l.219-.684.219.684a2.25 2.25 0 001.402 1.402l.684.219-.684.219a2.25 2.25 0 00-1.402 1.402z" /></svg>
+          {{ 'diagnostico.step_objetivo.regenerate' | i18nTranslate }}
+        </span>
+        <span *ngIf="isLoading" class="flex items-center">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          {{ 'diagnostico.step_objetivo.generating' | i18nTranslate }}
+        </span>
       </button>
+    </div>
+
+    <!-- 3. Resultados de la IA y Opciones Predefinidas -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ 'diagnostico.step_objetivo.ai_suggestions' | i18nTranslate }}</h3>
+      
+      <!-- Objetivos generados por IA -->
+      <div *ngIf="generatedObjectives.length > 0" class="space-y-3">
+        <div *ngFor="let objective of generatedObjectives" class="flex items-center p-3 rounded-lg bg-indigo-50 dark:bg-gray-700 border border-indigo-200 dark:border-gray-600">
+          <input [id]="objective" type="radio" [value]="objective" formControlName="objetivoSeleccionado" (change)="onSelectionChange()" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label [for]="objective" class="ml-3 w-full text-sm font-medium text-gray-900 dark:text-gray-300">{{ objective }}</label>
+        </div>
+      </div>
+
+      <!-- Objetivos predefinidos -->
+      <div class="space-y-3 pt-4">
+         <div *ngFor="let objective of predefinedObjectives" class="flex items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+          <input [id]="objective" type="radio" [value]="objective" formControlName="objetivoSeleccionado" (change)="onSelectionChange()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label [for]="objective" class="ml-3 w-full text-sm font-medium text-gray-900 dark:text-gray-300">{{ objective }}</label>
+        </div>
+      </div>
     </div>
   </form>
 </div>
