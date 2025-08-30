@@ -1,98 +1,215 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
-import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
+import { Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
 import { finalize } from 'rxjs/operators';
+
+import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { AsistenteIaService } from '../../../../../shared/ui/chatbot/asistente-ia.service';
 
 @Component({
   selector: 'app-step-objetivo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, I18nTranslatePipe],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './step-objetivo.component.html',
 })
 export class StepObjetivoComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  public state = inject(DiagnosticStateService);
-  private generativeAi = inject(GenerativeAiService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  readonly state = inject(DiagnosticStateService);
+  private readonly generativeAi = inject(AsistenteIaService);
 
-  objetivoForm!: FormGroup;
+  // Formulario local para capturar la descripción libre del usuario
+  uiForm!: FormGroup;
+
+  // FormArray referenciado directamente al estado global para los objetivos seleccionados
+  selectedObjectives!: FormArray<FormControl<string>>;
+
+  // UI state
   isLoading = false;
-  generatedObjectives: string[] = [];
+  errorMsg: string | null = null;
+  suggestions: string[] = [];
   
   // Opciones predefinidas como fallback
-  predefinedObjectives = [
-    'Mejorar mis habilidades de liderazgo',
-    'Desarrollar mi inteligencia emocional',
-    'Aumentar mi productividad y gestión del tiempo',
-    'Mejorar la comunicación con mi equipo',
-    'Otra'
+  readonly predefinedObjectives: string[] = [
+    'Optimizar procesos con IA (automatización y eficiencia)',
+    'Formar al equipo en competencias clave de IA',
+    'Implementar analítica avanzada para toma de decisiones',
+    'Mejorar la experiencia del cliente con IA generativa',
+    'Fortalecer la gobernanza y ética de datos',
   ];
 
-  constructor() {}
-
   ngOnInit(): void {
-    this.objetivoForm = this.fb.group({
-      descripcion: ['', Validators.required],
-      objetivoSeleccionado: [this.state.form.get('objetivo')?.value || '', Validators.required],
+    // Enlazar el FormArray del estado global
+    const fa = this.state.form.get('objetivo');
+    this.selectedObjectives = (fa instanceof FormArray) ? fa as FormArray<FormControl<string>> : this.fb.array([]) as FormArray<FormControl<string>>;
+
+    // Formulario de UI
+    this.uiForm = this.fb.group({
+      descripcion: ['', [Validators.required, Validators.minLength(8)]],
     });
 
-    // Si ya hay un objetivo, lo establece en el form
-    const currentObjective = this.state.form.get('objetivo')?.value;
-    if(currentObjective && !this.predefinedObjectives.includes(currentObjective)) {
-        this.generatedObjectives.push(currentObjective);
-    }
+    // Si ya había objetivos seleccionados, asegurar unicidad
+    this.deduplicateSelected();
   }
 
-  generateObjectives(): void {
-    if (!this.objetivoForm.get('descripcion')?.value) {
-      // Idealmente, mostrar un toast o mensaje al usuario.
-      console.warn('La descripción no puede estar vacía para generar objetivos.');
+  // Construye un prompt inteligente con el contexto, ARES y competencias
+  private buildPrompt(userDescription: string): string {
+    const contexto = this.state.getContextoData();
+    const segmento = this.state.form.get('segmento')?.value ?? 'No especificado';
+
+    const aresValues = this.state.aresForm.value as Record<string, number>;
+    const competenciasValues = this.state.competenciasForm.value as Record<string, number>;
+
+    // Extraer top debilidades y fortalezas ARES
+    const aresArray = Object.entries(aresValues)
+      .filter(([, v]) => typeof v === 'number')
+      .map(([id, v]) => ({ id, score: v as number }));
+    const weakestAres = [...aresArray].sort((a, b) => a.score - b.score).slice(0, 3).map(x => this.labelFromAresId(x.id));
+    const strongestAres = [...aresArray].sort((a, b) => b.score - a.score).slice(0, 3).map(x => this.labelFromAresId(x.id));
+
+    // Extraer competencias más bajas
+    const compArray = Object.entries(competenciasValues)
+      .filter(([, v]) => typeof v === 'number')
+      .map(([id, v]) => ({ id, score: v as number }));
+    const lowestCompetencias = [...compArray].sort((a, b) => a.score - b.score).slice(0, 4).map(x => this.labelFromCompetenciaId(x.id));
+
+    return `Eres un asesor experto en transformación con IA.
+Genera entre 5 y 7 objetivos SMART, accionables y específicos, alineados al contexto y carencias detectadas. Devuelve SOLO la lista, una línea por objetivo, sin numeración ni texto adicional.
+
+Contexto:
+- Industria: ${contexto?.industria ?? 'No especificada'}
+- Tamaño: ${contexto?.tamano ?? 'No especificado'}
+- Presupuesto: ${contexto?.presupuesto ?? 'No especificado'}
+- Segmento: ${segmento}
+- Descripción del usuario: "${userDescription}"
+
+Hallazgos ARES:
+- Áreas más débiles: ${weakestAres.join(', ') || 'No disponible'}
+- Áreas más fuertes: ${strongestAres.join(', ') || 'No disponible'}
+
+Competencias más bajas: ${lowestCompetencias.join(', ') || 'No disponible'}`;
+  }
+
+  private labelFromAresId(id: string): string {
+    const item = this.state.aresItems?.find(x => x.id === id);
+    return item?.labelKey ?? id;
+  }
+
+  private labelFromCompetenciaId(id: string): string {
+    const comp = this.state.competencias?.find(x => x.id === id);
+    return comp?.nameKey ?? id;
+  }
+
+  // Generar sugerencias con IA
+  async onGenerate(): Promise<void> {
+    if (this.uiForm.invalid) {
+      this.uiForm.markAllAsTouched();
       return;
     }
-
     this.isLoading = true;
-    this.generatedObjectives = [];
-    const context = this.state.getContextoData();
-    const userDescription = this.objetivoForm.get('descripcion')?.value;
+    this.errorMsg = null;
+    this.suggestions = [];
 
-    const prompt = `
-      Basado en el siguiente contexto de una organización, genera 3 objetivos de desarrollo claros, concisos y accionables.
-      - Industria: ${context?.industria || 'No especificada'}
-      - Tamaño: ${context?.tamano || 'No especificado'}
-      - Presupuesto: ${context?.presupuesto || 'No especificado'}
-      - Segmento: ${this.state.form.get('segmento')?.value || 'No especificado'}
-      - Descripción del desafío o meta: "${userDescription}"
-
-      Responde únicamente con los 3 objetivos, cada uno en una nueva línea, sin numeración ni introducciones. Por ejemplo:
-      Desarrollar habilidades de negociación para cierre de contratos.
-      Implementar una nueva metodología de gestión de proyectos ágiles.
-      Mejorar la comunicación asertiva en reuniones de equipo.
-    `;
-
-    this.generativeAi.generateContent(prompt)
+    const desc = (this.uiForm.get('descripcion') as FormControl<string>).value ?? '';
+    const prompt = this.buildPrompt(desc);
+    const payload: any = {
+      messages: [
+        { role: 'system', content: 'Eres un asistente que genera listas de objetivos en texto plano, uno por línea.' },
+        { role: 'user', content: prompt }
+      ],
+      maxTokens: 400,
+      temperature: 0.6
+    };
+    (this.generativeAi as AsistenteIaService).generarTextoAzure(payload)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
-        next: (response) => {
-          // El texto viene separado por saltos de línea
-          this.generatedObjectives = response.split('\n').filter(obj => obj.trim() !== '');
+        next: (res: any) => {
+          const raw = res?.choices?.[0]?.message?.content ?? '';
+          const lines = raw.split(/\r?\n/)
+            .map((s: string) => s.trim())
+            .map((s: string) => s.replace(/^[-*\d.\)\]]+\s*/, ''))
+            .filter((s: string) => s.length > 0);
+          this.suggestions = this.unique([...lines]).slice(0, 10);
+          if (this.suggestions.length === 0) {
+            this.suggestions = [...this.predefinedObjectives];
+          }
         },
         error: (err) => {
-          console.error('Error al generar objetivos:', err);
-          // En caso de error, podríamos mostrar un mensaje al usuario.
+          console.error('Error IA (objetivos):', err);
+          this.errorMsg = 'No se pudieron generar sugerencias. Usa las opciones predefinidas o intenta nuevamente.';
+          this.suggestions = [...this.predefinedObjectives];
         }
       });
   }
 
-  saveState(): void {
-    const selected = this.objetivoForm.get('objetivoSeleccionado')?.value;
-    if (selected) {
-      this.state.form.patchValue({ objetivo: selected });
+  // Checkbox change handler
+  onToggle(option: string, checked: boolean): void {
+    if (checked) {
+      this.addSelection(option);
+    } else {
+      this.removeSelection(option);
     }
   }
 
-  onSelectionChange(): void {
-    this.saveState();
+  isSelected(option: string): boolean {
+    const values = (this.selectedObjectives.value || []) as string[];
+    return values.includes(option);
+  }
+
+  private addSelection(option: string): void {
+    const values = (this.selectedObjectives.value || []) as string[];
+    if (!values.includes(option)) {
+      this.selectedObjectives.push(new FormControl<string>(option, { nonNullable: true }));
+    }
+  }
+
+  private removeSelection(option: string): void {
+    const idx = (this.selectedObjectives.value as string[]).findIndex(v => v === option);
+    if (idx >= 0) {
+      this.selectedObjectives.removeAt(idx);
+    }
+  }
+
+  private deduplicateSelected(): void {
+    const seen = new Set<string>();
+    const toKeep: string[] = [];
+    for (const v of (this.selectedObjectives.value as string[])) {
+      if (!seen.has(v)) {
+        seen.add(v);
+        toKeep.push(v);
+      }
+    }
+    if (toKeep.length !== this.selectedObjectives.length) {
+      this.selectedObjectives.clear();
+      toKeep.forEach(v => this.selectedObjectives.push(new FormControl<string>(v, { nonNullable: true })));
+    }
+  }
+
+  get selectedCount(): number {
+    return this.selectedObjectives?.length ?? 0;
+  }
+
+  // Navegación
+  goNext(): void {
+    if (this.selectedCount === 0) return;
+    const next = this.state.getNextStepLink(this.router.url);
+    if (next) {
+      const base = this.router.url.split('/').slice(0, -1).join('/');
+      this.router.navigate([`${base}/${next}`]).catch(err => console.error('Error navegación next:', err));
+    }
+  }
+
+  goPrevious(): void {
+    const prev = this.state.getPreviousStepLink(this.router.url);
+    if (prev) {
+      const base = this.router.url.split('/').slice(0, -1).join('/');
+      this.router.navigate([`${base}/${prev}`]).catch(err => console.error('Error navegación prev:', err));
+    }
+  }
+
+  // Utilidad para deduplicar arrays
+  private unique(arr: string[]): string[] {
+    return Array.from(new Set(arr.map(s => s.trim())));
   }
 }

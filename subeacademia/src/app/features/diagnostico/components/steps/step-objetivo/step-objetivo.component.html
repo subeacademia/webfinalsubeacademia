@@ -1,47 +1,81 @@
-<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
-  <form [formGroup]="objetivoForm">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">{{ 'diagnostico.step_objetivo.title' | i18nTranslate }}</h2>
-    <p class="text-gray-600 dark:text-gray-300 mb-6">{{ 'diagnostico.step_objetivo.subtitle' | i18nTranslate }}</p>
+<div class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md transition-colors duration-300">
+  <!-- Header -->
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Define tus objetivos</h2>
+    <p class="text-gray-600 dark:text-gray-300">Selecciona múltiples objetivos alineados a tu contexto. Puedes generar sugerencias con IA.</p>
+  </div>
 
-    <!-- 1. Campo de texto para el usuario -->
-    <div class="mb-6">
-      <label for="descripcion" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'diagnostico.step_objetivo.question' | i18nTranslate }}</label>
-      <textarea id="descripcion" formControlName="descripcion" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [placeholder]="'diagnostico.step_objetivo.placeholder' | i18nTranslate"></textarea>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Columna izquierda: Resumen + entrada usuario -->
+    <div class="lg:col-span-1 space-y-4">
+      <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Resumen del contexto</span>
+          <span class="text-xs text-gray-500">Automático</span>
+        </div>
+        <ul class="text-sm text-gray-600 dark:text-gray-400 list-disc pl-5 space-y-1">
+          <li>Industria: {{ state.getContextoData()?.industria || '—' }}</li>
+          <li>Tamaño: {{ state.getContextoData()?.tamano || '—' }}</li>
+          <li>Presupuesto: {{ state.getContextoData()?.presupuesto || '—' }}</li>
+          <li>Segmento: {{ state.form.get('segmento')?.value || '—' }}</li>
+        </ul>
     </div>
 
-    <!-- 2. Botón para generar con IA -->
-    <div class="mb-6 text-center">
-      <button (click)="generateObjectives()" [disabled]="isLoading || objetivoForm.get('descripcion')?.invalid" type="button" class="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-purple-500 to-indigo-600 rounded-md hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-        <span *ngIf="!isLoading" class="flex items-center">
-          <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.624l-.219.684-.219-.684a2.25 2.25 0 00-1.402-1.402l-.684-.219.684-.219a2.25 2.25 0 001.402-1.402l.219-.684.219.684a2.25 2.25 0 001.402 1.402l.684.219-.684.219a2.25 2.25 0 00-1.402 1.402z" /></svg>
-          {{ 'diagnostico.step_objetivo.regenerate' | i18nTranslate }}
-        </span>
-        <span *ngIf="isLoading" class="flex items-center">
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          {{ 'diagnostico.step_objetivo.generating' | i18nTranslate }}
-        </span>
+      <form [formGroup]="uiForm" class="space-y-3">
+        <label for="descripcion" class="block text-sm font-medium text-gray-900 dark:text-white">Describe tu meta principal</label>
+        <textarea id="descripcion" formControlName="descripcion" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-white" placeholder="Ej: Acelerar adopción de IA en ventas y atención al cliente"></textarea>
+
+        <button type="button" (click)="onGenerate()" [disabled]="uiForm.invalid || isLoading" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-md hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50">
+          <svg *ngIf="!isLoading" class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+          <svg *ngIf="isLoading" class="w-4 h-4 mr-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          {{ isLoading ? 'Generando...' : 'Generar con IA' }}
       </button>
+
+        <div *ngIf="errorMsg" class="text-sm text-red-400 bg-red-900/20 border border-red-500/30 rounded-md p-2">{{ errorMsg }}</div>
+      </form>
     </div>
 
-    <!-- 3. Resultados de la IA y Opciones Predefinidas -->
-    <div class="space-y-4">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ 'diagnostico.step_objetivo.ai_suggestions' | i18nTranslate }}</h3>
-      
-      <!-- Objetivos generados por IA -->
-      <div *ngIf="generatedObjectives.length > 0" class="space-y-3">
-        <div *ngFor="let objective of generatedObjectives" class="flex items-center p-3 rounded-lg bg-indigo-50 dark:bg-gray-700 border border-indigo-200 dark:border-gray-600">
-          <input [id]="objective" type="radio" [value]="objective" formControlName="objetivoSeleccionado" (change)="onSelectionChange()" class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-          <label [for]="objective" class="ml-3 w-full text-sm font-medium text-gray-900 dark:text-gray-300">{{ objective }}</label>
+    <!-- Columna derecha: sugerencias y selección múltiple -->
+    <div class="lg:col-span-2">
+      <!-- Loading skeleton -->
+      <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div *ngFor="let i of [0,1,2,3]" class="p-4 rounded-lg bg-gray-800/50 border border-gray-700 animate-pulse">
+          <div class="h-4 bg-gray-700 rounded w-5/6 mb-2"></div>
+          <div class="h-4 bg-gray-700 rounded w-4/6"></div>
         </div>
       </div>
 
-      <!-- Objetivos predefinidos -->
-      <div class="space-y-3 pt-4">
-         <div *ngFor="let objective of predefinedObjectives" class="flex items-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-          <input [id]="objective" type="radio" [value]="objective" formControlName="objetivoSeleccionado" (change)="onSelectionChange()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-          <label [for]="objective" class="ml-3 w-full text-sm font-medium text-gray-900 dark:text-gray-300">{{ objective }}</label>
+      <!-- Lista de sugerencias -->
+      <div *ngIf="!isLoading" class="space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Sugerencias de la IA</h3>
+          <div class="space-y-3">
+            <label *ngFor="let opt of suggestions" class="flex items-start gap-3 p-3 rounded-lg bg-gray-800/40 border border-gray-700 cursor-pointer">
+              <input type="checkbox" [checked]="isSelected(opt)" (change)="onToggle(opt, $any($event.target).checked)" class="mt-1 w-4 h-4 text-purple-600 bg-gray-800 border-gray-600 rounded focus:ring-purple-500">
+              <span class="text-sm text-gray-100">{{ opt }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Opciones predefinidas</h3>
+          <div class="space-y-3">
+            <label *ngFor="let opt of predefinedObjectives" class="flex items-start gap-3 p-3 rounded-lg bg-gray-800/20 border border-gray-700 cursor-pointer">
+              <input type="checkbox" [checked]="isSelected(opt)" (change)="onToggle(opt, $any($event.target).checked)" class="mt-1 w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500">
+              <span class="text-sm text-gray-100">{{ opt }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Estado de selección -->
+        <div class="flex items-center justify-between mt-4">
+          <div class="text-sm text-gray-400">Seleccionados: {{ selectedCount }}</div>
+          <div class="space-x-2">
+            <button type="button" (click)="goPrevious()" class="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600">Anterior</button>
+            <button type="button" (click)="goNext()" [disabled]="selectedCount === 0" class="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">Siguiente</button>
+          </div>
         </div>
       </div>
     </div>
-  </form>
+  </div>
 </div>

@@ -1,29 +1,30 @@
-import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, AfterViewInit, ViewChild, ElementRef, OnChanges, SimpleChanges, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
+import { FormsModule } from '@angular/forms';
 import { I18nService } from '../../../../../core/i18n/i18n.service';
 import { SeoService } from '../../../../../core/seo/seo.service';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
-import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
-import { DiagnosticReport } from '../../../data/report.model';
+import { DiagnosticReport, PlanDeAccionItem } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { PdfService } from '../../../services/pdf.service';
-import { SemaforoAresComponent } from '../semaforo-ares.component';
-import { CompetencyBarChartComponent } from '../competency-bar-chart/competency-bar-chart.component';
 import { GeneratingReportLoaderComponent } from '../generating-report-loader/generating-report-loader.component';
 import { AnimationService } from '../../../../../core/services/animation.service';
 import { ChartConfiguration } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import { COMPETENCIAS } from '../../../data/competencias';
 import { SocialShareModalComponent } from '../social-share-modal/social-share-modal.component';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
+import { catchError, of } from 'rxjs';
+import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
+import { AsistenteIaService } from '../../../../../shared/ui/chatbot/asistente-ia.service';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe, SemaforoAresComponent, CompetencyBarChartComponent, GeneratingReportLoaderComponent, BaseChartDirective, SocialShareModalComponent],
+  imports: [CommonModule, FormsModule, GeneratingReportLoaderComponent, SocialShareModalComponent, NgxChartsModule],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
@@ -32,8 +33,13 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   
   private stateService = inject(DiagnosticStateService);
   private scoringService = inject(ScoringService);
-  private generativeAiService = inject(GenerativeAiService);
   private diagnosticsService = inject(DiagnosticsService);
+  private asistenteIaService = inject(AsistenteIaService);
+  
+  // Nuevo estado reactivo para detailedReport
+  isGeneratingDetailed = signal(true);
+  detailedReportError = signal(false);
+  detailedReport = signal<any | null>(null);
   private pdfService = inject(PdfService);
   private animationService = inject(AnimationService);
   private toastService = inject(ToastService);
@@ -48,6 +54,17 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   pdfUrl: string | null = null;
   isGeneratingPdf = false;
   isGeneratingReport = false;
+  diagnosticId: string | null = null;
+
+  // Datos para ngx-charts (gráfico polar/radar)
+  polarResults: Array<{ name: string; series: Array<{ name: string; value: number }> }> = [];
+  view: [number, number] = [600, 300];
+  colorScheme: Color = {
+    name: 'competencias',
+    selectable: true,
+    group: ScaleType.Ordinal,
+    domain: ['#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#8b5cf6']
+  };
 
   // Datos del gráfico radar
   public radarChartData!: ChartConfiguration<'radar'>['data'];
@@ -64,6 +81,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       const id = this.route.snapshot.paramMap.get('id');
       if (id) {
         // Modo sólo lectura desde Firestore por ID
+        this.diagnosticId = id;
         this.diagnosticsService.getById(id).subscribe((doc: any) => {
           try {
             const diagnosticData = doc?.diagnosticData || doc?.form || {};
@@ -80,6 +98,12 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
             this.report = doc?.report || null;
             this.isGeneratingReport = false;
             this.isLoadingReport = false;
+            this.formatChartData();
+
+            // Generar plan de acción si no existe aún
+            if (this.report && !this.report.planDeAccion && this.diagnosticId) {
+              this.generateActionPlan(this.report);
+            }
           } catch (e) {
             console.error('Error procesando doc diagnóstico:', e);
             this.loadingError = true; this.isLoadingReport = false; this.isGeneratingReport = false;
@@ -114,6 +138,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
       // 2. Prepara los datos del gráfico radar
       this.prepareRadarChartData();
+      this.formatChartData();
 
       // 3. Forzar la detección de cambios para los componentes hijos
       setTimeout(() => {
@@ -124,9 +149,23 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
         this.scores = { ...this.scores };
       }, 200);
 
-      // 4. Activar loader y llamar a la IA para generar el reporte detallado.
-      this.isGeneratingReport = true;
-      this.generateReport(diagnosticData);
+      // 4. Activar loader y llamar a la nueva Cloud Function para generar el reporte detallado.
+      this.isGeneratingDetailed.set(true);
+      this.detailedReportError.set(false);
+      this.diagnosticsService.generateDetailedReport(diagnosticData)
+        .pipe(
+          catchError(error => {
+            console.error('Error generating detailed report', error);
+            this.detailedReportError.set(true);
+            return of(null);
+          })
+        )
+        .subscribe(reportData => {
+          if (reportData) {
+            this.detailedReport.set(reportData);
+          }
+          this.isGeneratingDetailed.set(false);
+        });
 
       // SEO título por idioma
       try {
@@ -271,6 +310,47 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     console.log('📊 Gráfico radar inicializado con datos:', this.radarChartData);
   }
 
+  // Formatea datos para ngx-charts polar chart a partir de scores/report
+  formatChartData(): void {
+    try {
+      let entries: Array<{ name: string; value: number }> = [];
+
+      // Preferir scores.competencias si existe
+      if (this.scores?.competencias) {
+        if (Array.isArray(this.scores.competencias)) {
+          entries = this.scores.competencias.map((comp: any) => {
+            const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
+            const name = competency?.nameKey || comp.competenciaId;
+            const value = typeof comp.puntaje === 'number' ? comp.puntaje : 0;
+            return { name, value };
+          });
+        } else {
+          entries = Object.entries(this.scores.competencias).map(([name, value]) => ({
+            name,
+            value: typeof value === 'number' ? value : 0
+          }));
+        }
+      } else if ((this.report as any)?.competencias) {
+        const rc: any = (this.report as any).competencias;
+        if (Array.isArray(rc)) {
+          entries = rc.map((c: any) => ({ name: c?.name || c?.competencia || 'Competencia', value: Number(c?.value ?? c?.puntaje ?? 0) }));
+        } else {
+          entries = Object.entries(rc).map(([name, value]) => ({ name, value: Number(value) || 0 }));
+        }
+      }
+
+      // Asegurar límites 0..100
+      entries = entries.map(e => ({ name: e.name, value: Math.max(0, Math.min(100, Math.round(e.value))) }));
+
+      this.polarResults = entries.length
+        ? [{ name: 'Competencias', series: entries }]
+        : [];
+    } catch (err) {
+      console.warn('formatChartData(): no se pudieron formatear competencias para ngx-charts', err);
+      this.polarResults = [];
+    }
+  }
+
   private animateResults(): void {
     // Animación de conteo para el puntaje total
     if (this.scores?.ares?.promedio !== undefined) {
@@ -330,50 +410,22 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   }
 
   private generateReport(diagnosticData: any): void {
-    console.log('🤖 Iniciando generación del reporte con IA (backend)...');
-    this.isLoadingReport = true;
-    this.loadingError = false;
-    
-    // Identificar la competencia más débil para el CTA dinámico
-    const weakestCompetency = this.identifyWeakestCompetency();
-    const ctaPrompt = this.generateCTAPrompt(weakestCompetency);
-    
-    // Construir un prompt combinando datos del diagnóstico y CTA adicional
-    const payload = {
-      diagnosticData,
-      scores: this.scores,
-      ctaPrompt
-    };
-    const prompt = `Genera un reporte diagnóstico en JSON compacto basado en: ${JSON.stringify(payload)}`;
-
-    this.generativeAiService.generateContent(prompt)
-      .subscribe({
-        next: (reportText: string) => {
-          try {
-            const parsedReport = JSON.parse(reportText) as DiagnosticReport;
-            this.report = parsedReport;
-            this.diagnosticsService
-              .saveDiagnosticWithReport(parsedReport, this.scores, diagnosticData)
-              .then(docRef => {
-                console.log('💾 Reporte guardado en Firestore:', docRef);
-              })
-              .catch((error: unknown) => {
-                console.warn('⚠️ No se pudo guardar en Firestore:', error);
-              });
-            this.loadingError = false;
-          } catch (e) {
-            console.error('❌ Error parseando respuesta de IA:', e, reportText);
-            this.loadingError = true;
-          }
-          this.isLoadingReport = false;
-          this.isGeneratingReport = false;
-        },
-        error: (error: unknown) => {
-          console.error('❌ Error al generar reporte con IA:', error);
-          this.loadingError = true;
-          this.isLoadingReport = false;
-          this.isGeneratingReport = false;
+    console.log('🤖 Re-generando reporte detallado (Cloud Function)...');
+    this.isGeneratingDetailed.set(true);
+    this.detailedReportError.set(false);
+    this.diagnosticsService.generateDetailedReport(diagnosticData)
+      .pipe(
+        catchError(error => {
+          console.error('Error generating detailed report', error);
+          this.detailedReportError.set(true);
+          return of(null);
+        })
+      )
+      .subscribe(reportData => {
+        if (reportData) {
+          this.detailedReport.set(reportData);
         }
+        this.isGeneratingDetailed.set(false);
       });
   }
 
@@ -863,6 +915,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     
     // Preparar datos del gráfico radar
     this.prepareRadarChartData();
+    this.formatChartData();
     
     // Forzar actualización de componentes hijos
     setTimeout(() => {
@@ -1019,5 +1072,97 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
 
   ngOnDestroy(): void {
     // Cleanup si es necesario
+  }
+
+  // =====================
+  // Plan de Acción con API de Vercel (Azure/OpenAI)
+  // =====================
+  private buildActionPlanPrompt(report: DiagnosticReport): string {
+    const resumen = (report as any)?.resumen_ejecutivo || '';
+    const areas = ((report as any)?.areas_enfoque_principales || []).join(', ');
+    const foda = (report as any)?.analisis_foda || {};
+    const fortalezas = Array.isArray(foda.fortalezas) ? foda.fortalezas.join('; ') : '';
+    const debilidades = Array.isArray(foda.debilidades) ? foda.debilidades.join('; ') : '';
+    const oportunidades = Array.isArray(foda.oportunidades) ? foda.oportunidades.join('; ') : '';
+    const amenazas = Array.isArray(foda.amenazas) ? foda.amenazas.join('; ') : '';
+
+    const base = `Contexto del diagnóstico:\n\nResumen ejecutivo:\n${resumen}\n\nÁreas de enfoque principales: ${areas}\n\nAnálisis FODA:\n- Fortalezas: ${fortalezas}\n- Debilidades: ${debilidades}\n- Oportunidades: ${oportunidades}\n- Amenazas: ${amenazas}\n\n`;
+
+    const forceJson = "Basado en la información anterior, genera un plan de acción de 3 a 5 pasos concretos y priorizados. Tu respuesta DEBE SER EXCLUSIVAMENTE un objeto JSON válido, sin ningún texto, explicación o markdown antes o después. La estructura del JSON debe ser la siguiente: { \"items\": [{ \"accion\": \"Descripción detallada de la acción 1\", \"completado\": false }, { \"accion\": \"Descripción detallada de la acción 2\", \"completado\": false }] }";
+
+    return `${base}${forceJson}`;
+  }
+
+  generateActionPlan(report: DiagnosticReport): void {
+    try {
+      const promptText = this.buildActionPlanPrompt(report);
+      const payload = {
+        messages: [
+          { role: 'system', content: 'Eres un experto en desarrollo profesional y coaching que solo responde con objetos JSON válidos.' },
+          { role: 'user', content: promptText }
+        ],
+        maxTokens: 1000,
+        temperature: 0.5
+      } as any;
+
+      this.asistenteIaService.generarTextoAzure(payload).subscribe({
+        next: (res: any) => {
+          try {
+            const content = res?.choices?.[0]?.message?.content ?? '';
+            const plan = JSON.parse(content);
+            if (this.report) {
+              this.report = { ...this.report, planDeAccion: plan } as any;
+            }
+            if (this.diagnosticId) {
+              const items: PlanDeAccionItem[] = plan?.items || [];
+              this.diagnosticsService.updateActionPlan(this.diagnosticId, items).catch((err: unknown) => console.error('Error al guardar planDeAccion:', err));
+            }
+          } catch (error) {
+            console.error('Error al parsear el plan de acción JSON:', error);
+          }
+        },
+        error: (err: unknown) => {
+          console.error('Error al generar plan de acción:', err);
+        }
+      });
+    } catch (error) {
+      console.error('Error general en generateActionPlan:', error);
+    }
+  }
+
+  toggleTask(reportId: string, planItems: any[]): void {
+    if (!reportId || !Array.isArray(planItems)) return;
+    this.diagnosticsService.updateActionPlan(reportId, planItems as PlanDeAccionItem[])
+      .catch((err: unknown) => console.error('Error actualizando estado de tareas:', err));
+  }
+
+  // =====================
+  // Exportar a PDF (html2canvas + jsPDF)
+  // =====================
+  public downloadPdf(): void {
+    const reportElement = document.getElementById('diagnosticReportContainer');
+    if (!reportElement) {
+      console.error('Elemento del reporte no encontrado!');
+      return;
+    }
+
+    const actionButtons = reportElement.querySelectorAll('.no-print');
+    actionButtons.forEach(el => ((el as HTMLElement).style.visibility = 'hidden'));
+
+    html2canvas(reportElement, { scale: 2, useCORS: true }).then(canvas => {
+      actionButtons.forEach(el => ((el as HTMLElement).style.visibility = 'visible'));
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const filename = `informe-diagnostico-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(filename);
+    }).catch((error: unknown) => {
+      actionButtons.forEach(el => ((el as HTMLElement).style.visibility = 'visible'));
+      console.error('Error al generar el PDF:', error);
+    });
   }
 }

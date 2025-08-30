@@ -21,4 +21,11 @@ export interface DiagnosticReport {
   resumen_ejecutivo: string;
   analisis_ares: ReportSection[];
   plan_de_accion: ActionPlanSection[];
+  // Plan de acción generado por la nueva IA (estructura compacta)
+  planDeAccion?: { items: PlanDeAccionItem[] };
+}
+
+export interface PlanDeAccionItem {
+  accion: string;
+  completado?: boolean;
 }

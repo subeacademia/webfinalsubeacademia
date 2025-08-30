@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, addDoc, collection, collectionData, query, where, orderBy, doc, docData } from '@angular/fire/firestore';
+import { HttpClient } from '@angular/common/http';
+import { Firestore, addDoc, collection, collectionData, query, where, orderBy, doc, docData, updateDoc } from '@angular/fire/firestore';
 import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
 import { Observable, map } from 'rxjs';
+import { PlanDeAccionItem } from '../data/report.model';
 
 interface UserDiagnostic {
   id: string;
@@ -16,6 +18,20 @@ interface UserDiagnostic {
 @Injectable({ providedIn: 'root' })
 export class DiagnosticsService {
 	private readonly firestore = inject(Firestore);
+    private readonly http = inject(HttpClient);
+    
+    generateDetailedReport(diagnosticData: any) {
+        try {
+            const projectId = (window as any)?.FIREBASE_CONFIG?.projectId || (window as any)?.__FIREBASE_DEFAULTS__?.projectId || 'web-subeacademia';
+            const region = 'us-central1';
+            const url = `https://${region}-${projectId}.cloudfunctions.net/generateDetailedReport`;
+            return this.http.post<any>(url, diagnosticData);
+        } catch (error) {
+            // Fallback a URL estática si no se puede resolver projectId en runtime
+            const url = 'https://us-central1-web-subeacademia.cloudfunctions.net/generateDetailedReport';
+            return this.http.post<any>(url, diagnosticData);
+        }
+    }
 
 	async saveAndRequestEmail(payload: DiagnosticoPersistedPayload & { email?: string; userId?: string }): Promise<string> {
 		// Si hay userId, guardar en la colección del usuario
@@ -45,6 +61,12 @@ export class DiagnosticsService {
 			return docRef.id;
 		}
 	}
+
+    // Actualiza solo el campo planDeAccion.items en el documento del diagnóstico
+    updateActionPlan(diagnosticId: string, planItems: PlanDeAccionItem[]): Promise<void> {
+        const ref = doc(this.firestore, 'diagnostics', diagnosticId);
+        return updateDoc(ref, { 'planDeAccion.items': planItems }) as Promise<void>;
+    }
 
 	getById(id: string) {
 		const ref = doc(this.firestore, `diagnostics/${id}`);
@@ -138,5 +160,14 @@ export class DiagnosticsService {
 		});
 	}
 }
+
+// Actualización parcial del plan de acción en el documento
+export interface PlanDeAccionPayload {
+    items: PlanDeAccionItem[];
+}
+
+// Método público para actualizar el plan de acción interactivo
+export interface UpdateActionPlanResult {}
+
 
 

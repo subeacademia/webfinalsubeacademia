@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormArray, Validators } from '@angular/forms';
 import { AresItem, DiagnosticoFormValue, NivelCompetencia, Segment } from '../data/diagnostic.models';
 import { ARES_ITEMS } from '../data/ares-items';
 import { COMPETENCIAS, COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO } from '../data/competencias';
@@ -50,7 +50,7 @@ export class DiagnosticStateService {
     // Formularios
     readonly form: FormGroup = this.fb.group({
         segmento: this.fb.control<Segment | null>(null),
-        objetivo: this.fb.control<string | null>(null, { validators: [Validators.required] }),
+        objetivo: this.fb.array([]),
     });
 
 	readonly contextoControls: Record<string, FormControl<any>> = {} as Record<string, FormControl<any>>;
@@ -388,9 +388,15 @@ export class DiagnosticStateService {
                 return hasCompetencias;
                 
             case 'objetivo':
-                const objetivo = this.form.get('objetivo')?.value;
-                const hasObjetivo = !!objetivo;
-                console.log(`🔍 Objetivo: ${hasObjetivo ? '✅' : '❌'}`, objetivo);
+                const objetivoCtrl = this.form.get('objetivo');
+                let hasObjetivo = false;
+                if (objetivoCtrl instanceof FormArray) {
+                    hasObjetivo = Array.isArray(objetivoCtrl.value) && objetivoCtrl.value.length > 0;
+                } else {
+                    const valor = objetivoCtrl?.value;
+                    hasObjetivo = Array.isArray(valor) ? valor.length > 0 : !!valor;
+                }
+                console.log(`🔍 Objetivo: ${hasObjetivo ? '✅' : '❌'}`, objetivoCtrl?.value);
                 return hasObjetivo;
                 
             case 'lead':
@@ -469,7 +475,23 @@ export class DiagnosticStateService {
             if (stored) {
                 const data = JSON.parse(stored);
                 
-                if (data.form) this.form.patchValue(data.form);
+                if (data.form) {
+                    // Restaurar 'segmento'
+                    if (Object.prototype.hasOwnProperty.call(data.form, 'segmento')) {
+                        this.form.patchValue({ segmento: data.form.segmento });
+                    }
+                    // Restaurar 'objetivo' como FormArray (compatibilidad con string)
+                    const objetivoCtrl = this.form.get('objetivo');
+                    if (objetivoCtrl instanceof FormArray) {
+                        objetivoCtrl.clear();
+                        const rawObjetivo = data.form.objetivo;
+                        if (Array.isArray(rawObjetivo)) {
+                            rawObjetivo.forEach((val: any) => objetivoCtrl.push(this.fb.control(val)));
+                        } else if (typeof rawObjetivo === 'string' && rawObjetivo) {
+                            objetivoCtrl.push(this.fb.control(rawObjetivo));
+                        }
+                    }
+                }
                 
                 // Cargar datos ARES con validación de valores
                 if (data.aresForm) {
@@ -521,6 +543,10 @@ export class DiagnosticStateService {
 
     // Método para limpiar el estado
     clearState(): void {
+        const objetivoCtrl = this.form.get('objetivo');
+        if (objetivoCtrl instanceof FormArray) {
+            objetivoCtrl.clear();
+        }
         this.form.reset();
         this.aresForm.reset();
         this.competenciasForm.reset();

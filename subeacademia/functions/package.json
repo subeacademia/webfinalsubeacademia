@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
+    "@ng-bootstrap/ng-bootstrap": "^19.0.1",
     "@sparticuz/chromium": "latest",
     "cors": "^2.8.5",
     "firebase-admin": "^12.6.0",
