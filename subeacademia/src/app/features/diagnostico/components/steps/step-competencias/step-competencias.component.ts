@@ -143,8 +143,13 @@ export class StepCompetenciasComponent implements OnInit {
 
   onSubmit(): void {
     if (this.competenciasForm.valid) {
-      // Los datos ya están guardados en el servicio
-      // Solo necesitamos navegar al siguiente paso
+      // 🔧 SOLUCIÓN: Guardar los datos de competencias en el estado global
+      const competenciasData = this.competenciasForm.value;
+      console.log('🎯 Guardando datos de competencias:', competenciasData);
+      
+      this.stateService.saveCompetenciasData(competenciasData);
+      
+      // Navegar al siguiente paso
       this.navigateToNextStep();
     }
   }

@@ -170,8 +170,13 @@ export class StepAresComponent implements OnInit {
 
   onSubmit(): void {
     if (this.aresForm.valid) {
-      // Los datos ya están guardados en el servicio
-      // Solo necesitamos navegar al siguiente paso
+      // 🔧 SOLUCIÓN: Guardar los datos de ARES en el estado global
+      const aresData = this.aresForm.value;
+      console.log('🎯 Guardando datos de ARES:', aresData);
+      
+      this.stateService.saveAresData(aresData);
+      
+      // Navegar al siguiente paso
       this.navigateToNextStep();
     }
   }

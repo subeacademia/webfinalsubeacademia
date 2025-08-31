@@ -224,6 +224,24 @@ export class DiagnosticStateService {
         });
     }
 
+    // Métodos para guardar datos de ARES
+    saveAresData(data: any): void {
+        console.log('saveAresData llamado con:', data);
+        this.aresForm.patchValue(data);
+        this.saveToStorage();
+        this.emitState();
+        console.log('✅ Datos ARES guardados en el estado global');
+    }
+
+    // Métodos para guardar datos de competencias
+    saveCompetenciasData(data: any): void {
+        console.log('saveCompetenciasData llamado con:', data);
+        this.competenciasForm.patchValue(data);
+        this.saveToStorage();
+        this.emitState();
+        console.log('✅ Datos de competencias guardados en el estado global');
+    }
+
     getContextoData(): ContextoData | null {
         const industria = this.contextoControls['industria']?.value;
         const tamano = this.contextoControls['tamano']?.value;

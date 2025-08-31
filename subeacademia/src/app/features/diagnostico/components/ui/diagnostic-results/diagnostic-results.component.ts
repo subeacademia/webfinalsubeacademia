@@ -30,6 +30,8 @@ import html2canvas from 'html2canvas';
 })
 export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @ViewChild('resultsContainer') resultsContainer!: ElementRef;
+  @ViewChild('radarChart') radarChart!: ElementRef;
+  @ViewChild('barChart') barChart!: ElementRef;
   
   private stateService = inject(DiagnosticStateService);
   private scoringService = inject(ScoringService);
@@ -149,23 +151,38 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
         this.scores = { ...this.scores };
       }, 200);
 
-      // 4. Activar loader y llamar a la nueva Cloud Function para generar el reporte detallado.
-      this.isGeneratingDetailed.set(true);
-      this.detailedReportError.set(false);
-      this.diagnosticsService.generateDetailedReport(diagnosticData)
-        .pipe(
-          catchError(error => {
-            console.error('Error generating detailed report', error);
-            this.detailedReportError.set(true);
-            return of(null);
-          })
-        )
-        .subscribe(reportData => {
-          if (reportData) {
-            this.detailedReport.set(reportData);
-          }
-          this.isGeneratingDetailed.set(false);
-        });
+      // 4. 🔧 SOLUCIÓN: Generar análisis del diagnóstico localmente
+      const diagnosticAnalysis = this.scoringService.generateDiagnosticAnalysis(diagnosticData);
+      console.log('📊 Análisis del diagnóstico generado:', diagnosticAnalysis);
+      
+      // 5. 🔧 SOLUCIÓN: Generar plan de acción localmente
+      const actionPlan = this.scoringService.generateActionPlan(diagnosticData);
+      console.log('📋 Plan de acción generado:', actionPlan);
+      
+      // 6. 🔧 SOLUCIÓN: Crear reporte local con todos los datos
+      this.report = {
+        titulo_informe: 'Diagnóstico de Madurez ARES-AI',
+        resumen_ejecutivo: this.generateExecutiveSummary(diagnosticAnalysis, actionPlan),
+        analisis_ares: [],
+        plan_de_accion: this.generateActionPlanItems(actionPlan),
+        planDeAccion: { items: [] }
+      } as any;
+      
+      // Agregar propiedades adicionales al reporte
+      (this.report as any).analisis_foda = this.generateFODAAnalysis(diagnosticAnalysis);
+      (this.report as any).areas_enfoque_principales = this.getTopCompetencyNames(competencias);
+      (this.report as any).siguientes_pasos = this.generateNextSteps(diagnosticAnalysis);
+      (this.report as any).nivel_general = diagnosticAnalysis.mainLevel;
+      (this.report as any).puntaje_total = diagnosticAnalysis.mainLevel === 'Líder' ? 85 : 
+                     diagnosticAnalysis.mainLevel === 'Avanzado' ? 70 :
+                     diagnosticAnalysis.mainLevel === 'Practicante' ? 50 :
+                     diagnosticAnalysis.mainLevel === 'Principiante' ? 30 : 15;
+      
+      console.log('📄 Reporte local generado:', this.report);
+      
+      // 7. Marcar como completado
+      this.isLoadingReport = false;
+      this.isGeneratingReport = false;
 
       // SEO título por idioma
       try {
@@ -748,14 +765,82 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
           name: competency?.nameKey || comp.competenciaId,
           score: comp.puntaje || 0
         };
-      }).sort((a: any, b: any) => b.score - a.score).slice(0, 4);
+      }).sort((a: any, b: any) => b.score - a.score).slice(0, 13); // Mostrar todas las 13 competencias
     } else {
       // Fallback para formato de objeto
       return Object.entries(this.scores.competencias).map(([name, score]) => ({
         name,
         score: typeof score === 'number' ? score : 0
-      })).sort((a, b) => b.score - a.score).slice(0, 4);
+      })).sort((a, b) => b.score - a.score).slice(0, 13);
     }
+  }
+
+  // Métodos para el Framework ARES
+  getTopAresStrengths(): Array<{name: string, score: number}> {
+    if (!this.scores?.ares) return [];
+    
+    const aresEntries = Object.entries(this.scores.ares)
+      .filter(([key]) => key !== 'promedio')
+      .map(([name, score]) => ({ 
+        name: this.getAresPhaseName(name), 
+        score: typeof score === 'number' ? score : 0 
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+    
+    return aresEntries;
+  }
+
+  getTopAresOpportunities(): Array<{name: string, score: number}> {
+    if (!this.scores?.ares) return [];
+    
+    const aresEntries = Object.entries(this.scores.ares)
+      .filter(([key]) => key !== 'promedio')
+      .map(([name, score]) => ({ 
+        name: this.getAresPhaseName(name), 
+        score: typeof score === 'number' ? score : 0 
+      }))
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3);
+    
+    return aresEntries;
+  }
+
+  getAresPhaseName(phase: string): string {
+    const phaseNames: {[key: string]: string} = {
+      'datos': 'F1: Preparación - Datos',
+      'talento': 'F1: Preparación - Talento',
+      'gobernanza': 'F1: Preparación - Gobernanza',
+      'valor': 'F2: Diseño - Valor',
+      'etica': 'F2: Diseño - Ética',
+      'riesgos': 'F2: Diseño - Riesgos',
+      'transparencia': 'F2: Diseño - Transparencia',
+      'tecnologia': 'F3: Desarrollo - Tecnología',
+      'integracion': 'F3: Desarrollo - Integración',
+      'capacidad': 'F3: Desarrollo - Capacidad',
+      'operacion': 'F4: Operación - Operación',
+      'seguridad': 'F4: Operación - Seguridad',
+      'cumplimiento': 'F4: Operación - Cumplimiento',
+      'adopcion': 'F5: Escalamiento - Adopción',
+      'sostenibilidad': 'F5: Escalamiento - Sostenibilidad'
+    };
+    
+    return phaseNames[phase] || phase;
+  }
+
+  // Métodos para competencias
+  getCompetencyBorderColor(score: number): string {
+    if (score >= 80) return 'border-green-500';
+    if (score >= 60) return 'border-blue-500';
+    if (score >= 40) return 'border-yellow-500';
+    return 'border-red-500';
+  }
+
+  getCompetencyDescription(score: number): string {
+    if (score >= 80) return 'Excelente - Dominio avanzado de esta competencia';
+    if (score >= 60) return 'Bueno - Nivel intermedio con espacio para mejora';
+    if (score >= 40) return 'Regular - Necesita desarrollo significativo';
+    return 'Crítico - Requiere atención prioritaria y desarrollo';
   }
 
   getAresPhases(): Array<{name: string, score: number}> {
@@ -764,7 +849,7 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     return Object.entries(this.scores.ares)
       .filter(([key]) => key !== 'promedio')
       .map(([name, score]) => ({ 
-        name, 
+        name: this.getAresPhaseName(name), 
         score: typeof score === 'number' ? score : 0 
       }))
       .sort((a, b) => b.score - a.score);
@@ -1139,6 +1224,64 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   // =====================
   // Exportar a PDF (html2canvas + jsPDF)
   // =====================
+  // =====================
+  // 🔧 SOLUCIÓN: Métodos para generar reporte local
+  // =====================
+  
+  private generateExecutiveSummary(analysis: any, actionPlan: any): string {
+    const nivel = analysis.mainLevel;
+    const fortalezas = analysis.topStrengths?.slice(0, 2).map((s: any) => s.name).join(', ') || 'No identificadas';
+    const oportunidades = analysis.topOpportunities?.slice(0, 2).map((s: any) => s.name).join(', ') || 'No identificadas';
+    
+    return `Tu organización se encuentra en un nivel ${nivel} en la implementación de IA. 
+    Las principales fortalezas identificadas son: ${fortalezas}. 
+    Las áreas de oportunidad más importantes son: ${oportunidades}. 
+    Este diagnóstico te proporciona un plan de acción personalizado para acelerar tu transformación digital.`;
+  }
+  
+  private generateFODAAnalysis(analysis: any): any {
+    return {
+      fortalezas: analysis.topStrengths?.map((s: any) => s.name) || [],
+      oportunidades: analysis.topOpportunities?.map((s: any) => s.name) || [],
+      debilidades: analysis.topOpportunities?.slice(0, 3).map((s: any) => s.name) || [],
+      amenazas: ['Falta de talento especializado', 'Cambios regulatorios', 'Competencia tecnológica']
+    };
+  }
+  
+  private generateActionPlanItems(actionPlan: any): any[] {
+    if (!actionPlan.areasDesarrollo) return [];
+    
+    return actionPlan.areasDesarrollo.map((area: any, index: number) => ({
+      area_mejora: area.competencia || `Área ${index + 1}`,
+      descripcion_problema: area.descripcion || 'Área de mejora identificada',
+      acciones_recomendadas: area.acciones?.map((a: any) => ({ accion: a.accion || 'Acción recomendada' })) || []
+    }));
+  }
+  
+  private getTopCompetencyNames(competencias: any[]): string[] {
+    if (!Array.isArray(competencias)) return [];
+    return competencias.slice(0, 5).map((c: any) => c.competenciaId || 'Competencia');
+  }
+  
+  private generateNextSteps(analysis: any): string[] {
+    const pasos = [
+      'Revisar y priorizar las acciones del plan de acción',
+      'Asignar responsables para cada iniciativa',
+      'Establecer métricas de seguimiento',
+      'Programar revisión mensual del progreso',
+      'Considerar capacitación del equipo en áreas críticas'
+    ];
+    
+    if (analysis.mainLevel === 'Inicial' || analysis.mainLevel === 'Principiante') {
+      pasos.unshift('Establecer comité de transformación digital');
+      pasos.unshift('Realizar auditoría de infraestructura tecnológica');
+    }
+    
+    return pasos;
+  }
+  
+
+
   public downloadPdf(): void {
     const reportElement = document.getElementById('diagnosticReportContainer');
     if (!reportElement) {
