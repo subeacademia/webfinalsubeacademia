@@ -2,8 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Firestore, addDoc, collection, collectionData, query, where, orderBy, doc, docData, updateDoc } from '@angular/fire/firestore';
 import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
-import { Observable, map } from 'rxjs';
+import { Observable, map, firstValueFrom, from } from 'rxjs';
 import { PlanDeAccionItem } from '../data/report.model';
+import { AsistenteIaService } from '../../../shared/ui/chatbot/asistente-ia.service';
 
 interface UserDiagnostic {
   id: string;
@@ -19,18 +20,38 @@ interface UserDiagnostic {
 export class DiagnosticsService {
 	private readonly firestore = inject(Firestore);
     private readonly http = inject(HttpClient);
+    private readonly asistenteIaService = inject(AsistenteIaService);
     
-    generateDetailedReport(diagnosticData: any) {
-        try {
-            const projectId = (window as any)?.FIREBASE_CONFIG?.projectId || (window as any)?.__FIREBASE_DEFAULTS__?.projectId || 'web-subeacademia';
-            const region = 'us-central1';
-            const url = `https://${region}-${projectId}.cloudfunctions.net/generateDetailedReport`;
-            return this.http.post<any>(url, diagnosticData);
-        } catch (error) {
-            // Fallback a URL estática si no se puede resolver projectId en runtime
-            const url = 'https://us-central1-web-subeacademia.cloudfunctions.net/generateDetailedReport';
-            return this.http.post<any>(url, diagnosticData);
-        }
+    generateDetailedReport(diagnosticData: any): Observable<any> {
+        const buildContext = typeof diagnosticData === 'string' ? diagnosticData : JSON.stringify(diagnosticData);
+        const resumenPrompt = `Basado en los siguientes datos de un diagnóstico de competencias: ${buildContext}, genera un "resumen_ejecutivo" conciso y profesional.`;
+        const fodaPrompt = `Con la misma información del diagnóstico: ${buildContext}, realiza un "analisis_foda" detallado en formato JSON con claves fortalezas, debilidades, oportunidades y amenazas como arrays de strings.`;
+        const areasPrompt = `Usando la información del diagnóstico: ${buildContext}, devuelve una lista breve (3 a 5) de "areas_enfoque_principales" en JSON como un array de strings.`;
+
+        const promise = (async () => {
+            const [resumen, fodaRaw, areasRaw] = await Promise.all([
+                this.callVercelAPI(resumenPrompt),
+                this.callVercelAPI(fodaPrompt),
+                this.callVercelAPI(areasPrompt)
+            ]);
+
+            let analisis_foda: any = { fortalezas: [], debilidades: [], oportunidades: [], amenazas: [] };
+            try { analisis_foda = JSON.parse(fodaRaw); } catch {}
+
+            let areas_enfoque_principales: string[] = [];
+            try {
+                const parsed = JSON.parse(areasRaw);
+                areas_enfoque_principales = Array.isArray(parsed) ? parsed : [];
+            } catch {}
+
+            return {
+                resumen_ejecutivo: resumen,
+                analisis_foda,
+                areas_enfoque_principales
+            } as any;
+        })();
+
+        return from(promise);
     }
 
 	async saveAndRequestEmail(payload: DiagnosticoPersistedPayload & { email?: string; userId?: string }): Promise<string> {
@@ -72,6 +93,74 @@ export class DiagnosticsService {
 		const ref = doc(this.firestore, `diagnostics/${id}`);
 		return docData(ref, { idField: 'id' });
 	}
+
+    // =====================
+    // Integración con API de Vercel (Azure/OpenAI) vía AsistenteIaService
+    // =====================
+    private async callVercelAPI(prompt: string): Promise<string> {
+        const payload = {
+            messages: [
+                { role: 'system', content: 'Eres un experto en coaching y desarrollo profesional.' },
+                { role: 'user', content: prompt }
+            ],
+            maxTokens: 1500,
+            temperature: 0.7
+        } as any;
+
+        try {
+            const res: any = await firstValueFrom(this.asistenteIaService.generarTextoAzure(payload));
+            if (res && res.choices && res.choices[0]?.message?.content) {
+                return res.choices[0].message.content as string;
+            }
+            throw new Error('Respuesta inesperada de la API de Vercel');
+        } catch (error) {
+            console.error('Error llamando a la API de Vercel:', error);
+            throw error as Error;
+        }
+    }
+
+    // Orquestador para generar y guardar secciones del reporte usando la API de Vercel
+    async generateReportWithVercel(diagnosticId: string, diagnosticData: any): Promise<void> {
+        try {
+            const diagnosticContext = typeof diagnosticData === 'string' ? diagnosticData : JSON.stringify(diagnosticData);
+
+            // Prompts
+            const resumenPrompt = `Basado en los siguientes datos de un diagnóstico de competencias: ${diagnosticContext}, genera un "resumen_ejecutivo" conciso y profesional.`;
+            const fodaPrompt = `Con la misma información del diagnóstico: ${diagnosticContext}, realiza un "analisis_foda" detallado en formato JSON con claves fortalezas, debilidades, oportunidades y amenazas como arrays de strings.`;
+            const areasPrompt = `Usando la información del diagnóstico: ${diagnosticContext}, devuelve una lista breve (3 a 5) de "areas_enfoque_principales" en JSON como un array de strings.`;
+
+            // Llamadas a IA
+            const [resumenGenerado, fodaGenerado, areasGeneradas] = await Promise.all([
+                this.callVercelAPI(resumenPrompt),
+                this.callVercelAPI(fodaPrompt),
+                this.callVercelAPI(areasPrompt)
+            ]);
+
+            // Parseos seguros
+            let analisisFoda: any = null;
+            try { analisisFoda = JSON.parse(fodaGenerado); } catch { analisisFoda = { fortalezas: [], debilidades: [], oportunidades: [], amenazas: [] }; }
+
+            let areasEnfoque: string[] = [];
+            try {
+                const parsed = JSON.parse(areasGeneradas);
+                areasEnfoque = Array.isArray(parsed) ? parsed : [];
+            } catch {
+                areasEnfoque = [];
+            }
+
+            const updatedReportData: any = {
+                resumen_ejecutivo: resumenGenerado,
+                analisis_foda: analisisFoda,
+                areas_enfoque_principales: areasEnfoque
+            };
+
+            const reportRef = doc(this.firestore, 'diagnostics', diagnosticId);
+            await updateDoc(reportRef, updatedReportData);
+        } catch (error) {
+            console.error('Error generando reporte con Vercel:', error);
+            throw error as Error;
+        }
+    }
 
 	async saveDiagnostic(payload: DiagnosticoPersistedPayload & { userId?: string; fecha?: Date; puntajeGeneral?: number; objetivo?: string; industria?: string; analysisContent?: any }, userId: string): Promise<string> {
 		const userCol = collection(this.firestore, `users/${userId}/diagnostics`);
