@@ -1,0 +1,231 @@
+/* Estilos personalizados para el componente de resultados mejorado */
+
+/* Animaciones de entrada */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Aplicar animaciones a los elementos */
+.bg-white, .bg-gray-800 {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Efectos hover para las tarjetas */
+.bg-white:hover, .bg-gray-800:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Estilos para las barras de progreso */
+.progress-bar {
+  transition: width 1s ease-in-out;
+}
+
+/* Efectos para los botones */
+button:not(:disabled) {
+  transition: all 0.2s ease-in-out;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos para las pestañas activas */
+.border-blue-500 {
+  position: relative;
+}
+
+.border-blue-500::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 1px;
+}
+
+/* Efectos de hover para las métricas */
+.grid > div:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Estilos para las barras de puntaje */
+.score-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.score-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 9999px;
+  transition: width 1s ease-in-out;
+}
+
+/* Efectos de sombra para las tarjetas principales */
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Estilos para el modo oscuro */
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Efectos de transición para los cambios de pestaña */
+.tab-content {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Estilos para los badges de prioridad */
+.priority-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.priority-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease-in-out;
+}
+
+.priority-badge:hover::before {
+  left: 100%;
+}
+
+/* Estilos para el estado de carga */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efectos de hover para las métricas de puntaje */
+.score-metric:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  transition: background 0.3s ease-in-out;
+}
+
+/* Estilos para las barras de competencias */
+.competency-bar {
+  position: relative;
+  background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.competency-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+/* Efectos de hover para las tarjetas de plan de acción */
+.action-plan-card {
+  transition: all 0.3s ease-in-out;
+}
+
+.action-plan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Estilos para el encabezado del reporte */
+.report-header {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+}
+
+.dark .report-header {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  border-color: #374151;
+}
+
+/* Efectos de hover para los botones de acción */
+.action-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.action-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease-in-out;
+}
+
+.action-button:hover::before {
+  left: 100%;
+}
+
+/* Estilos para las métricas de resumen */
+.summary-metric {
+  transition: all 0.3s ease-in-out;
+}
+
+.summary-metric:hover {
+  transform: scale(1.05);
+}
+
+/* Efectos de transición para los cambios de estado */
+.fade-transition {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Estilos para el modo de impresión */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .bg-gradient-to-br {
+    background: white !important;
+  }
+  
+  .shadow-xl, .shadow-lg {
+    box-shadow: none !important;
+  }
+}

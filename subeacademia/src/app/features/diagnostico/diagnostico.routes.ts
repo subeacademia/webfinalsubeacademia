@@ -8,6 +8,7 @@ import { StepObjetivoComponent } from './components/steps/step-objetivo/step-obj
 import { StepLeadComponent } from './components/steps/step-lead/step-lead.component';
 import { DiagnosticResultsComponent } from './components/ui/diagnostic-results/diagnostic-results.component';
 import { SimpleDiagnosticResultsComponent } from './components/ui/simple-diagnostic-results/simple-diagnostic-results.component';
+import { EnhancedDiagnosticResultsComponent } from './components/ui/enhanced-diagnostic-results/enhanced-diagnostic-results.component';
 
 export const DIAGNOSTICO_ROUTES: Routes = [
   {
@@ -23,8 +24,8 @@ export const DIAGNOSTICO_ROUTES: Routes = [
       { path: 'competencias/:group', component: StepCompetenciasComponent },
       { path: 'objetivo', component: StepObjetivoComponent },
       { path: 'lead', component: StepLeadComponent },
-      { path: 'resultados', component: SimpleDiagnosticResultsComponent },
-      { path: 'resultados/:id', component: SimpleDiagnosticResultsComponent },
+      { path: 'resultados', component: EnhancedDiagnosticResultsComponent },
+      { path: 'resultados/:id', component: EnhancedDiagnosticResultsComponent },
     ]
   }
 ];
