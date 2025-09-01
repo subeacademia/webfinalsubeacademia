@@ -12,25 +12,19 @@ import { PdfService } from '../../../services/pdf.service';
 import { GeneratingReportLoaderComponent } from '../generating-report-loader/generating-report-loader.component';
 import { AnimationService } from '../../../../../core/services/animation.service';
 import { ChartConfiguration } from 'chart.js';
-import { COMPETENCIAS, COMPETENCIAS_COMPLETAS } from '../../../data/competencias';
+import { COMPETENCIAS } from '../../../data/competencias';
 import { SocialShareModalComponent } from '../social-share-modal/social-share-modal.component';
 import { ToastService } from '../../../../../core/ui/toast/toast.service';
 import { catchError, of } from 'rxjs';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
 import { AsistenteIaService } from '../../../../../shared/ui/chatbot/asistente-ia.service';
-import { CompetencyMapComponent } from '../competency-map/competency-map.component';
-import { CompetencyRankingComponent } from '../competency-ranking/competency-ranking.component';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { GenerativeAiService, DiagnosticAnalysisData, DiagnosticAnalysis, ActionPlanItem } from '../../../../../core/ai/generative-ai.service';
-import { AiProcessingLoaderComponent } from '../ai-processing-loader/ai-processing-loader.component';
-import { DiagnosticChartsComponent, CompetencyScore, AresScore } from '../diagnostic-charts/diagnostic-charts.component';
-import { ActionPlanComponent } from '../action-plan/action-plan.component';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, FormsModule, GeneratingReportLoaderComponent, SocialShareModalComponent, NgxChartsModule, CompetencyMapComponent, CompetencyRankingComponent, AiProcessingLoaderComponent, DiagnosticChartsComponent, ActionPlanComponent],
+  imports: [CommonModule, FormsModule, GeneratingReportLoaderComponent, SocialShareModalComponent, NgxChartsModule],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css']
 })
@@ -43,19 +37,11 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private scoringService = inject(ScoringService);
   private diagnosticsService = inject(DiagnosticsService);
   private asistenteIaService = inject(AsistenteIaService);
-  private generativeAiService = inject(GenerativeAiService);
   
   // Nuevo estado reactivo para detailedReport
   isGeneratingDetailed = signal(true);
   detailedReportError = signal(false);
   detailedReport = signal<any | null>(null);
-  
-  // Estado para el nuevo sistema de IA
-  isProcessingWithAI = false;
-  aiAnalysis: DiagnosticAnalysis | null = null;
-  aiActionPlan: ActionPlanItem[] = [];
-  competencyScores: CompetencyScore[] = [];
-  aresScores: AresScore | null = null;
   private pdfService = inject(PdfService);
   private animationService = inject(AnimationService);
   private toastService = inject(ToastService);
@@ -89,168 +75,9 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
   private finalLabels: string[] = [];
 
   showShareModal = false;
-  
-  /**
-   * Procesa el diagnóstico con IA para generar análisis y plan de acción
-   */
-  private async processDiagnosticWithAI(diagnosticData: any): Promise<void> {
-    if (this.isProcessingWithAI) return;
-    
-    this.isProcessingWithAI = true;
-    console.log('🤖 Iniciando procesamiento con IA...');
-    
-    try {
-      // Preparar datos para la IA
-      const competencyScores = this.prepareCompetencyScoresForAI();
-      const aresScores = this.prepareAresScoresForAI();
-      
-      const aiData: DiagnosticAnalysisData = {
-        diagnosticData,
-        competencyScores,
-        aresScores,
-        leadInfo: diagnosticData.lead || {}
-      };
-      
-      // Generar análisis y plan de acción en paralelo
-      const [analysis, actionPlan] = await Promise.all([
-        this.generativeAiService.generateDiagnosticAnalysis(aiData).toPromise(),
-        this.generativeAiService.generateActionPlan(aiData).toPromise()
-      ]);
-      
-      this.aiAnalysis = analysis || null;
-      this.aiActionPlan = actionPlan || [];
-      
-      console.log('✅ Análisis de IA completado:', analysis);
-      console.log('✅ Plan de acción de IA completado:', actionPlan);
-      
-    } catch (error) {
-      console.error('❌ Error procesando con IA:', error);
-      console.error('Error al procesar con IA. Usando análisis local.');
-      
-      // Usar análisis de fallback
-      this.aiAnalysis = this.generateFallbackAnalysis();
-      this.aiActionPlan = this.generateFallbackActionPlan();
-    } finally {
-      this.isProcessingWithAI = false;
-    }
-  }
-  
-  /**
-   * Prepara los scores de competencias para la IA
-   */
-  private prepareCompetencyScoresForAI(): CompetencyScore[] {
-    if (!this.scores?.competencias) return [];
-    
-    return Object.entries(this.scores.competencias).map(([name, score]: [string, any]) => ({
-      name,
-      score: typeof score === 'number' ? score : 0,
-      category: 'Competencia',
-      description: `Puntaje en ${name}`
-    }));
-  }
-  
-  /**
-   * Prepara los scores ARES para la IA
-   */
-  private prepareAresScoresForAI(): AresScore | null {
-    if (!this.scores?.ares) return null;
-    
-    return {
-      analisis: this.scores.ares.analisis || 0,
-      responsabilidad: this.scores.ares.responsabilidad || 0,
-      estrategia: this.scores.ares.estrategia || 0,
-      sistemas: this.scores.ares.sistemas || 0
-    };
-  }
-  
-  /**
-   * Genera análisis de fallback
-   */
-  private generateFallbackAnalysis(): DiagnosticAnalysis {
-    return {
-      summary: "Análisis generado localmente basado en los resultados del diagnóstico.",
-      strengths: [
-        "Tienes competencias sólidas en áreas clave",
-        "Tu organización muestra madurez en ciertos aspectos",
-        "Existe potencial para desarrollo y mejora"
-      ],
-      weaknesses: [
-        "Identificamos oportunidades de mejora en competencias específicas",
-        "Algunas áreas del framework ARES requieren atención",
-        "Hay espacio para optimización de procesos"
-      ],
-      opportunities: [
-        "Desarrollo de competencias clave",
-        "Implementación de mejores prácticas",
-        "Optimización de procesos organizacionales"
-      ],
-      threats: [
-        "Riesgo de quedarse atrás en transformación digital",
-        "Posible pérdida de competitividad",
-        "Ineficiencias operativas"
-      ],
-      recommendations: [
-        "Priorizar el desarrollo de competencias más débiles",
-        "Implementar un plan de mejora gradual",
-        "Establecer métricas de seguimiento"
-      ],
-      actionPlan: this.generateFallbackActionPlan()
-    };
-  }
-  
-  /**
-   * Genera plan de acción de fallback
-   */
-  private generateFallbackActionPlan(): ActionPlanItem[] {
-    return [
-      {
-        id: 'fallback-1',
-        title: 'Evaluación de Competencias',
-        description: 'Realizar una evaluación detallada de las competencias identificadas como débiles',
-        priority: 'alta',
-        timeframe: '1-2 meses',
-        impact: 'Identificación clara de áreas de mejora',
-        category: 'Evaluación'
-      },
-      {
-        id: 'fallback-2',
-        title: 'Plan de Desarrollo',
-        description: 'Crear un plan de desarrollo personalizado para las competencias clave',
-        priority: 'alta',
-        timeframe: '2-3 meses',
-        impact: 'Mejora medible en competencias',
-        category: 'Desarrollo'
-      },
-      {
-        id: 'fallback-3',
-        title: 'Implementación de Mejoras',
-        description: 'Implementar mejoras graduales en los procesos identificados',
-        priority: 'media',
-        timeframe: '3-6 meses',
-        impact: 'Optimización de procesos operativos',
-        category: 'Implementación'
-      }
-    ];
-  }
-  
-  /**
-   * Prepara datos para los nuevos gráficos
-   */
-  private prepareDataForNewCharts(): void {
-    // Preparar datos de competencias
-    this.competencyScores = this.prepareCompetencyScoresForAI();
-    
-    // Preparar datos ARES
-    this.aresScores = this.prepareAresScoresForAI();
-    
-    console.log('📊 Datos preparados para nuevos gráficos:', {
-      competencyScores: this.competencyScores,
-      aresScores: this.aresScores
-    });
-  }
 
-    ngOnInit(): void {
-    console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado - CONECTANDO A IA');
+  ngOnInit(): void {
+    console.log('🚀 DiagnosticResultsComponent.ngOnInit() iniciado');
     
     try {
       const id = this.route.snapshot.paramMap.get('id');
@@ -281,12 +108,11 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
             }
           } catch (e) {
             console.error('Error procesando doc diagnóstico:', e);
-            this.loadingError = true; this.isGeneratingReport = false; this.isLoadingReport = false;
+            this.loadingError = true; this.isLoadingReport = false; this.isGeneratingReport = false;
           }
         });
         return;
       }
-      
       const diagnosticData = this.stateService.getDiagnosticData();
       console.log('📊 Datos del diagnóstico completos:', diagnosticData);
       console.log('📊 Datos de competencias:', diagnosticData.competencias);
@@ -315,9 +141,6 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       // 2. Prepara los datos del gráfico radar
       this.prepareRadarChartData();
       this.formatChartData();
-      
-      // 3. 🚀 NUEVO: Prepara datos para los nuevos gráficos
-      this.prepareDataForNewCharts();
 
       // 3. Forzar la detección de cambios para los componentes hijos
       setTimeout(() => {
@@ -328,17 +151,14 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
         this.scores = { ...this.scores };
       }, 200);
 
-      // 4. 🚨 SOLUCIÓN RADICAL: Generar reporte local inmediatamente (sin IA por ahora)
-      this.generateLocalReport(diagnosticData);
-      
-      // 5. 🚀 NUEVO: Procesar con IA para análisis y plan de acción
-      this.processDiagnosticWithAI(diagnosticData);
+      // 4. 🚀 NUEVA FUNCIONALIDAD: Generar diagnóstico completo con IA
+      this.generateCompleteDiagnosticWithAI(diagnosticData);
 
       // SEO título por idioma
       try {
         const title = this.i18n.translate('diagnostico.results.page_title');
         this.seo.updateTags({ title });
-      } catch {} 
+      } catch {}
       
     } catch (error) {
       console.error('❌ Error al inicializar resultados:', error);
@@ -813,49 +633,6 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
       }));
       
       console.log('📈 Scores formateados para gráfico de barras (fallback):', result);
-      return result;
-    }
-  }
-
-  // Método para obtener datos de competencias para los nuevos gráficos
-  getCompetencyScoresForCharts(): Array<{name: string, score: number, description?: string}> {
-    console.log('🗺️ getCompetencyScoresForCharts() llamado - INICIO');
-    console.log('🗺️ Estado actual de scores:', this.scores);
-    
-    if (!this.scores?.competencias) {
-      console.warn('⚠️ No hay scores de competencias disponibles');
-      return [];
-    }
-    
-    console.log('🗺️ Obteniendo scores para nuevos gráficos:', this.scores.competencias);
-    
-    if (Array.isArray(this.scores.competencias)) {
-      // computeCompetencyScores devuelve un array de objetos con competenciaId, puntaje, nivel
-      const result = this.scores.competencias.map((comp: any) => {
-        const competency = COMPETENCIAS.find((c: any) => c.id === comp.competenciaId);
-        const competencyComplete = COMPETENCIAS_COMPLETAS.find((c: any) => c.id === comp.competenciaId);
-        const score = comp.puntaje || 0;
-        const name = competency?.nameKey || comp.competenciaId;
-        const description = competencyComplete?.description || '';
-        console.log(`🗺️ Competencia ${comp.competenciaId}: ${name} = ${score} (nivel: ${comp.nivel})`);
-        return {
-          name: name,
-          score: score,
-          description: description
-        };
-      });
-      
-      console.log('🗺️ Scores formateados para nuevos gráficos:', result);
-      return result;
-    } else {
-      // Fallback para formato de objeto
-      const result = Object.entries(this.scores.competencias).map(([name, score]) => ({
-        name,
-        score: typeof score === 'number' ? score : 0,
-        description: ''
-      }));
-      
-      console.log('🗺️ Scores formateados para nuevos gráficos (fallback):', result);
       return result;
     }
   }
@@ -1352,204 +1129,169 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     // Cleanup si es necesario
   }
 
-  // 🚨 MÉTODO TEMPORALMENTE DESHABILITADO - CAUSA CONGELAMIENTO DEL NAVEGADOR
-  /*
+  private extractJsonFromString(str: string): any | null {
+    if (!str) {
+      return null;
+    }
+
+    // Prioritize looking for a JSON markdown block
+    const jsonRegex = /```json\n([\s\S]*?)\n```/;
+    const match = str.match(jsonRegex);
+
+    if (match && match[1]) {
+      try {
+        return JSON.parse(match[1]);
+      } catch (error) {
+        console.error('Error parsing extracted JSON from markdown block:', error);
+        // Fallthrough to try the other method
+      }
+    }
+
+    // Fallback for raw JSON object, possibly with surrounding text
+    const startIndex = str.indexOf('{');
+    const endIndex = str.lastIndexOf('}');
+
+    if (startIndex > -1 && endIndex > -1 && endIndex > startIndex) {
+      const jsonString = str.substring(startIndex, endIndex + 1);
+      try {
+        return JSON.parse(jsonString);
+      } catch (error) {
+        console.error('Error parsing extracted JSON from substring:', error, 'Original string:', str);
+        return null;
+      }
+    }
+
+    console.warn('Could not find a valid JSON object in the string:', str);
+    return null;
+  }
+
+  // 🚀 NUEVA FUNCIONALIDAD: Generar diagnóstico completo con IA
   private generateCompleteDiagnosticWithAI(diagnosticData: any): void {
     console.log('🤖 Iniciando generación de diagnóstico completo con IA...');
     this.isGeneratingReport = true;
     
-    // 🔧 SOLUCIÓN: Timeout global MUY AGRESIVO para evitar congelamiento
-    const globalTimeout = setTimeout(() => {
-      console.log('⏰ Timeout global alcanzado - usando fallback local');
-      this.fallbackToLocalComplete(diagnosticData);
-    }, 15000); // Solo 15 segundos máximo
-    
-    // 🔧 SOLUCIÓN: Contador de llamadas exitosas
-    let completedCalls = 0;
-    const totalCalls = 3;
-    
-    const checkCompletion = () => {
-      completedCalls++;
-      if (completedCalls >= totalCalls) {
-        clearTimeout(globalTimeout);
-        this.isGeneratingReport = false;
-        console.log('✅ Generación completa finalizada');
-      }
-    };
-    
     // 1. Generar análisis del diagnóstico con IA
-    this.generateDiagnosticAnalysisWithAI(diagnosticData, checkCompletion);
+    this.generateDiagnosticAnalysisWithAI(diagnosticData);
     
     // 2. Generar plan de acción personalizado con IA
-    this.generatePersonalizedActionPlanWithAI(diagnosticData, checkCompletion);
+    this.generatePersonalizedActionPlanWithAI(diagnosticData);
     
     // 3. Generar objetivos personalizados con IA
-    this.generatePersonalizedObjectivesWithAI(diagnosticData, checkCompletion);
+    this.generatePersonalizedObjectivesWithAI(diagnosticData);
   }
-  */
 
-  // 🚨 MÉTODO TEMPORALMENTE DESHABILITADO - CAUSA CONGELAMIENTO DEL NAVEGADOR
-  /*
-  private generateDiagnosticAnalysisWithAI(diagnosticData: any, onComplete?: () => void): void {
-    console.log('🧠 Generando análisis del diagnóstico con IA...');
-    
-    // 🔧 SOLUCIÓN: Timeout individual MUY AGRESIVO para esta llamada
-    const timeout = setTimeout(() => {
-      console.log('⏰ Timeout en análisis del diagnóstico - usando fallback');
-      this.fallbackToLocalAnalysis(diagnosticData);
-      onComplete?.();
-    }, 8000); // Solo 8 segundos
-    
-    const prompt = this.buildDiagnosticAnalysisPrompt(diagnosticData);
+  // ------------------- REFACTORIZACIÓN DE IA -------------------
+
+  private generateAIPart(
+    taskName: string,
+    promptBuilder: (data: any) => string,
+    diagnosticData: any,
+    systemContent: string,
+    responseProcessor: (response: any, data: any) => void,
+    fallback: (data: any) => void,
+    options: { maxTokens: number; temperature: number }
+  ): void {
+    console.log(`🤖 Iniciando tarea de IA: ${taskName}...`);
+    const prompt = promptBuilder.call(this, diagnosticData);
     const payload = {
       messages: [
-        {
-          role: 'system',
-          content: 'Eres un experto consultor en transformación digital e IA con más de 15 años de experiencia. Analiza el diagnóstico de madurez en IA y genera un análisis profesional, detallado y personalizado.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
+        { role: 'system', content: systemContent },
+        { role: 'user', content: prompt }
       ],
-      maxTokens: 2000,
-      temperature: 0.7
+      maxTokens: options.maxTokens,
+      temperature: options.temperature
     };
 
     this.asistenteIaService.generarTextoAzure(payload).subscribe({
       next: (res: any) => {
-        clearTimeout(timeout);
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          console.log('✅ Análisis del diagnóstico generado con IA:', content);
-          
-          // Procesar y guardar el análisis
-          this.processDiagnosticAnalysis(content, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando análisis del diagnóstico:', error);
-          this.fallbackToLocalAnalysis(diagnosticData);
-        }
-        onComplete?.();
+        responseProcessor.call(this, res, diagnosticData);
       },
       error: (err: unknown) => {
-        clearTimeout(timeout);
-        console.error('❌ Error generando análisis del diagnóstico con IA:', err);
-        this.fallbackToLocalAnalysis(diagnosticData);
-        onComplete?.();
+        console.error(`❌ Error en la tarea de IA "${taskName}". Respuesta completa del error:`, err);
+        fallback.call(this, diagnosticData);
       }
     });
   }
-  */
 
-  // 🚨 MÉTODO TEMPORALMENTE DESHABILITADO - CAUSA CONGELAMIENTO DEL NAVEGADOR
-  /*
-  private generatePersonalizedActionPlanWithAI(diagnosticData: any, onComplete?: () => void): void {
-    console.log('📋 Generando plan de acción personalizado con IA...');
+  // Generar análisis del diagnóstico con IA
+  private generateDiagnosticAnalysisWithAI(diagnosticData: any): void {
+    const systemContent = 'Eres un experto consultor en transformación digital e IA con más de 15 años de experiencia. Analiza el diagnóstico de madurez en IA y genera un análisis profesional, detallado y personalizado.';
     
-    // 🔧 SOLUCIÓN: Timeout individual MUY AGRESIVO para esta llamada
-    const timeout = setTimeout(() => {
-      console.log('⏰ Timeout en plan de acción - usando fallback');
-      this.fallbackToLocalActionPlan(diagnosticData);
-      onComplete?.();
-);
-      onComplete?.();
-    }, 8000); // Solo 8 segundos
-    
-    const prompt = this.buildActionPlanPrompt(diagnosticData);
-    const payload = {
-      messages: [
-        {
-          role: 'system',
-          content: 'Eres un experto en desarrollo profesional y coaching que genera planes de acción estratégicos, personalizados y accionables. Responde SOLO con JSON válido.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens: 1500,
-      temperature: 0.6
+    const responseProcessor = (res: any, data: any) => {
+      try {
+        const content = res?.choices?.[0]?.message?.content ?? '';
+        console.log('✅ Análisis del diagnóstico generado con IA:', content);
+        this.processDiagnosticAnalysis(content, data);
+      } catch (error) {
+        console.error('❌ Error procesando análisis del diagnóstico:', error);
+        this.fallbackToLocalAnalysis(data);
+      }
     };
 
-    this.asistenteIaService.generarTextoAzure(payload).subscribe({
-      next: (res: any) => {
-        clearTimeout(timeout);
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          const plan = JSON.parse(content);
-          console.log('✅ Plan de acción personalizado generado con IA:', plan);
-          
-          // Procesar y guardar el plan de acción
-          this.processActionPlan(plan, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando plan de acción:', error);
-          this.fallbackToLocalActionPlan(diagnosticData);
-        }
-        onComplete?.();
-      },
-      error: (err: unknown) => {
-        clearTimeout(timeout);
-        console.error('❌ Error generando plan de acción con IA:', err);
-        this.fallbackToLocalActionPlan(diagnosticData);
-        onComplete?.();
-      }
-    });
+    this.generateAIPart(
+      'Análisis de Diagnóstico',
+      this.buildDiagnosticAnalysisPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalAnalysis,
+      { maxTokens: 2000, temperature: 0.7 }
+    );
   }
-  */
 
-  // 🚨 MÉTODO TEMPORALMENTE DESHABILITADO - CAUSA CONGELAMIENTO DEL NAVEGADOR
-  /*
-  private generatePersonalizedObjectivesWithAI(diagnosticData: any, onComplete?: () => void): void {
-    console.log('🎯 Generando objetivos personalizados con IA...');
-    
-    // 🔧 SOLUCIÓN: Timeout individual para esta llamada
-    const timeout = setTimeout(() => {
-      console.log('⏰ Timeout en objetivos - usando fallback');
-      this.fallbackToLocalObjectives(diagnosticData);
-      onComplete?.();
-    }, 8000); // Solo 8 segundos
-    
-    const prompt = this.buildObjectivesPrompt(diagnosticData);
-    const payload = {
-      messages: [
-        {
-          role: 'system',
-          content: 'Eres un asesor experto en transformación digital con IA. Genera objetivos SMART, accionables y específicos basados en el contexto del cliente. Responde SOLO con JSON válido.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens: 1200,
-      temperature: 0.7
+  // Generar plan de acción personalizado con IA
+  private generatePersonalizedActionPlanWithAI(diagnosticData: any): void {
+    const systemContent = 'Eres un API de generación de JSON. Tu única función es recibir un contexto y devolver un plan de acción en formato JSON. NO escribas nada más que el objeto JSON. La respuesta debe ser directamente un JSON válido, sin explicaciones, ni texto introductorio, ni formato markdown.';
+
+    const responseProcessor = (res: any, data: any) => {
+      const content = res?.choices?.[0]?.message?.content ?? '';
+      const plan = this.extractJsonFromString(content);
+      if (plan) {
+        console.log('✅ Plan de acción personalizado generado con IA:', plan);
+        this.processActionPlan(plan, data);
+      } else {
+        console.error('❌ Error: No se pudo extraer el JSON del plan de acción. Respuesta recibida:', content);
+        this.fallbackToLocalActionPlan(data);
+      }
     };
 
-    this.asistenteIaService.generarTextoAzure(payload).subscribe({
-      next: (res: any) => {
-        clearTimeout(timeout);
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          const objectives = JSON.parse(content);
-          console.log('✅ Objetivos personalizados generados con IA:', objectives);
-          
-          // Procesar y guardar los objetivos
-          this.processObjectives(objectives, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando objetivos:', error);
-          this.fallbackToLocalObjectives(diagnosticData);
-        }
-        onComplete?.();
-      },
-      error: (err: unknown) => {
-        clearTimeout(timeout);
-        console.error('❌ Error generando objetivos con IA:', err);
-        this.fallbackToLocalObjectives(diagnosticData);
-        onComplete?.();
-      }
-    });
+    this.generateAIPart(
+      'Plan de Acción Personalizado',
+      this.buildActionPlanPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalActionPlan,
+      { maxTokens: 1500, temperature: 0.6 }
+    );
   }
-  */
+
+  // Generar objetivos personalizados con IA
+  private generatePersonalizedObjectivesWithAI(diagnosticData: any): void {
+    const systemContent = 'Eres un API de generación de JSON. Tu única función es recibir un contexto y devolver objetivos SMART en formato JSON. NO escribas nada más que el objeto JSON. La respuesta debe ser directamente un JSON válido, sin explicaciones, ni texto introductorio, ni formato markdown.';
+
+    const responseProcessor = (res: any, data: any) => {
+      const content = res?.choices?.[0]?.message?.content ?? '';
+      const objectives = this.extractJsonFromString(content);
+      if (objectives) {
+        console.log('✅ Objetivos personalizados generados con IA:', objectives);
+        this.processObjectives(objectives, data);
+      } else {
+        console.error('❌ Error: No se pudo extraer el JSON de los objetivos. Respuesta recibida:', content);
+        this.fallbackToLocalObjectives(data);
+      }
+    };
+
+    this.generateAIPart(
+      'Objetivos Personalizados',
+      this.buildObjectivesPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalObjectives,
+      { maxTokens: 1200, temperature: 0.7 }
+    );
+  }
 
   // Construir prompt para análisis del diagnóstico
   private buildDiagnosticAnalysisPrompt(diagnosticData: any): string {
@@ -1624,7 +1366,7 @@ ANÁLISIS ACTUAL:
 - Competencias: ${JSON.stringify(competencias)}
 
 INSTRUCCIONES:
-Genera un plan de acción estratégico con 5-7 acciones priorizadas. Responde SOLO con JSON válido:
+Genera un plan de acción estratégico con 5-7 acciones priorizadas. Tu respuesta DEBE ser únicamente un objeto JSON válido, siguiendo la estructura especificada. No incluyas ningún texto fuera del propio JSON.
 
 {
   "planEstrategico": {
@@ -1674,7 +1416,7 @@ ANÁLISIS ACTUAL:
 - Competencias: ${JSON.stringify(competencias)}
 
 INSTRUCCIONES:
-Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON válido:
+Genera 5 objetivos SMART específicos y personalizados. Tu respuesta DEBE ser únicamente un objeto JSON válido, siguiendo la estructura especificada. No incluyas ningún texto fuera del propio JSON.
 
 {
   "objetivos": [
@@ -1757,6 +1499,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
 
   // Fallbacks a análisis local
   private fallbackToLocalAnalysis(diagnosticData: any): void {
+    this.toastService.info('No se pudo conectar con la IA para el análisis. Se generó un reporte local.');
     console.log('🔄 Usando análisis local como fallback...');
     const diagnosticAnalysis = this.scoringService.generateDiagnosticAnalysis(diagnosticData);
     const actionPlan = this.scoringService.generateActionPlan(diagnosticData);
@@ -1783,6 +1526,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
   }
 
   private fallbackToLocalActionPlan(diagnosticData: any): void {
+    this.toastService.info('No se pudo generar el plan de acción con IA. Se usó un plan local.');
     console.log('🔄 Usando plan de acción local como fallback...');
     const actionPlan = this.scoringService.generateActionPlan(diagnosticData);
     if (this.report) {
@@ -1791,6 +1535,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
   }
 
   private fallbackToLocalObjectives(diagnosticData: any): void {
+    this.toastService.info('No se pudieron generar objetivos con IA. Se usaron objetivos locales.');
     console.log('🔄 Usando objetivos locales como fallback...');
     // Generar objetivos básicos basados en los scores
     const basicObjectives = [
@@ -1836,9 +1581,9 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
 
       this.asistenteIaService.generarTextoAzure(payload).subscribe({
         next: (res: any) => {
-          try {
-            const content = res?.choices?.[0]?.message?.content ?? '';
-            const plan = JSON.parse(content);
+          const content = res?.choices?.[0]?.message?.content ?? '';
+          const plan = this.extractJsonFromString(content);
+          if (plan) {
             if (this.report) {
               this.report = { ...this.report, planDeAccion: plan } as any;
             }
@@ -1846,8 +1591,8 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
               const items: PlanDeAccionItem[] = plan?.items || [];
               this.diagnosticsService.updateActionPlan(this.diagnosticId, items).catch((err: unknown) => console.error('Error al guardar planDeAccion:', err));
             }
-          } catch (error) {
-            console.error('Error al parsear el plan de acción JSON:', error);
+          } else {
+            console.error('Error al parsear el plan de acción JSON. Contenido recibido:', content);
           }
         },
         error: (err: unknown) => {
@@ -1984,348 +1729,5 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
     if (score <= 2) return 'Necesita desarrollo significativo en el corto plazo';
     if (score <= 3) return 'Tiene potencial de mejora en el mediano plazo';
     return 'Área con oportunidades de optimización';
-  }
-  
-  // 🔧 MÉTODO DE FALLBACK COMPLETO: Para cuando fallan todas las llamadas a la API
-  private fallbackToLocalComplete(diagnosticData: any): void {
-    console.log('🔄 Usando fallback completo local...');
-    
-    // Generar análisis local
-    this.fallbackToLocalAnalysis(diagnosticData);
-    
-    // Generar plan de acción local
-    this.fallbackToLocalActionPlan(diagnosticData);
-    
-    // Generar objetivos locales
-    this.fallbackToLocalObjectives(diagnosticData);
-    
-    // Marcar como completado
-    this.isGeneratingReport = false;
-    console.log('✅ Fallback completo finalizado');
-  }
-  
-  // 🔧 SOLUCIÓN: Método simplificado para cargar desde Firestore
-  private loadDiagnosticFromFirestoreSimple(id: string): void {
-    console.log('📥 Cargando diagnóstico desde Firestore (modo simple):', id);
-    
-    // 🔧 SOLUCIÓN: Timeout muy corto para evitar congelamiento
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ Timeout alcanzado - usando datos de prueba');
-      this.generateTestData();
-    }, 5000); // Solo 5 segundos
-    
-    this.diagnosticsService.getById(id).subscribe({
-      next: (doc: any) => {
-        clearTimeout(timeoutId);
-        try {
-          const diagnosticData = doc?.diagnosticData || doc?.form || {};
-          const scores = doc?.scores || null;
-          
-          if (scores) {
-            this.scores = scores;
-          } else {
-            this.scores = {
-              ares: this.scoringService.computeAresScore(diagnosticData),
-              competencias: this.scoringService.computeCompetencyScores(diagnosticData)
-            } as any;
-          }
-          
-          this.prepareRadarChartData();
-          this.report = doc?.report || null;
-          this.isGeneratingReport = false;
-          this.isLoadingReport = false;
-          this.formatChartData();
-          
-          console.log('✅ Diagnóstico cargado exitosamente desde Firestore');
-        } catch (e) {
-          console.error('❌ Error procesando doc diagnóstico:', e);
-          this.generateTestData();
-        }
-      },
-      error: (error) => {
-        clearTimeout(timeoutId);
-        console.error('❌ Error cargando diagnóstico desde Firestore:', error);
-        this.generateTestData();
-      }
-    });
-  }
-
-  // 🔧 SOLUCIÓN: Generar reporte local sin llamadas a IA
-  private generateLocalReport(diagnosticData: any): void {
-    console.log('📋 Generando reporte local (sin IA)...');
-    
-    try {
-      // Generar análisis local básico
-      const aresScores = this.scores.ares;
-      const competenciasScores = this.scores.competencias;
-      
-      // Calcular nivel general
-      let nivelGeneral = 'Inicial';
-      let puntajeTotal = 0;
-      
-      if (aresScores && aresScores.promedio) {
-        puntajeTotal = Math.round(aresScores.promedio * 20); // Convertir a escala 0-100
-        
-        if (puntajeTotal >= 80) nivelGeneral = 'Líder';
-        else if (puntajeTotal >= 60) nivelGeneral = 'Avanzado';
-        else if (puntajeTotal >= 40) nivelGeneral = 'Intermedio';
-        else if (puntajeTotal >= 20) nivelGeneral = 'Principiante';
-      }
-      
-      // Crear reporte básico
-      this.report = {
-        titulo_informe: 'Diagnóstico de Madurez ARES-AI - Reporte Local',
-        resumen_ejecutivo: `Tu organización se encuentra en un nivel ${nivelGeneral} en la implementación de IA. 
-        El puntaje total es de ${puntajeTotal}/100. Este diagnóstico te proporciona un plan de acción personalizado 
-        para acelerar tu transformación digital.`,
-        analisis_ares: [],
-        plan_de_accion: [
-          {
-            area_mejora: 'Desarrollo de Competencias',
-            descripcion_problema: 'Identificamos áreas de mejora en las competencias evaluadas',
-            acciones_recomendadas: [
-              {
-                accion: 'Implementar programa de capacitación',
-                detalle: 'Desarrollar un plan de formación específico para las competencias identificadas'
-              },
-              {
-                accion: 'Establecer métricas de seguimiento',
-                detalle: 'Crear indicadores para medir el progreso en cada competencia'
-              }
-            ]
-          }
-        ],
-        planDeAccion: { items: [] }
-      } as any;
-      
-      // Agregar análisis FODA básico
-      (this.report as any).analisis_foda = {
-        fortalezas: ['Pensamiento crítico', 'Resolución de problemas'],
-        debilidades: ['Alfabetización digital', 'Liderazgo en IA'],
-        oportunidades: ['Mercado en crecimiento', 'Demanda de talento'],
-        amenazas: ['Competencia tecnológica', 'Cambios regulatorios']
-      };
-      
-      // Agregar áreas de enfoque
-      (this.report as any).areas_enfoque_principales = [
-        'Alfabetización digital y tecnológica',
-        'Liderazgo en transformación digital',
-        'Innovación y creatividad tecnológica'
-      ];
-      
-      console.log('✅ Reporte local generado exitosamente');
-      
-    } catch (error) {
-      console.error('❌ Error generando reporte local:', error);
-      // Usar reporte mínimo como fallback
-      this.report = {
-        titulo_informe: 'Diagnóstico de Madurez ARES-AI',
-        resumen_ejecutivo: 'Se ha completado tu diagnóstico. Revisa los resultados y el plan de acción recomendado.',
-        analisis_ares: [],
-        plan_de_accion: [],
-        planDeAccion: { items: [] }
-      } as any;
-    }
-  }
-
-  // 🚨 MÉTODO TEMPORALMENTE DESHABILITADO - CAUSA CONGELAMIENTO DEL NAVEGADOR
-  /*
-  private verificarYGenerarDiagnostico(diagnosticData: any): void {
-    console.log('🔍 Verificando salud de la API antes de generar diagnóstico...');
-    
-    // 🔧 SOLUCIÓN: Timeout muy agresivo para evitar congelamiento
-    const healthCheckTimeout = setTimeout(() => {
-      console.log('⏰ Timeout en verificación de salud - usando fallback local');
-      this.fallbackToLocalComplete(diagnosticData);
-    }, 8000); // Solo 8 segundos para verificar salud
-    
-    this.asistenteIaService.verificarSaludAPI().subscribe({
-      next: (isHealthy: boolean) => {
-        clearTimeout(healthCheckTimeout);
-        if (isHealthy) {
-          console.log('✅ API saludable - generando diagnóstico con IA');
-          this.generateCompleteDiagnosticWithAI(diagnosticData);
-        } else {
-          console.log('❌ API no disponible - usando fallback local');
-          this.fallbackToLocalComplete(diagnosticData);
-        }
-      },
-      error: (error) => {
-        clearTimeout(healthCheckTimeout);
-        console.error('❌ Error verificando API:', error);
-        console.log('🔄 Usando fallback local por error de verificación');
-        this.fallbackToLocalComplete(diagnosticData);
-);
-      }
-    });
-  }
-  */
-
-  // 🔧 MÉTODO DE EMERGENCIA: Bypass completo del sistema
-  emergencyBypass(): void {
-    console.log('🚨 BYPASS DE EMERGENCIA ACTIVADO - Generando resultados inmediatamente');
-    
-    try {
-      // 1. Generar datos de prueba inmediatamente
-      this.generateTestData();
-      
-      // 2. Generar reporte local básico
-      this.report = {
-        titulo_informe: 'Diagnóstico de Madurez ARES-AI - MODO EMERGENCIA',
-        resumen_ejecutivo: `Tu organización se encuentra en un nivel Intermedio en la implementación de IA. 
-        El puntaje total es de 65/100. Este diagnóstico te proporciona un plan de acción personalizado 
-        para acelerar tu transformación digital.`,
-        analisis_ares: [
-          {
-            dimension: 'Preparación (F1)',
-            puntaje: 70,
-            analisis: 'Buen nivel en preparación de datos y talento, necesita mejorar gobernanza'
-          },
-          {
-            dimension: 'Diseño (F2)',
-            puntaje: 65,
-            analisis: 'Aspectos éticos y de valor bien desarrollados, requiere atención en riesgos'
-          },
-          {
-            dimension: 'Desarrollo (F3)',
-            puntaje: 60,
-            analisis: 'Tecnología implementada, necesita mejorar integración y capacidad'
-          },
-          {
-            dimension: 'Operación (F4)',
-            puntaje: 75,
-            analisis: 'Excelente en operación y seguridad, buen cumplimiento'
-          },
-          {
-            dimension: 'Escalamiento (F5)',
-            puntaje: 55,
-            analisis: 'Necesita mejorar adopción y sostenibilidad'
-          }
-        ],
-        plan_de_accion: [
-          {
-            area_mejora: 'Gobernanza de IA',
-            descripcion_problema: 'Falta de políticas claras y marcos regulatorios para IA',
-            acciones_recomendadas: [
-              {
-                accion: 'Establecer comité de ética de IA',
-                detalle: 'Crear un comité multidisciplinario para supervisar el uso de IA'
-              },
-              {
-                accion: 'Desarrollar políticas de gobernanza',
-                detalle: 'Crear documentos que definan el uso responsable de IA'
-              }
-            ]
-          },
-          {
-            area_mejora: 'Gestión de Riesgos',
-            descripcion_problema: 'Necesidad de identificar y mitigar riesgos asociados a IA',
-            acciones_recomendadas: [
-              {
-                accion: 'Realizar evaluación de riesgos',
-                detalle: 'Identificar amenazas potenciales y vulnerabilidades'
-              },
-              {
-                accion: 'Implementar controles de mitigación',
-                detalle: 'Establecer medidas para reducir riesgos identificados'
-              }
-            ]
-          },
-          {
-            area_mejora: 'Integración Tecnológica',
-            descripcion_problema: 'Sistemas de IA no están completamente integrados',
-            acciones_recomendadas: [
-              {
-                accion: 'Auditoría de integración',
-                detalle: 'Evaluar la conectividad entre sistemas de IA'
-              },
-              {
-                accion: 'Implementar APIs unificadas',
-                detalle: 'Crear interfaces para conectar diferentes sistemas'
-              }
-            ]
-          }
-        ],
-        planDeAccion: { 
-          items: [
-            {
-              id: '1',
-              title: 'Establecer comité de ética de IA',
-              completed: false,
-              priority: 'Alta',
-              deadline: '3 meses'
-            },
-            {
-              id: '2',
-              title: 'Desarrollar políticas de gobernanza',
-              completed: false,
-              priority: 'Alta',
-              deadline: '6 meses'
-            },
-            {
-              id: '3',
-              title: 'Realizar evaluación de riesgos',
-              completed: false,
-              priority: 'Media',
-              deadline: '4 meses'
-            }
-          ]
-        }
-      } as any;
-      
-      // 3. Agregar análisis FODA
-      (this.report as any).analisis_foda = {
-        fortalezas: [
-          'Excelente operación y seguridad',
-          'Buen nivel de preparación de datos',
-          'Aspectos éticos bien desarrollados'
-        ],
-        debilidades: [
-          'Falta de gobernanza clara',
-          'Gestión de riesgos limitada',
-          'Integración tecnológica incompleta'
-        ],
-        oportunidades: [
-          'Mercado en crecimiento de IA',
-          'Demanda de talento especializado',
-          'Potencial de mejora significativa'
-        ],
-        amenazas: [
-          'Cambios regulatorios rápidos',
-          'Competencia tecnológica intensa',
-          'Riesgos de seguridad emergentes'
-        ]
-      };
-      
-      // 4. Agregar áreas de enfoque
-      (this.report as any).areas_enfoque_principales = [
-        'Gobernanza y ética de IA',
-        'Gestión integral de riesgos',
-        'Integración tecnológica avanzada',
-        'Adopción y sostenibilidad'
-      ];
-      
-      // 5. Marcar como completado
-      this.isLoadingReport = false;
-      this.isGeneratingReport = false;
-      this.loadingError = false;
-      
-      // 6. Preparar gráficos
-      this.prepareRadarChartData();
-      this.formatChartData();
-      
-      // 7. Forzar actualización de la vista
-      setTimeout(() => {
-        this.scores = { ...this.scores };
-        console.log('✅ BYPASS DE EMERGENCIA COMPLETADO - Resultados mostrados');
-      }, 100);
-      
-    } catch (error) {
-      console.error('❌ Error en bypass de emergencia:', error);
-      // Último recurso: datos mínimos
-      this.isLoadingReport = false;
-      this.isGeneratingReport = false;
-      this.loadingError = true;
-    }
   }
 }

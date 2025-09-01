@@ -185,14 +185,10 @@ export class StepContextoComponent implements OnInit {
     const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
     const nextStepUrl = `${baseUrl}/ares`;
     
-    console.log(`🚀 Navegando al siguiente paso: ${nextStepUrl}`);
-    
     this.router.navigate([nextStepUrl]).catch(error => {
-      console.error('❌ Error en navegación:', error);
+      console.error('Error en navegación:', error);
       // Fallback: navegar usando la ruta completa
-      this.router.navigate(['/es', 'diagnostico', 'ares']).catch(fallbackErr => {
-        console.error('❌ Error en fallback de navegación:', fallbackErr);
-      });
+      this.router.navigate(['/es', 'diagnostico', 'ares']);
     });
   }
 }

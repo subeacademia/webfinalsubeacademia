@@ -327,14 +327,10 @@ export class StepLeadComponent implements OnInit {
     const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
     const resultsUrl = `${baseUrl}/resultados`;
     
-    console.log(`🚀 Navegando a resultados: ${resultsUrl}`);
-    
     this.router.navigate([resultsUrl]).catch(error => {
-      console.error('❌ Error en navegación a resultados:', error);
+      console.error('Error en navegación a resultados:', error);
       // Fallback: navegar usando la ruta completa
-      this.router.navigate(['/es', 'diagnostico', 'resultados']).catch(fallbackErr => {
-        console.error('❌ Error en fallback de navegación a resultados:', fallbackErr);
-      });
+      this.router.navigate(['/es', 'diagnostico', 'resultados']);
     });
   }
 }

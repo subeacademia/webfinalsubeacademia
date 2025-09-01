@@ -74,11 +74,9 @@ export class StepStartComponent {
     this.router.navigate([nextStepUrl]).then(() => {
       console.log('Navegación completada exitosamente');
     }).catch(error => {
-      console.error('❌ Error en navegación:', error);
+      console.error('Error en navegación:', error);
       // Fallback: navegar usando la ruta completa
-      this.router.navigate(['/es', 'diagnostico', 'contexto']).catch(fallbackErr => {
-        console.error('❌ Error en fallback de navegación:', fallbackErr);
-      });
+      this.router.navigate(['/es', 'diagnostico', 'contexto']);
     });
   }
 }
