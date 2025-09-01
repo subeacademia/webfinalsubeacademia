@@ -1129,6 +1129,42 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     // Cleanup si es necesario
   }
 
+  private extractJsonFromString(str: string): any | null {
+    if (!str) {
+      return null;
+    }
+
+    // Prioritize looking for a JSON markdown block
+    const jsonRegex = /```json\n([\s\S]*?)\n```/;
+    const match = str.match(jsonRegex);
+
+    if (match && match[1]) {
+      try {
+        return JSON.parse(match[1]);
+      } catch (error) {
+        console.error('Error parsing extracted JSON from markdown block:', error);
+        // Fallthrough to try the other method
+      }
+    }
+
+    // Fallback for raw JSON object, possibly with surrounding text
+    const startIndex = str.indexOf('{');
+    const endIndex = str.lastIndexOf('}');
+
+    if (startIndex > -1 && endIndex > -1 && endIndex > startIndex) {
+      const jsonString = str.substring(startIndex, endIndex + 1);
+      try {
+        return JSON.parse(jsonString);
+      } catch (error) {
+        console.error('Error parsing extracted JSON from substring:', error, 'Original string:', str);
+        return null;
+      }
+    }
+
+    console.warn('Could not find a valid JSON object in the string:', str);
+    return null;
+  }
+
   // 🚀 NUEVA FUNCIONALIDAD: Generar diagnóstico completo con IA
   private generateCompleteDiagnosticWithAI(diagnosticData: any): void {
     console.log('🤖 Iniciando generación de diagnóstico completo con IA...');
@@ -1144,126 +1180,117 @@ export class DiagnosticResultsComponent implements OnInit, OnChanges, AfterViewI
     this.generatePersonalizedObjectivesWithAI(diagnosticData);
   }
 
-  // Generar análisis del diagnóstico con IA
-  private generateDiagnosticAnalysisWithAI(diagnosticData: any): void {
-    console.log('🧠 Generando análisis del diagnóstico con IA...');
-    
-    const prompt = this.buildDiagnosticAnalysisPrompt(diagnosticData);
+  // ------------------- REFACTORIZACIÓN DE IA -------------------
+
+  private generateAIPart(
+    taskName: string,
+    promptBuilder: (data: any) => string,
+    diagnosticData: any,
+    systemContent: string,
+    responseProcessor: (response: any, data: any) => void,
+    fallback: (data: any) => void,
+    options: { maxTokens: number; temperature: number }
+  ): void {
+    console.log(`🤖 Iniciando tarea de IA: ${taskName}...`);
+    const prompt = promptBuilder.call(this, diagnosticData);
     const payload = {
       messages: [
-        {
-          role: 'system',
-          content: 'Eres un experto consultor en transformación digital e IA con más de 15 años de experiencia. Analiza el diagnóstico de madurez en IA y genera un análisis profesional, detallado y personalizado.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
+        { role: 'system', content: systemContent },
+        { role: 'user', content: prompt }
       ],
-      maxTokens: 2000,
-      temperature: 0.7
+      maxTokens: options.maxTokens,
+      temperature: options.temperature
     };
 
     this.asistenteIaService.generarTextoAzure(payload).subscribe({
       next: (res: any) => {
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          console.log('✅ Análisis del diagnóstico generado con IA:', content);
-          
-          // Procesar y guardar el análisis
-          this.processDiagnosticAnalysis(content, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando análisis del diagnóstico:', error);
-          this.fallbackToLocalAnalysis(diagnosticData);
-        }
+        responseProcessor.call(this, res, diagnosticData);
       },
       error: (err: unknown) => {
-        console.error('❌ Error generando análisis del diagnóstico con IA:', err);
-        this.fallbackToLocalAnalysis(diagnosticData);
+        console.error(`❌ Error en la tarea de IA "${taskName}". Respuesta completa del error:`, err);
+        fallback.call(this, diagnosticData);
       }
     });
+  }
+
+  // Generar análisis del diagnóstico con IA
+  private generateDiagnosticAnalysisWithAI(diagnosticData: any): void {
+    const systemContent = 'Eres un experto consultor en transformación digital e IA con más de 15 años de experiencia. Analiza el diagnóstico de madurez en IA y genera un análisis profesional, detallado y personalizado.';
+    
+    const responseProcessor = (res: any, data: any) => {
+      try {
+        const content = res?.choices?.[0]?.message?.content ?? '';
+        console.log('✅ Análisis del diagnóstico generado con IA:', content);
+        this.processDiagnosticAnalysis(content, data);
+      } catch (error) {
+        console.error('❌ Error procesando análisis del diagnóstico:', error);
+        this.fallbackToLocalAnalysis(data);
+      }
+    };
+
+    this.generateAIPart(
+      'Análisis de Diagnóstico',
+      this.buildDiagnosticAnalysisPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalAnalysis,
+      { maxTokens: 2000, temperature: 0.7 }
+    );
   }
 
   // Generar plan de acción personalizado con IA
   private generatePersonalizedActionPlanWithAI(diagnosticData: any): void {
-    console.log('📋 Generando plan de acción personalizado con IA...');
-    
-    const prompt = this.buildActionPlanPrompt(diagnosticData);
-    const payload = {
-      messages: [
-        {
-          role: 'system',
-          content: 'Eres un experto en desarrollo profesional y coaching que genera planes de acción estratégicos, personalizados y accionables. Responde SOLO con JSON válido.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens: 1500,
-      temperature: 0.6
+    const systemContent = 'Eres un API de generación de JSON. Tu única función es recibir un contexto y devolver un plan de acción en formato JSON. NO escribas nada más que el objeto JSON. La respuesta debe ser directamente un JSON válido, sin explicaciones, ni texto introductorio, ni formato markdown.';
+
+    const responseProcessor = (res: any, data: any) => {
+      const content = res?.choices?.[0]?.message?.content ?? '';
+      const plan = this.extractJsonFromString(content);
+      if (plan) {
+        console.log('✅ Plan de acción personalizado generado con IA:', plan);
+        this.processActionPlan(plan, data);
+      } else {
+        console.error('❌ Error: No se pudo extraer el JSON del plan de acción. Respuesta recibida:', content);
+        this.fallbackToLocalActionPlan(data);
+      }
     };
 
-    this.asistenteIaService.generarTextoAzure(payload).subscribe({
-      next: (res: any) => {
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          const plan = JSON.parse(content);
-          console.log('✅ Plan de acción personalizado generado con IA:', plan);
-          
-          // Procesar y guardar el plan de acción
-          this.processActionPlan(plan, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando plan de acción:', error);
-          this.fallbackToLocalActionPlan(diagnosticData);
-        }
-      },
-      error: (err: unknown) => {
-        console.error('❌ Error generando plan de acción con IA:', err);
-        this.fallbackToLocalActionPlan(diagnosticData);
-      }
-    });
+    this.generateAIPart(
+      'Plan de Acción Personalizado',
+      this.buildActionPlanPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalActionPlan,
+      { maxTokens: 1500, temperature: 0.6 }
+    );
   }
 
   // Generar objetivos personalizados con IA
   private generatePersonalizedObjectivesWithAI(diagnosticData: any): void {
-    console.log('🎯 Generando objetivos personalizados con IA...');
+    const systemContent = 'Eres un API de generación de JSON. Tu única función es recibir un contexto y devolver objetivos SMART en formato JSON. NO escribas nada más que el objeto JSON. La respuesta debe ser directamente un JSON válido, sin explicaciones, ni texto introductorio, ni formato markdown.';
     
-    const prompt = this.buildObjectivesPrompt(diagnosticData);
-    const payload = {
-      messages: [
-        {
-          role: 'system',
-          content: 'Eres un asesor experto en transformación digital con IA. Genera objetivos SMART, accionables y específicos basados en el contexto del cliente. Responde SOLO con JSON válido.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens: 1200,
-      temperature: 0.7
+    const responseProcessor = (res: any, data: any) => {
+      const content = res?.choices?.[0]?.message?.content ?? '';
+      const objectives = this.extractJsonFromString(content);
+      if (objectives) {
+        console.log('✅ Objetivos personalizados generados con IA:', objectives);
+        this.processObjectives(objectives, data);
+      } else {
+        console.error('❌ Error: No se pudo extraer el JSON de los objetivos. Respuesta recibida:', content);
+        this.fallbackToLocalObjectives(data);
+      }
     };
 
-    this.asistenteIaService.generarTextoAzure(payload).subscribe({
-      next: (res: any) => {
-        try {
-          const content = res?.choices?.[0]?.message?.content ?? '';
-          const objectives = JSON.parse(content);
-          console.log('✅ Objetivos personalizados generados con IA:', objectives);
-          
-          // Procesar y guardar los objetivos
-          this.processObjectives(objectives, diagnosticData);
-        } catch (error) {
-          console.error('❌ Error procesando objetivos:', error);
-          this.fallbackToLocalObjectives(diagnosticData);
-        }
-      },
-      error: (err: unknown) => {
-        console.error('❌ Error generando objetivos con IA:', err);
-        this.fallbackToLocalObjectives(diagnosticData);
-      }
-    });
+    this.generateAIPart(
+      'Objetivos Personalizados',
+      this.buildObjectivesPrompt,
+      diagnosticData,
+      systemContent,
+      responseProcessor,
+      this.fallbackToLocalObjectives,
+      { maxTokens: 1200, temperature: 0.7 }
+    );
   }
 
   // Construir prompt para análisis del diagnóstico
@@ -1339,7 +1366,7 @@ ANÁLISIS ACTUAL:
 - Competencias: ${JSON.stringify(competencias)}
 
 INSTRUCCIONES:
-Genera un plan de acción estratégico con 5-7 acciones priorizadas. Responde SOLO con JSON válido:
+Genera un plan de acción estratégico con 5-7 acciones priorizadas. Tu respuesta DEBE ser únicamente un objeto JSON válido, siguiendo la estructura especificada. No incluyas ningún texto fuera del propio JSON.
 
 {
   "planEstrategico": {
@@ -1389,7 +1416,7 @@ ANÁLISIS ACTUAL:
 - Competencias: ${JSON.stringify(competencias)}
 
 INSTRUCCIONES:
-Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON válido:
+Genera 5 objetivos SMART específicos y personalizados. Tu respuesta DEBE ser únicamente un objeto JSON válido, siguiendo la estructura especificada. No incluyas ningún texto fuera del propio JSON.
 
 {
   "objetivos": [
@@ -1472,6 +1499,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
 
   // Fallbacks a análisis local
   private fallbackToLocalAnalysis(diagnosticData: any): void {
+    this.toastService.info('No se pudo conectar con la IA para el análisis. Se generó un reporte local.');
     console.log('🔄 Usando análisis local como fallback...');
     const diagnosticAnalysis = this.scoringService.generateDiagnosticAnalysis(diagnosticData);
     const actionPlan = this.scoringService.generateActionPlan(diagnosticData);
@@ -1498,6 +1526,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
   }
 
   private fallbackToLocalActionPlan(diagnosticData: any): void {
+    this.toastService.info('No se pudo generar el plan de acción con IA. Se usó un plan local.');
     console.log('🔄 Usando plan de acción local como fallback...');
     const actionPlan = this.scoringService.generateActionPlan(diagnosticData);
     if (this.report) {
@@ -1506,6 +1535,7 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
   }
 
   private fallbackToLocalObjectives(diagnosticData: any): void {
+    this.toastService.info('No se pudieron generar objetivos con IA. Se usaron objetivos locales.');
     console.log('🔄 Usando objetivos locales como fallback...');
     // Generar objetivos básicos basados en los scores
     const basicObjectives = [
@@ -1551,9 +1581,9 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
 
       this.asistenteIaService.generarTextoAzure(payload).subscribe({
         next: (res: any) => {
-          try {
-            const content = res?.choices?.[0]?.message?.content ?? '';
-            const plan = JSON.parse(content);
+          const content = res?.choices?.[0]?.message?.content ?? '';
+          const plan = this.extractJsonFromString(content);
+          if (plan) {
             if (this.report) {
               this.report = { ...this.report, planDeAccion: plan } as any;
             }
@@ -1561,8 +1591,8 @@ Genera 5 objetivos SMART específicos y personalizados. Responde SOLO con JSON v
               const items: PlanDeAccionItem[] = plan?.items || [];
               this.diagnosticsService.updateActionPlan(this.diagnosticId, items).catch((err: unknown) => console.error('Error al guardar planDeAccion:', err));
             }
-          } catch (error) {
-            console.error('Error al parsear el plan de acción JSON:', error);
+          } else {
+            console.error('Error al parsear el plan de acción JSON. Contenido recibido:', content);
           }
         },
         error: (err: unknown) => {
