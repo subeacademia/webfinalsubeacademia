@@ -16,11 +16,18 @@ export const environment = {
   // GA4 Measurement ID (fallback por defecto si no se reemplaza)
   ga4MeasurementId: "G-KC1T2FD7JB",
   // Endpoint del backend de IA (por ejemplo, en Vercel)
-  backendIaUrl: "PON_AQUI_TU_ENDPOINT_VERCEL",
+  backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate",
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
   // API Key de Google Gemini
   geminiApiKey: 'AIzaSyBhcmP7NTPJqF-pIuyS5rbZVXgxifaiMn8',
+  // 🔧 SOLUCIÓN: Configuración mejorada de timeouts y reintentos
+  api: {
+    timeout: 30000, // 30 segundos
+    maxRetries: 3,
+    healthCheckTimeout: 10000, // 10 segundos
+    diagnosticTimeout: 45000, // 45 segundos para diagnóstico completo
+  },
   // Para activar emuladores en local, pon en true
   // y arranca: firebase emulators:start
   useEmulators: false,

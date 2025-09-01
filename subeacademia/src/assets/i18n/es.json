@@ -218,5 +218,13 @@
   "Desarrollar mi inteligencia emocional": "Desarrollar mi inteligencia emocional",
   "Aumentar mi productividad y gestión del tiempo": "Aumentar mi productividad y gestión del tiempo",
   "Mejorar la comunicación con mi equipo": "Mejorar la comunicación con mi equipo",
-  "Otra": "Otra (la describiré más adelante)"
+  "Otra": "Otra (la describiré más adelante)",
+  "AI_PROCESSING_TITLE": "Procesando con Inteligencia Artificial",
+  "AI_PROCESSING_DESCRIPTION": "Nuestra IA está analizando tus respuestas para crear un diagnóstico integral y un plan de acción personalizado",
+  "AI_STEP_1": "Analizando respuestas del diagnóstico",
+  "AI_STEP_2": "Evaluando competencias y madurez",
+  "AI_STEP_3": "Generando análisis personalizado",
+  "AI_STEP_4": "Finalizando reporte",
+  "AI_PROCESSING_TIME": "Tiempo estimado",
+  "AI_PROCESSING_SECONDS": "segundos"
 }

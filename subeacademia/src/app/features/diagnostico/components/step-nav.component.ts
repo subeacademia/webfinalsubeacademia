@@ -311,20 +311,31 @@ export class StepNavComponent implements OnInit, OnDestroy {
 
 	navigateToStep(stepIndex: number): void {
 		if (this.isDiagnosticComplete()) {
-			// Navegar al paso específico
+			// 🔧 SOLUCIÓN: Navegar al paso específico considerando el idioma
 			const stepRoutes = [
-				'/diagnostico/inicio',
-				'/diagnostico/contexto',
-				'/diagnostico/ares',
-				'/diagnostico/competencias',
-				'/diagnostico/objetivo',
-				'/diagnostico/contacto',
-				'/diagnostico/resultados'
+				'inicio',
+				'contexto',
+				'ares',
+				'competencias',
+				'objetivo',
+				'lead',
+				'resultados'
 			];
 			
 			if (stepRoutes[stepIndex]) {
-				this.router.navigate([stepRoutes[stepIndex]]);
-				console.log(`✅ Navegando al paso ${stepIndex + 1}: ${stepRoutes[stepIndex]}`);
+				const currentUrl = this.router.url;
+				const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+				const targetUrl = `${baseUrl}/${stepRoutes[stepIndex]}`;
+				
+				console.log(`✅ Navegando al paso ${stepIndex + 1}: ${targetUrl}`);
+				
+				this.router.navigate([targetUrl]).catch(error => {
+					console.error('❌ Error navegando al paso:', error);
+					// Fallback: intentar navegación con ruta completa
+					this.router.navigate(['/es', 'diagnostico', stepRoutes[stepIndex]]).catch(fallbackErr => {
+						console.error('❌ Error en fallback de navegación:', fallbackErr);
+					});
+				});
 			}
 		} else {
 			// Mostrar mensaje de que no se puede navegar
@@ -335,21 +346,66 @@ export class StepNavComponent implements OnInit, OnDestroy {
 	}
 
 	goNext(): void {
+		console.log('🚀 goNext() llamado');
 		this.updateCanGoNext();
+		console.log(`🔍 canGoNext: ${this.canGoNext}`);
+		
 		if (!this.canGoNext) {
 			alert('Completa el paso actual antes de continuar.');
 			return;
 		}
+		
 		const next = this.diagnosticStateService.getNextStepLink(this.router.url);
+		console.log(`🔍 next step: ${next}`);
+		
 		if (next) {
-			this.router.navigate(['/diagnostico', next]);
+			// 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
+			const currentUrl = this.router.url;
+			const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+			const nextStepUrl = `${baseUrl}/${next}`;
+			
+			console.log(`🚀 Navegando al siguiente paso: ${nextStepUrl}`);
+			console.log(`🔍 currentUrl: ${currentUrl}`);
+			console.log(`🔍 baseUrl: ${baseUrl}`);
+			console.log(`🔍 next: ${next}`);
+			
+			this.router.navigate([nextStepUrl]).catch(error => {
+				console.error('❌ Error en navegación:', error);
+				// Fallback: intentar navegación con ruta completa
+				this.router.navigate(['/es', 'diagnostico', next]).catch(fallbackErr => {
+					console.error('❌ Error en fallback de navegación:', fallbackErr);
+				});
+			});
+		} else {
+			console.error('❌ No se pudo obtener el siguiente paso');
 		}
 	}
 
 	goPrevious(): void {
+		console.log('🔄 goPrevious() llamado');
 		const prev = this.diagnosticStateService.getPreviousStepLink(this.router.url);
+		console.log(`🔍 prev step: ${prev}`);
+		
 		if (prev) {
-			this.router.navigate(['/diagnostico', prev]);
+			// 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
+			const currentUrl = this.router.url;
+			const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+			const prevStepUrl = `${baseUrl}/${prev}`;
+			
+			console.log(`🔄 Navegando al paso anterior: ${prevStepUrl}`);
+			console.log(`🔍 currentUrl: ${currentUrl}`);
+			console.log(`🔍 baseUrl: ${baseUrl}`);
+			console.log(`🔍 prev: ${prev}`);
+			
+			this.router.navigate([prevStepUrl]).catch(error => {
+				console.error('❌ Error en navegación anterior:', error);
+				// Fallback: intentar navegación con ruta completa
+				this.router.navigate(['/es', 'diagnostico', prev]).catch(fallbackErr => {
+					console.error('❌ Error en fallback de navegación anterior:', fallbackErr);
+				});
+			});
+		} else {
+			console.error('❌ No se pudo obtener el paso anterior');
 		}
 	}
 

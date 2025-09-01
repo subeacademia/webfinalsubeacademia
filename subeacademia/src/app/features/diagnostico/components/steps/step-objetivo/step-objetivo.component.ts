@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
@@ -19,6 +19,7 @@ export class StepObjetivoComponent implements OnInit {
   private readonly router = inject(Router);
   readonly state = inject(DiagnosticStateService);
   private readonly besselAi = inject(BesselAiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   // Formulario local para capturar la descripción libre del usuario
   uiForm!: FormGroup;
@@ -63,11 +64,23 @@ export class StepObjetivoComponent implements OnInit {
   ]);
   
   // Computed properties
-  readonly canProceed = computed(() => this.selectedCount() > 0);
+  readonly canProceed = computed(() => {
+    const count = this.selectedCount();
+    const canProceed = count > 0;
+    console.log(`🔍 canProceed: ${count} objetivos seleccionados -> ${canProceed ? '✅ Puede continuar' : '❌ No puede continuar'}`);
+    return canProceed;
+  });
   readonly selectedCount = computed(() => {
-    // 🔧 SOLUCIÓN: Contar solo los objetivos realmente seleccionados
-    const objetivos = this.getObjetivosSeleccionados();
-    return objetivos.length;
+    // 🔧 SOLUCIÓN: Contar directamente desde el FormArray sin filtrar
+    const formArrayValues = this.selectedObjectives?.value || [];
+    const count = Array.isArray(formArrayValues) ? formArrayValues.length : 0;
+    
+    // 🔧 DEBUG: Log del contador para verificar que funcione
+    console.log(`🔢 selectedCount computed: ${count} objetivos`);
+    console.log(`📋 Valores del FormArray:`, formArrayValues);
+    
+    // 🔧 SOLUCIÓN: Asegurar que el contador sea siempre un número válido
+    return Math.max(0, count);
   });
   readonly hasGeneratedObjectives = computed(() => this.suggestions().length > 0);
   
@@ -292,50 +305,66 @@ export class StepObjetivoComponent implements OnInit {
       this.removeSelection(option.texto);
     }
     
+    // 🔧 SOLUCIÓN: Forzar actualización del estado
+    this.selectedObjectives.updateValueAndValidity();
+    
     // Log del estado actual después del toggle
     const currentCount = this.selectedCount();
     console.log(`📊 Objetivos seleccionados después del toggle: ${currentCount}`);
     console.log(`📋 Lista actual:`, this.getObjetivosSeleccionados());
     
-    // 🔧 VERIFICACIÓN ADICIONAL: Asegurar que el contador sea correcto
-    console.log(`🔍 Verificación: FormArray length: ${this.selectedObjectives.length}`);
-    console.log(`🔍 Verificación: Valores filtrados: ${this.getObjetivosSeleccionados().length}`);
+    // 🔧 SOLUCIÓN: Forzar detección de cambios para actualizar la UI
+    this.cdr.detectChanges();
+    
+    // 🔧 SOLUCIÓN: Verificación adicional después de la detección de cambios
+    setTimeout(() => {
+      console.log(`🔄 Verificación final - Contador actual: ${this.selectedCount()}`);
+      this.cdr.detectChanges();
+      this.debugEstado(); // 🔧 DEBUG: Verificar estado completo
+    }, 0);
+    
+    // 🔧 SOLUCIÓN: Forzar actualización del estado global
+    this.state.form.updateValueAndValidity();
   }
+
+
 
   isSelected(option: ObjetivoGenerado): boolean {
     const values = (this.selectedObjectives.value || []) as string[];
-    return values.includes(option.texto);
+    const isSelected = values.includes(option.texto);
+    console.log(`🔍 isSelected "${option.texto}": ${isSelected ? '✅' : '❌'}`);
+    return isSelected;
   }
 
   private addSelection(option: string): void {
     const values = (this.selectedObjectives.value || []) as string[];
     console.log(`➕ Agregando selección: "${option}"`);
-    console.log(`📋 Valores actuales antes:`, values);
     
     if (!values.includes(option)) {
       this.selectedObjectives.push(new FormControl<string>(option, { nonNullable: true }));
       console.log(`✅ Selección agregada exitosamente`);
+      
+      // 🔧 SOLUCIÓN: Forzar actualización inmediata del computed
+      this.cdr.detectChanges();
     } else {
       console.log(`⚠️ La opción ya estaba seleccionada`);
     }
-    
-    console.log(`📋 Valores actuales después:`, this.selectedObjectives.value);
   }
 
   private removeSelection(option: string): void {
     const values = (this.selectedObjectives.value as string[]) || [];
     console.log(`➖ Removiendo selección: "${option}"`);
-    console.log(`📋 Valores actuales antes:`, values);
     
     const idx = values.findIndex(v => v === option);
     if (idx >= 0) {
       this.selectedObjectives.removeAt(idx);
       console.log(`✅ Selección removida exitosamente del índice ${idx}`);
+      
+      // 🔧 SOLUCIÓN: Forzar actualización inmediata del computed
+      this.cdr.detectChanges();
     } else {
       console.log(`⚠️ La opción no se encontró para remover`);
     }
-    
-    console.log(`📋 Valores actuales después:`, this.selectedObjectives.value);
   }
 
   private deduplicateSelected(): void {
@@ -355,9 +384,15 @@ export class StepObjetivoComponent implements OnInit {
 
   // Navegación
   goNext(): void {
-    if (!this.canProceed()) return;
-    
     console.log('🚀 Botón Siguiente presionado...');
+    console.log(`🔍 canProceed(): ${this.canProceed()}`);
+    console.log(`📊 selectedCount(): ${this.selectedCount()}`);
+    
+    if (!this.canProceed()) {
+      console.log('❌ No se puede continuar - no hay objetivos seleccionados');
+      this.debugEstado();
+      return;
+    }
     
     // 🔧 SOLUCIÓN: Ir al paso de revisión y NO navegar automáticamente
     this.currentStep.set('review');
@@ -374,9 +409,10 @@ export class StepObjetivoComponent implements OnInit {
     console.log(`📍 Paso anterior: ${prev}`);
     
     if (prev) {
-      // Construir la URL del paso anterior
-      const base = this.router.url.split('/').slice(0, -1).join('/');
-      const prevUrl = `${base}/${prev}`;
+      // 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
+      const currentUrl = this.router.url;
+      const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
+      const prevUrl = `${baseUrl}/${prev}`;
       
       console.log(`🔗 URL anterior: ${prevUrl}`);
       
@@ -388,7 +424,7 @@ export class StepObjetivoComponent implements OnInit {
         console.log('🔄 Intentando navegación directa...');
         
         // Fallback: intentar navegación directa
-        this.router.navigate([`/diagnostico/${prev}`]).then(() => {
+        this.router.navigate(['/es', 'diagnostico', prev]).then(() => {
           console.log('✅ Navegación directa al paso anterior exitosa');
         }).catch(fallbackErr => {
           console.error('❌ Error en fallback de navegación anterior:', fallbackErr);
@@ -397,7 +433,7 @@ export class StepObjetivoComponent implements OnInit {
     } else {
       console.error('❌ No se pudo determinar el paso anterior');
       // Fallback: ir al inicio del diagnóstico
-      this.router.navigate(['/diagnostico/inicio']).catch(err => {
+      this.router.navigate(['/es', 'diagnostico', 'inicio']).catch(err => {
         console.error('❌ Error navegando al inicio:', err);
       });
     }
@@ -438,20 +474,20 @@ export class StepObjetivoComponent implements OnInit {
     const objetivosSeleccionados = this.getObjetivosSeleccionados();
     console.log('🎯 Objetivos seleccionados para guardar:', objetivosSeleccionados);
     
-          // Asegurar que los objetivos se guarden en el estado global
-      if (objetivosSeleccionados.length > 0) {
-        // Limpiar el FormArray y agregar los objetivos seleccionados
-        this.selectedObjectives.clear();
-        objetivosSeleccionados.forEach(objetivo => {
-          this.selectedObjectives.push(this.fb.control(objetivo, { nonNullable: true }));
-        });
-        
-        // Forzar la actualización del estado
-        this.state.form.updateValueAndValidity();
-        console.log('✅ Objetivos guardados en el estado global');
-      }
+    // Asegurar que los objetivos se guarden en el estado global
+    if (objetivosSeleccionados.length > 0) {
+      // Limpiar el FormArray y agregar los objetivos seleccionados
+      this.selectedObjectives.clear();
+      objetivosSeleccionados.forEach(objetivo => {
+        this.selectedObjectives.push(this.fb.control(objetivo, { nonNullable: true }));
+      });
+      
+      // Forzar la actualización del estado
+      this.state.form.updateValueAndValidity();
+      console.log('✅ Objetivos guardados en el estado global');
+    }
     
-    // Construir la ruta correctamente basada en la URL actual
+    // 🔧 SOLUCIÓN: Construir la ruta correctamente basada en la URL actual
     const currentUrl = this.router.url;
     const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
     const resultsUrl = `${baseUrl}/resultados`;
@@ -504,20 +540,34 @@ export class StepObjetivoComponent implements OnInit {
   // Método para obtener los objetivos seleccionados para mostrar en la pantalla de revisión
   getObjetivosSeleccionados(): string[] {
     const values = this.selectedObjectives?.value;
-    if (!values || !Array.isArray(values)) return [];
+    if (!values || !Array.isArray(values)) {
+      console.log(`🔍 getObjetivosSeleccionados: valores inválidos -`, values);
+      return [];
+    }
     
-    // 🔧 SOLUCIÓN: Filtrar solo valores válidos y no vacíos
-    const objetivosValidos = values
-      .filter(v => v && typeof v === 'string' && v.trim() !== '')
-      .map(v => v.trim())
-      .filter((v, index, arr) => arr.indexOf(v) === index); // Eliminar duplicados
+    // 🔧 SOLUCIÓN: Usar directamente los valores del FormArray para consistencia
+    const objetivosValidos = values.filter(v => v && typeof v === 'string');
     
     console.log(`🔍 getObjetivosSeleccionados: FormArray length=${values.length}, valores válidos=${objetivosValidos.length}`);
+    console.log(`📋 Valores completos:`, values);
+    console.log(`✅ Objetivos válidos:`, objetivosValidos);
+    
     return objetivosValidos;
   }
 
   // TrackBy function para optimizar el rendimiento del *ngFor
   trackByObjetivo(index: number, objetivo: string): string {
     return objetivo;
+  }
+  
+  // 🔧 MÉTODO DE DEBUG: Para verificar el estado actual
+  debugEstado(): void {
+    console.log('🔍 === DEBUG ESTADO ACTUAL ===');
+    console.log(`📊 selectedCount(): ${this.selectedCount()}`);
+    console.log(`🔍 canProceed(): ${this.canProceed()}`);
+    console.log(`📋 FormArray length: ${this.selectedObjectives.length}`);
+    console.log(`📋 FormArray value:`, this.selectedObjectives.value);
+    console.log(`📋 getObjetivosSeleccionados():`, this.getObjetivosSeleccionados());
+    console.log('🔍 === FIN DEBUG ===');
   }
 }

@@ -221,10 +221,14 @@ export class StepAresComponent implements OnInit {
     const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
     const nextStepUrl = `${baseUrl}/competencias`;
     
+    console.log(`🚀 Navegando al siguiente paso: ${nextStepUrl}`);
+    
     this.router.navigate([nextStepUrl]).catch(error => {
-      console.error('Error en navegación:', error);
+      console.error('❌ Error en navegación:', error);
       // Fallback: navegar usando la ruta completa
-      this.router.navigate(['/es', 'diagnostico', 'competencias']);
+      this.router.navigate(['/es', 'diagnostico', 'competencias']).catch(fallbackErr => {
+        console.error('❌ Error en fallback de navegación:', fallbackErr);
+      });
     });
   }
 }

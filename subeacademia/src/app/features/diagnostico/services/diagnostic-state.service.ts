@@ -330,8 +330,10 @@ export class DiagnosticStateService {
     // Métodos para navegación entre pasos
     getNextStepLink(currentRoute: string): string | null {
         const path = this.extractDiagnosticoPath(currentRoute);
+        console.log(`🔍 getNextStepLink - Path extraído: "${path}"`);
         
         const stepFlow: Record<string, string> = {
+            '': 'inicio',  // 🔧 SOLUCIÓN: Agregar caso para ruta base
             'inicio': 'contexto',
             'contexto': 'ares/F1',
             'ares/F1': 'ares/F2',
@@ -345,13 +347,17 @@ export class DiagnosticStateService {
             'lead': 'resultados'
         };
         
-        return stepFlow[path] || null;
+        const nextStep = stepFlow[path] || null;
+        console.log(`🔍 getNextStepLink - Siguiente paso: "${nextStep}"`);
+        return nextStep;
     }
 
     getPreviousStepLink(currentRoute: string): string | null {
         const path = this.extractDiagnosticoPath(currentRoute);
+        console.log(`🔍 getPreviousStepLink - Path extraído: "${path}"`);
         
         const stepFlow: Record<string, string> = {
+            'inicio': '',  // 🔧 SOLUCIÓN: Agregar caso para volver a ruta base
             'contexto': 'inicio',
             'ares/F1': 'contexto',
             'ares/F2': 'ares/F1',
@@ -365,13 +371,39 @@ export class DiagnosticStateService {
             'resultados': 'lead'
         };
         
-        return stepFlow[path] || null;
+        const prevStep = stepFlow[path] || null;
+        console.log(`🔍 getPreviousStepLink - Paso anterior: "${prevStep}"`);
+        return prevStep;
     }
 
     private extractDiagnosticoPath(route: string): string {
-        const match = route.match(/\/diagnostico(\/.*)?$/);
-        if (!match) return '';
-        return match[1] || '';
+        // 🔧 SOLUCIÓN: Mejorar la extracción del path para manejar rutas con idioma
+        console.log(`🔍 Extrayendo path de ruta: ${route}`);
+        
+        // Manejar rutas con idioma como /es/diagnostico/contexto
+        const matchWithLang = route.match(/\/[a-z]{2}\/diagnostico(\/.*)?$/);
+        if (matchWithLang) {
+            const path = matchWithLang[1] || '';
+            console.log(`🔍 Path extraído (con idioma): "${path}"`);
+            return path;
+        }
+        
+        // Manejar rutas sin idioma como /diagnostico/contexto
+        const matchWithoutLang = route.match(/\/diagnostico(\/.*)?$/);
+        if (matchWithoutLang) {
+            const path = matchWithoutLang[1] || '';
+            console.log(`🔍 Path extraído (sin idioma): "${path}"`);
+            return path;
+        }
+        
+        // 🔧 SOLUCIÓN: Manejar rutas que terminan en /diagnostico sin path adicional
+        if (route.endsWith('/diagnostico') || route.endsWith('/diagnostico/')) {
+            console.log(`🔍 Path extraído (ruta base): ""`);
+            return '';
+        }
+        
+        console.log(`🔍 No se pudo extraer path de: ${route}`);
+        return '';
     }
 
     // Método para verificar si un paso está completo
@@ -621,14 +653,19 @@ export class DiagnosticStateService {
 
 	// Utilidades públicas para navegación/gating desde componentes de UI
 	getCurrentStepKeyFromRoute(currentRoute: string): 'inicio' | 'contexto' | 'ares' | 'competencias' | 'objetivo' | 'lead' | 'resultados' {
-		const match = currentRoute.match(/\/diagnostico(\/.*)?$/);
-		const path = match?.[1] || '';
+		// 🔧 SOLUCIÓN: Usar el mismo método extractDiagnosticoPath para consistencia
+		const path = this.extractDiagnosticoPath(currentRoute);
+		console.log(`🔍 getCurrentStepKeyFromRoute - Path: "${path}"`);
+		
 		if (path.includes('resultados')) return 'resultados';
-		if (path.includes('contacto') || path.includes('lead')) return 'lead';
+		if (path.includes('lead')) return 'lead';
 		if (path.includes('objetivo')) return 'objetivo';
 		if (path.includes('competencias')) return 'competencias';
 		if (path.includes('ares')) return 'ares';
 		if (path.includes('contexto')) return 'contexto';
+		if (path.includes('inicio') || path === '') return 'inicio';
+		
+		console.log(`🔍 getCurrentStepKeyFromRoute - No se pudo determinar el paso, usando 'inicio'`);
 		return 'inicio';
 	}
 
