@@ -5,7 +5,7 @@ import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
 import { Observable, map, firstValueFrom, from, throwError, of, timeout, catchError } from 'rxjs';
 import { PlanDeAccionItem } from '../data/report.model';
 import { AsistenteIaService } from '../../../shared/ui/chatbot/asistente-ia.service';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../../environments/environment';
 
 interface AIReport {
   analysis: string;
@@ -61,7 +61,7 @@ Para el 'actionPlan', debes crear una lista de 3 a 5 pasos concretos y accionabl
 
       try {
         const response = await firstValueFrom(
-          this.http.post<AIReport>(environment.apiUrl, payload).pipe(
+          this.http.post<AIReport>(environment.backendIaUrl, payload).pipe(
             catchError((err: HttpErrorResponse) => {
               console.error('Error calling Vercel API:', err);
               this.error.set('Hubo un error al generar el reporte. Por favor, intenta de nuevo.');
