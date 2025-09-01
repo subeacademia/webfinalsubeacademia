@@ -14,17 +14,44 @@ import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.c
     <div class="max-w-6xl mx-auto animate-fade-in">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-white dark:text-white mb-4">
-          Evaluación ARES-AI
+          🎯 Evaluación ARES-AI Framework
         </h2>
         <p class="text-lg text-gray-300 dark:text-gray-400">
-          Evalúa la madurez de tu organización en las dimensiones clave del modelo ARES-AI
+          Evalúa la madurez de tu organización en la implementación responsable de IA
         </p>
       </div>
 
+      <!-- Explicación del Framework ARES-AI -->
+      <div class="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-blue-200 font-medium mb-4 text-center text-lg">🚀 ¿Qué es el Framework ARES-AI?</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-blue-100">
+          <div class="space-y-3">
+            <div class="bg-blue-800/30 rounded-lg p-3">
+              <div class="font-semibold text-blue-200">🎯 Ágil (Agile)</div>
+              <div class="text-blue-300 text-xs">Adaptación rápida, desarrollo iterativo y ciclos de feedback continuo</div>
+            </div>
+            <div class="bg-blue-800/30 rounded-lg p-3">
+              <div class="font-semibold text-blue-200">🛡️ Responsable (Responsible)</div>
+              <div class="text-blue-300 text-xs">Cumplimiento normativo, gobernanza de datos y rendición de cuentas</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-blue-800/30 rounded-lg p-3">
+              <div class="font-semibold text-blue-200">⚖️ Ético (Ethical)</div>
+              <div class="text-blue-300 text-xs">Equidad, justicia, mitigación de sesgos e impacto social positivo</div>
+            </div>
+            <div class="bg-blue-800/30 rounded-lg p-3">
+              <div class="font-semibold text-blue-200">🌱 Sostenible (Sustainable)</div>
+              <div class="text-blue-300 text-xs">Eficiencia energética, impacto ambiental y viabilidad a largo plazo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Información sobre la escala al comienzo -->
-      <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
-        <h4 class="text-blue-200 font-medium mb-4 text-center">Escala de Evaluación:</h4>
-        <div class="grid grid-cols-5 gap-4 text-sm text-blue-100">
+      <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-green-200 font-medium mb-4 text-center">📊 Escala de Evaluación:</h4>
+        <div class="grid grid-cols-5 gap-4 text-sm text-green-100">
           <div class="text-center">
             <div class="font-medium">1 - Incipiente</div>
             <div class="text-xs">Sin implementación</div>
@@ -48,64 +75,61 @@ import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.c
         </div>
       </div>
 
-      <!-- Explicación de las dimensiones ARES -->
-      <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
-        <h4 class="text-green-200 font-medium mb-4 text-center">¿Qué evaluamos en cada dimensión?</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-green-100">
-          <div class="space-y-3">
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Datos & Talento</div>
-              <div class="text-green-300 text-xs">Calidad de datos, disponibilidad de talento y gobernanza básica</div>
-            </div>
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Valor & Ética</div>
-              <div class="text-green-300 text-xs">Métricas de valor, principios éticos y gestión de riesgos</div>
-            </div>
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Tecnología & Integración</div>
-              <div class="text-green-300 text-xs">Capacidades técnicas y capacidad de integración</div>
-            </div>
+      <!-- Fases del Modelo ARES-AI con explicación detallada -->
+      <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-purple-200 font-medium mb-4 text-center text-lg">🔄 Las 5 Fases del Modelo ARES-AI:</h4>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm text-purple-100">
+          <div class="text-center bg-purple-800/30 rounded-lg p-3">
+            <div class="font-medium text-purple-200">F1</div>
+            <div class="text-xs text-purple-300">Preparación y Evaluación</div>
+            <div class="text-xs text-purple-400 mt-1">Fundamentos, datos y talento</div>
           </div>
-          <div class="space-y-3">
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Operación & Seguridad</div>
-              <div class="text-green-300 text-xs">Monitoreo, seguridad y cumplimiento normativo</div>
-            </div>
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Adopción & Sostenibilidad</div>
-              <div class="text-green-300 text-xs">Escalamiento transversal y sostenibilidad a largo plazo</div>
-            </div>
-            <div class="bg-green-800/30 rounded-lg p-3">
-              <div class="font-semibold text-green-200">Transparencia</div>
-              <div class="text-green-300 text-xs">Explicabilidad y transparencia en el uso de IA</div>
-            </div>
+          <div class="text-center bg-purple-800/30 rounded-lg p-3">
+            <div class="font-medium text-purple-200">F2</div>
+            <div class="text-xs text-purple-300">Diseño y Prototipado</div>
+            <div class="text-xs text-purple-400 mt-1">Estrategia, ética y riesgos</div>
+          </div>
+          <div class="text-center bg-purple-800/30 rounded-lg p-3">
+            <div class="font-medium text-purple-200">F3</div>
+            <div class="text-xs text-purple-300">Desarrollo e Implementación</div>
+            <div class="text-xs text-purple-400 mt-1">Tecnología y capacidades</div>
+          </div>
+          <div class="text-center bg-purple-800/30 rounded-lg p-3">
+            <div class="font-medium text-purple-200">F4</div>
+            <div class="text-xs text-purple-300">Operación y Monitoreo</div>
+            <div class="text-xs text-purple-400 mt-1">Seguridad y cumplimiento</div>
+          </div>
+          <div class="text-center bg-purple-800/30 rounded-lg p-3">
+            <div class="font-medium text-purple-200">F5</div>
+            <div class="text-xs text-purple-300">Escalado y Sostenibilidad</div>
+            <div class="text-xs text-purple-400 mt-1">Adopción transversal</div>
           </div>
         </div>
       </div>
 
-      <!-- Información sobre fases -->
-      <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8">
-        <h4 class="text-purple-200 font-medium mb-4 text-center">Fases del Modelo ARES-AI:</h4>
-        <div class="grid grid-cols-5 gap-4 text-sm text-purple-100">
-          <div class="text-center">
-            <div class="font-medium">F1</div>
-            <div class="text-xs">Fundamentos</div>
+      <!-- Dimensiones ARES con mapeo a pilares -->
+      <div class="bg-orange-900/20 border border-orange-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-orange-200 font-medium mb-4 text-center text-lg">🎯 Dimensiones Evaluadas por Pilar ARES:</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-orange-100">
+          <div class="space-y-3">
+            <div class="bg-orange-800/30 rounded-lg p-3">
+              <div class="font-semibold text-orange-200">🔄 Ágil (Agile)</div>
+              <div class="text-orange-300 text-xs">Adopción, Estrategia, Capacidades, Integración</div>
+            </div>
+            <div class="bg-orange-800/30 rounded-lg p-3">
+              <div class="font-semibold text-orange-200">🛡️ Responsable (Responsible)</div>
+              <div class="text-orange-300 text-xs">Gobernanza, Cumplimiento, Seguridad, Privacidad</div>
+            </div>
           </div>
-          <div class="text-center">
-            <div class="font-medium">F2</div>
-            <div class="text-xs">Estrategia</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">F3</div>
-            <div class="text-xs">Capacidades</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">F4</div>
-            <div class="text-xs">Operación</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">F5</div>
-            <div class="text-xs">Transformación</div>
+          <div class="space-y-3">
+            <div class="bg-orange-800/30 rounded-lg p-3">
+              <div class="font-semibold text-orange-200">⚖️ Ético (Ethical)</div>
+              <div class="text-orange-300 text-xs">Ética, Riesgos, Transparencia, Explicabilidad</div>
+            </div>
+            <div class="bg-orange-800/30 rounded-lg p-3">
+              <div class="font-semibold text-orange-200">🌱 Sostenible (Sustainable)</div>
+              <div class="text-orange-300 text-xs">Sostenibilidad, Operación, Monitoreo, Valor</div>
+            </div>
           </div>
         </div>
       </div>

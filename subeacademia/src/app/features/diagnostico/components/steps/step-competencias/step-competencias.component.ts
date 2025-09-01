@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { COMPETENCIAS } from '../../../data/competencias';
+import { COMPETENCIAS, COMPETENCIAS_COMPLETAS } from '../../../data/competencias';
 import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.component';
 
 @Component({
@@ -14,36 +14,100 @@ import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.c
     <div class="max-w-6xl mx-auto animate-fade-in">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-white dark:text-white mb-4">
-          Evaluación de Competencias
+          🧠 Evaluación de Competencias para la Era de la IA
         </h2>
         <p class="text-lg text-gray-300 dark:text-gray-400">
-          Evalúa tu nivel actual en cada una de las competencias clave para la implementación de IA
+          Evalúa tu nivel actual en las competencias clave que transformarán tu futuro profesional
         </p>
       </div>
 
+      <!-- Explicación de la Transformación por la IA -->
+      <div class="bg-gradient-to-r from-indigo-900/30 to-cyan-900/30 border border-indigo-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-indigo-200 font-medium mb-4 text-center text-lg">🚀 ¿Por qué estas competencias son cruciales en la era de la IA?</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-indigo-100">
+          <div class="space-y-3">
+            <div class="bg-indigo-800/30 rounded-lg p-3">
+              <div class="font-semibold text-indigo-200">🤖 La IA automatiza lo básico</div>
+              <div class="text-indigo-300 text-xs">Análisis de datos, tareas repetitivas y procesos algorítmicos</div>
+            </div>
+            <div class="bg-indigo-800/30 rounded-lg p-3">
+              <div class="font-semibold text-indigo-200">🧠 El valor humano se desplaza</div>
+              <div class="text-indigo-300 text-xs">Hacia la creatividad, intuición y pensamiento de orden superior</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-indigo-800/30 rounded-lg p-3">
+              <div class="font-semibold text-indigo-200">⚡ Aprendizaje continuo es supervivencia</div>
+              <div class="text-indigo-300 text-xs">La obsolescencia del conocimiento se acelera exponencialmente</div>
+            </div>
+            <div class="bg-indigo-800/30 rounded-lg p-3">
+              <div class="font-semibold text-indigo-200">🎯 Problemas adaptativos son clave</div>
+              <div class="text-indigo-300 text-xs">Juicio, contexto, ética e inteligencia emocional</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Información sobre la escala al comienzo -->
-      <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
-        <h4 class="text-blue-200 font-medium mb-4 text-center">Escala de Evaluación:</h4>
-        <div class="grid grid-cols-5 gap-4 text-sm text-blue-100">
+      <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-green-200 font-medium mb-4 text-center">📊 Escala de Evaluación por Nivel de Dominio:</h4>
+        <div class="grid grid-cols-5 gap-4 text-sm text-green-100">
           <div class="text-center">
-            <div class="font-medium">1 - Incipiente</div>
-            <div class="text-xs">Conocimiento básico</div>
+            <div class="font-medium">1 - Explorador</div>
+            <div class="text-xs">Reconoce conceptos básicos</div>
           </div>
           <div class="text-center">
-            <div class="font-medium">2 - Básico</div>
-            <div class="text-xs">Comprensión general</div>
+            <div class="font-medium">2 - Aprendiz</div>
+            <div class="text-xs">Aplica en contextos familiares</div>
           </div>
           <div class="text-center">
-            <div class="font-medium">3 - Intermedio</div>
-            <div class="text-xs">Aplicación práctica</div>
+            <div class="font-medium">3 - Practicante</div>
+            <div class="text-xs">Implementa de manera independiente</div>
           </div>
           <div class="text-center">
             <div class="font-medium">4 - Avanzado</div>
-            <div class="text-xs">Experiencia sólida</div>
+            <div class="text-xs">Lidera y innova en el área</div>
           </div>
           <div class="text-center">
-            <div class="font-medium">5 - Líder</div>
-            <div class="text-xs">Experto reconocido</div>
+            <div class="font-medium">5 - Experto</div>
+            <div class="text-xs">Transforma la disciplina</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explicación de los niveles de dominio -->
+      <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-purple-200 font-medium mb-4 text-center text-lg">🎯 Progresión de Dominio en Competencias:</h4>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-purple-100">
+          <div class="space-y-3">
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">🌱 Niveles 1-2: Fundamentos</div>
+              <div class="text-purple-300 text-xs">Comprensión básica y aplicación en contextos familiares</div>
+            </div>
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">🚀 Nivel 3: Independencia</div>
+              <div class="text-purple-300 text-xs">Implementación autónoma y resolución de problemas complejos</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">🎯 Nivel 4: Liderazgo</div>
+              <div class="text-purple-300 text-xs">Innovación, mentoría y transformación de equipos</div>
+            </div>
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">🌟 Nivel 5: Maestría</div>
+              <div class="text-purple-300 text-xs">Revolución de la disciplina e influencia global</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">💡 Transformación por la IA</div>
+              <div class="text-purple-300 text-xs">Los niveles 1-2 se automatizan, el valor está en 3-5</div>
+            </div>
+            <div class="bg-purple-800/30 rounded-lg p-3">
+              <div class="font-semibold text-purple-200">🎯 Enfoque estratégico</div>
+              <div class="text-purple-300 text-xs">Desarrollar competencias que la IA no puede replicar</div>
+            </div>
           </div>
         </div>
       </div>
@@ -95,7 +159,7 @@ export class StepCompetenciasComponent implements OnInit {
 
   competenciasForm!: FormGroup;
   competencias = COMPETENCIAS;
-  nivelesCompetencia = ['Incipiente', 'Básico', 'Intermedio', 'Avanzado', 'Líder'];
+  nivelesCompetencia = ['Explorador', 'Aprendiz', 'Practicante', 'Avanzado', 'Experto'];
 
   ngOnInit(): void {
     this.initializeForm();

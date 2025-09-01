@@ -7,12 +7,40 @@ export interface AresPhaseScore {
     items: any[];
 }
 
+export interface AresPillarScore {
+    pillar: string;
+    score: number;
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+}
+
 @Component({
 	selector: 'app-semaforo-ares',
 	standalone: true,
 	imports: [CommonModule],
     template: `
-        <div class="flex flex-col gap-4 overflow-hidden">
+        <div class="flex flex-col gap-6 overflow-hidden">
+            <!-- Resumen Ejecutivo de Riesgo ARES -->
+            <div class="bg-gradient-to-r from-slate-900/50 to-gray-900/50 border border-slate-600/30 rounded-xl p-6">
+                <h3 class="text-xl font-bold text-slate-200 mb-4 text-center">🎯 Resumen Ejecutivo de Riesgo ARES</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div *ngFor="let pillar of aresPillarScores" 
+                         class="text-center p-4 rounded-lg transition-all duration-300"
+                         [ngClass]="getPillarClass(pillar.riskLevel)">
+                        <div class="text-2xl font-bold mb-2" [ngClass]="getPillarTextClass(pillar.riskLevel)">
+                            {{ pillar.score }}%
+                        </div>
+                        <div class="text-sm font-medium mb-1" [ngClass]="getPillarTextClass(pillar.riskLevel)">
+                            {{ pillar.pillar }}
+                        </div>
+                        <div class="text-xs opacity-80" [ngClass]="getPillarTextClass(pillar.riskLevel)">
+                            {{ pillar.description }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semáforo por Fases ARES -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 justify-items-center">
                 <div 
                     *ngFor="let phase of phases; let i = index" 
@@ -70,6 +98,30 @@ export interface AresPhaseScore {
                     </div>
                 </div>
             </div>
+
+            <!-- Análisis de Riesgo por Pilar -->
+            <div class="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-xl p-6">
+                <h3 class="text-lg font-bold text-blue-200 mb-4 text-center">🔍 Análisis de Riesgo por Pilar ARES</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div *ngFor="let pillar of aresPillarScores" 
+                         class="bg-blue-800/20 rounded-lg p-4 border border-blue-600/30">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-blue-200">{{ pillar.pillar }}</h4>
+                            <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                  [ngClass]="getRiskBadgeClass(pillar.riskLevel)">
+                                {{ getRiskLabel(pillar.riskLevel) }}
+                            </span>
+                        </div>
+                        <div class="text-sm text-blue-300 mb-3">{{ pillar.description }}</div>
+                        <div class="w-full bg-blue-900/30 rounded-full h-2">
+                            <div class="h-2 rounded-full transition-all duration-1000"
+                                 [ngClass]="getRiskProgressClass(pillar.riskLevel)"
+                                 [style.width.%]="pillar.score">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `,
 	changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,6 +133,37 @@ export class SemaforoAresComponent implements OnChanges, AfterViewInit {
     @ViewChild('greenLight') greenLight!: ElementRef;
 
     readonly phases = ['F1', 'F2', 'F3', 'F4', 'F5'];
+
+    // Computed property para calcular scores por pilar ARES
+    get aresPillarScores(): AresPillarScore[] {
+        const pillarScores = this.calculatePillarScores();
+        return [
+            {
+                pillar: 'Agile',
+                score: pillarScores.agile,
+                riskLevel: this.getRiskLevel(pillarScores.agile),
+                description: this.getPillarDescription('agile', pillarScores.agile)
+            },
+            {
+                pillar: 'Responsible',
+                score: pillarScores.responsible,
+                riskLevel: this.getRiskLevel(pillarScores.responsible),
+                description: this.getPillarDescription('responsible', pillarScores.responsible)
+            },
+            {
+                pillar: 'Ethical',
+                score: pillarScores.ethical,
+                riskLevel: this.getRiskLevel(pillarScores.ethical),
+                description: this.getPillarDescription('ethical', pillarScores.ethical)
+            },
+            {
+                pillar: 'Sustainable',
+                score: pillarScores.sustainable,
+                riskLevel: this.getRiskLevel(pillarScores.sustainable),
+                description: this.getPillarDescription('sustainable', pillarScores.sustainable)
+            }
+        ];
+    }
 
     ngAfterViewInit(): void {
         console.log('🎬 ngAfterViewInit llamado en SemaforoAresComponent');
@@ -122,6 +205,68 @@ export class SemaforoAresComponent implements OnChanges, AfterViewInit {
                 console.warn('⚠️ No hay datos ARES disponibles para animar');
             }
         }
+    }
+
+    // Método para calcular scores por pilar ARES
+    private calculatePillarScores(): { agile: number; responsible: number; ethical: number; sustainable: number } {
+        const scores = { agile: 0, responsible: 0, ethical: 0, sustainable: 0 };
+        let counts = { agile: 0, responsible: 0, ethical: 0, sustainable: 0 };
+
+        // Mapear fases a pilares ARES
+        const phaseToPillar: Record<string, keyof typeof scores> = {
+            'F1': 'agile',      // Preparación - enfoque en agilidad
+            'F2': 'ethical',    // Diseño - enfoque en ética
+            'F3': 'agile',      // Desarrollo - enfoque en agilidad
+            'F4': 'responsible', // Operación - enfoque en responsabilidad
+            'F5': 'sustainable' // Escalamiento - enfoque en sostenibilidad
+        };
+
+        Object.entries(this.aresByPhase).forEach(([phase, data]) => {
+            const pillar = phaseToPillar[phase];
+            if (pillar && data.score > 0) {
+                scores[pillar] += data.score;
+                counts[pillar]++;
+            }
+        });
+
+        // Calcular promedios
+        Object.keys(scores).forEach(pillar => {
+            const key = pillar as keyof typeof scores;
+            scores[key] = counts[key] > 0 ? Math.round(scores[key] / counts[key]) : 0;
+        });
+
+        return scores;
+    }
+
+    // Método para determinar el nivel de riesgo
+    private getRiskLevel(score: number): 'low' | 'medium' | 'high' | 'critical' {
+        if (score >= 80) return 'low';
+        if (score >= 60) return 'medium';
+        if (score >= 40) return 'high';
+        return 'critical';
+    }
+
+    // Método para obtener descripción del pilar
+    private getPillarDescription(pillar: string, score: number): string {
+        const descriptions = {
+            agile: score >= 80 ? 'Excelente capacidad de adaptación y respuesta rápida' :
+                   score >= 60 ? 'Buena capacidad de adaptación con áreas de mejora' :
+                   score >= 40 ? 'Capacidad de adaptación limitada, requiere atención' :
+                   'Capacidad de adaptación crítica, acción inmediata requerida',
+            responsible: score >= 80 ? 'Gobernanza sólida y cumplimiento normativo excelente' :
+                       score >= 60 ? 'Gobernanza adecuada con algunas brechas' :
+                       score >= 40 ? 'Gobernanza limitada, riesgos de cumplimiento' :
+                       'Gobernanza crítica, alto riesgo de incumplimiento',
+            ethical: score >= 80 ? 'Principios éticos sólidos y mitigación de sesgos efectiva' :
+                    score >= 60 ? 'Principios éticos adecuados con algunas áreas de mejora' :
+                    score >= 40 ? 'Principios éticos limitados, riesgos de sesgo' :
+                    'Principios éticos críticos, alto riesgo de sesgo',
+            sustainable: score >= 80 ? 'Sostenibilidad excelente y eficiencia energética' :
+                         score >= 60 ? 'Sostenibilidad adecuada con oportunidades de mejora' :
+                         score >= 40 ? 'Sostenibilidad limitada, impacto ambiental' :
+                         'Sostenibilidad crítica, alto impacto ambiental'
+        };
+        return descriptions[pillar as keyof typeof descriptions] || 'Descripción no disponible';
     }
 
     getPhaseLabel(phase: string): string {
@@ -266,6 +411,57 @@ export class SemaforoAresComponent implements OnChanges, AfterViewInit {
         
         console.log(`🎨 Clase CSS del badge para fase ${phase}: ${badgeClass}`);
         return badgeClass;
+    }
+
+    // Métodos para el resumen ejecutivo de riesgo
+    getPillarClass(riskLevel: string): string {
+        const classes = {
+            low: 'bg-green-900/30 border border-green-600/30',
+            medium: 'bg-blue-900/30 border border-blue-600/30',
+            high: 'bg-yellow-900/30 border border-yellow-600/30',
+            critical: 'bg-red-900/30 border border-red-600/30'
+        };
+        return classes[riskLevel as keyof typeof classes] || classes.medium;
+    }
+
+    getPillarTextClass(riskLevel: string): string {
+        const classes = {
+            low: 'text-green-200',
+            medium: 'text-blue-200',
+            high: 'text-yellow-200',
+            critical: 'text-red-200'
+        };
+        return classes[riskLevel as keyof typeof classes] || classes.medium;
+    }
+
+    getRiskBadgeClass(riskLevel: string): string {
+        const classes = {
+            low: 'bg-green-500/20 text-green-300 border border-green-500/30',
+            medium: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+            high: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
+            critical: 'bg-red-500/20 text-red-300 border border-red-500/30'
+        };
+        return classes[riskLevel as keyof typeof classes] || classes.medium;
+    }
+
+    getRiskLabel(riskLevel: string): string {
+        const labels = {
+            low: 'Bajo Riesgo',
+            medium: 'Riesgo Medio',
+            high: 'Alto Riesgo',
+            critical: 'Riesgo Crítico'
+        };
+        return labels[riskLevel as keyof typeof labels] || 'Riesgo Desconocido';
+    }
+
+    getRiskProgressClass(riskLevel: string): string {
+        const classes = {
+            low: 'bg-green-500',
+            medium: 'bg-blue-500',
+            high: 'bg-yellow-500',
+            critical: 'bg-red-500'
+        };
+        return classes[riskLevel as keyof typeof classes] || classes.medium;
     }
 
     private isLightActive(score: number, color: 'red' | 'yellow' | 'green'): boolean {
