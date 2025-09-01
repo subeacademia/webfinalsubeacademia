@@ -42,6 +42,12 @@ export class DiagnosticStateService {
 
     // Signals públicos
     readonly isCompleted = this._isCompleted.asReadonly();
+    
+    // Computed signal para verificar si el diagnóstico está completo
+    readonly isDiagnosticCompleteSignal = computed(() => {
+        const allSteps = ['contexto', 'ares', 'competencias', 'objetivo', 'lead'];
+        return allSteps.every(step => this.isStepComplete(step));
+    });
 
     // Signal para notificar cambios en el progreso
     private readonly _progressChanged = signal(0);
@@ -260,6 +266,13 @@ export class DiagnosticStateService {
         this.emitState();
     }
 
+    // Método para actualizar el estado de completado basado en los pasos
+    updateCompletionStatus(): void {
+        const allComplete = this.isDiagnosticComplete();
+        this._isCompleted.set(allComplete);
+        this.emitState();
+    }
+
     // Método para calcular el progreso basado en la ruta y el estado de los formularios
     getProgressForRoute(currentRoute: string): number {
         // Extraer la parte del diagnóstico de la ruta
@@ -332,19 +345,37 @@ export class DiagnosticStateService {
         const path = this.extractDiagnosticoPath(currentRoute);
         console.log(`🔍 getNextStepLink - Path extraído: "${path}"`);
         
-        const stepFlow: Record<string, string> = {
-            '': 'inicio',  // 🔧 SOLUCIÓN: Agregar caso para ruta base
+        const stepFlow: Record<string, string | null> = {
+            '': 'inicio',
+            '/': 'inicio',
             'inicio': 'contexto',
+            '/inicio': 'contexto',
             'contexto': 'ares/F1',
+            '/contexto': 'ares/F1',
+            'ares': 'ares/F1',
+            '/ares': 'ares/F1',
             'ares/F1': 'ares/F2',
+            '/ares/F1': 'ares/F2',
             'ares/F2': 'ares/F3',
+            '/ares/F2': 'ares/F3',
             'ares/F3': 'ares/F4',
+            '/ares/F3': 'ares/F4',
             'ares/F4': 'competencias/1',
+            '/ares/F4': 'competencias/1',
+            'competencias': 'competencias/1',
+            '/competencias': 'competencias/1',
             'competencias/1': 'competencias/2',
+            '/competencias/1': 'competencias/2',
             'competencias/2': 'competencias/3',
+            '/competencias/2': 'competencias/3',
             'competencias/3': 'objetivo',
+            '/competencias/3': 'objetivo',
             'objetivo': 'lead',
-            'lead': 'resultados'
+            '/objetivo': 'lead',
+            'lead': 'resultados',
+            '/lead': 'resultados',
+            'resultados': null,
+            '/resultados': null
         };
         
         const nextStep = stepFlow[path] || null;
@@ -356,19 +387,37 @@ export class DiagnosticStateService {
         const path = this.extractDiagnosticoPath(currentRoute);
         console.log(`🔍 getPreviousStepLink - Path extraído: "${path}"`);
         
-        const stepFlow: Record<string, string> = {
-            'inicio': '',  // 🔧 SOLUCIÓN: Agregar caso para volver a ruta base
+        const stepFlow: Record<string, string | null> = {
+            '': null,
+            '/': null,
+            'inicio': '',
+            '/inicio': '',
             'contexto': 'inicio',
+            '/contexto': 'inicio',
+            'ares': 'contexto',
+            '/ares': 'contexto',
             'ares/F1': 'contexto',
+            '/ares/F1': 'contexto',
             'ares/F2': 'ares/F1',
+            '/ares/F2': 'ares/F1',
             'ares/F3': 'ares/F2',
+            '/ares/F3': 'ares/F2',
             'ares/F4': 'ares/F3',
+            '/ares/F4': 'ares/F3',
+            'competencias': 'ares/F4',
+            '/competencias': 'ares/F4',
             'competencias/1': 'ares/F4',
+            '/competencias/1': 'ares/F4',
             'competencias/2': 'competencias/1',
+            '/competencias/2': 'competencias/1',
             'competencias/3': 'competencias/2',
+            '/competencias/3': 'competencias/2',
             'objetivo': 'competencias/3',
+            '/objetivo': 'competencias/3',
             'lead': 'objetivo',
-            'resultados': 'lead'
+            '/lead': 'objetivo',
+            'resultados': 'lead',
+            '/resultados': 'lead'
         };
         
         const prevStep = stepFlow[path] || null;
@@ -377,11 +426,13 @@ export class DiagnosticStateService {
     }
 
     private extractDiagnosticoPath(route: string): string {
-        // 🔧 SOLUCIÓN: Mejorar la extracción del path para manejar rutas con idioma
         console.log(`🔍 Extrayendo path de ruta: ${route}`);
         
+        // Normalizar la ruta eliminando barras al final
+        const normalizedRoute = route.replace(/\/$/, '');
+        
         // Manejar rutas con idioma como /es/diagnostico/contexto
-        const matchWithLang = route.match(/\/[a-z]{2}\/diagnostico(\/.*)?$/);
+        const matchWithLang = normalizedRoute.match(/\/[a-z]{2}\/diagnostico(\/.*)?$/);
         if (matchWithLang) {
             const path = matchWithLang[1] || '';
             console.log(`🔍 Path extraído (con idioma): "${path}"`);
@@ -389,16 +440,22 @@ export class DiagnosticStateService {
         }
         
         // Manejar rutas sin idioma como /diagnostico/contexto
-        const matchWithoutLang = route.match(/\/diagnostico(\/.*)?$/);
+        const matchWithoutLang = normalizedRoute.match(/\/diagnostico(\/.*)?$/);
         if (matchWithoutLang) {
             const path = matchWithoutLang[1] || '';
             console.log(`🔍 Path extraído (sin idioma): "${path}"`);
             return path;
         }
         
-        // 🔧 SOLUCIÓN: Manejar rutas que terminan en /diagnostico sin path adicional
-        if (route.endsWith('/diagnostico') || route.endsWith('/diagnostico/')) {
+        // Manejar rutas que terminan en /diagnostico sin path adicional
+        if (normalizedRoute.endsWith('/diagnostico')) {
             console.log(`🔍 Path extraído (ruta base): ""`);
+            return '';
+        }
+        
+        // Manejar rutas que son exactamente /diagnostico
+        if (normalizedRoute === '/diagnostico') {
+            console.log(`🔍 Path extraído (ruta exacta): ""`);
             return '';
         }
         
@@ -464,12 +521,6 @@ export class DiagnosticStateService {
     // Método para verificar si el diagnóstico está completamente terminado
     isDiagnosticComplete(): boolean {
         console.log('🔍 isDiagnosticComplete() llamado');
-        
-        // Si estamos en la página de resultados, considerar el diagnóstico como completo
-        if (window.location.pathname.includes('/resultados')) {
-            console.log('✅ En página de resultados - diagnóstico considerado completo');
-            return true;
-        }
         
         const allSteps = ['contexto', 'ares', 'competencias', 'objetivo', 'lead'];
         const stepResults = allSteps.map(step => {

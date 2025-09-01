@@ -301,7 +301,7 @@ export class StepNavComponent implements OnInit, OnDestroy {
 	}
 
 	isDiagnosticComplete(): boolean {
-		return this.diagnosticStateService.isDiagnosticComplete();
+		return this.diagnosticStateService.isDiagnosticCompleteSignal();
 	}
 
 	private updateCanGoNext(): void {
@@ -377,7 +377,8 @@ export class StepNavComponent implements OnInit, OnDestroy {
 				});
 			});
 		} else {
-			console.error('❌ No se pudo obtener el siguiente paso');
+			console.log('ℹ️ No hay siguiente paso disponible (probablemente estamos en el último paso)');
+			// No mostrar error, simplemente no hacer nada si estamos en el último paso
 		}
 	}
 
@@ -386,11 +387,13 @@ export class StepNavComponent implements OnInit, OnDestroy {
 		const prev = this.diagnosticStateService.getPreviousStepLink(this.router.url);
 		console.log(`🔍 prev step: ${prev}`);
 		
-		if (prev) {
+		if (prev !== null) {
 			// 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
 			const currentUrl = this.router.url;
 			const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-			const prevStepUrl = `${baseUrl}/${prev}`;
+			
+			// Si prev es una cadena vacía, significa que vamos a la ruta base
+			const prevStepUrl = prev === '' ? baseUrl : `${baseUrl}/${prev}`;
 			
 			console.log(`🔄 Navegando al paso anterior: ${prevStepUrl}`);
 			console.log(`🔍 currentUrl: ${currentUrl}`);
@@ -400,12 +403,14 @@ export class StepNavComponent implements OnInit, OnDestroy {
 			this.router.navigate([prevStepUrl]).catch(error => {
 				console.error('❌ Error en navegación anterior:', error);
 				// Fallback: intentar navegación con ruta completa
-				this.router.navigate(['/es', 'diagnostico', prev]).catch(fallbackErr => {
+				const fallbackUrl = prev === '' ? ['/es', 'diagnostico'] : ['/es', 'diagnostico', prev];
+				this.router.navigate(fallbackUrl).catch(fallbackErr => {
 					console.error('❌ Error en fallback de navegación anterior:', fallbackErr);
 				});
 			});
 		} else {
-			console.error('❌ No se pudo obtener el paso anterior');
+			console.log('ℹ️ No hay paso anterior disponible (probablemente estamos en el primer paso)');
+			// No mostrar error, simplemente no hacer nada si estamos en el primer paso
 		}
 	}
 

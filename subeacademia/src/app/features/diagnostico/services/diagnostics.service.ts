@@ -37,12 +37,15 @@ export class DiagnosticsService {
     private readonly API_TIMEOUT = 25000; // 25 segundos
     private readonly MAX_RETRIES = 2;
 
-    async generateAIReport(diagnosticData: any): Promise<void> {
+        async generateAIReport(diagnosticData: any): Promise<void> {
       this.isLoading.set(true);
       this.error.set(null);
       this.aiReport.set(null);
 
-      const context = `
+      console.log('🚀 DiagnosticsService: Iniciando generación de reporte con IA');
+      console.log('📊 Datos del diagnóstico:', diagnosticData);
+
+const context = `
 Eres un experto coach en desarrollo profesional y transformación digital para la era de la IA. Tu análisis debe basarse estrictamente en dos documentos rectores:
 1. La metodología 'ARES-AI Framework', que significa Agile (Ágil), Responsible (Responsable), Ethical (Ético) y Sustainable (Sostenible).
 2. Las '13 Competencias de SUBE Academia para la era de la IA'.
@@ -52,7 +55,7 @@ Tu objetivo es generar un reporte con dos secciones claras en formato JSON: 'ana
 Para el 'analysis', debes ofrecer un resumen conciso de las fortalezas y áreas de oportunidad del usuario, mencionando explícitamente 2 o 3 de las 13 competencias más relevantes según sus respuestas.
 
 Para el 'actionPlan', debes crear una lista de 3 a 5 pasos concretos y accionables. Cada paso debe estar directamente vinculado a mejorar una de las competencias identificadas y debe seguir los principios ARES: ser práctico (Ágil), consciente de su impacto (Responsable y Ético) y enfocado en el crecimiento a largo plazo (Sostenible).
-      `;
+`;
 
       const payload = {
         diagnosticData,
@@ -60,21 +63,45 @@ Para el 'actionPlan', debes crear una lista de 3 a 5 pasos concretos y accionabl
       };
 
       try {
+        console.log('🌐 Enviando solicitud a la API de Vercel...');
+        console.log('🔗 URL:', environment.backendIaUrl);
+        
         const response = await firstValueFrom(
           this.http.post<AIReport>(environment.backendIaUrl, payload).pipe(
+            timeout(this.API_TIMEOUT),
             catchError((err: HttpErrorResponse) => {
-              console.error('Error calling Vercel API:', err);
-              this.error.set('Hubo un error al generar el reporte. Por favor, intenta de nuevo.');
-              return throwError(() => new Error('API call failed'));
+              console.error('❌ Error en la API de Vercel:', err);
+              console.error('📊 Status:', err.status);
+              console.error('📊 Status Text:', err.statusText);
+              console.error('📊 Error Body:', err.error);
+              
+              let errorMessage = 'Hubo un error al generar el reporte. Por favor, intenta de nuevo.';
+              
+              if (err.status === 0) {
+                errorMessage = 'Error de conexión. Verifica tu conexión a internet.';
+              } else if (err.status === 500) {
+                errorMessage = 'Error interno del servidor. El servicio de IA no está disponible temporalmente.';
+              } else if (err.status === 404) {
+                errorMessage = 'Servicio no encontrado. Contacta al administrador.';
+              } else if (err.status >= 400 && err.status < 500) {
+                errorMessage = 'Error en la solicitud. Verifica los datos e intenta de nuevo.';
+              }
+              
+              this.error.set(errorMessage);
+              return throwError(() => new Error(`API call failed: ${err.status} - ${err.statusText}`));
             })
           )
         );
+        
+        console.log('✅ Respuesta recibida de la API:', response);
         this.aiReport.set(response);
+        
       } catch (error) {
-        // The error is already handled in the catchError block,
-        // but this catch is here to prevent unhandled promise rejections.
+        console.error('❌ Error general en generateAIReport:', error);
+        // El error ya fue manejado en el catchError block
       } finally {
         this.isLoading.set(false);
+        console.log('🏁 Generación de reporte completada');
       }
     }
     
