@@ -1,10 +1,16 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Firestore, addDoc, collection, collectionData, query, where, orderBy, doc, docData, updateDoc } from '@angular/fire/firestore';
 import { DiagnosticoPersistedPayload } from '../data/diagnostic.models';
 import { Observable, map, firstValueFrom, from, throwError, of, timeout, catchError } from 'rxjs';
 import { PlanDeAccionItem } from '../data/report.model';
 import { AsistenteIaService } from '../../../shared/ui/chatbot/asistente-ia.service';
+import { environment } from 'src/environments/environment';
+
+interface AIReport {
+  analysis: string;
+  actionPlan: PlanDeAccionItem[];
+}
 
 interface UserDiagnostic {
   id: string;
@@ -21,10 +27,56 @@ export class DiagnosticsService {
 	private readonly firestore = inject(Firestore);
     private readonly http = inject(HttpClient);
     private readonly asistenteIaService = inject(AsistenteIaService);
+
+    // State for AI-generated report
+    aiReport = signal<AIReport | null>(null);
+    isLoading = signal<boolean>(false);
+    error = signal<string | null>(null);
     
     // 🔧 SOLUCIÓN: Timeouts y reintentos mejorados
     private readonly API_TIMEOUT = 25000; // 25 segundos
     private readonly MAX_RETRIES = 2;
+
+    async generateAIReport(diagnosticData: any): Promise<void> {
+      this.isLoading.set(true);
+      this.error.set(null);
+      this.aiReport.set(null);
+
+      const context = `
+Eres un experto coach en desarrollo profesional y transformación digital para la era de la IA. Tu análisis debe basarse estrictamente en dos documentos rectores:
+1. La metodología 'ARES-AI Framework', que significa Agile (Ágil), Responsible (Responsable), Ethical (Ético) y Sustainable (Sostenible).
+2. Las '13 Competencias de SUBE Academia para la era de la IA'.
+
+Tu objetivo es generar un reporte con dos secciones claras en formato JSON: 'analysis' y 'actionPlan'.
+
+Para el 'analysis', debes ofrecer un resumen conciso de las fortalezas y áreas de oportunidad del usuario, mencionando explícitamente 2 o 3 de las 13 competencias más relevantes según sus respuestas.
+
+Para el 'actionPlan', debes crear una lista de 3 a 5 pasos concretos y accionables. Cada paso debe estar directamente vinculado a mejorar una de las competencias identificadas y debe seguir los principios ARES: ser práctico (Ágil), consciente de su impacto (Responsable y Ético) y enfocado en el crecimiento a largo plazo (Sostenible).
+      `;
+
+      const payload = {
+        diagnosticData,
+        context,
+      };
+
+      try {
+        const response = await firstValueFrom(
+          this.http.post<AIReport>(environment.apiUrl, payload).pipe(
+            catchError((err: HttpErrorResponse) => {
+              console.error('Error calling Vercel API:', err);
+              this.error.set('Hubo un error al generar el reporte. Por favor, intenta de nuevo.');
+              return throwError(() => new Error('API call failed'));
+            })
+          )
+        );
+        this.aiReport.set(response);
+      } catch (error) {
+        // The error is already handled in the catchError block,
+        // but this catch is here to prevent unhandled promise rejections.
+      } finally {
+        this.isLoading.set(false);
+      }
+    }
     
     generateDetailedReport(diagnosticData: any): Observable<any> {
         console.log('🚀 Iniciando generación de reporte detallado...');
