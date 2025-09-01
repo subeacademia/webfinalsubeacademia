@@ -48,6 +48,41 @@ import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.c
         </div>
       </div>
 
+      <!-- Explicación de las dimensiones ARES -->
+      <div class="bg-green-900/20 border border-green-500/30 rounded-lg p-6 mb-8">
+        <h4 class="text-green-200 font-medium mb-4 text-center">¿Qué evaluamos en cada dimensión?</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-green-100">
+          <div class="space-y-3">
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Datos & Talento</div>
+              <div class="text-green-300 text-xs">Calidad de datos, disponibilidad de talento y gobernanza básica</div>
+            </div>
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Valor & Ética</div>
+              <div class="text-green-300 text-xs">Métricas de valor, principios éticos y gestión de riesgos</div>
+            </div>
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Tecnología & Integración</div>
+              <div class="text-green-300 text-xs">Capacidades técnicas y capacidad de integración</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Operación & Seguridad</div>
+              <div class="text-green-300 text-xs">Monitoreo, seguridad y cumplimiento normativo</div>
+            </div>
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Adopción & Sostenibilidad</div>
+              <div class="text-green-300 text-xs">Escalamiento transversal y sostenibilidad a largo plazo</div>
+            </div>
+            <div class="bg-green-800/30 rounded-lg p-3">
+              <div class="font-semibold text-green-200">Transparencia</div>
+              <div class="text-green-300 text-xs">Explicabilidad y transparencia en el uso de IA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Información sobre fases -->
       <div class="bg-purple-900/20 border border-purple-500/30 rounded-lg p-6 mb-8">
         <h4 class="text-purple-200 font-medium mb-4 text-center">Fases del Modelo ARES-AI:</h4>

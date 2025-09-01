@@ -31,10 +31,10 @@ import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
         <!-- Texto principal -->
         <div class="text-center mb-8">
           <h2 class="text-2xl font-bold text-[var(--fg)] mb-3">
-            {{ 'diagnostico.loader.title' | i18nTranslate }}
+            Generando tu Reporte Profesional
           </h2>
           <p class="text-[var(--muted)] text-lg leading-relaxed">
-            {{ 'diagnostico.loader.subtitle' | i18nTranslate }}
+            Nuestra IA está analizando tus respuestas para crear un diagnóstico integral y un plan de acción personalizado
           </p>
         </div>
         
@@ -42,15 +42,15 @@ import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
         <div class="space-y-4 mb-8">
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step1' | i18nTranslate }}</span>
+            <span class="text-[var(--muted)] text-sm">Analizando respuestas del diagnóstico</span>
           </div>
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
-            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step2' | i18nTranslate }}</span>
+            <span class="text-[var(--muted)] text-sm">Evaluando competencias y madurez ARES</span>
           </div>
           <div class="flex items-center space-x-3">
             <div class="w-2 h-2 bg-purple-400 rounded-full animate-pulse" style="animation-delay: 1s"></div>
-            <span class="text-[var(--muted)] text-sm">{{ 'diagnostico.loader.step3' | i18nTranslate }}</span>
+            <span class="text-[var(--muted)] text-sm">Generando plan de acción personalizado</span>
           </div>
         </div>
         
@@ -135,7 +135,7 @@ import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
   `]
 })
 export class GeneratingReportLoaderComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('loaderSvg') loaderSvg!: ElementRef;
+  @ViewChild('loaderSvg') loaderSvg!: ElementRef
   @ViewChild('progressCircle') progressCircle!: ElementRef;
 
   currentMessage = '';
@@ -153,11 +153,11 @@ export class GeneratingReportLoaderComponent implements AfterViewInit, OnDestroy
 
   private loadMessages(): void {
     this.messages = [
-      this.i18n.translate('diagnostico.loader.msg1'),
-      this.i18n.translate('diagnostico.loader.msg2'),
-      this.i18n.translate('diagnostico.loader.msg3'),
-      this.i18n.translate('diagnostico.loader.msg4'),
-      this.i18n.translate('diagnostico.loader.msg5'),
+      'Analizando tus respuestas del diagnóstico...',
+      'Evaluando competencias y madurez organizacional...',
+      'Generando análisis personalizado con IA...',
+      'Construyendo plan de acción estratégico...',
+      'Finalizando reporte profesional...'
     ];
     this.currentMessage = this.messages[0] || '';
   }
