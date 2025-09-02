@@ -191,7 +191,7 @@ export class StepObjetivoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error generando objetivos con Bessel:', err);
-        this.handleGenerationError();
+        this.handleGenerationError(err);
       }
     });
   }
@@ -283,8 +283,19 @@ export class StepObjetivoComponent implements OnInit {
     return comp?.nameKey ?? id;
   }
 
-  private handleGenerationError(): void {
-    this.errorMsg.set('No se pudieron generar sugerencias personalizadas con IA. Usando opciones predefinidas adaptadas a tu contexto.');
+  private handleGenerationError(error?: any): void {
+    let errorMessage = 'No se pudieron generar sugerencias personalizadas con IA. Usando opciones predefinidas adaptadas a tu contexto.';
+    
+    // Personalizar mensaje según el tipo de error
+    if (error?.status === 0) {
+      errorMessage = 'No se pudo conectar con el servicio de IA. Usando opciones predefinidas adaptadas a tu contexto.';
+    } else if (error?.status === 429) {
+      errorMessage = 'Demasiadas solicitudes. Usando opciones predefinidas adaptadas a tu contexto.';
+    } else if (error?.status >= 500) {
+      errorMessage = 'Error temporal del servicio de IA. Usando opciones predefinidas adaptadas a tu contexto.';
+    }
+    
+    this.errorMsg.set(errorMessage);
     this.suggestions.set([...this.predefinedObjectives]);
     
     // Marcar progreso como error

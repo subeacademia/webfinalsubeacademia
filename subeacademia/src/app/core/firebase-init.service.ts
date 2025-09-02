@@ -23,15 +23,17 @@ export class FirebaseInitService {
       return of(true);
     }
 
-    if (this._initPromise) {
-      return new Observable(observer => {
-        this._initPromise!.then(() => observer.next(true)).catch(err => observer.error(err));
-      });
+    if (!this._initPromise) {
+      this._initPromise = this._initializeFirebase();
     }
 
-    this._initPromise = this._initializeFirebase();
     return new Observable(observer => {
-      this._initPromise!.then(() => observer.next(true)).catch(err => observer.error(err));
+      this._initPromise!.then(ready => {
+        observer.next(ready);
+        observer.complete();
+      }).catch(error => {
+        observer.error(error);
+      });
     });
   }
 
@@ -57,10 +59,10 @@ export class FirebaseInitService {
         throw new Error('Servicio de Firestore no disponible');
       }
 
-      // Hacer una consulta simple para verificar conectividad
-      const testQuery = await this._testFirestoreConnection();
-      if (!testQuery) {
-        throw new Error('No se pudo conectar a Firestore');
+      // Hacer una verificación de conectividad
+      const isConnected = await this._testConnectivity();
+      if (!isConnected) {
+        throw new Error('Sin conectividad a Firebase');
       }
 
       this._isInitialized = true;
@@ -70,26 +72,7 @@ export class FirebaseInitService {
     } catch (error) {
       console.error('❌ Error inicializando Firebase:', error);
       this._isInitialized = false;
-      this._initPromise = null;
       throw error;
-    }
-  }
-
-  /**
-   * Prueba la conectividad con Firestore
-   */
-  private async _testFirestoreConnection(): Promise<boolean> {
-    try {
-      // Intentar hacer una consulta simple
-      const { collection, getDocs, query, limit } = await import('@angular/fire/firestore');
-      const testCollection = collection(this.firestore, '_test_connection');
-      const testQuery = query(testCollection, limit(1));
-      const querySnapshot = await getDocs(testQuery);
-      return true;
-    } catch (error) {
-      console.warn('⚠️ No se pudo probar Firestore:', error);
-      // Si no podemos probar, asumimos que está bien
-      return true;
     }
   }
 
@@ -99,108 +82,83 @@ export class FirebaseInitService {
   checkFirebaseHealth(): Observable<boolean> {
     const now = Date.now();
     
-    // Evitar verificaciones muy frecuentes
+    // Si ya hicimos un health check recientemente, devolver el resultado cacheado
     if (now - this._lastHealthCheck < this.HEALTH_CHECK_INTERVAL) {
       return of(this._isInitialized);
     }
-    
+
     this._lastHealthCheck = now;
-    
-    if (!this._isInitialized) {
-      return of(false);
-    }
-    
-    return this._testFirestoreConnectionObservable().pipe(
-      timeout(10000), // 10 segundos máximo
+
+    return this.isFirebaseReady().pipe(
+      switchMap(ready => {
+        if (!ready) {
+          return throwError(() => new Error('Firebase no está listo'));
+        }
+
+        // Hacer un ping a Firebase para verificar conectividad real
+        return this._pingFirebase();
+      }),
+      timeout(10000), // 10 segundos timeout
       retry(2), // Reintentar 2 veces
-      map(() => true),
       catchError(error => {
         console.warn('⚠️ Firebase no está saludable:', error);
-        this._isInitialized = false;
         return of(false);
       })
     );
   }
 
   /**
-   * 🔧 SOLUCIÓN: Test de conectividad como Observable
+   * Hace un ping a Firebase para verificar conectividad
    */
-  private _testFirestoreConnectionObservable(): Observable<boolean> {
+  private _pingFirebase(): Observable<boolean> {
     return new Observable(observer => {
-      this._testFirestoreConnection()
-        .then(result => {
-          observer.next(result);
-          observer.complete();
-        })
-        .catch(error => {
-          observer.error(error);
-        });
-    });
-  }
-
-  /**
-   * 🔧 SOLUCIÓN: Verificar conectividad de red
-   */
-  checkNetworkConnectivity(): Observable<boolean> {
-    return new Observable<boolean>(observer => {
-      // Verificar conectividad básica
-      if (navigator.onLine) {
-        // Hacer un ping a Google para verificar conectividad real
-        const img = new Image();
-        img.onload = () => {
-          observer.next(true);
-          observer.complete();
-        };
-        img.onerror = () => {
-          observer.next(false);
-          observer.complete();
-        };
-        img.src = 'https://www.google.com/favicon.ico?' + Date.now();
-      } else {
-        observer.next(false);
+      // Hacer un ping a Google para verificar conectividad real
+      const img = new Image();
+      img.onload = () => {
+        observer.next(true);
         observer.complete();
-      }
-    }).pipe(
-      timeout(5000), // 5 segundos máximo
-      catchError(() => of(false))
-    );
+      };
+      img.onerror = () => {
+        observer.error(new Error('Sin conectividad a Google/Firebase'));
+      };
+      img.src = 'https://www.google.com/favicon.ico?' + Date.now();
+    });
   }
 
   /**
    * 🔧 SOLUCIÓN: Reinicializar Firebase si es necesario
    */
-  async reinitializeIfNeeded(): Promise<boolean> {
-    if (this._isInitialized) {
-      return true;
-    }
+  async resetInitialization(): Promise<boolean> {
+    console.log('🔄 Reinicializando Firebase...');
+    this._isInitialized = false;
+    this._initPromise = null;
+    this._lastHealthCheck = 0;
     
     try {
       console.log('🔄 Reintentando inicialización de Firebase...');
-      this._initPromise = null;
+      this._initPromise = this._initializeFirebase();
       return await this._initializeFirebase();
     } catch (error) {
-      console.error('❌ Error en reintento de inicialización:', error);
+      console.error('❌ Error en reinicialización:', error);
       return false;
     }
   }
 
   /**
-   * Reinicia la inicialización (útil para debugging)
+   * Verifica conectividad básica
    */
-  resetInitialization(): void {
-    this._isInitialized = false;
-    this._initPromise = null;
-    this._lastHealthCheck = 0;
-  }
-
-  /**
-   * Obtiene el estado actual de inicialización
-   */
-  getInitializationStatus(): { isInitialized: boolean; hasPromise: boolean; lastHealthCheck: number } {
-    return {
-      isInitialized: this._isInitialized,
-      hasPromise: !!this._initPromise,
-      lastHealthCheck: this._lastHealthCheck
-    };
+  private async _testConnectivity(): Promise<boolean> {
+    try {
+      // Hacer una petición simple para verificar conectividad
+      const response = await fetch('https://www.google.com/favicon.ico', {
+        method: 'HEAD',
+        mode: 'no-cors',
+        cache: 'no-cache'
+      });
+      return true;
+    } catch (error) {
+      console.warn('⚠️ Sin conectividad a internet:', error);
+      return false;
+    }
   }
 }

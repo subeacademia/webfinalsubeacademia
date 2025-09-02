@@ -255,26 +255,152 @@ export class GenerativeAiService {
     
     const leadName = diagnosticData.lead?.nombre || 'Usuario';
     const industry = diagnosticData.contexto?.industria || 'su industria';
+    const objetivo = diagnosticData.objetivo || 'implementar IA';
     
-    const fallbackMessage = `### Error al Generar tu Reporte
+    // Calcular puntajes básicos
+    const aresScores = Object.values(diagnosticData.ares?.respuestas || {}).filter(v => v !== null) as number[];
+    const aresAverage = aresScores.length > 0 ? aresScores.reduce((sum, score) => sum + score, 0) / aresScores.length : 0;
+    
+    const competenciaScores = Object.values(diagnosticData.competencias?.niveles || {})
+      .map(nivel => this.getNivelScore(nivel as string))
+      .filter(score => score > 0);
+    const competenciaAverage = competenciaScores.length > 0 ? competenciaScores.reduce((sum, score) => sum + score, 0) / competenciaScores.length : 0;
+    
+    const overallScore = Math.round((aresAverage * 20 + competenciaAverage) / 2);
+    const maturityLevel = this.getMaturityLevel((aresAverage + competenciaAverage / 20) / 2);
+    
+    // Generar análisis básico basado en los datos disponibles
+    const topStrengths = this.getTopStrengths(diagnosticData.ares?.respuestas || {}, diagnosticData.competencias?.niveles || {});
+    const topOpportunities = this.getTopOpportunities(diagnosticData.ares?.respuestas || {}, diagnosticData.competencias?.niveles || {});
+    
+    const fallbackMessage = `# 🎯 Diagnóstico de Madurez en IA - ${leadName}
 
-Hola, ${leadName}. Lamentamos informarte que ocurrió un problema al intentar generar tu diagnóstico personalizado para ${industry}.
+## 📊 Resumen Ejecutivo
 
-**¿Qué pasó?**
-- Nuestro sistema de IA experimentó un problema técnico
-- La conexión con nuestro servicio de análisis no pudo completarse
+**Industria:** ${industry}  
+**Nivel de Madurez:** ${maturityLevel}  
+**Puntaje ARES:** ${aresAverage.toFixed(1)}/5  
+**Competencias Clave:** ${competenciaAverage.toFixed(1)}%  
+**Posición Actual:** ${this.getPositionDescription((aresAverage + competenciaAverage / 20) / 2)}
 
-**¿Qué puedes hacer?**
-1. **Intenta de nuevo:** A veces los problemas son temporales
-2. **Verifica tu conexión:** Asegúrate de tener una conexión estable a internet
-3. **Contacta soporte:** Si el problema persiste, nuestro equipo puede ayudarte
+---
 
-**Información del error:**
-- ID de solicitud: ${requestId}
-- Fecha: ${new Date().toLocaleString('es-ES')}
-- Estado: Error de conexión con la API
+## 🚀 Análisis de Fortalezas
 
-Mientras tanto, puedes revisar los resultados numéricos de tu diagnóstico que se muestran arriba.`;
+${topStrengths}
+
+---
+
+## ⚠️ Áreas de Oportunidad Críticas
+
+${topOpportunities}
+
+---
+
+## 📋 Plan de Acción Estratégico
+
+### 🎯 Objetivo 1: Gobernanza y Ética en IA
+**Descripción:** Desarrollar un marco robusto de gobernanza que asegure el uso responsable y ético de la IA.
+
+**Acciones Clave:**
+• Establecer comité de ética en IA con representantes de diferentes áreas  
+• Desarrollar políticas claras de uso responsable de IA  
+• Implementar auditorías regulares de algoritmos y datos  
+• Crear protocolos de transparencia y explicabilidad  
+
+**Competencias a Desarrollar:** Ética y Responsabilidad, Gobernanza, Seguridad y Privacidad  
+**Prioridad:** 🔴 Alta  
+**Timeline:** 3-4 meses  
+**Recursos:** Consultoría especializada, capacitación del equipo, herramientas de monitoreo  
+**Métricas:** Reducción del 50% en incidentes éticos, 100% de transparencia  
+
+---
+
+### 🎯 Objetivo 2: Capacidades Técnicas y de Talento
+**Descripción:** Construir un equipo competente en IA que pueda implementar y mantener soluciones tecnológicas avanzadas.
+
+**Acciones Clave:**
+• Crear programa de capacitación en IA personalizado por roles  
+• Contratar o desarrollar talento especializado en IA y ML  
+• Establecer alianzas con universidades para conocimiento de vanguardia  
+• Implementar herramientas de desarrollo y MLOps  
+
+**Competencias a Desarrollar:** Liderazgo en IA, Aprendizaje Continuo, Diseño Tecnológico, Alfabetización de Datos  
+**Prioridad:** 🔴 Alta  
+**Timeline:** 4-6 meses  
+**Recursos:** Presupuesto de capacitación, tiempo del equipo, plataformas de aprendizaje  
+**Métricas:** 80% del equipo certificado, reducción del 40% en tiempo de implementación  
+
+---
+
+### 🎯 Objetivo 3: Soluciones de IA de Alto Impacto
+**Descripción:** Desarrollar e implementar soluciones de IA que generen valor tangible y medible.
+
+**Acciones Clave:**
+• Identificar 2-3 casos de uso prioritarios basados en tu objetivo  
+• Desarrollar prototipos y pruebas de concepto con métricas claras  
+• Establecer métricas de éxito y KPIs específicos  
+• Crear roadmap de implementación por fases  
+
+**Competencias a Desarrollar:** Resolución de Problemas Complejos, Automatización y Agentes IA, Comunicación  
+**Prioridad:** 🟡 Media  
+**Timeline:** 6-8 meses  
+**Recursos:** Equipo de desarrollo, infraestructura tecnológica, datos de calidad  
+**Métricas:** ROI positivo en 12 meses, mejora del 30% en eficiencia operativa  
+
+---
+
+## 🏭 Recomendaciones Específicas por Industria
+
+${this.getIndustryRecommendations(industry)}
+
+---
+
+## ⏰ Próximos Pasos Inmediatos
+
+| Semana | Acción | Responsable |
+|--------|--------|-------------|
+| **1** | Revisar y aprobar plan con equipo directivo, asignar presupuesto | Liderazgo |
+| **2** | Establecer comité de ética en IA, evaluar talento interno | RH + Legal |
+| **3-4** | Iniciar programa de capacitación, identificar casos de uso | Operaciones |
+| **Mes 2** | Implementar políticas de gobernanza, comenzar prototipos | IT + Legal |
+
+---
+
+## 📅 Reuniones de Seguimiento
+
+- **🔄 Semanal:** Revisión de progreso y ajustes del plan
+- **📊 Mensual:** Evaluación de métricas y KPIs establecidos  
+- **🎯 Trimestral:** Revisión completa del plan y ajustes estratégicos
+
+---
+
+## 📚 Recursos Adicionales
+
+### 🎓 Cursos SUBE AcademIA
+- "Fundamentos de IA para Líderes"
+- "Ética y Gobernanza de IA"  
+- "Implementación Práctica de IA"
+
+### 🏆 Certificaciones
+- "Ética y Responsabilidad en IA"
+- "Gobernanza de Datos y IA"
+
+### 💼 Consultoría
+- Servicios especializados en implementación de IA para tu industria
+
+### 🤝 Comunidades
+- Grupos de práctica y networking con otros profesionales de IA en tu sector
+
+---
+
+## 📝 Nota Importante
+
+Este análisis fue generado localmente basándose en tus respuestas del diagnóstico. Para obtener un análisis más detallado y personalizado, puedes regenerar el reporte cuando sea necesario.
+
+---
+
+*Generado el ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}*`;
 
     this.logInfo(`[${requestId}] Mensaje de fallback generado`, {
       messageLength: fallbackMessage.length,
@@ -324,6 +450,33 @@ Mientras tanto, puedes revisar los resultados numéricos de tu diagnóstico que 
       .filter(score => score > 0);
     const competenciaAverage = competenciaScores.length > 0 ? competenciaScores.reduce((sum, score) => sum + score, 0) / competenciaScores.length : 0;
 
+    // Análisis detallado por dimensiones ARES
+    const aresDimensionAnalysis = Object.entries(aresByDimension)
+      .map(([dimension, items]) => {
+        const dimensionName = this.getDimensionName(dimension);
+        const scores = items.map(([_, value]) => value);
+        const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        const status = avg >= 4 ? '🟢 Fortaleza' : avg >= 3 ? '🟡 En desarrollo' : '🔴 Área crítica';
+        return `**${dimensionName} (${avg.toFixed(1)}/5):** ${status}`;
+      })
+      .join('\n');
+
+    // Análisis de competencias por nivel
+    const competenciasByLevel = this.groupCompetenciasByLevel(data.competencias?.niveles || {});
+    const competenciasAnalysis = Object.entries(competenciasByLevel)
+      .map(([level, competencias]) => {
+        const competenciasList = competencias.map(comp => {
+          const item = COMPETENCIAS.find((c) => c.id === comp);
+          return `- ${item?.nameKey || comp}`;
+        }).join('\n');
+        return `**${this.getLevelDisplayName(level)}:**\n${competenciasList}`;
+      })
+      .join('\n\n');
+
+    // Identificar fortalezas y oportunidades específicas
+    const topStrengths = this.getTopStrengths(data.ares?.respuestas || {}, data.competencias?.niveles || {});
+    const topOpportunities = this.getTopOpportunities(data.ares?.respuestas || {}, data.competencias?.niveles || {});
+
     this.logInfo('Prompt construido exitosamente', {
       aresResultsCount: aresResults.split('\n').length,
       competenciasResultsCount: competenciasResults.split('\n').length,
@@ -360,6 +513,18 @@ ${aresResults}
 **13 Competencias Clave (Puntaje promedio: ${competenciaAverage.toFixed(1)}%):**
 ${competenciasResults}
 
+**Análisis Detallado por Dimensiones ARES:**
+${aresDimensionAnalysis}
+
+**Análisis de Competencias por Nivel:**
+${competenciasAnalysis}
+
+**Fortalezas Identificadas:**
+${topStrengths}
+
+**Áreas de Oportunidad Críticas:**
+${topOpportunities}
+
 **Tarea y Formato de Salida Obligatorio (Markdown):**
 
 Basándote **estrictamente** en los datos proporcionados, genera un informe completo y visualmente claro en formato MARKDOWN. No inventes información. Tu análisis debe reflejar directamente los puntajes y el contexto del usuario. Utiliza el siguiente formato EXACTO:
@@ -369,59 +534,86 @@ Basándote **estrictamente** en los datos proporcionados, genera un informe comp
 **Análisis General para ${data.contexto?.industria || 'tu empresa'}:**
 Basado en tu diagnóstico, tu organización muestra un nivel de madurez en IA de **${this.getMaturityLevel((aresAverage + competenciaAverage / 20) / 2)}**. Con un puntaje promedio de ${aresAverage.toFixed(1)}/5 en el framework ARES y ${competenciaAverage.toFixed(1)}% en competencias clave, tu empresa se encuentra en una posición ${this.getPositionDescription((aresAverage + competenciaAverage / 20) / 2)} para alcanzar tu objetivo de "${data.objetivo || 'implementar IA'}".
 
+**Análisis por Dimensiones ARES:**
+${aresDimensionAnalysis}
+
+**Análisis por Competencias Clave:**
+${competenciasAnalysis}
+
 **Fortalezas y Oportunidades Clave:**
 
 **Fortalezas Principales:**
-${this.getTopStrengths(data.ares?.respuestas || {}, data.competencias?.niveles || {})}
+${topStrengths}
 
 **Áreas de Mayor Oportunidad:**
-${this.getTopOpportunities(data.ares?.respuestas || {}, data.competencias?.niveles || {})}
+${topOpportunities}
 
-### Plan de Acción Personalizado
+### Plan de Acción Personalizado y Detallado
 
 **Objetivo Estratégico 1: Fortalecer la Gobernanza y Ética en IA**
+- **Descripción:** Desarrollar un marco robusto de gobernanza que asegure el uso responsable y ético de la IA en tu organización.
 - **Acciones Recomendadas:**
-  - Establecer un comité de ética en IA con representantes de diferentes áreas
-  - Desarrollar políticas claras de uso responsable de IA
-  - Implementar auditorías regulares de algoritmos y datos
-  - Crear protocolos de transparencia y explicabilidad
-- **Competencias a Desarrollar:** Ética y Responsabilidad, Gobernanza
-- **Prioridad:** Alta
-- **Tiempo Estimado:** 3-4 meses
+  - Establecer un comité de ética en IA con representantes de diferentes áreas (${this.getRecommendedTimeline(aresAverage, 'gobernanza')})
+  - Desarrollar políticas claras de uso responsable de IA, incluyendo principios de transparencia y explicabilidad
+  - Implementar auditorías regulares de algoritmos y datos para identificar sesgos y riesgos
+  - Crear protocolos de transparencia y explicabilidad para todas las decisiones basadas en IA
+  - Establecer un sistema de reportes de incidentes éticos relacionados con IA
+- **Competencias a Desarrollar:** Ética y Responsabilidad, Gobernanza, Seguridad y Privacidad
+- **Prioridad:** ${this.getPriorityLevel(aresAverage, 'gobernanza')}
+- **Tiempo Estimado:** ${this.getRecommendedTimeline(aresAverage, 'gobernanza')}
+- **Recursos Necesarios:** Consultoría especializada, capacitación del equipo, herramientas de monitoreo
+- **Métricas de Éxito:** Reducción del 50% en incidentes éticos, 100% de transparencia en decisiones de IA
 
 **Objetivo Estratégico 2: Desarrollar Capacidades Técnicas y de Talento**
+- **Descripción:** Construir un equipo competente en IA que pueda implementar y mantener soluciones tecnológicas avanzadas.
 - **Acciones Recomendadas:**
-  - Crear un programa de capacitación en IA para todo el equipo
-  - Contratar o desarrollar talento especializado en IA
-  - Establecer alianzas con universidades o centros de investigación
-  - Implementar herramientas de desarrollo y MLOps
-- **Competencias a Desarrollar:** Liderazgo en IA, Aprendizaje Continuo, Diseño Tecnológico
-- **Prioridad:** Alta
-- **Tiempo Estimado:** 4-6 meses
+  - Crear un programa de capacitación en IA para todo el equipo, personalizado por roles y niveles de experiencia
+  - Contratar o desarrollar talento especializado en IA, machine learning y ciencia de datos
+  - Establecer alianzas con universidades o centros de investigación para acceso a conocimiento de vanguardia
+  - Implementar herramientas de desarrollo y MLOps para facilitar el ciclo de vida de la IA
+  - Crear un centro de excelencia en IA que sirva como hub de conocimiento y mejores prácticas
+- **Competencias a Desarrollar:** Liderazgo en IA, Aprendizaje Continuo, Diseño Tecnológico, Alfabetización de Datos
+- **Prioridad:** ${this.getPriorityLevel(aresAverage, 'talento')}
+- **Tiempo Estimado:** ${this.getRecommendedTimeline(aresAverage, 'talento')}
+- **Recursos Necesarios:** Presupuesto de capacitación, tiempo del equipo, plataformas de aprendizaje
+- **Métricas de Éxito:** 80% del equipo certificado en IA, reducción del 40% en tiempo de implementación
 
 **Objetivo Estratégico 3: Implementar Soluciones de IA de Alto Impacto**
+- **Descripción:** Desarrollar e implementar soluciones de IA que generen valor tangible y medible para tu organización.
 - **Acciones Recomendadas:**
-  - Identificar 2-3 casos de uso prioritarios basados en tu objetivo de "${data.objetivo || 'implementar IA'}"
-  - Desarrollar prototipos y pruebas de concepto
-  - Establecer métricas de éxito y KPIs específicos
-  - Crear un roadmap de implementación por fases
-- **Competencias a Desarrollar:** Resolución de Problemas Complejos, Automatización y Agentes IA
-- **Prioridad:** Media
-- **Tiempo Estimado:** 6-8 meses
+  - Identificar 2-3 casos de uso prioritarios basados en tu objetivo de "${data.objetivo || 'implementar IA'}" y el análisis de madurez
+  - Desarrollar prototipos y pruebas de concepto con métricas claras de éxito
+  - Establecer métricas de éxito y KPIs específicos para cada implementación
+  - Crear un roadmap de implementación por fases con hitos claros y entregables
+  - Implementar un sistema de monitoreo continuo para medir el impacto y ROI de las soluciones
+- **Competencias a Desarrollar:** Resolución de Problemas Complejos, Automatización y Agentes IA, Comunicación
+- **Prioridad:** ${this.getPriorityLevel(aresAverage, 'tecnologia')}
+- **Tiempo Estimado:** ${this.getRecommendedTimeline(aresAverage, 'tecnologia')}
+- **Recursos Necesarios:** Equipo de desarrollo, infraestructura tecnológica, datos de calidad
+- **Métricas de Éxito:** ROI positivo en 12 meses, mejora del 30% en eficiencia operativa
 
 **Recomendaciones Específicas por Industria:**
 ${this.getIndustryRecommendations(data.contexto?.industria || '')}
 
-**Próximos Pasos Inmediatos:**
-1. Revisar y aprobar este plan de acción con el equipo directivo
-2. Asignar responsables y recursos para cada objetivo
-3. Establecer reuniones de seguimiento mensuales
-4. Considerar la contratación de un consultor especializado en IA
+**Próximos Pasos Inmediatos (Primeras 2 semanas):**
+1. **Semana 1:** Revisar y aprobar este plan de acción con el equipo directivo, asignar presupuesto inicial
+2. **Semana 2:** Establecer el comité de ética en IA y comenzar la evaluación de talento interno
+3. **Semana 3-4:** Iniciar el programa de capacitación y comenzar la identificación de casos de uso prioritarios
+4. **Mes 2:** Implementar las primeras políticas de gobernanza y comenzar el desarrollo de prototipos
 
-**Recursos Adicionales:**
-- Curso "Fundamentos de IA para Líderes" de SUBE AcademIA
-- Certificación en "Ética y Gobernanza de IA"
-- Consultoría especializada en implementación de IA
+**Reuniones de Seguimiento Recomendadas:**
+- **Semanal:** Revisión de progreso y ajustes del plan
+- **Mensual:** Evaluación de métricas y KPIs establecidos
+- **Trimestral:** Revisión completa del plan y ajustes estratégicos
+
+**Recursos Adicionales Recomendados:**
+- **Cursos SUBE AcademIA:** "Fundamentos de IA para Líderes", "Ética y Gobernanza de IA", "Implementación Práctica de IA"
+- **Certificaciones:** "Ética y Responsabilidad en IA", "Gobernanza de Datos y IA"
+- **Consultoría:** Servicios especializados en implementación de IA para tu industria
+- **Comunidades:** Grupos de práctica y networking con otros profesionales de IA en tu sector
+
+**Contacto y Soporte:**
+Para implementar este plan o resolver dudas específicas, nuestro equipo de consultores está disponible para acompañarte en cada paso del proceso.
     `;
   }
 
@@ -540,6 +732,47 @@ ${this.getIndustryRecommendations(data.contexto?.industria || '')}
     };
     
     return recommendations[industria] || 'Considera las regulaciones específicas de tu industria y las mejores prácticas del sector para la implementación de IA.';
+  }
+
+  // Nuevos métodos auxiliares para generar contenido más específico
+  private groupCompetenciasByLevel(niveles: Record<string, string | null>): Record<string, string[]> {
+    const grouped: Record<string, string[]> = {};
+    
+    Object.entries(niveles).forEach(([competenciaId, nivel]) => {
+      if (nivel) {
+        if (!grouped[nivel]) {
+          grouped[nivel] = [];
+        }
+        grouped[nivel].push(competenciaId);
+      }
+    });
+    
+    return grouped;
+  }
+
+  private getLevelDisplayName(level: string): string {
+    const levelNames: Record<string, string> = {
+      'incipiente': '🟢 Incipiente (Principiante)',
+      'basico': '🟡 Básico (En desarrollo)',
+      'intermedio': '🟠 Intermedio (Practicante)',
+      'avanzado': '🔵 Avanzado (Experto)',
+      'lider': '🟣 Líder (Referente)'
+    };
+    return levelNames[level] || level;
+  }
+
+  private getPriorityLevel(aresAverage: number, dimension: string): string {
+    // Basado en el puntaje promedio de ARES y la dimensión específica
+    if (aresAverage < 2.5) return 'Alta';
+    if (aresAverage < 3.5) return 'Media';
+    return 'Baja';
+  }
+
+  private getRecommendedTimeline(aresAverage: number, dimension: string): string {
+    // Basado en el nivel de madurez actual
+    if (aresAverage < 2.5) return '4-6 meses';
+    if (aresAverage < 3.5) return '3-4 meses';
+    return '2-3 meses';
   }
 
   // 🔍 MÉTODOS DE LOGGING

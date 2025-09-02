@@ -90,7 +90,7 @@ export class LogosPageComponent {
 		this.previewUrl = null;
 		if (this.file) {
             // Genera preview normalizada (sin subir)
-            this.media.normalizeLogoImage(this.file, { targetHeight: 64, maxWidth: 220, paddingX: 12, format: 'image/png' })
+            this.media.normalizeLogoImage(this.file)
                 .then((normalized) => {
                     const fileForPreview = normalized || this.file!;
                     this.previewUrl = URL.createObjectURL(fileForPreview);
@@ -104,7 +104,7 @@ export class LogosPageComponent {
 		this.busy.set(true);
 		try {
             // Normaliza y sube la imagen a Firebase Storage
-            const normalized = await this.media.normalizeLogoImage(this.file, { targetHeight: 64, maxWidth: 220, paddingX: 12, format: 'image/png' });
+            const normalized = await this.media.normalizeLogoImage(this.file);
             const upload = await this.storage.uploadTo('public/logos', normalized || this.file);
             
             // Crea el objeto Logo y lo guarda en Firestore

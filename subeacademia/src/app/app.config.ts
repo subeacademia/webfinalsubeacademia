@@ -13,7 +13,7 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth, connectAuthEmulator } from '@angular/fire/auth';
 import { provideFirestore, getFirestore, connectFirestoreEmulator, collection, getDocs } from '@angular/fire/firestore';
 import { provideStorage, getStorage, connectStorageEmulator } from '@angular/fire/storage';
-import { provideFunctions, getFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
+// import { provideFunctions, getFunctions, connectFunctionsEmulator } from '@angular/fire/functions';
 import { environment } from '../environments/environment';
 import { FirebaseDataService } from './core/firebase-data.service';
 
@@ -112,13 +112,14 @@ export const appConfig: ApplicationConfig = {
       }
       return storage;
     }),
-    provideFunctions(() => {
-      const functions = getFunctions();
-      if (shouldUseEmulators()) {
-        connectFunctionsEmulator(functions, 'localhost', 5001);
-      }
-      return functions;
-    }),
+    // Firebase Functions deshabilitado para evitar error de billing
+    // provideFunctions(() => {
+    //   const functions = getFunctions();
+    //   if (shouldUseEmulators()) {
+    //     connectFunctionsEmulator(functions, 'localhost', 5001);
+    //   }
+    //   return functions;
+    // }),
     {
       provide: APP_INITIALIZER,
       useFactory: injectGa4AndSearchConsoleFactory,

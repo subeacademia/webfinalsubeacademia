@@ -176,13 +176,13 @@
                           </span>
                         </div>
                       </div>
-                      <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
-                        <div 
-                          class="h-2 rounded-full transition-all duration-500"
-                          [class]="getScoreColor(competency.score)"
-                          [style.width.%]="competency.score">
-                        </div>
-                      </div>
+                                                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
+                            <div 
+                              class="h-2 rounded-full transition-all duration-500"
+                              [class]="getScoreColorClass(competency.score)"
+                              [style.width.%]="competency.score">
+                            </div>
+                          </div>
                       <p class="text-xs text-gray-500 dark:text-gray-400">{{ competency.description }}</p>
                     </div>
                   }
@@ -222,11 +222,86 @@
                   </p>
                 </div>
               } @else if (aiAnalysis()?.analysis) {
-                <div class="space-y-6">
+                <div class="space-y-8">
                   <!-- Análisis generado por IA -->
                   <div class="bg-white dark:bg-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600 shadow-sm">
-                    <div class="prose prose-lg dark:prose-invert max-w-none prose-headings:text-blue-600 dark:prose-headings:text-blue-400 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-gray-100">
-                      <div [innerHTML]="aiAnalysis()?.analysis"></div>
+                    <div class="max-w-none">
+                      <div [innerHTML]="parseAIContentToHTML(aiAnalysis()?.analysis || '')" class="ai-content"></div>
+                    </div>
+                  </div>
+
+                  <!-- Análisis detallado por dimensiones ARES -->
+                  <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-200 dark:border-blue-700">
+                    <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                      </svg>
+                      Análisis Detallado por Dimensiones ARES
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      @for (dimension of getAresDimensions(); track $index) {
+                        <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-blue-200 dark:border-blue-600">
+                          <div class="flex items-center justify-between mb-2">
+                            <h5 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">{{ dimension.name }}</h5>
+                            <span class="text-xs font-medium px-2 py-1 rounded-full" [class]="getScoreColorClass(dimension.score)">
+                              {{ dimension.score }}%
+                            </span>
+                          </div>
+                          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
+                            <div 
+                              class="h-2 rounded-full transition-all duration-500"
+                              [class]="getScoreColorClass(dimension.score)"
+                              [style.width.%]="dimension.score">
+                            </div>
+                          </div>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">{{ dimension.description }}</p>
+                          <div class="mt-2">
+                            <span class="text-xs font-medium px-2 py-1 rounded-full" [class]="getStatusColorClass(dimension.score)">
+                              {{ getStatusText(dimension.score) }}
+                            </span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Análisis detallado por competencias -->
+                  <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-6 border border-purple-200 dark:border-purple-700">
+                    <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+                      <svg class="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                      </svg>
+                      Análisis Detallado por Competencias Clave
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      @for (competency of getCompetencyDetails(); track $index) {
+                        <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-purple-200 dark:border-purple-600">
+                          <div class="flex items-center justify-between mb-2">
+                            <h5 class="font-semibold text-gray-800 dark:text-gray-200 text-sm">{{ competency.name }}</h5>
+                            <div class="flex items-center space-x-2">
+                              <span class="text-xs font-medium px-2 py-1 rounded-full" [class]="getCompetencyLevelColor(competency.level)">
+                                {{ competency.level }}
+                              </span>
+                              <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+                                {{ competency.score }}%
+                              </span>
+                            </div>
+                          </div>
+                          <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mb-2">
+                            <div 
+                              class="h-2 rounded-full transition-all duration-500"
+                              [class]="getScoreColorClass(competency.score)"
+                              [style.width.%]="competency.score">
+                            </div>
+                          </div>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">{{ competency.description }}</p>
+                          <div class="mt-2">
+                            <span class="text-xs font-medium px-2 py-1 rounded-full" [class]="getCompetencyStatusColor(competency.score)">
+                              {{ getCompetencyStatusText(competency.score) }}
+                            </span>
+                          </div>
+                        </div>
+                      }
                     </div>
                   </div>
 
@@ -337,8 +412,8 @@
                                   [class]="getPriorityColor(item.prioridad)">
                                   {{ item.prioridad }}
                                 </span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">
-                                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                   </svg>
                                   {{ item.tiempoEstimado }}
@@ -391,6 +466,28 @@
                             </h6>
                             <p class="text-sm text-green-700 dark:text-green-300">
                               Mejora significativa en {{ item.competencia.toLowerCase() }} y avance hacia el objetivo estratégico.
+                            </p>
+                          </div>
+                        </div>
+
+                        <!-- Información adicional del objetivo -->
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div class="bg-gray-50 dark:bg-gray-600 rounded-lg p-3">
+                            <h6 class="font-semibold text-gray-700 dark:text-gray-300 mb-1 text-xs">Recursos Necesarios</h6>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                              {{ getResourcesForObjective(item.objetivo) }}
+                            </p>
+                          </div>
+                          <div class="bg-gray-50 dark:bg-gray-600 rounded-lg p-3">
+                            <h6 class="font-semibold text-gray-700 dark:text-gray-300 mb-1 text-xs">Métricas de Éxito</h6>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                              {{ getMetricsForObjective(item.objetivo) }}
+                            </p>
+                          </div>
+                          <div class="bg-gray-50 dark:bg-gray-600 rounded-lg p-3">
+                            <h6 class="font-semibold text-gray-700 dark:text-gray-300 mb-1 text-xs">Riesgos Identificados</h6>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">
+                              {{ getRisksForObjective(item.objetivo) }}
                             </p>
                           </div>
                         </div>

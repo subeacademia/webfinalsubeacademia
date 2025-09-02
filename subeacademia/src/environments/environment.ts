@@ -19,9 +19,8 @@ export const environment = {
   backendIaUrl: "https://apisube-smoky.vercel.app/api/azure/generate",
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
-  apiUrl: 'https://apisube-smoky.vercel.app/api/azure/generate',
-  // API Key de Google Gemini
-  geminiApiKey: 'AIzaSyBhcmP7NTPJqF-pIuyS5rbZVXgxifaiMn8',
+  // API Key de Google Gemini (deshabilitado - usando solo Vercel)
+  // geminiApiKey: 'AIzaSyBhcmP7NTPJqF-pIuyS5rbZVXgxifaiMn8',
   // 🔧 SOLUCIÓN: Configuración mejorada de timeouts y reintentos
   api: {
     timeout: 30000, // 30 segundos

@@ -213,8 +213,65 @@ Prioriza objetivos de ${enfoque === 'general' ? 'alto impacto y rápida implemen
       errorMessage = 'Error en la solicitud. Verifica que la información sea válida.';
     }
     
-    // Retornar array vacío para que el componente maneje el fallback
-    return of([]);
+    // Retornar objetivos de fallback en lugar de array vacío
+    console.log('🔄 Usando objetivos de fallback debido a error en API');
+    return of(this.generarObjetivosFallback());
+  }
+
+  /**
+   * Genera objetivos de fallback cuando la API no está disponible
+   */
+  private generarObjetivosFallback(): ObjetivoGenerado[] {
+    return [
+      {
+        id: 'fallback-1',
+        texto: 'Implementar herramientas básicas de automatización para optimizar procesos operativos',
+        categoria: 'Procesos',
+        prioridad: 'alta',
+        tiempoEstimado: '2-3 meses',
+        impacto: 'Mejora del 20% en eficiencia operativa y reducción de errores manuales'
+      },
+      {
+        id: 'fallback-2',
+        texto: 'Capacitar al equipo en competencias digitales fundamentales y herramientas de IA',
+        categoria: 'Capacitación',
+        prioridad: 'alta',
+        tiempoEstimado: '1-2 meses',
+        impacto: 'Mejora del 30% en competencias digitales del equipo y mayor adopción tecnológica'
+      },
+      {
+        id: 'fallback-3',
+        texto: 'Establecer un sistema básico de análisis de datos para mejorar la toma de decisiones',
+        categoria: 'Analítica',
+        prioridad: 'media',
+        tiempoEstimado: '3-4 meses',
+        impacto: 'Mejora del 25% en precisión de decisiones y optimización de recursos'
+      },
+      {
+        id: 'fallback-4',
+        texto: 'Mejorar la experiencia del cliente mediante canales digitales y atención automatizada',
+        categoria: 'CX',
+        prioridad: 'media',
+        tiempoEstimado: '2-3 meses',
+        impacto: 'Aumento del 20% en satisfacción del cliente y reducción del 30% en tiempo de respuesta'
+      },
+      {
+        id: 'fallback-5',
+        texto: 'Implementar políticas básicas de seguridad de datos y privacidad',
+        categoria: 'Gobernanza',
+        prioridad: 'alta',
+        tiempoEstimado: '1-2 meses',
+        impacto: 'Cumplimiento normativo básico y reducción del 40% en riesgos de seguridad'
+      },
+      {
+        id: 'fallback-6',
+        texto: 'Explorar oportunidades de innovación con tecnologías emergentes',
+        categoria: 'Innovación',
+        prioridad: 'baja',
+        tiempoEstimado: '4-6 meses',
+        impacto: 'Identificación de nuevas oportunidades de negocio y diferenciación competitiva'
+      }
+    ];
   }
 
   /**

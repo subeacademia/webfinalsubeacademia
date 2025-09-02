@@ -142,7 +142,7 @@ export class CollaboratorsPageComponent {
     const file = input.files?.[0];
     if (!file) return;
     // Normaliza logos para nitidez uniforme
-    const normalized = await this.media.normalizeLogoImage(file, { targetHeight: 64, maxWidth: 220, paddingX: 12, background: null, format: 'image/png' }) || file;
+    const normalized = await this.media.normalizeLogoImage(file) || file;
     this.media.uploadPublic(normalized).subscribe({
       next: v => {
         if (v.state === 'running') this.uploadProgress.set(v.progress);

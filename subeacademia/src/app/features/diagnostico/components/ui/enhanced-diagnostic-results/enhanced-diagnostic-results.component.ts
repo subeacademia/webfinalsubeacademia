@@ -100,41 +100,35 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
         industry,
         size,
         hasAresData: !!data.ares?.respuestas,
-        hasCompetenciasData: !!data.competencias?.niveles,
-        hasLeadData: !!data.lead,
-        hasContextData: !!data.contexto,
-        hasObjetivo: !!data.objetivo
+        hasCompetenciasData: !!data.competencias?.niveles
       });
 
-      // Calcular puntajes
-      this.calculateScores(data);
+      // Calcular puntajes detallados
+      await this.calculateDetailedScores(data);
       
       // Generar análisis con IA
       await this.generateAIAnalysis(data);
       
-      // 🔍 REGISTRAR COMPLETACIÓN EXITOSA DEL PASO
+      this.isLoading.set(false);
+      this.cdr.detectChanges();
+      
+      // 🔍 REGISTRAR COMPLETACIÓN DEL PASO
       this.flowLogger.logStepCompleted('resultados', {
         scoresCalculated: true,
         aiAnalysisGenerated: !!this.aiAnalysis(),
         timestamp: new Date().toISOString()
       });
       
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      this.error.set(errorMessage);
-      
-      // 🔍 REGISTRAR FALLO DEL PASO
-      this.flowLogger.logStepFailed('resultados', {
-        error: errorMessage,
-        timestamp: new Date().toISOString()
-      });
-      
-      console.error('🔍 EnhancedDiagnosticResults: Error al cargar datos del diagnóstico', {
-        error: err,
-        timestamp: new Date().toISOString()
-      });
-    } finally {
+    } catch (error) {
+      console.error('🔍 EnhancedDiagnosticResults: Error al cargar datos del diagnóstico', error);
+      this.error.set(error instanceof Error ? error.message : 'Error desconocido');
       this.isLoading.set(false);
+      
+      // 🔍 REGISTRAR ERROR
+      this.flowLogger.logStepFailed('resultados', {
+        error: error instanceof Error ? error.message : 'Error desconocido',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 
@@ -147,218 +141,441 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
     return Object.entries(obj || {});
   }
 
-  getObjectLength(obj: Record<string, any>): number {
+  // Métodos auxiliares para la UI
+  getObjectLength(obj: any): number {
     return Object.keys(obj || {}).length;
   }
 
-  private calculateScores(data: any): void {
-    // Calcular puntajes ARES
-    const aresScores: Record<string, number> = {};
-    if (data.ares?.respuestas) {
-      Object.entries(data.ares.respuestas).forEach(([key, value]) => {
-        aresScores[key] = (value as number) * 20; // Convertir de 1-5 a 0-100
-      });
-    }
-    this.aresScores.set(aresScores);
-
-    // Calcular puntajes de competencias
-    const competencyScores: Record<string, number> = {};
-    if (data.competencias?.niveles) {
-      Object.entries(data.competencias.niveles).forEach(([key, value]) => {
-        const nivel = value as string;
-        competencyScores[key] = this.getNivelScore(nivel);
-      });
-    }
-    this.competencyScores.set(competencyScores);
-
-    // Calcular puntaje general
-    const allScores = [...Object.values(aresScores), ...Object.values(competencyScores)];
-    const average = allScores.length > 0 ? allScores.reduce((sum, score) => sum + score, 0) / allScores.length : 0;
-    this.overallScore.set(Math.round(average));
-
-    // Determinar nivel de madurez
-    this.maturityLevel.set(this.getMaturityLevel(average));
+  getCurrentDate(): Date {
+    return new Date();
   }
 
-  private getNivelScore(nivel: string): number {
-    const nivelMap: Record<string, number> = {
-      'incipiente': 20,
-      'basico': 40,
-      'intermedio': 60,
-      'avanzado': 80,
-      'lider': 100
+  setActiveTab(tab: 'overview' | 'analysis' | 'action-plan'): void {
+    this.activeTab.set(tab);
+  }
+
+  getAresDimensions(): Array<{name: string, score: number, description: string}> {
+    const dimensions = [];
+    for (const [key, score] of Object.entries(this.aresScores())) {
+      if (key !== 'promedio') {
+        dimensions.push({
+          name: this.getDimensionDisplayName(key),
+          score: score,
+          description: this.getDimensionDescription(key)
+        });
+      }
+    }
+    return dimensions.sort((a, b) => b.score - a.score);
+  }
+
+  getCompetencyDetails(): Array<{name: string, score: number, level: string, description: string}> {
+    const details = [];
+    for (const [key, score] of Object.entries(this.competencyScores())) {
+      const competency = this.getCompetencyById(key);
+      if (competency) {
+        details.push({
+          name: competency.nameKey,
+          score: score,
+          level: this.getCompetencyLevel(score),
+          description: this.getCompetencyDescription(key)
+        });
+      }
+    }
+    return details.sort((a, b) => b.score - a.score);
+  }
+
+  getAresAverage(): number {
+    const scores = Object.values(this.aresScores()).filter(score => typeof score === 'number');
+    return scores.length > 0 ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
+  }
+
+  getCompetencyAverage(): number {
+    const scores = Object.values(this.competencyScores());
+    return scores.length > 0 ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
+  }
+
+  getOverallMaturityScore(): number {
+    const aresAvg = this.getAresAverage();
+    const compAvg = this.getCompetencyAverage();
+    return Math.round((aresAvg + compAvg) / 2);
+  }
+
+  getActionPlanLength(): number {
+    return this.aiAnalysis()?.actionPlan?.length || 0;
+  }
+
+  getTotalActions(): number {
+    const plan = this.aiAnalysis()?.actionPlan;
+    if (!plan) return 0;
+    return plan.reduce((total, item) => total + item.acciones.length, 0);
+  }
+
+  getHighPriorityActions(): number {
+    const plan = this.aiAnalysis()?.actionPlan;
+    if (!plan) return 0;
+    return plan.filter(item => item.prioridad === 'Alta').length;
+  }
+
+  hasValidActionPlan(): boolean {
+    const analysis = this.aiAnalysis();
+    return !!(analysis?.actionPlan && analysis.actionPlan.length > 0);
+  }
+
+  getActionPlan(): ActionPlanItem[] {
+    return this.aiAnalysis()?.actionPlan || [];
+  }
+
+  // Métodos para colores y estados
+  getScoreColorClass(score: number): string {
+    if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+    if (score >= 60) return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+    if (score >= 40) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+  }
+
+  getStatusColorClass(score: number): string {
+    if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+    if (score >= 60) return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+    if (score >= 40) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+  }
+
+  getStatusText(score: number): string {
+    if (score >= 80) return '🟢 Fortaleza';
+    if (score >= 60) return '🟡 En desarrollo';
+    if (score >= 40) return '🟠 Necesita atención';
+    return '🔴 Área crítica';
+  }
+
+  getCompetencyLevelColor(level: string): string {
+    const colorMap: Record<string, string> = {
+      'incipiente': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+      'basico': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      'intermedio': 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200',
+      'avanzado': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200',
+      'lider': 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200'
     };
-    return nivelMap[nivel] || 0;
+    return colorMap[level] || 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200';
+  }
+
+  getCompetencyStatusColor(score: number): string {
+    if (score >= 80) return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+    if (score >= 60) return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+    if (score >= 40) return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
+    return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+  }
+
+  getCompetencyStatusText(score: number): string {
+    if (score >= 80) return '🟢 Competencia sólida';
+    if (score >= 60) return '🟡 En desarrollo';
+    if (score >= 40) return '🟠 Necesita mejora';
+    return '🔴 Requiere atención urgente';
+  }
+
+  getPriorityColor(priority: string): string {
+    const colorMap: Record<string, string> = {
+      'Alta': 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200',
+      'Media': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200',
+      'Baja': 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+    };
+    return colorMap[priority] || 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200';
+  }
+
+  // Métodos auxiliares para obtener información
+  private getDimensionDisplayName(dimension: string): string {
+    const dimensionNames: Record<string, string> = {
+      'adopcion': 'Adopción y Escalamiento',
+      'riesgos': 'Gestión de Riesgos',
+      'etica': 'Ética y Responsabilidad',
+      'seguridad': 'Seguridad y Privacidad',
+      'capacidad': 'Capacidades de Desarrollo',
+      'datos': 'Gobierno de Datos',
+      'gobernanza': 'Gobernanza ARES',
+      'valor': 'Métricas de Valor',
+      'operacion': 'Operación y Monitoreo',
+      'talento': 'Gestión del Talento',
+      'tecnologia': 'Arquitectura Tecnológica',
+      'integracion': 'Integración de Sistemas',
+      'cumplimiento': 'Cumplimiento Normativo',
+      'transparencia': 'Transparencia y Explicabilidad',
+      'sostenibilidad': 'Sostenibilidad'
+    };
+    return dimensionNames[dimension] || dimension;
+  }
+
+  private getDimensionDescription(dimension: string): string {
+    const descriptions: Record<string, string> = {
+      'adopcion': 'Capacidad para implementar y escalar soluciones de IA',
+      'riesgos': 'Identificación y gestión de riesgos asociados a la IA',
+      'etica': 'Uso responsable y ético de la IA en la organización',
+      'seguridad': 'Protección de datos y sistemas de IA',
+      'capacidad': 'Habilidades técnicas para desarrollar soluciones de IA',
+      'datos': 'Calidad y gobernanza de los datos utilizados en IA',
+      'gobernanza': 'Marco de control y supervisión de iniciativas de IA',
+      'valor': 'Medición del impacto y ROI de las soluciones de IA',
+      'operacion': 'Monitoreo y mantenimiento de sistemas de IA',
+      'talento': 'Desarrollo y retención de talento especializado en IA',
+      'tecnologia': 'Infraestructura y arquitectura tecnológica para IA',
+      'integracion': 'Integración de IA con sistemas existentes',
+      'cumplimiento': 'Cumplimiento de regulaciones y estándares',
+      'transparencia': 'Explicabilidad y transparencia de decisiones de IA',
+      'sostenibilidad': 'Impacto ambiental y social de las soluciones de IA'
+    };
+    return descriptions[dimension] || 'Descripción no disponible';
+  }
+
+  private getCompetencyById(id: string): any {
+    // Aquí deberías importar y usar el array COMPETENCIAS
+    const competencyMap: Record<string, any> = {
+      'c1_pensamiento_critico': { nameKey: 'Pensamiento Crítico' },
+      'c2_resolucion_problemas': { nameKey: 'Resolución de Problemas Complejos' },
+      'c3_alfabetizacion_datos': { nameKey: 'Alfabetización de Datos' },
+      'c4_comunicacion': { nameKey: 'Comunicación Efectiva' },
+      'c5_colaboracion': { nameKey: 'Colaboración y Trabajo en Equipo' },
+      'c6_creatividad': { nameKey: 'Creatividad e Innovación' },
+      'c7_diseno_tecnologico': { nameKey: 'Diseño Tecnológico' },
+      'c8_automatizacion_agentes': { nameKey: 'Automatización y Agentes IA' },
+      'c9_seguridad_privacidad': { nameKey: 'Seguridad y Privacidad' },
+      'c10_etica_responsabilidad': { nameKey: 'Ética y Responsabilidad' },
+      'c11_sostenibilidad': { nameKey: 'Sostenibilidad' },
+      'c12_aprendizaje_continuo': { nameKey: 'Aprendizaje Continuo' },
+      'c13_liderazgo_ia': { nameKey: 'Liderazgo en IA' }
+    };
+    return competencyMap[id] || { nameKey: id };
+  }
+
+  private getCompetencyLevel(score: number): string {
+    if (score >= 80) return 'lider';
+    if (score >= 60) return 'avanzado';
+    if (score >= 40) return 'intermedio';
+    if (score >= 20) return 'basico';
+    return 'incipiente';
+  }
+
+  private getCompetencyDescription(id: string): string {
+    const descriptions: Record<string, string> = {
+      'c1_pensamiento_critico': 'Análisis crítico y evaluación de información',
+      'c2_resolucion_problemas': 'Resolución de problemas complejos y toma de decisiones',
+      'c3_alfabetizacion_datos': 'Interpretación y análisis de datos',
+      'c4_comunicacion': 'Comunicación clara y efectiva',
+      'c5_colaboracion': 'Trabajo en equipo y colaboración efectiva',
+      'c6_creatividad': 'Generación de ideas innovadoras',
+      'c7_diseno_tecnologico': 'Diseño de soluciones tecnológicas',
+      'c8_automatizacion_agentes': 'Automatización de procesos con IA',
+      'c9_seguridad_privacidad': 'Protección de datos y sistemas',
+      'c10_etica_responsabilidad': 'Uso ético y responsable de la tecnología',
+      'c11_sostenibilidad': 'Desarrollo de soluciones sostenibles',
+      'c12_aprendizaje_continuo': 'Actualización constante de conocimientos',
+      'c13_liderazgo_ia': 'Liderazgo en iniciativas de IA'
+    };
+    return descriptions[id] || 'Descripción no disponible';
+  }
+
+  private async calculateDetailedScores(data: any): Promise<void> {
+    try {
+      console.log('🔍 EnhancedDiagnosticResults: Calculando puntajes detallados...');
+      
+      // Calcular puntajes ARES por dimensión
+      const aresScores = this.scoringService.computeAresScore(data);
+      this.aresScores.set(aresScores);
+      
+      // Calcular puntajes de competencias
+      const competencyScores = this.scoringService.computeCompetencyScores(data);
+      const competencyScoresMap: Record<string, number> = {};
+      competencyScores.forEach(comp => {
+        competencyScoresMap[comp.competenciaId] = comp.puntaje;
+      });
+      this.competencyScores.set(competencyScoresMap);
+      
+      // Calcular puntaje general
+      const aresAverage = aresScores.promedio || 0;
+      const competencyAverage = competencyScores.length > 0 
+        ? competencyScores.reduce((sum, comp) => sum + comp.puntaje, 0) / competencyScores.length 
+        : 0;
+      
+      const overallScore = Math.round((aresAverage + competencyAverage) / 2);
+      this.overallScore.set(overallScore);
+      
+      // Determinar nivel de madurez
+      const maturityLevel = this.getMaturityLevel(overallScore);
+      this.maturityLevel.set(maturityLevel);
+      
+      console.log('🔍 EnhancedDiagnosticResults: Puntajes calculados', {
+        aresScores,
+        competencyScores,
+        overallScore,
+        maturityLevel
+      });
+      
+    } catch (error) {
+      console.error('🔍 EnhancedDiagnosticResults: Error al calcular puntajes', error);
+      throw error;
+    }
   }
 
   private getMaturityLevel(score: number): string {
-    if (score >= 80) return 'Líder';
-    if (score >= 60) return 'Avanzado';
-    if (score >= 40) return 'Intermedio';
-    if (score >= 20) return 'Básico';
+    if (score >= 85) return 'Líder';
+    if (score >= 70) return 'Avanzado';
+    if (score >= 50) return 'Intermedio';
+    if (score >= 30) return 'Básico';
     return 'Incipiente';
   }
 
-  public async generateAIAnalysis(data: any): Promise<void> {
+  private async generateAIAnalysis(data: any): Promise<void> {
     try {
       this.isGenerating.set(true);
-      console.log('🔍 EnhancedDiagnosticResults: Iniciando generación de análisis con IA...');
+      console.log('🔍 EnhancedDiagnosticResults: Generando análisis con IA...');
       
-      // 🔍 LOG DE INICIO DE LLAMADA A API
-      this.flowLogger.logApiCall('resultados', {
-        url: 'https://apisube-smoky.vercel.app/api/azure/generate',
-        method: 'POST',
-        requestSize: JSON.stringify(data).length
-      });
+      const aiContent = await this.generativeAiService.generateActionPlan(data);
       
-      const startTime = Date.now();
-      const analysis = await this.generativeAiService.generateActionPlan(data);
-      const endTime = Date.now();
-      const responseTime = endTime - startTime;
-      
-      console.log('🔍 EnhancedDiagnosticResults: Análisis de IA generado exitosamente', {
-        responseTime: `${responseTime}ms`,
-        analysisLength: analysis.length,
-        timestamp: new Date().toISOString()
-      });
-      
-      // 🔍 LOG DE LLAMADA A API EXITOSA
-      this.flowLogger.logApiCall('resultados', {
-        url: 'https://apisube-smoky.vercel.app/api/azure/generate',
-        method: 'POST',
-        requestSize: JSON.stringify(data).length
-      }, {
-        responseTime,
-        analysisLength: analysis.length,
-        success: true
-      });
-      
-      // Parsear la respuesta de la IA (asumiendo que devuelve markdown)
-      const actionPlan = this.parseActionPlanFromMarkdown(analysis);
+      // Parsear el contenido de IA para extraer el plan de acción estructurado
+      const actionPlan = this.parseAIActionPlan(aiContent);
       
       this.aiAnalysis.set({
-        analysis: analysis,
+        analysis: aiContent,
         actionPlan: actionPlan,
         isFromAPI: true
       });
       
-      console.log('🔍 EnhancedDiagnosticResults: Plan de acción parseado', {
-        actionPlanItems: actionPlan.length,
-        timestamp: new Date().toISOString()
+      console.log('🔍 EnhancedDiagnosticResults: Análisis de IA generado exitosamente', {
+        contentLength: aiContent.length,
+        actionPlanItems: actionPlan.length
       });
       
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      console.error('🔍 EnhancedDiagnosticResults: Error generando análisis con IA:', {
-        error: err,
-        errorMessage,
-        timestamp: new Date().toISOString()
-      });
+    } catch (error) {
+      console.error('🔍 EnhancedDiagnosticResults: Error al generar análisis de IA', error);
       
-      // 🔍 LOG DE ERROR EN LLAMADA A API
-      this.flowLogger.logApiCall('resultados', {
-        url: 'https://apisube-smoky.vercel.app/api/azure/generate',
-        method: 'POST',
-        requestSize: JSON.stringify(data).length
-      }, undefined, {
-        error: errorMessage,
-        timestamp: new Date().toISOString()
-      });
+      // Generar plan de acción de fallback
+      const fallbackPlan = this.generateFallbackActionPlan();
       
       this.aiAnalysis.set({
-        analysis: 'Error al generar análisis con IA. Por favor, intenta de nuevo.',
-        actionPlan: [],
+        analysis: 'Error al generar análisis con IA. Se muestra un plan de acción de respaldo.',
+        actionPlan: fallbackPlan,
         isFromAPI: false,
-        error: 'Error de conexión con IA'
+        error: error instanceof Error ? error.message : 'Error desconocido'
       });
     } finally {
       this.isGenerating.set(false);
     }
   }
 
-  private parseActionPlanFromMarkdown(markdown: string): ActionPlanItem[] {
-    const actionPlan: ActionPlanItem[] = [];
-    
-    // Buscar objetivos en el markdown
-    const objectiveRegex = /\*\*Objetivo (\d+):\s*([^*]+)\*\*/g;
-    let match;
-    
-    while ((match = objectiveRegex.exec(markdown)) !== null) {
-      const objectiveNumber = match[1];
-      const objectiveTitle = match[2].trim();
+  private parseAIActionPlan(aiContent: string): ActionPlanItem[] {
+    try {
+      // Buscar secciones de objetivos estratégicos en el contenido de IA
+      const objectiveMatches = aiContent.match(/\*\*Objetivo Estratégico \d+: ([^*]+)\*\*/g);
       
-      // Buscar acciones clave para este objetivo
-      const actions: string[] = [];
-      const actionsRegex = new RegExp(`\\*\\*Objetivo ${objectiveNumber}:[^*]*\\*\\*[\\s\\S]*?\\*\\*Acciones Clave:\\*\\*([\\s\\S]*?)(?=\\*\\*Objetivo|\\*\\*Prioridad|\\*\\*Recomendaciones|$)`);
-      const actionsMatch = markdown.match(actionsRegex);
-      
-      if (actionsMatch && actionsMatch[1]) {
-        const actionsText = actionsMatch[1];
-        const actionItems = actionsText.match(/- ([^-]+)/g);
-        if (actionItems) {
-          actionItems.forEach(item => {
-            actions.push(item.replace('- ', '').trim());
-          });
-        }
+      if (!objectiveMatches) {
+        return this.generateFallbackActionPlan();
       }
       
-      // Buscar prioridad
-      const priorityRegex = new RegExp(`\\*\\*Objetivo ${objectiveNumber}:[^*]*\\*\\*[\\s\\S]*?\\*\\*Prioridad:\\*\\*\\s*(Alta|Media|Baja)`);
-      const priorityMatch = markdown.match(priorityRegex);
-      const priority = priorityMatch ? (priorityMatch[1] as 'Alta' | 'Media' | 'Baja') : 'Media';
+      const actionPlan: ActionPlanItem[] = [];
       
-      // Buscar tiempo estimado
-      const timeRegex = new RegExp(`\\*\\*Objetivo ${objectiveNumber}:[^*]*\\*\\*[\\s\\S]*?\\*\\*Tiempo Estimado:\\*\\*\\s*([^*]+)`);
-      const timeMatch = markdown.match(timeRegex);
-      const tiempoEstimado = timeMatch ? timeMatch[1].trim() : '3-6 meses';
-      
-      // Determinar competencia basada en el título del objetivo
-      let competencia = 'General';
-      if (objectiveTitle.toLowerCase().includes('gobernanza') || objectiveTitle.toLowerCase().includes('ética')) {
-        competencia = 'Gobernanza';
-      } else if (objectiveTitle.toLowerCase().includes('competencias') || objectiveTitle.toLowerCase().includes('equipo') || objectiveTitle.toLowerCase().includes('formación')) {
-        competencia = 'Desarrollo de Talento';
-      } else if (objectiveTitle.toLowerCase().includes('implementación') || objectiveTitle.toLowerCase().includes('metodologías') || objectiveTitle.toLowerCase().includes('herramientas')) {
-        competencia = 'Implementación';
-      }
-      
-      actionPlan.push({
-        objetivo: objectiveTitle,
-        acciones: actions.length > 0 ? actions : ['Acción específica a definir'],
-        competencia,
-        prioridad: priority,
-        tiempoEstimado: tiempoEstimado
+      objectiveMatches.forEach((match, index) => {
+        const objective = match.replace(/\*\*Objetivo Estratégico \d+: |\*\*/g, '');
+        
+        // Extraer información del objetivo del contenido de IA
+        const objectiveSection = this.extractObjectiveSection(aiContent, index + 1);
+        
+        actionPlan.push({
+          objetivo: objective,
+          acciones: this.extractActions(objectiveSection),
+          competencia: this.extractCompetencies(objectiveSection),
+          prioridad: this.extractPriority(objectiveSection),
+          tiempoEstimado: this.extractTimeline(objectiveSection)
+        });
       });
+      
+      return actionPlan.length > 0 ? actionPlan : this.generateFallbackActionPlan();
+      
+    } catch (error) {
+      console.error('🔍 EnhancedDiagnosticResults: Error al parsear plan de acción de IA', error);
+      return this.generateFallbackActionPlan();
     }
+  }
+
+  private extractObjectiveSection(content: string, objectiveNumber: number): string {
+    const startMarker = `**Objetivo Estratégico ${objectiveNumber}:`;
+    const endMarker = objectiveNumber < 3 ? `**Objetivo Estratégico ${objectiveNumber + 1}:` : '**Recomendaciones Específicas por Industria:';
     
-    // Si no se encontraron objetivos estructurados, crear uno genérico
-    if (actionPlan.length === 0) {
-      actionPlan.push({
+    const startIndex = content.indexOf(startMarker);
+    if (startIndex === -1) return '';
+    
+    const endIndex = content.indexOf(endMarker, startIndex);
+    const section = endIndex !== -1 
+      ? content.substring(startIndex, endIndex)
+      : content.substring(startIndex);
+    
+    return section;
+  }
+
+  private extractActions(section: string): string[] {
+    const actionMatches = section.match(/- ([^-]+)/g);
+    if (!actionMatches) return ['Identificar acciones específicas para este objetivo'];
+    
+    return actionMatches
+      .map(action => action.replace('- ', '').trim())
+      .filter(action => action.length > 10)
+      .slice(0, 5); // Máximo 5 acciones
+  }
+
+  private extractCompetencies(section: string): string {
+    const competencyMatch = section.match(/Competencias a Desarrollar: ([^\n]+)/);
+    return competencyMatch ? competencyMatch[1].trim() : 'Competencias generales';
+  }
+
+  private extractPriority(section: string): 'Alta' | 'Media' | 'Baja' {
+    if (section.includes('Prioridad: Alta')) return 'Alta';
+    if (section.includes('Prioridad: Baja')) return 'Baja';
+    return 'Media';
+  }
+
+  private extractTimeline(section: string): string {
+    const timelineMatch = section.match(/Tiempo Estimado: ([^\n]+)/);
+    return timelineMatch ? timelineMatch[1].trim() : '3-4 meses';
+  }
+
+  private generateFallbackActionPlan(): ActionPlanItem[] {
+    return [
+      {
         objetivo: 'Desarrollar Estrategia de IA',
-        acciones: ['Evaluar estado actual', 'Definir objetivos', 'Crear roadmap'],
+        acciones: [
+          'Evaluar estado actual de la organización en IA',
+          'Definir objetivos estratégicos claros y medibles',
+          'Crear roadmap de implementación por fases',
+          'Establecer métricas de éxito y KPIs'
+        ],
         competencia: 'Estrategia',
         prioridad: 'Alta',
         tiempoEstimado: '2-3 meses'
-      });
-    }
-    
-    return actionPlan;
+      },
+      {
+        objetivo: 'Fortalecer Capacidades del Equipo',
+        acciones: [
+          'Identificar brechas de competencias en el equipo',
+          'Diseñar programa de capacitación personalizado',
+          'Implementar sistema de certificaciones',
+          'Crear centro de excelencia en IA'
+        ],
+        competencia: 'Talento',
+        prioridad: 'Alta',
+        tiempoEstimado: '3-4 meses'
+      },
+      {
+        objetivo: 'Implementar Soluciones Piloto',
+        acciones: [
+          'Seleccionar casos de uso prioritarios',
+          'Desarrollar prototipos y pruebas de concepto',
+          'Establecer métricas de impacto y ROI',
+          'Crear plan de escalamiento'
+        ],
+        competencia: 'Implementación',
+        prioridad: 'Media',
+        tiempoEstimado: '4-6 meses'
+      }
+    ];
   }
 
-  async regenerateReport(): Promise<void> {
-    try {
-      this.isGenerating.set(true);
-      const data = this.diagnosticData();
-      if (data) {
-        await this.generateAIAnalysis(data);
-        this.toastService.show('success', 'Reporte regenerado exitosamente');
-      }
-    } catch (err) {
-      this.toastService.show('error', 'Error al regenerar el reporte');
-    } finally {
-      this.isGenerating.set(false);
-    }
-  }
+
 
   async downloadPDF(): Promise<void> {
     try {
@@ -373,182 +590,131 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
     }
   }
 
-  setActiveTab(tab: 'overview' | 'analysis' | 'action-plan'): void {
-    this.activeTab.set(tab);
+  // Métodos para obtener información específica de objetivos
+  getResourcesForObjective(objetivo: string): string {
+    const resourceMap: Record<string, string> = {
+      'Fortalecer la Gobernanza y Ética en IA': 'Consultoría especializada, capacitación del equipo, herramientas de monitoreo',
+      'Desarrollar Capacidades Técnicas y de Talento': 'Presupuesto de capacitación, tiempo del equipo, plataformas de aprendizaje',
+      'Implementar Soluciones de IA de Alto Impacto': 'Equipo de desarrollo, infraestructura tecnológica, datos de calidad',
+      'Desarrollar Estrategia de IA': 'Análisis de mercado, consultoría estratégica, tiempo de planificación',
+      'Fortalecer Capacidades del Equipo': 'Programas de capacitación, mentores, recursos de aprendizaje',
+      'Implementar Soluciones Piloto': 'Desarrolladores, infraestructura, datos de prueba'
+    };
+    return resourceMap[objetivo] || 'Recursos específicos a definir según el contexto';
   }
 
-  getPriorityColor(priority: string): string {
-    switch (priority) {
-      case 'Alta': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
-      case 'Media': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200';
-      case 'Baja': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+  getMetricsForObjective(objetivo: string): string {
+    const metricsMap: Record<string, string> = {
+      'Fortalecer la Gobernanza y Ética en IA': 'Reducción del 50% en incidentes éticos, 100% de transparencia',
+      'Desarrollar Capacidades Técnicas y de Talento': '80% del equipo certificado, reducción del 40% en tiempo de implementación',
+      'Implementar Soluciones de IA de Alto Impacto': 'ROI positivo en 12 meses, mejora del 30% en eficiencia',
+      'Desarrollar Estrategia de IA': 'Plan estratégico aprobado, objetivos medibles definidos',
+      'Fortalecer Capacidades del Equipo': 'Competencias evaluadas, plan de desarrollo implementado',
+      'Implementar Soluciones Piloto': 'Prototipos funcionales, métricas de impacto establecidas'
+    };
+    return metricsMap[objetivo] || 'Métricas específicas a definir según el objetivo';
+  }
+
+  getRisksForObjective(objetivo: string): string {
+    const risksMap: Record<string, string> = {
+      'Fortalecer la Gobernanza y Ética en IA': 'Resistencia al cambio, falta de recursos, complejidad regulatoria',
+      'Desarrollar Capacidades Técnicas y de Talento': 'Rotación de personal, costos elevados, tiempo de implementación',
+      'Implementar Soluciones de IA de Alto Impacto': 'Falla técnica, resistencia del usuario, problemas de datos',
+      'Desarrollar Estrategia de IA': 'Cambios en el mercado, falta de alineación ejecutiva, recursos limitados',
+      'Fortalecer Capacidades del Equipo': 'Falta de compromiso, recursos insuficientes, expectativas irreales',
+      'Implementar Soluciones Piloto': 'Problemas técnicos, falta de adopción, métricas inadecuadas'
+    };
+    return risksMap[objetivo] || 'Riesgos específicos a evaluar según el contexto';
+  }
+
+
+
+  // Método público para regenerar el reporte
+  async regenerateReport(): Promise<void> {
+    try {
+      console.log('🔍 EnhancedDiagnosticResults: Regenerando reporte...');
+      this.isGenerating.set(true);
+      const data = this.diagnosticData();
+      if (data) {
+        await this.generateAIAnalysis(data);
+        this.toastService.show('success', 'Reporte regenerado exitosamente');
+      }
+    } catch (err) {
+      console.error('Error al regenerar reporte:', err);
+      this.toastService.show('error', 'Error al regenerar el reporte');
+    } finally {
+      this.isGenerating.set(false);
     }
   }
 
-  getScoreColor(score: number): string {
-    if (score >= 80) return 'text-green-600 dark:text-green-400';
-    if (score >= 60) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 40) return 'text-yellow-600 dark:text-yellow-400';
-    return 'text-red-600 dark:text-red-400';
-  }
-
-  getCurrentDate(): Date {
-    return new Date();
-  }
-
-  // Método helper para verificar si el análisis de IA está disponible
-  hasValidActionPlan(): boolean {
-    const analysis = this.aiAnalysis();
-    return !!(analysis?.actionPlan && analysis.actionPlan.length > 0);
-  }
-
-  // Método helper para obtener el plan de acción de forma segura
-  getActionPlan(): ActionPlanItem[] {
-    const analysis = this.aiAnalysis();
-    return analysis?.actionPlan || [];
-  }
-
-  // Métodos para el framework ARES
-  getAresDimensions(): Array<{name: string, score: number, description: string}> {
-    const dimensions: Record<string, {name: string, scores: number[], description: string}> = {
-      'adopcion': { name: 'Adopción y Escalamiento', scores: [], description: 'Capacidad de adoptar y escalar IA en la organización' },
-      'riesgos': { name: 'Gestión de Riesgos', scores: [], description: 'Identificación y mitigación de riesgos de IA' },
-      'etica': { name: 'Ética y Responsabilidad', scores: [], description: 'Principios éticos y responsabilidad en el uso de IA' },
-      'seguridad': { name: 'Seguridad y Privacidad', scores: [], description: 'Protección de datos y sistemas de IA' },
-      'capacidad': { name: 'Capacidades de Desarrollo', scores: [], description: 'Habilidades técnicas para desarrollar IA' },
-      'datos': { name: 'Gobierno de Datos', scores: [], description: 'Gestión y calidad de datos para IA' },
-      'gobernanza': { name: 'Gobernanza ARES', scores: [], description: 'Estructura de gobierno para IA' },
-      'valor': { name: 'Métricas de Valor', scores: [], description: 'Medición del valor generado por IA' },
-      'operacion': { name: 'Operación y Monitoreo', scores: [], description: 'Operación y monitoreo de sistemas de IA' },
-      'talento': { name: 'Gestión del Talento', scores: [], description: 'Desarrollo y retención de talento en IA' },
-      'tecnologia': { name: 'Arquitectura Tecnológica', scores: [], description: 'Infraestructura tecnológica para IA' },
-      'integracion': { name: 'Integración de Sistemas', scores: [], description: 'Integración de IA con sistemas existentes' },
-      'cumplimiento': { name: 'Cumplimiento Normativo', scores: [], description: 'Cumplimiento de regulaciones de IA' },
-      'transparencia': { name: 'Transparencia y Explicabilidad', scores: [], description: 'Transparencia en decisiones de IA' },
-      'sostenibilidad': { name: 'Sostenibilidad', scores: [], description: 'Impacto ambiental y social de IA' }
-    };
-
-    // Agrupar puntajes por dimensión
-    const data = this.diagnosticData();
-    if (data?.ares?.respuestas) {
-      Object.entries(data.ares.respuestas).forEach(([key, value]) => {
-        if (value !== null && typeof value === 'number') {
-          // Buscar la dimensión del item
-          const item = this.findAresItem(key);
-          if (item && dimensions[item.dimension]) {
-            dimensions[item.dimension].scores.push(value * 20); // Convertir de 1-5 a 0-100
-          }
-        }
+  // Método para parsear el contenido de IA y convertirlo en HTML estructurado
+  parseAIContentToHTML(content: string): string {
+    if (!content) return '';
+    
+    // Convertir Markdown básico a HTML estructurado
+    let html = content
+      // Títulos
+      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3 mt-6">$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2 mt-4">$1</h3>')
+      
+      // Separadores
+      .replace(/^---$/gim, '<hr class="my-6 border-gray-300 dark:border-gray-600">')
+      
+      // Negritas
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-gray-900 dark:text-gray-100">$1</strong>')
+      
+      // Listas con bullets
+      .replace(/^• (.*$)/gim, '<li class="ml-4 text-gray-700 dark:text-gray-300">$1</li>')
+      .replace(/^- (.*$)/gim, '<li class="ml-4 text-gray-700 dark:text-gray-300">$1</li>')
+      
+      // Párrafos (solo si no son títulos, listas o separadores)
+      .replace(/^([^#\-\*•\n\r\|].*$)/gim, '<p class="text-gray-700 dark:text-gray-300 mb-3">$1</p>');
+    
+    // Envolver listas
+    html = html.replace(/(<li.*?<\/li>)/gs, '<ul class="list-disc ml-6 mb-4">$1</ul>');
+    
+    // Manejar tablas de manera más robusta
+    const tableRegex = /\| (.*?) \| (.*?) \| (.*?) \|/g;
+    let tableMatch;
+    let tableRows = [];
+    
+    while ((tableMatch = tableRegex.exec(content)) !== null) {
+      tableRows.push({
+        semana: tableMatch[1].trim(),
+        accion: tableMatch[2].trim(),
+        responsable: tableMatch[3].trim()
       });
     }
-
-    // Calcular promedio por dimensión
-    return Object.entries(dimensions).map(([key, dim]) => ({
-      name: dim.name,
-      score: dim.scores.length > 0 ? Math.round(dim.scores.reduce((sum, score) => sum + score, 0) / dim.scores.length) : 0,
-      description: dim.description
-    })).filter(dim => dim.score > 0);
-  }
-
-  private findAresItem(id: string): any {
-    // Importar ARES_ITEMS desde el servicio o crear una referencia local
-    const aresItems = [
-      { id: 'adopcion_01', dimension: 'adopcion' },
-      { id: 'adopcion_02', dimension: 'adopcion' },
-      { id: 'riesgos_01', dimension: 'riesgos' },
-      { id: 'etica_01', dimension: 'etica' },
-      { id: 'seguridad_01', dimension: 'seguridad' },
-      { id: 'capacidad_01', dimension: 'capacidad' },
-      { id: 'datos_01', dimension: 'datos' },
-      { id: 'gobernanza_01', dimension: 'gobernanza' },
-      { id: 'valor_01', dimension: 'valor' },
-      { id: 'operacion_01', dimension: 'operacion' },
-      { id: 'talento_01', dimension: 'talento' },
-      { id: 'tecnologia_01', dimension: 'tecnologia' },
-      { id: 'integracion_01', dimension: 'integracion' },
-      { id: 'cumplimiento_01', dimension: 'cumplimiento' },
-      { id: 'transparencia_01', dimension: 'transparencia' },
-      { id: 'sostenibilidad_01', dimension: 'sostenibilidad' }
-    ];
-    return aresItems.find(item => item.id === id);
-  }
-
-  // Métodos para competencias
-  getCompetencyDetails(): Array<{name: string, level: string, score: number, description: string}> {
-    const competencies = [
-      { id: 'c1_pensamiento_critico', name: 'Pensamiento Crítico y Análisis', description: 'Capacidad de analizar problemas complejos y generar soluciones innovadoras' },
-      { id: 'c2_resolucion_problemas', name: 'Resolución de Problemas Complejos', description: 'Habilidad para abordar desafíos multidimensionales' },
-      { id: 'c3_alfabetizacion_datos', name: 'Alfabetización de Datos', description: 'Capacidad para interpretar y analizar información basada en datos' },
-      { id: 'c4_comunicacion', name: 'Comunicación Efectiva', description: 'Habilidad para transmitir ideas complejas de manera clara' },
-      { id: 'c5_colaboracion', name: 'Colaboración y Trabajo en Equipo', description: 'Capacidad para trabajar en equipos diversos y multidisciplinarios' },
-      { id: 'c6_creatividad', name: 'Creatividad e Innovación', description: 'Habilidad para generar ideas originales y soluciones innovadoras' },
-      { id: 'c7_diseno_tecnologico', name: 'Diseño Tecnológico', description: 'Capacidad para crear soluciones tecnológicas centradas en el usuario' },
-      { id: 'c8_automatizacion_agentes', name: 'Automatización y Agentes IA', description: 'Habilidad para diseñar e implementar sistemas automatizados' },
-      { id: 'c9_seguridad_privacidad', name: 'Seguridad y Privacidad', description: 'Comprensión de principios de seguridad digital y protección de datos' },
-      { id: 'c10_etica_responsabilidad', name: 'Ética y Responsabilidad', description: 'Comprensión de principios éticos en el desarrollo de tecnologías' },
-      { id: 'c11_sostenibilidad', name: 'Sostenibilidad', description: 'Comprensión de principios de desarrollo sostenible en proyectos tecnológicos' },
-      { id: 'c12_aprendizaje_continuo', name: 'Aprendizaje Continuo', description: 'Compromiso con el desarrollo profesional continuo' },
-      { id: 'c13_liderazgo_ia', name: 'Liderazgo en IA', description: 'Capacidad para liderar equipos en la adopción de IA' }
-    ];
-
-    const data = this.diagnosticData();
-    const competencyScores = this.competencyScores();
-
-    return competencies.map(comp => {
-      const level = data?.competencias?.niveles?.[comp.id] as string || 'incipiente';
-      const score = competencyScores[comp.id] || 0;
-      return {
-        name: comp.name,
-        level: level,
-        score: score,
-        description: comp.description
-      };
-    }).filter(comp => comp.score > 0);
-  }
-
-  getCompetencyLevelColor(level: string): string {
-    switch (level) {
-      case 'lider': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200';
-      case 'avanzado': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200';
-      case 'intermedio': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200';
-      case 'basico': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200';
-      case 'incipiente': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    
+    if (tableRows.length > 0) {
+      let tableHTML = '<div class="overflow-x-auto mb-6"><table class="w-full border-collapse border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">';
+      tableHTML += '<thead><tr class="bg-gray-100 dark:bg-gray-800">';
+      tableHTML += '<th class="px-4 py-3 border border-gray-300 dark:border-gray-600 font-semibold text-gray-900 dark:text-gray-100 text-left">Semana</th>';
+      tableHTML += '<th class="px-4 py-3 border border-gray-300 dark:border-gray-600 font-semibold text-gray-900 dark:text-gray-100 text-left">Acción</th>';
+      tableHTML += '<th class="px-4 py-3 border border-gray-300 dark:border-gray-600 font-semibold text-gray-900 dark:text-gray-100 text-left">Responsable</th>';
+      tableHTML += '</tr></thead><tbody>';
+      
+      tableRows.forEach(row => {
+        tableHTML += '<tr class="hover:bg-gray-50 dark:hover:bg-gray-600">';
+        tableHTML += `<td class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">${row.semana}</td>`;
+        tableHTML += `<td class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">${row.accion}</td>`;
+        tableHTML += `<td class="px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">${row.responsable}</td>`;
+        tableHTML += '</tr>';
+      });
+      
+      tableHTML += '</tbody></table></div>';
+      
+      // Reemplazar la tabla en el HTML
+      html = html.replace(/\| (.*?) \| (.*?) \| (.*?) \|/g, tableHTML);
     }
-  }
-
-  // Métodos para cálculos de promedios
-  getAresAverage(): number {
-    const aresScores = this.aresScores();
-    const scores = Object.values(aresScores);
-    return scores.length > 0 ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
-  }
-
-  getCompetencyAverage(): number {
-    const competencyScores = this.competencyScores();
-    const scores = Object.values(competencyScores);
-    return scores.length > 0 ? Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0;
-  }
-
-  getOverallMaturityScore(): number {
-    const aresAvg = this.getAresAverage();
-    const competencyAvg = this.getCompetencyAverage();
-    return Math.round((aresAvg + competencyAvg) / 2);
-  }
-
-  // Métodos para cálculos del plan de acción
-  getTotalActions(): number {
-    const actionPlan = this.getActionPlan();
-    return actionPlan.reduce((sum, item) => sum + item.acciones.length, 0);
-  }
-
-  getHighPriorityActions(): number {
-    const actionPlan = this.getActionPlan();
-    return actionPlan.filter(item => item.prioridad === 'Alta').length;
-  }
-
-  getActionPlanLength(): number {
-    return this.getActionPlan().length;
+    
+    // Limpiar HTML duplicado y mejorar espaciado
+    html = html
+      .replace(/<p><\/p>/g, '') // Eliminar párrafos vacíos
+      .replace(/\n\s*\n/g, '\n') // Limpiar líneas en blanco múltiples
+      .replace(/<p class="text-gray-700 dark:text-gray-300 mb-3">\s*<\/p>/g, ''); // Eliminar párrafos con solo espacios
+    
+    return html;
   }
 }

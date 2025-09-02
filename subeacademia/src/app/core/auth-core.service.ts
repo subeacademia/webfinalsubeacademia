@@ -57,4 +57,3 @@ export class AuthCoreService {
 
   async logout(): Promise<void> { if (this.auth) await signOut(this.auth); }
 }
-
