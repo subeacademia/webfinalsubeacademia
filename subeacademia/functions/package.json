@@ -5,19 +5,19 @@
   "main": "lib/index.js",
   "type": "commonjs",
   "engines": {
-    "node": "18"
+    "node": "22"
   },
   "scripts": {
     "build": "tsc",
-    "dev": "vercel dev",
+    "dev": " dev",
     "deploy": "vercel deploy"
   },
   "dependencies": {
-    "@vercel/node": "^3.0.0",
+    "@vercel/node": "^3.2.29",
     "cors": "^2.8.5"
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "@types/node": "^20.0.0"
+    "@types/node": "^22.17.2"
   }
 }

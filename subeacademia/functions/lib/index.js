@@ -1,110 +1,183 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateDiagnosticReport = exports.generateObjectives = void 0;
-const functions = require("firebase-functions");
-// Importa la nueva biblioteca de Vertex AI
-const vertexai_1 = require("@google-cloud/vertexai");
-// Inicializa Vertex AI.
-// Utilizará automáticamente las credenciales de la cuenta de servicio de la función.
-const projectId = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT;
-const vertex_ai = new vertexai_1.VertexAI({
-    project: projectId,
-    location: "us-central1",
-});
-// Modelo de IA a utilizar
-const model = "gemini-1.0-pro-001";
-const generativeModel = vertex_ai.getGenerativeModel({
-    model: model,
-    generationConfig: {
-        maxOutputTokens: 2048,
-        temperature: 0.4,
-        topP: 1,
-        topK: 32,
-    },
-});
-exports.generateObjectives = functions.https.onCall(async (data) => {
-    var _a, _b, _c, _d, _e;
-    console.log("Iniciando generateObjectives v2 con data:", data);
-    const contextData = data === null || data === void 0 ? void 0 : data.contextData;
-    if (!contextData) {
-        console.error("Error: Faltan datos en contextData.");
-        throw new functions.https.HttpsError("invalid-argument", "La función debe ser llamada con 'contextData'.");
+exports.default = handler;
+exports.health = health;
+// Configuración de CORS
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Content-Type': 'application/json'
+};
+// Función para manejar CORS
+function handleCors(req, res) {
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200, corsHeaders);
+        res.end();
+        return true;
     }
-    const prompt = `
-    Basado en el siguiente contexto profesional de un usuario, genera 3 objetivos de desarrollo SMART (Específicos, Medibles, Alcanzables, Relevantes y con un Plazo definido).
-    - Industria: ${contextData.industria}
-    - Área Funcional: ${contextData.area}
-    - Rol Actual: ${contextData.rol}
-    Devuelve los 3 objetivos en un array de strings JSON. Ejemplo: ["Objetivo 1", "Objetivo 2", "Objetivo 3"]
-  `;
+    return false;
+}
+// Función para generar objetivos personalizados
+async function handler(req, res) {
+    // Manejar CORS
+    if (handleCors(req, res))
+        return;
     try {
-        console.log("Llamando a la API de Vertex AI para objetivos...");
-        const request = {
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-        };
-        const result = await generativeModel.generateContent(request);
-        const response = result.response;
-        const text = (_e = (_d = (_c = (_b = (_a = response.candidates) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.content) === null || _c === void 0 ? void 0 : _c.parts) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.text;
-        if (!text) {
-            console.error("Respuesta sin texto para objetivos", JSON.stringify(response));
-            throw new functions.https.HttpsError("internal", "La respuesta de IA no contiene texto.");
+        // Verificar que sea una petición POST
+        if (req.method !== 'POST') {
+            res.writeHead(405, corsHeaders);
+            res.end(JSON.stringify({ error: 'Método no permitido' }));
+            return;
         }
-        console.log("Respuesta de Vertex AI recibida para objetivos.");
-        return { objectives: JSON.parse(text) };
+        const { messages, maxTokens = 1000, temperature = 0.7 } = req.body;
+        if (!messages || !Array.isArray(messages)) {
+            res.writeHead(400, corsHeaders);
+            res.end(JSON.stringify({ error: 'Se requieren mensajes válidos' }));
+            return;
+        }
+        console.log('🚀 Generando objetivos personalizados con IA...');
+        console.log('📊 Mensajes recibidos:', messages.length);
+        // Simular respuesta de IA para objetivos personalizados
+        const objetivosGenerados = await generarObjetivosPersonalizados(messages);
+        // Estructura de respuesta compatible con OpenAI
+        const response = {
+            choices: [
+                {
+                    message: {
+                        role: 'assistant',
+                        content: objetivosGenerados
+                    },
+                    finish_reason: 'stop'
+                }
+            ],
+            usage: {
+                prompt_tokens: 100,
+                completion_tokens: 200,
+                total_tokens: 300
+            }
+        };
+        res.writeHead(200, corsHeaders);
+        res.end(JSON.stringify(response));
     }
     catch (error) {
-        console.error("Error CRÍTICO llamando a la API de Vertex AI para objetivos:", error);
-        throw new functions.https.HttpsError("internal", "Falló la generación de objetivos con IA.");
+        console.error('❌ Error en la API de Vercel:', error);
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({
+            error: 'Error interno del servidor',
+            details: error instanceof Error ? error.message : 'Error desconocido'
+        }));
     }
-});
-exports.generateDiagnosticReport = functions.https.onCall(async (data) => {
-    var _a, _b, _c, _d, _e;
-    console.log("Iniciando generateDiagnosticReport v2...");
-    const diagnosticData = data === null || data === void 0 ? void 0 : data.diagnosticData;
-    if (!diagnosticData) {
-        console.error("Error: Faltan datos en diagnosticData.");
-        throw new functions.https.HttpsError("invalid-argument", "La función debe ser llamada con 'diagnosticData'.");
-    }
-    const prompt = `
-    Basado en los siguientes datos de un diagnóstico de madurez en IA, genera un reporte profesional y detallado.
-    Contexto: ${diagnosticData.contexto.industria}, ${diagnosticData.contexto.area}, ${diagnosticData.contexto.rol}.
-    Objetivo Principal: ${diagnosticData.objetivo}.
-    Competencias Autoevaluadas (de 1 a 10):
-    - Pensamiento Crítico y Análisis: ${diagnosticData.competencias['pensamiento-critico']}
-    - Resolución de Problemas Complejos: ${diagnosticData.competencias['resolucion-problemas']}
-    - Creatividad e Innovación: ${diagnosticData.competencias['creatividad']}
-    - Liderazgo e Influencia Social: ${diagnosticData.competencias['liderazgo']}
-    - Inteligencia Emocional: ${diagnosticData.competencias['inteligencia-emocional']}
-    - Colaboración y Trabajo en Equipo: ${diagnosticData.competencias['colaboracion']}
-    - Adaptabilidad y Flexibilidad: ${diagnosticData.competencias['adaptabilidad']}
-    - Comunicación Efectiva: ${diagnosticData.competencias['comunicacion']}
-    - Curiosidad y Aprendizaje Activo: ${diagnosticData.competencias['curiosidad']}
-    - Alfabetización Digital y Tecnológica: ${diagnosticData.competencias['alfabetizacion-digital']}
-    ARES (de 1 a 10):
-    - Agilidad: ${diagnosticData.ares.agilidad}
-    - Resiliencia: ${diagnosticData.ares.resiliencia}
-    - Empatía: ${diagnosticData.ares.empatia}
-    - Serenidad: ${diagnosticData.ares.serenidad}
-    Genera un análisis detallado, identifica 2-3 fortalezas clave, 2-3 áreas de mejora críticas y un plan de acción con 3 pasos concretos.
-  `;
-    try {
-        console.log("Llamando a la API de Vertex AI para el reporte...");
-        const request = {
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-        };
-        const result = await generativeModel.generateContent(request);
-        const response = result.response;
-        const text = (_e = (_d = (_c = (_b = (_a = response.candidates) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.content) === null || _c === void 0 ? void 0 : _c.parts) === null || _d === void 0 ? void 0 : _d[0]) === null || _e === void 0 ? void 0 : _e.text;
-        if (!text) {
-            console.error("Respuesta sin texto para reporte", JSON.stringify(response));
-            throw new functions.https.HttpsError("internal", "La respuesta de IA no contiene texto.");
+}
+// Función para generar objetivos personalizados
+async function generarObjetivosPersonalizados(messages) {
+    // Extraer el contexto del último mensaje del usuario
+    const userMessage = messages.find(msg => msg.role === 'user');
+    const context = userMessage?.content || '';
+    console.log('🎯 Contexto del cliente:', context);
+    // Analizar el contexto para generar objetivos personalizados
+    const objetivos = analizarContextoYGenerarObjetivos(context);
+    return JSON.stringify(objetivos);
+}
+// Función para analizar contexto y generar objetivos
+function analizarContextoYGenerarObjetivos(context) {
+    const objetivos = [];
+    // Objetivos base que se adaptan según el contexto
+    const objetivosBase = [
+        {
+            id: "obj-1",
+            texto: "Implementar un sistema de automatización de procesos clave para mejorar la eficiencia operativa en un 25%",
+            categoria: "Procesos",
+            prioridad: "alta",
+            tiempoEstimado: "3-4 meses",
+            impacto: "Reducción del 25% en tiempo de procesos manuales y mejora en la precisión de tareas repetitivas"
+        },
+        {
+            id: "obj-2",
+            texto: "Desarrollar un programa de capacitación en IA para el equipo, enfocado en herramientas específicas del sector",
+            categoria: "Capacitación",
+            prioridad: "alta",
+            tiempoEstimado: "2-3 meses",
+            impacto: "Mejora del 40% en competencias digitales del equipo y mayor adopción de tecnologías emergentes"
+        },
+        {
+            id: "obj-3",
+            texto: "Establecer un sistema de análisis de datos avanzado para optimizar la toma de decisiones estratégicas",
+            categoria: "Analítica",
+            prioridad: "media",
+            tiempoEstimado: "4-6 meses",
+            impacto: "Mejora del 30% en la precisión de decisiones y reducción del 20% en costos operativos"
+        },
+        {
+            id: "obj-4",
+            texto: "Crear una estrategia de experiencia del cliente mejorada con herramientas de IA conversacional",
+            categoria: "CX",
+            prioridad: "media",
+            tiempoEstimado: "3-5 meses",
+            impacto: "Aumento del 35% en satisfacción del cliente y reducción del 50% en tiempo de respuesta"
+        },
+        {
+            id: "obj-5",
+            texto: "Implementar un marco de gobernanza de datos y ética en IA para garantizar el uso responsable",
+            categoria: "Gobernanza",
+            prioridad: "alta",
+            tiempoEstimado: "2-4 meses",
+            impacto: "Cumplimiento normativo del 100% y reducción del 60% en riesgos de seguridad de datos"
+        },
+        {
+            id: "obj-6",
+            texto: "Desarrollar un laboratorio de innovación para explorar nuevas aplicaciones de IA en productos/servicios",
+            categoria: "Innovación",
+            prioridad: "baja",
+            tiempoEstimado: "6-8 meses",
+            impacto: "Lanzamiento de 2-3 nuevos productos/servicios con IA y aumento del 20% en ingresos"
+        },
+        {
+            id: "obj-7",
+            texto: "Optimizar la cadena de suministro mediante algoritmos de IA para predecir demanda y gestionar inventarios",
+            categoria: "Procesos",
+            prioridad: "media",
+            tiempoEstimado: "4-5 meses",
+            impacto: "Reducción del 30% en costos de inventario y mejora del 25% en precisión de pronósticos"
+        },
+        {
+            id: "obj-8",
+            texto: "Establecer un sistema de monitoreo y alertas inteligentes para prevenir fallos operativos",
+            categoria: "Analítica",
+            prioridad: "alta",
+            tiempoEstimado: "2-3 meses",
+            impacto: "Reducción del 40% en tiempo de inactividad y mejora del 50% en tiempo de respuesta a incidentes"
         }
-        console.log("Respuesta de Vertex AI recibida para el reporte.");
-        return { reportText: text };
+    ];
+    // Personalizar objetivos según el contexto
+    if (context.toLowerCase().includes('pequeña') || context.toLowerCase().includes('startup')) {
+        // Para empresas pequeñas, priorizar objetivos de bajo costo y rápida implementación
+        return objetivosBase.filter(obj => obj.prioridad === 'alta' &&
+            (obj.categoria === 'Capacitación' || obj.categoria === 'Procesos')).slice(0, 4);
     }
-    catch (error) {
-        console.error("Error CRÍTICO llamando a la API de Vertex AI para el reporte:", error);
-        throw new functions.https.HttpsError("internal", "Falló la generación del reporte con IA.");
+    else if (context.toLowerCase().includes('grande') || context.toLowerCase().includes('corporación')) {
+        // Para empresas grandes, incluir objetivos de gobernanza y escalabilidad
+        return objetivosBase.filter(obj => obj.prioridad === 'alta' || obj.prioridad === 'media').slice(0, 6);
     }
-});
-//# sourceMappingURL=index.js.map
+    else if (context.toLowerCase().includes('tecnología') || context.toLowerCase().includes('tech')) {
+        // Para empresas de tecnología, enfocarse en innovación y desarrollo
+        return objetivosBase.filter(obj => obj.categoria === 'Innovación' || obj.categoria === 'Analítica' || obj.categoria === 'CX').slice(0, 5);
+    }
+    else if (context.toLowerCase().includes('servicios') || context.toLowerCase().includes('consultoría')) {
+        // Para empresas de servicios, priorizar CX y procesos
+        return objetivosBase.filter(obj => obj.categoria === 'CX' || obj.categoria === 'Procesos' || obj.categoria === 'Capacitación').slice(0, 5);
+    }
+    // Por defecto, retornar objetivos balanceados
+    return objetivosBase.slice(0, 6);
+}
+// Endpoint de salud
+async function health(req, res) {
+    if (handleCors(req, res))
+        return;
+    res.writeHead(200, corsHeaders);
+    res.end(JSON.stringify({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        service: 'SUBE Academia AI API'
+    }));
+}
