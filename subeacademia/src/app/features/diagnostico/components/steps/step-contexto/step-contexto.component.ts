@@ -87,7 +87,21 @@ export class StepContextoComponent implements OnInit {
 
   onSubmit() {
     if (this.profileForm.valid) {
-      this.stateService.updateProfile(this.profileForm.value as CompanyProfile);
+      // Desestructuramos los valores del formulario para asegurar un objeto limpio
+      const { industry, size, iaBudgetUSD } = this.profileForm.value;
+
+      // Creamos el objeto parcial de datos con la estructura correcta
+      const profileData: CompanyProfile = {
+        industry: industry || '',
+        size: size || '1-10',
+        iaBudgetUSD: iaBudgetUSD || null
+      };
+
+      // Actualizamos el estado con el objeto correctamente formado
+      this.stateService.updateProfile(profileData);
+      
+      // Llamamos al método nextStep del servicio
+      this.stateService.nextStep();
       
       // Navegación relativa para mantener el idioma en la URL
       this.router.navigate(['ares'], { relativeTo: this.route.parent }).then(() => {
@@ -99,6 +113,9 @@ export class StepContextoComponent implements OnInit {
           console.error('❌ Error en fallback de navegación:', fallbackErr);
         });
       });
+    } else {
+      // Marcar todos los campos como tocados para mostrar errores de validación
+      this.profileForm.markAllAsTouched();
     }
   }
 }

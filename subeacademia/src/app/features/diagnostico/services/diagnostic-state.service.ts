@@ -98,6 +98,13 @@ export class DiagnosticStateService {
     this.state.update(s => ({...s, targetLevel: target }));
   }
 
+  // Método para avanzar al siguiente paso
+  nextStep() {
+    // Este método puede ser usado por los componentes para avanzar al siguiente paso
+    // La lógica de navegación se maneja en cada componente individual
+    console.log('Avanzando al siguiente paso del diagnóstico');
+  }
+
   // --- MANEJO DE PERSISTENCIA ---
   private saveStateToLocalStorage(state: DiagnosticState) {
     if (typeof localStorage !== 'undefined') {

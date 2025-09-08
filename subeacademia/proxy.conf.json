@@ -1,11 +1,8 @@
 {
-  "/api/proxy/generate": {
+  "/api": {
     "target": "https://apisube-smoky.vercel.app",
-    "secure": true,
+    "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug",
-    "pathRewrite": {
-      "^/api/proxy/generate": "/api/azure/generate"
-    }
+    "logLevel": "debug"
   }
 }
