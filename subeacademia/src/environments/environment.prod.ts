@@ -20,6 +20,8 @@ export const environment = {
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
   apiUrl: 'https://apisube-smoky.vercel.app/api/azure/generate',
+  // URL de la API de GPT para producción
+  gptApiUrl: 'https://apisube-smoky.vercel.app/api/azure/generate',
   // API Key de Google Gemini (NUNCA hardcodear en repositorio público)
   // Se espera en runtime vía window.__env.geminiApiKey o usar backendIaUrl (deshabilitado)
   // geminiApiKey: 'TU_API_KEY_AQUI',

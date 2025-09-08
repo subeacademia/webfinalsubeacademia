@@ -1,10 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { DiagnosticoFormValue } from '../../features/diagnostico/data/diagnostic.models';
 import { ARES_ITEMS } from '../../features/diagnostico/data/ares-items';
 import { COMPETENCIAS } from '../../features/diagnostico/data/competencias';
 import { ARES_FRAMEWORK_SUMMARY, COMPETENCIAS_ERA_IA_SUMMARY } from './methodology-data';
+import { environment } from '../../../environments/environment';
 
 interface VercelApiResponse {
   result: string;
@@ -15,12 +17,18 @@ interface VercelApiResponse {
 })
 export class GenerativeAiService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://apisube-smoky.vercel.app/api/azure/generate';
+  private apiUrl = environment.gptApiUrl;
 
   // 🔍 SISTEMA DE LOGGING COMPLETO
   private logPrefix = '🤖 [GenerativeAI]';
   private requestId = 0;
 
+  /**
+   * Genera un plan de acción personalizado basado en los datos del diagnóstico
+   * Utiliza la API de Vercel para procesar la información con IA
+   * @param diagnosticData - Datos completos del diagnóstico del usuario
+   * @returns Promise<string> - Plan de acción generado en formato Markdown
+   */
   async generateActionPlan(diagnosticData: DiagnosticoFormValue): Promise<string> {
     const currentRequestId = ++this.requestId;
     
@@ -76,7 +84,12 @@ export class GenerativeAiService {
       const startTime = Date.now();
       
       const response = await firstValueFrom(
-        this.http.post<VercelApiResponse>(this.apiUrl, body, { headers })
+        this.http.post<VercelApiResponse>(this.apiUrl, body, { headers }).pipe(
+          catchError(error => {
+            console.error('Error en la llamada a la API:', error);
+            return throwError(() => new Error('Error al comunicarse con el servicio de IA. Por favor, intenta nuevamente.'));
+          })
+        )
       );
       
       const endTime = Date.now();
@@ -135,6 +148,11 @@ export class GenerativeAiService {
     }
   }
 
+  /**
+   * Valida que los datos del diagnóstico contengan la información mínima requerida
+   * @param data - Datos del diagnóstico a validar
+   * @returns objeto con isValid y array de errores encontrados
+   */
   private validateDiagnosticData(data: DiagnosticoFormValue): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
@@ -172,6 +190,12 @@ export class GenerativeAiService {
     };
   }
 
+  /**
+   * Maneja errores de manera detallada y los registra para debugging
+   * @param error - Error capturado
+   * @param requestId - ID único de la petición
+   * @param diagnosticData - Datos del diagnóstico para contexto
+   */
   private handleError(error: any, requestId: number, diagnosticData: DiagnosticoFormValue): void {
     let errorType = 'Unknown';
     let errorDetails: any = {};
@@ -250,6 +274,13 @@ export class GenerativeAiService {
     });
   }
 
+  /**
+   * Genera un mensaje de fallback cuando la API de IA no está disponible
+   * Incluye análisis básico basado en los datos del diagnóstico
+   * @param diagnosticData - Datos del diagnóstico
+   * @param requestId - ID único de la petición
+   * @returns string - Mensaje de fallback en formato Markdown
+   */
   private generateFallbackMessage(diagnosticData: DiagnosticoFormValue, requestId: number): string {
     this.logInfo(`[${requestId}] Generando mensaje de fallback...`);
     
@@ -410,6 +441,12 @@ Este análisis fue generado localmente basándose en tus respuestas del diagnós
     return fallbackMessage;
   }
 
+  /**
+   * Construye un prompt detallado para la IA basado en los datos del diagnóstico
+   * Incluye análisis de ARES, competencias y contexto del usuario
+   * @param data - Datos del diagnóstico a procesar
+   * @returns string - Prompt estructurado para la API de IA
+   */
   private constructPrompt(data: DiagnosticoFormValue): string {
     this.logInfo('Construyendo prompt para la IA...', {
       hasAresData: !!data.ares?.respuestas,

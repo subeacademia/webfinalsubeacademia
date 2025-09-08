@@ -35,7 +35,7 @@ export class BesselAiService {
   private readonly http = inject(HttpClient);
   
   // Usar la API de Bessel configurada en environment
-  private readonly apiUrl = environment.azureGenerateEndpoint || 'https://apisube-smoky.vercel.app/api/azure/generate';
+  private readonly apiUrl = environment.gptApiUrl;
   
   // Configuración de la API
   private readonly defaultConfig = {
@@ -147,25 +147,17 @@ Prioriza objetivos de ${enfoque === 'general' ? 'alto impacto y rápida implemen
    */
   private procesarRespuestaObjetivos(response: any): ObjetivoGenerado[] {
     try {
-      const raw = response?.choices?.[0]?.message?.content ?? '';
-      console.log('Respuesta API Bessel:', raw);
+      // La respuesta ya viene parseada como JSON
+      console.log('Respuesta API Bessel:', response);
       
-      // Intentar extraer JSON de la respuesta
-      let parsedObjectives: any[] = [];
-      
-      try {
-        // Buscar arrays JSON en la respuesta
-        const jsonMatch = raw.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          parsedObjectives = JSON.parse(jsonMatch[0]);
-        }
-      } catch (parseError) {
-        console.warn('Error parseando JSON de Bessel:', parseError);
+      // Verificar que la respuesta tenga la estructura esperada
+      if (!response || !Array.isArray(response)) {
+        console.warn('Respuesta de Bessel no es un array válido:', response);
         return [];
       }
 
       // Validar y limpiar objetivos
-      return this.validarYLimpiarObjetivos(parsedObjectives);
+      return this.validarYLimpiarObjetivos(response);
       
     } catch (error) {
       console.error('Error procesando respuesta de Bessel:', error);
@@ -272,6 +264,62 @@ Prioriza objetivos de ${enfoque === 'general' ? 'alto impacto y rápida implemen
         impacto: 'Identificación de nuevas oportunidades de negocio y diferenciación competitiva'
       }
     ];
+  }
+
+  /**
+   * Genera un reporte completo usando la API de Bessel
+   */
+  generateReport(diagnosticData: any): Observable<string> {
+    const payload = {
+      messages: [
+        {
+          role: 'system',
+          content: 'Eres un asesor experto en transformación digital con IA. Genera reportes detallados y accionables en formato JSON válido.'
+        },
+        {
+          role: 'user',
+          content: `Genera un reporte completo basado en los siguientes datos de diagnóstico: ${JSON.stringify(diagnosticData)}`
+        }
+      ],
+      maxTokens: this.defaultConfig.maxTokens,
+      temperature: this.defaultConfig.temperature
+    };
+
+    return this.http.post<any>(this.apiUrl, payload, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).pipe(
+      timeout(this.defaultConfig.timeout),
+      retry(this.defaultConfig.retryAttempts),
+      map(response => this.procesarRespuestaReporte(response)),
+      catchError(error => {
+        console.error('API Error:', error);
+        return throwError(() => new Error('Error al generar el reporte desde la API'));
+      })
+    );
+  }
+
+  /**
+   * Procesa la respuesta del reporte de la API
+   */
+  private procesarRespuestaReporte(response: any): string {
+    try {
+      // La respuesta ya viene parseada como JSON
+      console.log('Respuesta API Bessel para reporte:', response);
+      
+      // Verificar que la respuesta tenga la estructura esperada
+      if (!response || typeof response !== 'object') {
+        console.warn('Respuesta de Bessel no es un objeto válido:', response);
+        return 'Error al procesar la respuesta de la API';
+      }
+
+      // Extraer el contenido del reporte
+      const reporte = response.result || response.content || response.message || JSON.stringify(response);
+      return typeof reporte === 'string' ? reporte : JSON.stringify(reporte);
+      
+    } catch (error) {
+      console.error('Error procesando respuesta de reporte de Bessel:', error);
+      return 'Error al procesar la respuesta de la API';
+    }
   }
 
   /**

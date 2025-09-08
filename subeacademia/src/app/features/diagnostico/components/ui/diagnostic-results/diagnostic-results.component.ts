@@ -5,7 +5,7 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
 import { ScoringService } from '../../../services/scoring.service';
 import { ApiService } from '../../../services/api.service';
 import { PdfService } from '../../../services/pdf.service';
-import { AresScores, CompScores, ActionItem, Question, ActionPlanApiResponse } from '../../../data/diagnostic.models';
+import { AresScores, CompScores, Question, ActionPlanApiResponse } from '../../../data/diagnostic.models';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 

@@ -1,91 +1,30 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.admin == true ||
-        request.auth.token.email in ["bruno@subeia.tech"] ||
-        request.auth.token.email.matches(".*@subeia\\.tech$")
-      );
-    }
 
-    // Público (lectura) de posts/courses publicados
-    match /posts/{id} {
-      allow read: if (resource.data.status == 'published') || (resource.data.published == true);
-      allow create, update, delete: if isAdmin();
-    }
-    match /courses/{id} {
-      allow read: if (resource.data.status == 'published') || (resource.data.published == true);
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Media metadata en colección media/
-    match /media/{id} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Logos de clientes (empresas e instituciones)
-    match /logos/{id} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Socios colaboradores
-    match /collaborators/{id} {
-      allow read: if true; // visibles públicamente y desde el admin
-      allow create, update, delete: if isAdmin(); // gestión solo para admins
-    }
-
-    // Historia (hitos)
-    match /history/{id} {
-      allow read: if true; // visible públicamente
-      allow create, update, delete: if isAdmin(); // solo administradores pueden modificar
-    }
-
-    // Settings del sitio
-    match /settings/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Contenido público del sitio (home page)
-    match /site_content/{doc} {
-      allow read: if true; // Legacy
-      allow write: if isAdmin();
-    }
-
-    // Configuración del sitio por idioma (textos de home)
-    match /configuracion_sitio/{doc} {
-      allow read: if true; // Home debe leer sin autenticación
-      allow write: if isAdmin(); // Solo administradores pueden modificar
-    }
-
-    // Frases del typewriter (públicas para lectura, solo admin para escritura)
-    match /typewriter_phrases/{id} {
-      allow read: if true; // Home debe leer sin autenticación
-      allow create, update, delete: if isAdmin(); // Solo admin puede escribir
-    }
-
-    // NUEVO: Reglas para usuarios autenticados
-    // Los usuarios pueden leer y escribir únicamente en su propio subdirectorio
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Diagnósticos (envíos del test gratuito)
-    // - Cualquier usuario puede crear (incluso no autenticado)
-    // - Lectura/actualización/eliminación solo para administradores
-    match /diagnostics/{id} {
+    // Regla para la colección de diagnósticos
+    // Cualquiera puede crear un diagnóstico (captura de lead).
+    // Solo los administradores autenticados pueden leer, actualizar o borrar.
+    match /diagnostics/{docId} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, update, delete: if request.auth.token.admin == true;
     }
 
-    // NUEVO: Colección de leads del diagnóstico
-    // Cualquier usuario puede crear leads, solo admins pueden leer/actualizar/eliminar
-    match /leads/{id} {
-      allow create: if true; // Usuarios pueden crear leads
-      allow read, update, delete: if isAdmin(); // Solo admins pueden ver y gestionar leads
+    // Reglas para la colección de leads
+    // Cualquiera puede crear un lead
+    // Solo los administradores pueden leer o interactuar con los datos.
+    match /leads/{docId} {
+        allow create: if true;
+        allow read, update, delete: if request.auth.token.admin == true;
+    }
+
+    // Regla general para el resto de las colecciones
+    // Cualquiera puede leer (get, list).
+    // Solo los administradores autenticados pueden escribir (create, update, delete).
+    match /{document=**} {
+      allow get, list: if true;
+      allow write: if request.auth.token.admin == true;
     }
   }
 }

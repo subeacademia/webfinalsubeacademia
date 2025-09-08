@@ -13,19 +13,6 @@ export class ApiService {
   // Usar el proxy local para evitar problemas de CORS
   private apiUrl = '/api/proxy/generate';
 
-  private extractJsonFromString(text: string): any {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        return JSON.parse(jsonMatch[0]);
-      } catch (e) {
-        console.error("Fallo al parsear el JSON extraído de la respuesta:", text);
-        throw new Error("La respuesta de la IA no es un JSON válido.");
-      }
-    }
-    console.error("No se encontró JSON en la respuesta:", text);
-    throw new Error("No se encontró un objeto JSON en la respuesta de la IA.");
-  }
 
   async generateObjectives(
     currentState: DiagnosticState,
@@ -74,22 +61,19 @@ Basado en toda esta información, genera entre 6 y 8 objetivos SMART en el forma
     };
     
     try {
-      const response = await firstValueFrom(this.http.post<any>(this.apiUrl, payload, { 
+      const response = await firstValueFrom(this.http.post<ObjectivesApiResponse>(this.apiUrl, payload, { 
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         }
       }));
       
-      // Extraer el contenido de la respuesta de OpenAI
-      const content = response.choices?.[0]?.message?.content;
-      if (!content) {
+      // La respuesta ya viene parseada como JSON
+      if (!response) {
         throw new Error('La respuesta de la IA no contiene contenido válido');
       }
       
-      // Parsear el JSON de la respuesta
-      const parsedResponse = JSON.parse(content);
-      return parsedResponse as ObjectivesApiResponse;
+      return response;
       
     } catch (error) {
         if (error instanceof HttpErrorResponse) {
@@ -143,22 +127,19 @@ Genera el plan de acción en JSON.
       };
       
       try {
-        const response = await firstValueFrom(this.http.post<any>(this.apiUrl, payload, { 
+        const response = await firstValueFrom(this.http.post<ActionPlanApiResponse>(this.apiUrl, payload, { 
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
         }));
         
-        // Extraer el contenido de la respuesta de OpenAI
-        const content = response.choices?.[0]?.message?.content;
-        if (!content) {
+        // La respuesta ya viene parseada como JSON
+        if (!response) {
           throw new Error('La respuesta de la IA no contiene contenido válido');
         }
         
-        // Parsear el JSON de la respuesta
-        const parsedResponse = JSON.parse(content);
-        return parsedResponse as ActionPlanApiResponse;
+        return response;
         
       } catch (error) {
         if (error instanceof HttpErrorResponse) {

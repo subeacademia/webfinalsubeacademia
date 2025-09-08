@@ -1,5 +1,7 @@
-import { Injectable, signal, effect, computed } from '@angular/core';
+import { Injectable, signal, effect, computed, inject } from '@angular/core';
 import { CompanyProfile, Answer, RiskLevel, SmartGoal, UserLead } from '../data/diagnostic.models';
+import { ToastService } from '../../../core/ui/toast/toast.service';
+import { BesselAiService } from '../../../core/ai/bessel-ai.service';
 
 const DIAGNOSTIC_STATE_KEY = 'inProgressDiagnosticState';
 
@@ -19,6 +21,9 @@ export interface DiagnosticState {
   providedIn: 'root',
 })
 export class DiagnosticStateService {
+  private toastService = inject(ToastService);
+  private besselAiService = inject(BesselAiService);
+  
   private initialState: DiagnosticState = {
     user: { name: '', email: ''},
     profile: { industry: '', size: '1-10', iaBudgetUSD: null },
@@ -31,6 +36,7 @@ export class DiagnosticStateService {
   };
 
   state = signal<DiagnosticState>(this.loadStateFromLocalStorage());
+  isLoading = signal<boolean>(false);
 
   // --- SELECTORS ---
   profile = computed(() => this.state().profile);
@@ -147,5 +153,37 @@ export class DiagnosticStateService {
     const criticalQuestions = questions.filter(q => q.critical);
     if(criticalQuestions.length === 0) return true;
     return criticalQuestions.every(q => answers[q.id]?.value != null);
+  }
+
+  /**
+   * Genera y guarda un reporte usando la API de IA
+   */
+  generateAndSaveReport(): void {
+    this.isLoading.set(true);
+    
+    const diagnosticData = this.getDiagnosticData();
+    
+    this.besselAiService.generateReport(diagnosticData).subscribe({
+      next: (report) => {
+        console.log('Reporte generado exitosamente:', report);
+        
+        // Aquí puedes procesar y guardar el reporte
+        // Por ejemplo, actualizar el estado con el reporte generado
+        this.state.update(s => ({ 
+          ...s, 
+          diagnosticId: `report-${Date.now()}` // Simular ID de reporte
+        }));
+        
+        this.isLoading.set(false);
+        
+        // Mostrar notificación de éxito
+        this.toastService.show('success', 'Diagnóstico generado exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al generar el reporte en DiagnosticStateService:', error);
+        this.isLoading.set(false);
+        this.toastService.show('error', 'No pudimos generar tu diagnóstico. Por favor, revisa tu conexión e intenta de nuevo.');
+      }
+    });
   }
 }
