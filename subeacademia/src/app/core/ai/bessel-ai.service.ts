@@ -1,343 +1,98 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, timeout, retry, map } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { Report } from '../../features/diagnostico/data/report.model';
 
-export interface ObjetivoGenerado {
-  id: string;
-  texto: string;
-  categoria: string;
-  prioridad: 'alta' | 'media' | 'baja';
-  tiempoEstimado: string;
-  impacto: string;
+// Interfaz para los datos del diagnóstico
+export interface DiagnosticData {
+  profile: any;
+  aresAnswers: any;
+  compAnswers: any;
+  riskLevel: any;
+  lambdaComp: number;
+  targetLevel: number;
+  selectedGoals: any[];
 }
 
-export interface ContextoCliente {
-  industria: string;
-  tamano: string;
-  presupuesto: string;
-  segmento: string;
-  descripcionUsuario: string;
-  aresDebilidades: string[];
-  aresFortalezas: string[];
-  competenciasBajas: string[];
-}
-
-export interface GeneracionObjetivosRequest {
-  contexto: ContextoCliente;
-  maxObjetivos?: number;
-  enfoque?: 'procesos' | 'capacitacion' | 'analitica' | 'cx' | 'gobernanza' | 'innovacion' | 'general';
-}
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class BesselAiService {
-  private readonly http = inject(HttpClient);
-  
-  // Usar la API de Bessel configurada en environment
-  private readonly apiUrl = environment.gptApiUrl;
-  
-  // Configuración de la API
-  private readonly defaultConfig = {
-    maxTokens: 1000,
-    temperature: 0.7,
-    timeout: 30000, // 30 segundos
-    retryAttempts: 2
-  };
+  private http = inject(HttpClient);
+  private apiUrl = environment.gptApiUrl;
 
-  /**
-   * Genera objetivos personalizados usando la API de Bessel
-   */
-  generarObjetivos(request: GeneracionObjetivosRequest): Observable<ObjetivoGenerado[]> {
-    const prompt = this.construirPromptInteligente(request);
-    
+  async generateReport(data: DiagnosticData, contextoAdicional: any): Promise<Report> {
+    console.log('Iniciando la generación de reporte con datos:', data);
+    console.log('Contexto adicional (cursos):', contextoAdicional);
+
+    const systemPrompt = `
+      Eres un coach ejecutivo y analista de talento para "Sube Academia". Tu tarea es generar un informe de diagnóstico profesional y personalizado.
+      Recibirás dos bloques de información del usuario:
+      1.  Los datos del diagnóstico del usuario (objetivos, autoevaluación, etc.).
+      2.  Un JSON con el catálogo de cursos y servicios que ofrece "Sube Academia".
+
+      Tu respuesta DEBE SER ÚNICA Y EXCLUSIVAMENTE UN OBJETO JSON VÁLIDO, sin texto adicional, que coincida con esta interfaz de TypeScript:
+      
+      interface Report {
+        titulo: string;
+        resumen: string;
+        analisisCompetencias: Array<{ competencia: string; puntaje: number; descripcion: string; sugerencia: string; }>;
+        identificacionBrechas: string;
+        planDeAccion: Array<{ area: string; acciones: Array<{ accion: string; descripcion: string; recursos: string[]; }>; }>;
+        recomendacionesGenerales: string;
+        alineacionObjetivos: string; // Explica cómo el plan de acción ayuda a lograr el objetivo principal del usuario.
+      }
+
+      INSTRUCCIONES CLAVE:
+      - En el 'planDeAccion', donde sea apropiado, recomienda explícitamente cursos o servicios del catálogo proporcionado. Menciona el nombre del curso.
+      - En el campo 'alineacionObjetivos', analiza el 'objetivo' del usuario (del JSON de diagnóstico) y redacta un párrafo explicando cómo el plan de acción que creaste le ayudará a alcanzarlo.
+      - Sé profesional, alentador y orienta la acción.
+      - NO INCLUYAS NINGÚN TEXTO ANTES O DESPUÉS DEL OBJETO JSON. La respuesta debe empezar con '{' y terminar con '}'.
+    `;
+
+    const userPrompt = `
+      Aquí están mis datos del diagnóstico:
+      ${JSON.stringify(data, null, 2)}
+
+      Y aquí está el catálogo de cursos y servicios disponibles en Sube Academia para que los uses en tus recomendaciones:
+      ${JSON.stringify(contextoAdicional, null, 2)}
+    `;
+
     const payload = {
       messages: [
-        {
-          role: 'system',
-          content: 'Eres un asesor experto en transformación digital con IA. Genera objetivos SMART, accionables y específicos en formato JSON válido.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens: request.maxObjetivos ? Math.min(request.maxObjetivos * 150, this.defaultConfig.maxTokens) : this.defaultConfig.maxTokens,
-      temperature: this.defaultConfig.temperature
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
     };
 
-    return this.http.post<any>(this.apiUrl, payload, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    }).pipe(
-      timeout(this.defaultConfig.timeout),
-      retry(this.defaultConfig.retryAttempts),
-      map(response => this.procesarRespuestaObjetivos(response)),
-      catchError(error => this.manejarError(error))
-    );
-  }
+    console.log('Enviando payload a la API:', JSON.stringify(payload));
 
-  /**
-   * Construye un prompt inteligente basado en el contexto del cliente
-   */
-  private construirPromptInteligente(request: GeneracionObjetivosRequest): string {
-    const { contexto, maxObjetivos = 6, enfoque = 'general' } = request;
-    
-    let prompt = `Eres un asesor experto en transformación digital con IA. 
-Genera entre ${Math.max(4, maxObjetivos)} y ${Math.min(8, maxObjetivos + 2)} objetivos SMART, accionables y específicos, alineados al contexto y carencias detectadas.
-
-Devuelve SOLO una lista JSON con este formato exacto:
-[
-  {
-    "id": "obj-1",
-    "texto": "Descripción del objetivo específico y medible",
-    "categoria": "Categoría (Procesos/Capacitación/Analítica/CX/Gobernanza/Innovación)",
-    "prioridad": "alta|media|baja",
-    "tiempoEstimado": "X-Y meses",
-    "impacto": "Descripción cuantificable del impacto esperado"
-  }
-]
-
-Contexto del cliente:
-- Industria: ${contexto.industria}
-- Tamaño: ${contexto.tamano}
-- Presupuesto: ${contexto.presupuesto}
-- Segmento: ${contexto.segmento}
-- Descripción del usuario: "${contexto.descripcionUsuario}"
-
-Hallazgos del diagnóstico:
-- Áreas más débiles (ARES): ${contexto.aresDebilidades.join(', ') || 'No disponible'}
-- Áreas más fuertes (ARES): ${contexto.aresFortalezas.join(', ') || 'No disponible'}
-- Competencias más bajas: ${contexto.competenciasBajas.join(', ') || 'No disponible'}
-
-Enfoque solicitado: ${this.obtenerDescripcionEnfoque(enfoque)}
-
-Genera objetivos que:
-1. Sean específicos, medibles, alcanzables, relevantes y con tiempo definido (SMART)
-2. Consideren el presupuesto y tamaño de la empresa
-3. Aborden las debilidades detectadas en el diagnóstico
-4. Aprovechen las fortalezas existentes
-5. Sean realizables en el contexto actual
-6. Tengan impacto medible y cuantificable
-7. Se alineen con el enfoque solicitado
-
-Prioriza objetivos de ${enfoque === 'general' ? 'alto impacto y rápida implementación' : 'la categoría solicitada'} según el contexto del cliente.`;
-
-    return prompt;
-  }
-
-  /**
-   * Obtiene la descripción del enfoque solicitado
-   */
-  private obtenerDescripcionEnfoque(enfoque: string): string {
-    const enfoques: Record<string, string> = {
-      'procesos': 'Optimización y automatización de procesos internos',
-      'capacitacion': 'Desarrollo de competencias del equipo en IA',
-      'analitica': 'Implementación de analítica avanzada y BI',
-      'cx': 'Mejora de la experiencia del cliente con IA',
-      'gobernanza': 'Gobernanza de datos y ética en IA',
-      'innovacion': 'Innovación y desarrollo de nuevos productos/servicios',
-      'general': 'Transformación digital integral con IA'
-    };
-    
-    return enfoques[enfoque] || enfoques['general'];
-  }
-
-  /**
-   * Procesa la respuesta de la API y la convierte en objetivos estructurados
-   */
-  private procesarRespuestaObjetivos(response: any): ObjetivoGenerado[] {
     try {
-      // La respuesta ya viene parseada como JSON
-      console.log('Respuesta API Bessel:', response);
-      
-      // Verificar que la respuesta tenga la estructura esperada
-      if (!response || !Array.isArray(response)) {
-        console.warn('Respuesta de Bessel no es un array válido:', response);
-        return [];
-      }
+      const response = await firstValueFrom(this.http.post<any>(this.apiUrl, payload));
+      console.log('Respuesta cruda de la API:', response);
 
-      // Validar y limpiar objetivos
-      return this.validarYLimpiarObjetivos(response);
+      let responseText = '';
+      if (response?.choices?.[0]?.message?.content) {
+        responseText = response.choices[0].message.content;
+      } else {
+        throw new Error('La respuesta de la API no tiene el formato esperado.');
+      }
       
+      console.log('Texto extraído:', responseText);
+
+      try {
+        const cleanedText = responseText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        const report: Report = JSON.parse(cleanedText);
+        console.log('Reporte parseado con éxito:', report);
+        return report;
+      } catch (parseError) {
+        console.error('Error fatal al parsear JSON:', parseError, 'Texto recibido:', responseText);
+        throw new Error('La respuesta de la IA no es un objeto JSON válido.');
+      }
     } catch (error) {
-      console.error('Error procesando respuesta de Bessel:', error);
-      return [];
+      console.error('Error en la llamada a la API de Bessel:', error);
+      throw error;
     }
-  }
-
-  /**
-   * Valida y limpia los objetivos generados
-   */
-  private validarYLimpiarObjetivos(objectives: any[]): ObjetivoGenerado[] {
-    const valid: ObjetivoGenerado[] = [];
-    
-    for (const obj of objectives) {
-      if (obj && typeof obj === 'object' && obj.texto && obj.categoria) {
-        valid.push({
-          id: obj.id || `bessel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          texto: obj.texto.trim(),
-          categoria: obj.categoria || 'General',
-          prioridad: ['alta', 'media', 'baja'].includes(obj.prioridad) ? obj.prioridad : 'media',
-          tiempoEstimado: obj.tiempoEstimado || '3-6 meses',
-          impacto: obj.impacto || 'Mejora en eficiencia y resultados'
-        });
-      }
-    }
-    
-    return valid.slice(0, 8); // Máximo 8 objetivos
-  }
-
-  /**
-   * Maneja errores de la API
-   */
-  private manejarError(error: any): Observable<ObjetivoGenerado[]> {
-    console.error('Error en API de Bessel:', error);
-    
-    let errorMessage = 'Error desconocido en la generación de objetivos';
-    
-    if (error.status === 0) {
-      errorMessage = 'No se pudo conectar con el servicio de IA. Verifica tu conexión a internet.';
-    } else if (error.status === 429) {
-      errorMessage = 'Demasiadas solicitudes. Intenta nuevamente en unos minutos.';
-    } else if (error.status >= 500) {
-      errorMessage = 'Error interno del servicio de IA. Intenta nuevamente más tarde.';
-    } else if (error.status >= 400) {
-      errorMessage = 'Error en la solicitud. Verifica que la información sea válida.';
-    }
-    
-    // Retornar objetivos de fallback en lugar de array vacío
-    console.log('🔄 Usando objetivos de fallback debido a error en API');
-    return of(this.generarObjetivosFallback());
-  }
-
-  /**
-   * Genera objetivos de fallback cuando la API no está disponible
-   */
-  private generarObjetivosFallback(): ObjetivoGenerado[] {
-    return [
-      {
-        id: 'fallback-1',
-        texto: 'Implementar herramientas básicas de automatización para optimizar procesos operativos',
-        categoria: 'Procesos',
-        prioridad: 'alta',
-        tiempoEstimado: '2-3 meses',
-        impacto: 'Mejora del 20% en eficiencia operativa y reducción de errores manuales'
-      },
-      {
-        id: 'fallback-2',
-        texto: 'Capacitar al equipo en competencias digitales fundamentales y herramientas de IA',
-        categoria: 'Capacitación',
-        prioridad: 'alta',
-        tiempoEstimado: '1-2 meses',
-        impacto: 'Mejora del 30% en competencias digitales del equipo y mayor adopción tecnológica'
-      },
-      {
-        id: 'fallback-3',
-        texto: 'Establecer un sistema básico de análisis de datos para mejorar la toma de decisiones',
-        categoria: 'Analítica',
-        prioridad: 'media',
-        tiempoEstimado: '3-4 meses',
-        impacto: 'Mejora del 25% en precisión de decisiones y optimización de recursos'
-      },
-      {
-        id: 'fallback-4',
-        texto: 'Mejorar la experiencia del cliente mediante canales digitales y atención automatizada',
-        categoria: 'CX',
-        prioridad: 'media',
-        tiempoEstimado: '2-3 meses',
-        impacto: 'Aumento del 20% en satisfacción del cliente y reducción del 30% en tiempo de respuesta'
-      },
-      {
-        id: 'fallback-5',
-        texto: 'Implementar políticas básicas de seguridad de datos y privacidad',
-        categoria: 'Gobernanza',
-        prioridad: 'alta',
-        tiempoEstimado: '1-2 meses',
-        impacto: 'Cumplimiento normativo básico y reducción del 40% en riesgos de seguridad'
-      },
-      {
-        id: 'fallback-6',
-        texto: 'Explorar oportunidades de innovación con tecnologías emergentes',
-        categoria: 'Innovación',
-        prioridad: 'baja',
-        tiempoEstimado: '4-6 meses',
-        impacto: 'Identificación de nuevas oportunidades de negocio y diferenciación competitiva'
-      }
-    ];
-  }
-
-  /**
-   * Genera un reporte completo usando la API de Bessel
-   */
-  generateReport(diagnosticData: any): Observable<string> {
-    const payload = {
-      messages: [
-        {
-          role: 'system',
-          content: 'Eres un asesor experto en transformación digital con IA. Genera reportes detallados y accionables en formato JSON válido.'
-        },
-        {
-          role: 'user',
-          content: `Genera un reporte completo basado en los siguientes datos de diagnóstico: ${JSON.stringify(diagnosticData)}`
-        }
-      ],
-      maxTokens: this.defaultConfig.maxTokens,
-      temperature: this.defaultConfig.temperature
-    };
-
-    return this.http.post<any>(this.apiUrl, payload, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    }).pipe(
-      timeout(this.defaultConfig.timeout),
-      retry(this.defaultConfig.retryAttempts),
-      map(response => this.procesarRespuestaReporte(response)),
-      catchError(error => {
-        console.error('API Error:', error);
-        return throwError(() => new Error('Error al generar el reporte desde la API'));
-      })
-    );
-  }
-
-  /**
-   * Procesa la respuesta del reporte de la API
-   */
-  private procesarRespuestaReporte(response: any): string {
-    try {
-      // La respuesta ya viene parseada como JSON
-      console.log('Respuesta API Bessel para reporte:', response);
-      
-      // Verificar que la respuesta tenga la estructura esperada
-      if (!response || typeof response !== 'object') {
-        console.warn('Respuesta de Bessel no es un objeto válido:', response);
-        return 'Error al procesar la respuesta de la API';
-      }
-
-      // Extraer el contenido del reporte
-      const reporte = response.result || response.content || response.message || JSON.stringify(response);
-      return typeof reporte === 'string' ? reporte : JSON.stringify(reporte);
-      
-    } catch (error) {
-      console.error('Error procesando respuesta de reporte de Bessel:', error);
-      return 'Error al procesar la respuesta de la API';
-    }
-  }
-
-  /**
-   * Verifica el estado de salud de la API
-   */
-  verificarSaludApi(): Observable<boolean> {
-    const testPayload = {
-      messages: [{ role: 'system', content: 'Test connection' }],
-      maxTokens: 10,
-      temperature: 0.1
-    };
-
-    return this.http.post<any>(this.apiUrl, testPayload, {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    }).pipe(
-      timeout(10000),
-      map(() => true),
-      catchError(() => of(false))
-    );
   }
 }

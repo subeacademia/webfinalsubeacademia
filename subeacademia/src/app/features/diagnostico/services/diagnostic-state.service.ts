@@ -1,7 +1,10 @@
 import { Injectable, signal, effect, computed, inject } from '@angular/core';
 import { CompanyProfile, Answer, RiskLevel, SmartGoal, UserLead } from '../data/diagnostic.models';
 import { ToastService } from '../../../core/ui/toast/toast.service';
-import { BesselAiService } from '../../../core/ai/bessel-ai.service';
+import { BesselAiService, DiagnosticData } from '../../../core/ai/bessel-ai.service';
+import { CursosService } from '../../productos/services/cursos.service';
+import { firstValueFrom } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 const DIAGNOSTIC_STATE_KEY = 'inProgressDiagnosticState';
 
@@ -23,6 +26,7 @@ export interface DiagnosticState {
 export class DiagnosticStateService {
   private toastService = inject(ToastService);
   private besselAiService = inject(BesselAiService);
+  private cursosService = inject(CursosService);
   
   private initialState: DiagnosticState = {
     user: { name: '', email: ''},
@@ -156,34 +160,36 @@ export class DiagnosticStateService {
   }
 
   /**
-   * Genera y guarda un reporte usando la API de IA
+   * Genera y guarda un reporte usando la API de IA con contexto de cursos
    */
-  generateAndSaveReport(): void {
+  async generateAndSaveReport(): Promise<void> {
     this.isLoading.set(true);
     
     const diagnosticData = this.getDiagnosticData();
     
-    this.besselAiService.generateReport(diagnosticData).subscribe({
-      next: (report) => {
-        console.log('Reporte generado exitosamente:', report);
-        
-        // Aquí puedes procesar y guardar el reporte
-        // Por ejemplo, actualizar el estado con el reporte generado
-        this.state.update(s => ({ 
-          ...s, 
-          diagnosticId: `report-${Date.now()}` // Simular ID de reporte
-        }));
-        
-        this.isLoading.set(false);
-        
-        // Mostrar notificación de éxito
-        this.toastService.show('success', 'Diagnóstico generado exitosamente');
-      },
-      error: (error) => {
-        console.error('Error al generar el reporte en DiagnosticStateService:', error);
-        this.isLoading.set(false);
-        this.toastService.show('error', 'No pudimos generar tu diagnóstico. Por favor, revisa tu conexión e intenta de nuevo.');
-      }
-    });
+    try {
+      // 1. Obtener el catálogo de cursos de Firebase
+      const cursos = await firstValueFrom(this.cursosService.getCursos().pipe(take(1)));
+      console.log('Cursos obtenidos para contexto:', cursos);
+      
+      // 2. Llamar al servicio de IA con los datos del diagnóstico Y el contexto de los cursos
+      const report = await this.besselAiService.generateReport(diagnosticData, cursos);
+      console.log('Reporte generado exitosamente:', report);
+      
+      // 3. Actualizar el estado con el reporte generado
+      this.state.update(s => ({ 
+        ...s, 
+        diagnosticId: `report-${Date.now()}` // Simular ID de reporte
+      }));
+      
+      // 4. Mostrar notificación de éxito
+      this.toastService.show('success', 'Diagnóstico generado exitosamente');
+      
+    } catch (error: any) {
+      console.error('Error al generar el reporte en DiagnosticStateService:', error);
+      this.toastService.show('error', `No pudimos generar tu diagnóstico: ${error.message || 'Error desconocido'}`);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 }
