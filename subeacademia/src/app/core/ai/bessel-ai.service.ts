@@ -58,7 +58,7 @@ export class BesselAiService {
       Y aquí está el catálogo de cursos y servicios disponibles en Sube Academia para que los uses en tus recomendaciones:
       ${JSON.stringify(contextoAdicional, null, 2)}
     `;
-
+    
     const payload = {
       messages: [
         { role: 'system', content: systemPrompt },
@@ -92,6 +92,60 @@ export class BesselAiService {
       }
     } catch (error) {
       console.error('Error en la llamada a la API de Bessel:', error);
+      throw error;
+    }
+  }
+
+  async generarSugerenciasDeObjetivos(rol: string, industria: string): Promise<string[]> {
+    console.log(`Generando sugerencias para rol: ${rol}, industria: ${industria}`);
+
+    const systemPrompt = `
+      Eres un experto en desarrollo profesional y coaching de carrera. 
+      Tu única tarea es generar 3 sugerencias de objetivos SMART (específicos, medibles, alcanzables, relevantes, con plazos) para una persona con un rol y en una industria específicos.
+      LA RESPUESTA DEBE SER ÚNICA Y EXCLUSIVAMENTE UN ARRAY DE STRINGS EN FORMATO JSON VÁLIDO.
+      Ejemplo de respuesta esperada: 
+      ["Desarrollar un proyecto de análisis de datos para optimizar un 15% los costos de logística en los próximos 6 meses.", "Completar la certificación avanzada en marketing digital para liderar la nueva campaña de producto en el Q4.", "Mejorar mis habilidades de liderazgo de equipos mediante un curso y la mentoría de un nuevo miembro del equipo este semestre."]
+
+      NO INCLUYAS NINGÚN TEXTO INTRODUCTORIO, EXPLICACIÓN, O CARACTERES ADICIONALES ANTES O DESPUÉS DEL ARRAY JSON.
+      La respuesta debe empezar con '[' y terminar con ']'.
+    `;
+
+    const userPrompt = `Rol: '${rol}', Industria: '${industria}'`;
+
+    const payload = {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+
+    console.log('Enviando payload para sugerencias:', JSON.stringify(payload));
+
+    try {
+      const response = await firstValueFrom(this.http.post<any>(this.apiUrl, payload));
+      console.log('Respuesta cruda de la API para sugerencias:', response);
+
+      let responseText = '';
+      if (response?.choices?.[0]?.message?.content) {
+        responseText = response.choices[0].message.content;
+      } else {
+        throw new Error('La respuesta de la API para sugerencias no tiene el formato esperado.');
+      }
+      
+      console.log('Texto de sugerencias extraído:', responseText);
+
+      try {
+        const cleanedText = responseText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        const sugerencias: string[] = JSON.parse(cleanedText);
+        console.log('Sugerencias parseadas con éxito:', sugerencias);
+        if (!Array.isArray(sugerencias)) throw new Error('La respuesta no es un array.');
+        return sugerencias;
+      } catch (parseError) {
+        console.error('Error fatal al parsear JSON de sugerencias:', parseError, 'Texto recibido:', responseText);
+        throw new Error('La respuesta de la IA no es un array JSON válido.');
+      }
+    } catch (error) {
+      console.error('Error en la llamada a la API para generar sugerencias:', error);
       throw error;
     }
   }

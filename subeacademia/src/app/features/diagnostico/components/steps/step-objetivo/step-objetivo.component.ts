@@ -6,7 +6,7 @@ import { forkJoin } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { ApiService } from '../../../services/api.service';
+import { BesselAiService } from '../../../../../core/ai/bessel-ai.service';
 import { ScoringService } from '../../../services/scoring.service';
 import { SmartGoal, Question, ObjectivesApiResponse } from '../../../data/diagnostic.models';
 
@@ -22,7 +22,7 @@ export class StepObjetivoComponent implements OnInit {
   private router = inject(Router);
   private http = inject(HttpClient);
   public stateService = inject(DiagnosticStateService);
-  private apiService = inject(ApiService);
+  private besselAiService = inject(BesselAiService);
   private scoringService = inject(ScoringService);
 
   userPrompt = signal('');
@@ -64,13 +64,28 @@ export class StepObjetivoComponent implements OnInit {
     this.errorMessage.set(null);
     
     try {
-      const aresScores = this.scoringService.computeAresScores(this.aresQuestions, this.stateService.aresAnswers());
-      const compScores = this.scoringService.computeCompScores(this.compQuestions, this.stateService.compAnswers());
-
-      const response: ObjectivesApiResponse = await this.apiService.generateObjectives(this.stateService.state(), this.userPrompt(), aresScores, compScores);
+      // Obtener el perfil de la empresa para contexto
+      const profile = this.stateService.profile();
+      const industry = profile.industry || 'General';
       
-      this.generatedGoals.set(response.options || []);
-      if (!response.options || response.options.length === 0) {
+      // Usar el nuevo método del BesselAiService para generar sugerencias
+      const suggestions = await this.besselAiService.generarSugerenciasDeObjetivos(this.userPrompt(), industry);
+      
+      // Convertir las sugerencias en SmartGoals
+      const goals: SmartGoal[] = suggestions.map((suggestion, index) => ({
+        id: `goal-${Date.now()}-${index}`,
+        title: suggestion,
+        smart: {
+          specific: suggestion,
+          measurable: 'A definir según el objetivo específico',
+          achievable: 'Basado en recursos y capacidades actuales',
+          relevant: `Alineado con el objetivo de ${this.userPrompt()}`,
+          timeBound: 'A definir según la complejidad del objetivo'
+        }
+      }));
+      
+      this.generatedGoals.set(goals);
+      if (goals.length === 0) {
           this.errorMessage.set("La IA no devolvió objetivos. Intenta ser más específico en tu descripción.");
       }
 
