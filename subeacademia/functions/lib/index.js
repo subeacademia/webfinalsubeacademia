@@ -81,94 +81,97 @@ async function generarObjetivosPersonalizados(messages) {
 }
 // Función para analizar contexto y generar objetivos
 function analizarContextoYGenerarObjetivos(context) {
-    const objetivos = [];
     // Objetivos base que se adaptan según el contexto
     const objetivosBase = [
         {
-            id: "obj-1",
-            texto: "Implementar un sistema de automatización de procesos clave para mejorar la eficiencia operativa en un 25%",
-            categoria: "Procesos",
-            prioridad: "alta",
-            tiempoEstimado: "3-4 meses",
-            impacto: "Reducción del 25% en tiempo de procesos manuales y mejora en la precisión de tareas repetitivas"
+            id: "goal1",
+            title: "Implementar un sistema de automatización de procesos clave para mejorar la eficiencia operativa en un 25%",
+            smart: {
+                specific: "Automatizar al menos 5 procesos manuales críticos identificados en el diagnóstico",
+                measurable: "Reducir tiempo de procesamiento en 25% y errores en 40%",
+                achievable: "Con el presupuesto y recursos disponibles, implementable en 3-4 meses",
+                relevant: "Alineado con la mejora de eficiencia operativa y reducción de costos",
+                timeBound: "Completar implementación en 4 meses máximo"
+            }
         },
         {
-            id: "obj-2",
-            texto: "Desarrollar un programa de capacitación en IA para el equipo, enfocado en herramientas específicas del sector",
-            categoria: "Capacitación",
-            prioridad: "alta",
-            tiempoEstimado: "2-3 meses",
-            impacto: "Mejora del 40% en competencias digitales del equipo y mayor adopción de tecnologías emergentes"
+            id: "goal2",
+            title: "Desarrollar un programa de capacitación en IA para el equipo, enfocado en herramientas específicas del sector",
+            smart: {
+                specific: "Capacitar al 80% del equipo en herramientas de IA relevantes para su área",
+                measurable: "Certificar a 15 empleados y lograr 90% de satisfacción en la capacitación",
+                achievable: "Con recursos internos y externos disponibles, factible en 2-3 meses",
+                relevant: "Esencial para la adopción exitosa de tecnologías de IA en la organización",
+                timeBound: "Completar programa de capacitación en 3 meses"
+            }
         },
         {
-            id: "obj-3",
-            texto: "Establecer un sistema de análisis de datos avanzado para optimizar la toma de decisiones estratégicas",
-            categoria: "Analítica",
-            prioridad: "media",
-            tiempoEstimado: "4-6 meses",
-            impacto: "Mejora del 30% en la precisión de decisiones y reducción del 20% en costos operativos"
+            id: "goal3",
+            title: "Establecer un sistema de análisis de datos avanzado para optimizar la toma de decisiones estratégicas",
+            smart: {
+                specific: "Implementar dashboard de BI con métricas clave y alertas automáticas",
+                measurable: "Reducir tiempo de análisis en 50% y mejorar precisión de decisiones en 30%",
+                achievable: "Con herramientas disponibles y personal capacitado, realizable en 4-6 meses",
+                relevant: "Crítico para la competitividad y crecimiento sostenible de la empresa",
+                timeBound: "Sistema operativo en 6 meses"
+            }
         },
         {
-            id: "obj-4",
-            texto: "Crear una estrategia de experiencia del cliente mejorada con herramientas de IA conversacional",
-            categoria: "CX",
-            prioridad: "media",
-            tiempoEstimado: "3-5 meses",
-            impacto: "Aumento del 35% en satisfacción del cliente y reducción del 50% en tiempo de respuesta"
+            id: "goal4",
+            title: "Crear una estrategia de experiencia del cliente mejorada con herramientas de IA conversacional",
+            smart: {
+                specific: "Implementar chatbot inteligente y sistema de análisis de sentimientos",
+                measurable: "Aumentar satisfacción del cliente en 35% y reducir tiempo de respuesta en 50%",
+                achievable: "Con tecnología disponible y presupuesto asignado, factible en 3-5 meses",
+                relevant: "Directamente impacta la retención y crecimiento de clientes",
+                timeBound: "Sistema en producción en 5 meses"
+            }
         },
         {
-            id: "obj-5",
-            texto: "Implementar un marco de gobernanza de datos y ética en IA para garantizar el uso responsable",
-            categoria: "Gobernanza",
-            prioridad: "alta",
-            tiempoEstimado: "2-4 meses",
-            impacto: "Cumplimiento normativo del 100% y reducción del 60% en riesgos de seguridad de datos"
+            id: "goal5",
+            title: "Implementar un marco de gobernanza de IA para asegurar el uso ético y responsable de la tecnología",
+            smart: {
+                specific: "Crear políticas, procedimientos y comité de ética para supervisar uso de IA",
+                measurable: "100% de cumplimiento normativo y 0 incidentes de uso inadecuado de IA",
+                achievable: "Con asesoría legal y recursos internos, implementable en 4-5 meses",
+                relevant: "Esencial para la sostenibilidad y reputación a largo plazo",
+                timeBound: "Marco operativo en 5 meses"
+            }
         },
         {
-            id: "obj-6",
-            texto: "Desarrollar un laboratorio de innovación para explorar nuevas aplicaciones de IA en productos/servicios",
-            categoria: "Innovación",
-            prioridad: "baja",
-            tiempoEstimado: "6-8 meses",
-            impacto: "Lanzamiento de 2-3 nuevos productos/servicios con IA y aumento del 20% en ingresos"
-        },
-        {
-            id: "obj-7",
-            texto: "Optimizar la cadena de suministro mediante algoritmos de IA para predecir demanda y gestionar inventarios",
-            categoria: "Procesos",
-            prioridad: "media",
-            tiempoEstimado: "4-5 meses",
-            impacto: "Reducción del 30% en costos de inventario y mejora del 25% en precisión de pronósticos"
-        },
-        {
-            id: "obj-8",
-            texto: "Establecer un sistema de monitoreo y alertas inteligentes para prevenir fallos operativos",
-            categoria: "Analítica",
-            prioridad: "alta",
-            tiempoEstimado: "2-3 meses",
-            impacto: "Reducción del 40% en tiempo de inactividad y mejora del 50% en tiempo de respuesta a incidentes"
+            id: "goal6",
+            title: "Desarrollar un laboratorio de innovación para experimentar con nuevas tecnologías de IA",
+            smart: {
+                specific: "Crear espacio físico y virtual para pruebas de conceptos de IA emergentes",
+                measurable: "Identificar 3-5 nuevas oportunidades de negocio y lanzar 2 pilotos",
+                achievable: "Con presupuesto de innovación y personal dedicado, realizable en 6-8 meses",
+                relevant: "Posiciona a la empresa como líder en innovación tecnológica",
+                timeBound: "Laboratorio operativo en 8 meses"
+            }
         }
     ];
     // Personalizar objetivos según el contexto
+    let objetivosSeleccionados = objetivosBase;
     if (context.toLowerCase().includes('pequeña') || context.toLowerCase().includes('startup')) {
         // Para empresas pequeñas, priorizar objetivos de bajo costo y rápida implementación
-        return objetivosBase.filter(obj => obj.prioridad === 'alta' &&
-            (obj.categoria === 'Capacitación' || obj.categoria === 'Procesos')).slice(0, 4);
+        objetivosSeleccionados = objetivosBase.filter(obj => obj.id === 'goal1' || obj.id === 'goal2' || obj.id === 'goal4');
     }
     else if (context.toLowerCase().includes('grande') || context.toLowerCase().includes('corporación')) {
         // Para empresas grandes, incluir objetivos de gobernanza y escalabilidad
-        return objetivosBase.filter(obj => obj.prioridad === 'alta' || obj.prioridad === 'media').slice(0, 6);
+        objetivosSeleccionados = objetivosBase.filter(obj => obj.id === 'goal1' || obj.id === 'goal3' || obj.id === 'goal5' || obj.id === 'goal6');
     }
     else if (context.toLowerCase().includes('tecnología') || context.toLowerCase().includes('tech')) {
         // Para empresas de tecnología, enfocarse en innovación y desarrollo
-        return objetivosBase.filter(obj => obj.categoria === 'Innovación' || obj.categoria === 'Analítica' || obj.categoria === 'CX').slice(0, 5);
+        objetivosSeleccionados = objetivosBase.filter(obj => obj.id === 'goal3' || obj.id === 'goal4' || obj.id === 'goal6');
     }
     else if (context.toLowerCase().includes('servicios') || context.toLowerCase().includes('consultoría')) {
         // Para empresas de servicios, priorizar CX y procesos
-        return objetivosBase.filter(obj => obj.categoria === 'CX' || obj.categoria === 'Procesos' || obj.categoria === 'Capacitación').slice(0, 5);
+        objetivosSeleccionados = objetivosBase.filter(obj => obj.id === 'goal1' || obj.id === 'goal2' || obj.id === 'goal4');
     }
-    // Por defecto, retornar objetivos balanceados
-    return objetivosBase.slice(0, 6);
+    // Devolver en el formato esperado por el frontend
+    return {
+        options: objetivosSeleccionados
+    };
 }
 // Endpoint de salud
 async function health(req, res) {

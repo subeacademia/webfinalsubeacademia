@@ -1,110 +1,129 @@
-// Modelos principales para el diagnóstico ARES-AI
-
-export type LanguageCode = 'es' | 'en' | 'pt';
-
-export type Segment = 'empresa' | 'educacion_superior' | 'educacion_escolar' | 'profesional_independiente';
-
-export interface SegmentSelectionForm {
-	segmento: Segment | null;
+// Perfil de la empresa que realiza el diagnóstico
+export interface CompanyProfile {
+  industry: string;
+  size: '1-10' | '11-50' | '51-200' | '201-1000' | '1001+';
+  iaBudgetUSD: number | null;
 }
 
-export interface ContextoStartupForm {
-	industria: string | null;
-	tamanoEquipo: number | null;
-	antiguedadMeses: number | null;
-	modeloNegocio: string | null;
+// Información del usuario que completa el diagnóstico
+export interface UserLead {
+    name: string;
+    email: string;
 }
 
-export interface ContextoPymeForm {
-	industria: string | null;
-	tamanoEmpresa: number | null;
-	facturacionAnual: number | null;
-	zonaOperacion: string | null;
+// Tipos para las preguntas y respuestas
+export type AresPillar = 'Agilidad' | 'Responsabilidad y Ética' | 'Sostenibilidad';
+export type AresPhase = 'Preparación' | 'Diseño' | 'Desarrollo' | 'Monitoreo' | 'Escalado';
+export type RiskLevel = 'Alto' | 'Limitado' | 'Mínimo' | null;
+
+export interface Question {
+  id: string;
+  text: string;
+  pillar: AresPillar;
+  subarea?: string;
+  phase?: AresPhase;
+  comp?: string;
+  cluster?: string;
+  critical: boolean;
+  weight: number;
 }
 
-export interface ContextoCorporativoForm {
-	industria: string | null;
-	numEmpleados: number | null;
-	presupuestoInnovacion: number | null;
-	presenciaRegional: boolean | null;
+export interface Answer {
+  value: number | null; // Escala de 1 a 5
+  evidence?: string; // Lo renombraremos a "Notas" en la UI
 }
 
-export type ContextoForm = ContextoStartupForm | ContextoPymeForm | ContextoCorporativoForm;
+// Tipos para los resultados de los cálculos
+export type GatingStatus = 'OK' | 'Bloquea≥3' | 'SIN_DATOS';
 
-export type ObjetivoEstrategico = 'eficiencia' | 'crecimiento' | 'innovacion' | 'experienciaCliente';
-
-export interface ObjetivoForm {
-	objetivo: ObjetivoEstrategico | null;
+export interface AresScores {
+  byPillar: Record<AresPillar, number>;
+  bySubarea: Record<string, number>;
+  byPhase: Record<AresPhase, number>;
+  general: number;
+  generalWeighted?: number;
+  gatingStatus: GatingStatus;
 }
 
-export interface LikertAnswer {
-	itemId: string;
-	value: 0 | 1 | 2 | 3 | 4 | 5; // 0: N/A ó No aplica
+export interface CompScores {
+  byCompetency: Record<string, number>;
+  byCluster: Record<string, number>;
+  general: number;
+  gatingStatus: GatingStatus;
 }
 
-export type AresDimension = 'adopcion' | 'riesgos' | 'etica' | 'seguridad' | 'capacidad' | 'datos' | 'gobernanza' | 'valor' | 'operacion' | 'talento' | 'tecnologia' | 'integracion' | 'cumplimiento' | 'transparencia' | 'sostenibilidad';
-
-export interface AresItem {
-	id: string;
-    dimension: AresDimension;
-    labelKey: string; // clave i18n e.g. 'diagnostico.ares.item_01'
-    phase?: 'F1' | 'F2' | 'F3' | 'F4' | 'F5';
-    tooltip?: string;
+// Tipos para la API de IA (Objetivos y Plan de Acción)
+export interface SmartGoal {
+  id: string;
+  title: string;
+  smart: {
+    specific: string;
+    measurable: string;
+    achievable: string;
+    relevant: string;
+    timeBound: string;
+  };
+  pillar?: AresPillar;
+  cluster?: string;
 }
 
-export interface AresForm {
-	respuestas: Record<string, 0 | 1 | 2 | 3 | 4 | 5 | null>; // itemId -> valor
+export interface ActionItem {
+  id: string;
+  area: string;
+  suggestion: string;
+  responsible: string;
+  deadline: string;
 }
 
-export interface CompetenciaDef {
-	id: string;
-	nameKey: string; // i18n key
-	dimensionMap?: Partial<Record<AresDimension, number>>; // ponderaciones por dimensión
+export interface ObjectivesApiResponse {
+  options: SmartGoal[];
 }
 
-export type NivelCompetencia = 'incipiente' | 'basico' | 'intermedio' | 'avanzado' | 'lider';
-
-export interface CompetenciasForm {
-	niveles: Record<string, NivelCompetencia | null>; // competenciaId -> nivel autoevaluado
+export interface ActionPlanApiResponse {
+  summary: string;
+  items: ActionItem[];
 }
 
-export interface LeadForm {
-	nombre: string | null;
-	email: string | null;
-	telefono: string | null;
-	aceptaComunicaciones: boolean | null;
-}
-
+// Interfaces de compatibilidad para el sistema anterior
 export interface DiagnosticoFormValue {
-	segmento: Segment | null;
-	contexto: Partial<ContextoStartupForm & ContextoPymeForm & ContextoCorporativoForm>;
-	objetivo: ObjetivoEstrategico | null;
-	ares: AresForm;
-	competencias: CompetenciasForm;
-	lead: LeadForm;
-}
-
-export interface AresScoresByDimension {
-	[dimension: string]: number; // 0-100
-}
-
-export interface CompetencyScore {
-	competenciaId: string;
-	puntaje: number; // 0-100
-	nivel: NivelCompetencia;
-}
-
-export interface DiagnosticoScores {
-	ares: AresScoresByDimension & { promedio: number };
-	competencias: CompetencyScore[];
+  contexto?: any;
+  ares?: any;
+  competencias?: any;
+  objetivo?: any;
+  lead?: any;
 }
 
 export interface DiagnosticoPersistedPayload {
-	version: number;
-	lang: LanguageCode;
-	createdAt: number;
-	form: DiagnosticoFormValue;
-	scores?: DiagnosticoScores;
+  id?: string;
+  data: any;
+  timestamp?: Date;
 }
 
+export interface AresItem {
+  id: string;
+  labelKey: string;
+  tooltip?: string;
+  dimension: string;
+  phase: string;
+}
 
+export interface CompetenciaDef {
+  id: string;
+  nameKey: string;
+  description?: string;
+  cluster: string;
+}
+
+export interface Segment {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface NivelCompetencia {
+  id: string;
+  name: string;
+  description: string;
+  minScore: number;
+  maxScore: number;
+}

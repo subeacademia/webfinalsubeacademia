@@ -16,19 +16,19 @@ export interface Competency {
 
 // Asunción: mapeo de 13 competencias con claves i18n asociadas a methodology.competencies
 export const COMPETENCIAS: CompetenciaDef[] = [
-  { id: 'c1_pensamiento_critico', nameKey: 'Pensamiento Crítico y Análisis' },
-  { id: 'c2_resolucion_problemas', nameKey: 'Resolución de Problemas Complejos' },
-  { id: 'c3_alfabetizacion_datos', nameKey: 'Alfabetización de Datos' },
-  { id: 'c4_comunicacion', nameKey: 'Comunicación Efectiva' },
-  { id: 'c5_colaboracion', nameKey: 'Colaboración y Trabajo en Equipo' },
-  { id: 'c6_creatividad', nameKey: 'Creatividad e Innovación' },
-  { id: 'c7_diseno_tecnologico', nameKey: 'Diseño Tecnológico' },
-  { id: 'c8_automatizacion_agentes', nameKey: 'Automatización y Agentes IA' },
-  { id: 'c9_seguridad_privacidad', nameKey: 'Seguridad y Privacidad' },
-  { id: 'c10_etica_responsabilidad', nameKey: 'Ética y Responsabilidad' },
-  { id: 'c11_sostenibilidad', nameKey: 'Sostenibilidad' },
-  { id: 'c12_aprendizaje_continuo', nameKey: 'Aprendizaje Continuo' },
-  { id: 'c13_liderazgo_ia', nameKey: 'Liderazgo en IA' },
+  { id: 'c1_pensamiento_critico', nameKey: 'Pensamiento Crítico y Análisis', cluster: 'Cognitivo-Analítico' },
+  { id: 'c2_resolucion_problemas', nameKey: 'Resolución de Problemas Complejos', cluster: 'Cognitivo-Analítico' },
+  { id: 'c3_alfabetizacion_datos', nameKey: 'Alfabetización de Datos', cluster: 'Cognitivo-Analítico' },
+  { id: 'c4_comunicacion', nameKey: 'Comunicación Efectiva', cluster: 'Interpersonal-Social' },
+  { id: 'c5_colaboracion', nameKey: 'Colaboración y Trabajo en Equipo', cluster: 'Interpersonal-Social' },
+  { id: 'c6_creatividad', nameKey: 'Creatividad e Innovación', cluster: 'Cognitivo-Analítico' },
+  { id: 'c7_diseno_tecnologico', nameKey: 'Diseño Tecnológico', cluster: 'Técnico-Funcional' },
+  { id: 'c8_automatizacion_agentes', nameKey: 'Automatización y Agentes IA', cluster: 'Técnico-Funcional' },
+  { id: 'c9_seguridad_privacidad', nameKey: 'Seguridad y Privacidad', cluster: 'Técnico-Funcional' },
+  { id: 'c10_etica_responsabilidad', nameKey: 'Ética y Responsabilidad', cluster: 'Gestión y Estrategia' },
+  { id: 'c11_sostenibilidad', nameKey: 'Sostenibilidad', cluster: 'Gestión y Estrategia' },
+  { id: 'c12_aprendizaje_continuo', nameKey: 'Aprendizaje Continuo', cluster: 'Autogestión' },
+  { id: 'c13_liderazgo_ia', nameKey: 'Liderazgo en IA', cluster: 'Gestión y Estrategia' },
 ];
 
 // Datos completos de las 13 competencias con niveles de dominio
@@ -205,7 +205,7 @@ export const COMPETENCIAS_COMPLETAS: Competency[] = [
 ];
 
 // Prioridades por segmento: top 6 sugeridas.
-export const COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO: Record<Segment, string[]> = {
+export const COMPETENCIAS_PRIORITARIAS_POR_SEGMENTO: Record<string, string[]> = {
   empresa: [
     'c2_resolucion_problemas',
     'c3_alfabetizacion_datos',

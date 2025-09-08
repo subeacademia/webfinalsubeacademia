@@ -1,97 +1,135 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, inject, computed, signal, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScoringService } from '../../../services/scoring.service';
-import { DiagnosticReport } from '../../../data/report.model';
-import { DiagnosticChartsComponent } from '../diagnostic-charts/diagnostic-charts.component';
+import { ApiService } from '../../../services/api.service';
 import { PdfService } from '../../../services/pdf.service';
-import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { DiagnosticoFormValue } from '../../../data/diagnostic.models';
+import { AresScores, CompScores, ActionItem, Question, ActionPlanApiResponse } from '../../../data/diagnostic.models';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
+
+interface Gap {
+  area: string;
+  score: number;
+  target: number;
+  gap: number;
+}
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, DiagnosticChartsComponent],
-  templateUrl: './diagnostic-results.component.html',
+  imports: [CommonModule, FormsModule],
   styleUrls: ['./diagnostic-results.component.css', './diagnostic-results.print.css'],
-  encapsulation: ViewEncapsulation.None,
+  templateUrl: './diagnostic-results.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiagnosticResultsComponent implements OnInit {
-  private diagnosticStateService = inject(DiagnosticStateService);
-  private scoringService = inject(ScoringService);
-  private pdfService = inject(PdfService);
-  private cdr = inject(ChangeDetectorRef);
-  private generativeAiService = inject(GenerativeAiService);
-  private sanitizer = inject(DomSanitizer);
+  stateService = inject(DiagnosticStateService);
+  scoringService = inject(ScoringService);
+  apiService = inject(ApiService);
+  pdfService = inject(PdfService);
+  http = inject(HttpClient);
 
-  report = signal<DiagnosticReport | null>(null);
-  aiGeneratedContent = signal<SafeHtml | null>(null);
-  isLoadingAi = signal<boolean>(true);
-  errorAi = signal<string | null>(null);
-  rawDiagnosticData = signal<string>('');
-  currentDate = new Date();
+  aresQuestions = signal<Question[]>([]);
+  compQuestions = signal<Question[]>([]);
 
-  ngOnInit(): void {
-    const currentData = this.diagnosticStateService.getDiagnosticData();
-    // Guardamos una copia del JSON para verificación
-    this.rawDiagnosticData.set(JSON.stringify(currentData, null, 2)); 
-    
-    // Crear un reporte básico compatible con la interfaz DiagnosticReport
-    const reportData: DiagnosticReport = {
-      titulo_informe: 'Diagnóstico de Madurez en IA',
-      resumen_ejecutivo: 'Reporte generado automáticamente',
-      analisis_ares: [],
-      plan_de_accion: []
-    };
-    this.report.set(reportData);
+  isLoadingPlan = signal(false);
+  actionPlan = signal<ActionPlanApiResponse | null>(null);
 
-    this.generateReportWithAI();
+  ngOnInit() {
+    forkJoin({
+      ares: this.http.get<Question[]>('/assets/data/ares-questions.json'),
+      comp: this.http.get<Question[]>('/assets/data/comp-questions.json')
+    }).subscribe(({ ares, comp }) => {
+      this.aresQuestions.set(ares);
+      this.compQuestions.set(comp);
+    });
   }
 
-  async generateReportWithAI(): Promise<void> {
-    this.isLoadingAi.set(true);
-    this.errorAi.set(null);
-    const diagnosticData = this.diagnosticStateService.getDiagnosticData();
+  // --- Computed Signals for Scores ---
+  aresScores = computed<AresScores>(() => {
+    const questions = this.aresQuestions();
+    if (!questions.length) return this.emptyAresScores();
+    const answers = this.stateService.aresAnswers();
+    return this.scoringService.computeAresScores(questions, answers);
+  });
 
+  weightedAresScores = computed<AresScores>(() => {
+    const scores = this.aresScores();
+    const risk = this.stateService.riskLevel();
+    return this.scoringService.applyRiskWeighting(scores, risk);
+  });
+  
+  compScores = computed<CompScores>(() => {
+    const questions = this.compQuestions();
+    if (!questions.length) return this.emptyCompScores();
+    const answers = this.stateService.compAnswers();
+    return this.scoringService.computeCompScores(questions, answers);
+  });
+
+  compositeScore = computed<number>(() => {
+    const aresScore = this.weightedAresScores().generalWeighted ?? this.weightedAresScores().general;
+    const compScore = this.compScores().general;
+    const lambda = this.stateService.lambdaComp();
+    return this.scoringService.composite(aresScore, compScore, lambda);
+  });
+  
+  // --- Computed Signals for Gaps and Plan ---
+  gaps = computed<Gap[]>(() => {
+      const target = this.stateService.targetLevel();
+      const aresPillars = this.aresScores().byPillar;
+      const compClusters = this.compScores().byCluster;
+      
+      const aresGaps = Object.entries(aresPillars).map(([area, score]) => ({
+          area, score, target, gap: Math.max(0, target - score)
+      }));
+      
+      const compGaps = Object.entries(compClusters).map(([area, score]) => ({
+          area, score, target, gap: Math.max(0, target - score)
+      }));
+
+      return [...aresGaps, ...compGaps].sort((a,b) => b.gap - a.gap);
+  });
+
+  // --- Methods ---
+  async generateActionPlan() {
+    this.isLoadingPlan.set(true);
     try {
-      const markdownContent = await this.generativeAiService.generateActionPlan(diagnosticData);
-
-      if (markdownContent.includes('Error al Generar')) {
-          this.errorAi.set(markdownContent);
-      } else {
-          this.aiGeneratedContent.set(this.sanitizer.bypassSecurityTrustHtml(markdownContent));
-      }
-
+      const plan = await this.apiService.generatePlan(this.stateService.state(), this.aresScores(), this.compScores());
+      this.actionPlan.set(plan);
     } catch (error) {
-      console.error('Error capturado en el componente:', error);
-      this.errorAi.set('Ocurrió un error inesperado al conectar con el servicio de IA. Por favor, intenta de nuevo.');
+      console.error('Error generating action plan:', error);
     } finally {
-      this.isLoadingAi.set(false);
-      this.cdr.detectChanges();
+      this.isLoadingPlan.set(false);
     }
   }
 
-  printResults(): void {
-    const reportElement = document.getElementById('report-content');
-    const diagnosticData = this.diagnosticStateService.getDiagnosticData();
-    const leadName = diagnosticData?.lead?.nombre || diagnosticData?.form?.lead?.nombre || 'Usuario';
-    
-    if (reportElement) {
-      const fileName = `Reporte_SUBE_Academia_${leadName.replace(/\s/g, '_')}.pdf`;
-      // Usar el método correcto del PdfService
-      this.pdfService.generateDiagnosticReport(
-        this.report() || {
-          titulo_informe: 'Diagnóstico de Madurez en IA',
-          resumen_ejecutivo: 'Reporte generado automáticamente',
-          analisis_ares: [],
-          plan_de_accion: []
-        },
-        diagnosticData,
-        reportElement
-      );
-    } else {
-      console.error('No se pudo encontrar el elemento del reporte.');
-    }
+  exportToPdf() {
+    const profile = this.stateService.profile();
+    const filename = `diagnostico-ares-ai-${profile.industry.replace(/\s+/g, '-')}.pdf`;
+    this.pdfService.exportElementToPdf('pdf-content', filename);
+  }
+  
+  scoreToPercentage(score: number): number {
+    return Math.max(0, (score - 1) * 25);
+  }
+
+  getColorForScore(score: number): string {
+    if (score < 2.5) return 'bg-red-500';
+    if (score < 3.5) return 'bg-yellow-500';
+    return 'bg-green-500';
+  }
+
+  getCurrentDate(): string {
+    return new Date().toLocaleDateString();
+  }
+  
+  // --- Helpers for initial state ---
+  private emptyAresScores(): AresScores {
+    return { byPillar: { Agilidad: 0, 'Responsabilidad y Ética': 0, Sostenibilidad: 0 }, bySubarea: {}, byPhase: { 'Preparación':0,'Diseño':0,'Desarrollo':0,'Monitoreo':0,'Escalado':0 }, general: 0, gatingStatus: 'SIN_DATOS' };
+  }
+  private emptyCompScores(): CompScores {
+    return { byCompetency: {}, byCluster: {}, general: 0, gatingStatus: 'SIN_DATOS' };
   }
 }

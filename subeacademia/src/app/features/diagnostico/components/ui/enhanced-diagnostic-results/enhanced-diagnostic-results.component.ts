@@ -382,7 +382,7 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
       // Calcular puntajes de competencias
       const competencyScores = this.scoringService.computeCompetencyScores(data);
       const competencyScoresMap: Record<string, number> = {};
-      competencyScores.forEach(comp => {
+      competencyScores.forEach((comp: any) => {
         competencyScoresMap[comp.competenciaId] = comp.puntaje;
       });
       this.competencyScores.set(competencyScoresMap);
@@ -390,7 +390,7 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
       // Calcular puntaje general
       const aresAverage = aresScores.promedio || 0;
       const competencyAverage = competencyScores.length > 0 
-        ? competencyScores.reduce((sum, comp) => sum + comp.puntaje, 0) / competencyScores.length 
+        ? competencyScores.reduce((sum: number, comp: any) => sum + comp.puntaje, 0) / competencyScores.length 
         : 0;
       
       const overallScore = Math.round((aresAverage + competencyAverage) / 2);
@@ -581,8 +581,7 @@ export class EnhancedDiagnosticResultsComponent implements OnInit {
     try {
       await this.pdfService.generateDiagnosticPDF(
         this.diagnosticData(),
-        this.aiAnalysis(),
-        this.leadName()
+        `diagnostico-${this.leadName()}-${new Date().toISOString().split('T')[0]}.pdf`
       );
       this.toastService.show('success', 'PDF descargado exitosamente');
     } catch (err) {

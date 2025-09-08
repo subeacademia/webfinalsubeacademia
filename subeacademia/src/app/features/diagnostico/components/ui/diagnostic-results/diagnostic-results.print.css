@@ -1,118 +1,46 @@
-/* Estilos para impresión y generación de PDF */
 @media print {
-  /* Ocultar elementos no deseados en el PDF */
+  /* Ocultar elementos no deseados en la impresión */
   .no-print {
     display: none !important;
   }
 
-  /* Asegurar fondo blanco */
+  /* Mostrar elementos solo para impresión */
+  .print-only {
+    display: block !important;
+  }
+  
   body {
-    background-color: #fff !important;
-    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Ajustar colores de texto para impresión */
-  .text-gray-300, 
-  .text-white,
-  .text-blue-100,
-  .text-green-100 {
-    color: #000 !important;
+  /* Ajustes generales de layout para impresión */
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+  
+  h1, h2, h3 {
+      color: #000 !important;
+  }
+  
+  .dark\:text-white, .dark\:text-gray-100 {
+      color: #111827 !important;
+  }
+  
+  .dark\:bg-gray-800, .dark\:bg-gray-900 {
+      background-color: #fff !important;
   }
 
-  /* Asegurar que los gráficos sean visibles */
-  .radar-chart-container {
-    opacity: 1 !important;
-    background-color: #f8f9fa !important;
-  }
-
-  /* Optimizar sombras para impresión */
-  .shadow-xl,
-  .shadow-2xl {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-  }
-
-  /* Asegurar que los gradientes se vean bien */
-  .bg-gradient-to-r,
-  .bg-gradient-to-br {
-    background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
-  }
-
-  /* Optimizar bordes */
-  .border {
-    border-color: #d1d5db !important;
-  }
-
-  /* Asegurar que las tarjetas tengan fondo blanco */
-  .bg-white,
-  .bg-gray-800 {
-    background-color: #fff !important;
-  }
-
-  /* Optimizar texto para impresión */
-  h1, h2, h3, h4, h5, h6 {
-    color: #000 !important;
-    page-break-after: avoid;
-  }
-
-  /* Evitar cortes de página en elementos importantes */
-  .diagnostic-results-container section {
+  /* Evitar saltos de página dentro de elementos */
+  .grid, .bg-white, table, .shadow {
     page-break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #eee;
   }
-
-  /* Asegurar que las métricas sean legibles */
-  .text-4xl,
-  .text-3xl,
-  .text-2xl {
-    font-size: 1.5rem !important;
-    line-height: 1.2 !important;
+  
+  /* Forzar saltos de página si es necesario */
+  .page-break {
+    page-break-before: always;
   }
-
-  /* Optimizar barras de progreso */
-  .bg-gradient-to-r.from-green-500.to-green-600,
-  .bg-gradient-to-r.from-yellow-500.to-yellow-600,
-  .bg-gradient-to-r.from-orange-500.to-orange-600,
-  .bg-gradient-to-r.from-red-500.to-red-600 {
-    background: #3b82f6 !important;
-  }
-
-  /* Asegurar que los iconos sean visibles */
-  svg {
-    fill: #000 !important;
-    stroke: #000 !important;
-  }
-
-  /* Optimizar espaciado para impresión */
-  .p-8, .p-6, .p-4 {
-    padding: 1rem !important;
-  }
-
-  .mb-16, .mb-12, .mb-8 {
-    margin-bottom: 1rem !important;
-  }
-
-  /* Asegurar que el contenido se ajuste a la página */
-  .max-w-7xl {
-    max-width: none !important;
-  }
-
-  /* Optimizar el contenedor principal */
-  .diagnostic-results-container {
-    background: #fff !important;
-    min-height: auto !important;
-  }
-}
-
-/* Estilos específicos para generación de PDF */
-.pdf-generation {
-  background-color: #fff !important;
-  color: #000 !important;
-}
-
-.pdf-generation .no-print {
-  display: none !important;
-}
-
-.pdf-generation .radar-chart-container {
-  opacity: 1 !important;
-  background-color: #f8f9fa !important;
 }

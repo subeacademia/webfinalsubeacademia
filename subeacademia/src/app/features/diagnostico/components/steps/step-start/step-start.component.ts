@@ -63,19 +63,12 @@ export class StepStartComponent {
   comenzarDiagnostico(): void {
     console.log('Navegando al siguiente paso del diagnóstico');
     
-    // Obtener la ruta base del diagnóstico desde la ruta actual
-    const currentUrl = this.router.url;
-    const baseUrl = currentUrl.split('/').slice(0, -1).join('/'); // Remover 'inicio'
-    
-    // Navegar al siguiente paso
-    const nextStepUrl = `${baseUrl}/contexto`;
-    console.log('URL de destino:', nextStepUrl);
-    
-    this.router.navigate([nextStepUrl]).then(() => {
-      console.log('Navegación completada exitosamente');
+    // Navegar directamente a la ruta contexto usando navegación relativa
+    this.router.navigate(['contexto'], { relativeTo: this.route.parent }).then(() => {
+      console.log('✅ Navegación completada exitosamente a contexto');
     }).catch(error => {
-      console.error('❌ Error en navegación:', error);
-      // Fallback: navegar usando la ruta completa
+      console.error('❌ Error en navegación relativa:', error);
+      // Fallback: navegar usando la ruta absoluta
       this.router.navigate(['/es', 'diagnostico', 'contexto']).catch(fallbackErr => {
         console.error('❌ Error en fallback de navegación:', fallbackErr);
       });
