@@ -14,19 +14,115 @@
     @if (isLoading()) {
       <div class="text-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando resultados...</p>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Generando tu reporte personalizado...</p>
+        <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Esto puede tomar unos momentos</p>
       </div>
     } @else if (report()) {
-      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Reporte Generado</h2>
-        <p class="text-gray-600 dark:text-gray-300">Tu diagnóstico ha sido completado exitosamente.</p>
-        <button (click)="printReport()" class="mt-4 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700">
-          Imprimir Reporte
-        </button>
+      <div class="space-y-6">
+        <!-- Resumen del Reporte -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Reporte Generado</h2>
+          <p class="text-gray-600 dark:text-gray-300 mb-4">Tu diagnóstico ha sido completado exitosamente.</p>
+          
+          <!-- Mostrar contenido del reporte si está disponible -->
+          @if (report()?.resumen) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Resumen Ejecutivo</h3>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ report()?.resumen }}</p>
+            </div>
+          }
+          
+          @if (report()?.analisisCompetencias && report()!.analisisCompetencias.length > 0) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Análisis de Competencias</h3>
+              <div class="grid gap-4 md:grid-cols-2">
+                @for (comp of report()!.analisisCompetencias; track comp.competencia) {
+                  <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                      <h4 class="font-medium text-gray-800 dark:text-gray-200">{{ comp.competencia }}</h4>
+                      <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ comp.puntaje }}/5</span>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ comp.descripcion }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 italic">{{ comp.sugerencia }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          
+          @if (report()?.identificacionBrechas) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Identificación de Brechas</h3>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ report()?.identificacionBrechas }}</p>
+            </div>
+          }
+          
+          @if (report()?.planDeAccion && report()!.planDeAccion.length > 0) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">Plan de Acción</h3>
+              <div class="space-y-4">
+                @for (area of report()!.planDeAccion; track area.area) {
+                  <div class="border-l-4 border-green-500 pl-4 py-3 bg-green-50 dark:bg-green-900/20 rounded-r-lg">
+                    <h4 class="font-medium text-gray-800 dark:text-gray-200 mb-3">{{ area.area }}</h4>
+                    <div class="space-y-2">
+                      @for (accion of area.acciones; track accion.accion) {
+                        <div class="bg-white dark:bg-gray-800 p-3 rounded border">
+                          <h5 class="font-medium text-gray-700 dark:text-gray-300">{{ accion.accion }}</h5>
+                          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ accion.descripcion }}</p>
+                          @if (accion.recursos && accion.recursos.length > 0) {
+                            <div class="mt-2">
+                              <p class="text-xs font-medium text-gray-500 dark:text-gray-500 mb-1">Recursos necesarios:</p>
+                              <ul class="text-xs text-gray-500 dark:text-gray-500 list-disc list-inside">
+                                @for (recurso of accion.recursos; track recurso) {
+                                  <li>{{ recurso }}</li>
+                                }
+                              </ul>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          
+          @if (report()?.recomendacionesGenerales) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Recomendaciones Generales</h3>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ report()?.recomendacionesGenerales }}</p>
+            </div>
+          }
+          
+          @if (report()?.alineacionObjetivos) {
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Alineación con Objetivos</h3>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">{{ report()?.alineacionObjetivos }}</p>
+            </div>
+          }
+          
+          <button (click)="printReport()" class="mt-4 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors">
+            Imprimir Reporte
+          </button>
+        </div>
+        
+        <!-- Debug info (solo en desarrollo) -->
+        @if (report()) {
+          <details class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
+            <summary class="cursor-pointer text-sm text-gray-600 dark:text-gray-400">Ver datos del reporte (debug)</summary>
+            <pre class="mt-2 text-xs text-gray-500 dark:text-gray-500 overflow-auto">{{ report() | json }}</pre>
+          </details>
+        }
       </div>
     } @else {
       <div class="text-center py-12">
-        <p class="text-gray-600 dark:text-gray-400">No se encontraron resultados del diagnóstico.</p>
+        <div class="text-6xl mb-4">📊</div>
+        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No se encontraron resultados</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">No se pudo cargar el reporte del diagnóstico.</p>
+        <button (click)="reloadPage()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Reintentar
+        </button>
       </div>
     }
   </div>

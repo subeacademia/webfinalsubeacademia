@@ -3,8 +3,12 @@
         <input formControlName="rol" placeholder="Tu rol actual (Ej: Jefe de Proyecto)" class="w-full p-2 border rounded">
         <select formControlName="industria" class="w-full p-2 border rounded">
             <option value="">Selecciona tu industria</option>
-            @for (industry of industries; track industry) {
-                <option [value]="industry">{{ industry }}</option>
+            @for (category of industries; track category.category) {
+                <optgroup [label]="category.category">
+                    @for (option of category.options; track option) {
+                        <option [value]="option">{{ option }}</option>
+                    }
+                </optgroup>
             }
         </select>
     </div>
@@ -29,4 +33,17 @@
             </div>
         </div>
     }
+    
+    <!-- Botones de navegación -->
+    <div class="mt-8 flex justify-between">
+        <button (click)="previous()" 
+                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+            ← Volver
+        </button>
+        <button (click)="next()" 
+                [disabled]="form.invalid"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+            Continuar →
+        </button>
+    </div>
 </div>

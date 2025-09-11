@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { INDUSTRIES } from '../../../data/industries';
 import { BesselAiService } from '../../../../../core/ai/bessel-ai.service';
@@ -18,6 +19,7 @@ export class StepObjetivoComponent {
   private besselAiService = inject(BesselAiService);
   private cdr = inject(ChangeDetectorRef);
   private toastService = inject(ToastService);
+  private router = inject(Router);
 
   industries = INDUSTRIES;
   sugerencias = signal<string[]>([]);
@@ -55,9 +57,17 @@ export class StepObjetivoComponent {
   next() {
     if (this.form.valid) {
       this.diagnosticState.updateData({ objetivo: this.form.value as any });
-      this.diagnosticState.nextStep();
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/finalizar`]);
     } else {
       this.form.markAllAsTouched();
     }
+  }
+
+  previous() {
+    const currentUrl = this.router.url;
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/competencias`]);
   }
 }

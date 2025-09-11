@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { competencias, Competency } from '../../../data/competencias';
 import { CompetencyQuestionCardComponent } from '../../ui/competency-question-card/competency-question-card.component';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
@@ -32,11 +33,25 @@ import { Answer } from '../../../data/diagnostic.models';
           }
         </div>
       }
+      
+      <!-- Botones de navegación -->
+      <div class="mt-8 flex justify-between">
+        <button (click)="previous()" 
+                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+          ← Volver
+        </button>
+        <button (click)="next()" 
+                [disabled]="!isComplete()"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+          Continuar →
+        </button>
+      </div>
     </div>
   `,
 })
 export class StepCompetenciasComponent {
   public stateService = inject(DiagnosticStateService);
+  private router = inject(Router);
   allCompetencies = competencias;
 
   getAnswerForQuestion(questionId: string): Answer {
@@ -45,5 +60,23 @@ export class StepCompetenciasComponent {
 
   onAnswerChange(questionId: string, answer: Answer) {
     this.stateService.updateAnswer('competencias', questionId, answer);
+  }
+
+  isComplete(): boolean {
+    return this.stateService.competenciasProgress().isComplete;
+  }
+
+  next() {
+    if (this.isComplete()) {
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
+    }
+  }
+
+  previous() {
+    const currentUrl = this.router.url;
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/ares`]);
   }
 }

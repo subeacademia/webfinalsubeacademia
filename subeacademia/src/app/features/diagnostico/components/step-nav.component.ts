@@ -71,7 +71,8 @@ export class StepNavComponent {
   // Lógica para determinar si un paso está habilitado
   isStepEnabled(step: Step): boolean {
     const currentStepOrder = this.activeStep()?.order || 0;
-    return step.order <= currentStepOrder;
+    // Permitir navegación al paso actual y al siguiente paso
+    return step.order <= currentStepOrder + 1;
   }
   
   startNew() {

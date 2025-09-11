@@ -8,18 +8,35 @@ import { Report } from '../data/report.model';
 })
 export class DiagnosticsService {
   private firestore: Firestore = inject(Firestore);
-  private diagnosticsCollection = collection(this.firestore, 'diagnostics');
+  
+  private get diagnosticsCollection() {
+    return collection(this.firestore, 'diagnostics');
+  }
 
   async saveDiagnosticResult(data: DiagnosticData, report: Report): Promise<string> {
     try {
-      const docRef = await addDoc(this.diagnosticsCollection, {
+      console.log('Attempting to save diagnostic result to Firestore...');
+      console.log('Data:', data);
+      console.log('Report:', report);
+      
+      // Crear la colección en el momento de uso
+      const collectionRef = collection(this.firestore, 'diagnostics');
+      
+      const docRef = await addDoc(collectionRef, {
         data,
         report,
         createdAt: new Date()
       });
+      
+      console.log('Document saved successfully with ID:', docRef.id);
       return docRef.id;
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error adding document: ", e);
+      console.error("Error details:", {
+        code: e?.code,
+        message: e?.message,
+        stack: e?.stack
+      });
       throw e;
     }
   }

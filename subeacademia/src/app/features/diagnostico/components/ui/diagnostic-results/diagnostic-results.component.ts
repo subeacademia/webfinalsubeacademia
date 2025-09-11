@@ -21,32 +21,48 @@ export class DiagnosticResultsComponent implements OnInit {
   isLoading = signal(true);
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.diagnosticsService.getDiagnosticResult(id).then(docSnap => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          this.report.set(data['report'] as Report);
-        } else {
-          console.error("No such document!");
-        }
-        this.isLoading.set(false);
-      }).catch(error => {
-        console.error("Error getting document:", error);
-        this.isLoading.set(false);
-      });
-    } else {
-      // Si no hay ID, intenta obtener el reporte del estado (flujo normal)
-      const stateReport = this.stateService.generatedReport();
-      if(stateReport){
-        this.report.set(stateReport);
-      }
+    console.log('DiagnosticResultsComponent initialized');
+    
+    // Primero intentar obtener el reporte del estado (flujo normal)
+    const stateReport = this.stateService.generatedReport();
+    console.log('State report:', stateReport);
+    
+    if (stateReport) {
+      this.report.set(stateReport);
       this.isLoading.set(false);
+      console.log('Report loaded from state');
+    } else {
+      // Si no hay reporte en el estado, intentar obtenerlo por ID
+      const id = this.route.snapshot.paramMap.get('id');
+      console.log('ID from route:', id);
+      
+      if (id) {
+        this.diagnosticsService.getDiagnosticResult(id).then(docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            this.report.set(data['report'] as Report);
+            console.log('Report loaded from Firebase');
+          } else {
+            console.error("No such document!");
+          }
+          this.isLoading.set(false);
+        }).catch(error => {
+          console.error("Error getting document:", error);
+          this.isLoading.set(false);
+        });
+      } else {
+        console.log('No ID and no state report, showing empty state');
+        this.isLoading.set(false);
+      }
     }
   }
 
   printReport() {
     window.print();
+  }
+
+  reloadPage() {
+    window.location.reload();
   }
 
   getCurrentDate(): string {

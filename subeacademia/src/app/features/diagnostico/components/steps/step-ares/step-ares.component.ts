@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { aresQuestions } from '../../../data/ares-items';
 import { QuestionCardComponent } from '../../ui/question-card/question-card.component';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
@@ -29,11 +30,25 @@ import { Answer } from '../../../data/diagnostic.models';
           ></app-question-card>
         }
       </div>
+      
+      <!-- Botones de navegación -->
+      <div class="mt-8 flex justify-between">
+        <button (click)="previous()" 
+                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+          ← Volver
+        </button>
+        <button (click)="next()" 
+                [disabled]="!isComplete()"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+          Continuar →
+        </button>
+      </div>
     </div>
   `,
 })
 export class StepAresComponent {
   public stateService = inject(DiagnosticStateService);
+  private router = inject(Router);
   questions = aresQuestions;
 
   getAnswerForQuestion(questionId: string): Answer {
@@ -42,5 +57,23 @@ export class StepAresComponent {
 
   onAnswerChange(questionId: string, answer: Answer) {
     this.stateService.updateAnswer('ares', questionId, answer);
+  }
+
+  isComplete(): boolean {
+    return this.stateService.aresProgress().isComplete;
+  }
+
+  next() {
+    if (this.isComplete()) {
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/competencias`]);
+    }
+  }
+
+  previous() {
+    const currentUrl = this.router.url;
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/contexto`]);
   }
 }
