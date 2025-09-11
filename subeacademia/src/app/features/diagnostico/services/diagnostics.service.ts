@@ -1,36 +1,41 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, doc, updateDoc, serverTimestamp } from '@angular/fire/firestore';
-import { DiagnosticState } from './diagnostic-state.service';
+import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } from '@angular/fire/firestore';
+import { DiagnosticData } from '../data/diagnostic.models';
+import { Report } from '../data/report.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiagnosticsService {
   private firestore: Firestore = inject(Firestore);
+  private diagnosticsCollection = collection(this.firestore, 'diagnostics');
 
-  constructor() { }
-
-  // Guarda el resultado completo del diagnóstico en Firestore
-  async saveDiagnosticResult(state: DiagnosticState): Promise<string> {
+  async saveDiagnosticResult(data: DiagnosticData, report: Report): Promise<string> {
     try {
-      const docRef = await addDoc(collection(this.firestore, 'diagnostics'), {
-        ...state,
-        createdAt: serverTimestamp(),
-        status: 'completed'
+      const docRef = await addDoc(this.diagnosticsCollection, {
+        data,
+        report,
+        createdAt: new Date()
       });
-      console.log("Diagnostic result saved with ID: ", docRef.id);
       return docRef.id;
     } catch (e) {
       console.error("Error adding document: ", e);
-      throw e; // Lanza el error para que el componente lo maneje
+      throw e;
     }
   }
 
-  // Método de compatibilidad para el dashboard
-  async getDiagnosticsForUserAsync(userId: string): Promise<any[]> {
-    // Implementación básica para compatibilidad
-    // En una implementación real, esto consultaría Firestore
-    console.log("Getting diagnostics for user:", userId);
-    return [];
+  getDiagnosticResult(id: string) {
+    const docRef = doc(this.firestore, 'diagnostics', id);
+    return getDoc(docRef);
+  }
+
+  async getDiagnosticsForUser(userId: string): Promise<any[]> {
+    const q = query(this.diagnosticsCollection, where("data.lead.email", "==", userId)); // Suponiendo que el userId es el email
+    const querySnapshot = await getDocs(q);
+    const results: any[] = [];
+    querySnapshot.forEach((doc) => {
+      results.push({ id: doc.id, ...doc.data() });
+    });
+    return results;
   }
 }

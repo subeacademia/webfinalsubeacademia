@@ -1,6 +1,13 @@
 import { Component, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActionPlanItem } from '../../../services/report-generator.service';
+
+export interface ActionPlanItem {
+  objetivo: string;
+  competencia: string;
+  prioridad: string;
+  tiempoEstimado: string;
+  acciones: string[];
+}
 
 @Component({
   selector: 'app-action-plan',

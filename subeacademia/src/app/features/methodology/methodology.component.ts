@@ -4,7 +4,7 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
 import { AresAiGraphComponent } from './components/ares-ai-graph/ares-ai-graph.component';
 import { UiModalComponent } from '../../shared/ui-kit/modal/modal';
-import { COMPETENCIAS_COMPLETAS, Competency } from '../diagnostico/data/competencias';
+import { competencias, Competency } from '../diagnostico/data/competencias';
 
 @Component({
   selector: 'app-methodology',
@@ -20,7 +20,7 @@ import { COMPETENCIAS_COMPLETAS, Competency } from '../diagnostico/data/competen
   styleUrls: ['./methodology.component.css']
 })
 export class MethodologyComponent {
-  competencies = COMPETENCIAS_COMPLETAS;
+  competencies = competencias;
   
   // Estado del modal
   isModalOpen = false;

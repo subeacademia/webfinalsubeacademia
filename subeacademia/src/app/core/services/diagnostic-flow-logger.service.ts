@@ -226,7 +226,7 @@ export class DiagnosticFlowLoggerService {
 
   private getStepData(step: string): any {
     try {
-      const currentData = this.diagnosticStateService.getDiagnosticData();
+      const currentData = this.diagnosticStateService.state();
       return this.filterDataByStep(step, currentData);
     } catch (error) {
       this.logError(`Error al obtener datos del paso: ${step}`, { error });

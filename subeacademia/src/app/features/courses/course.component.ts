@@ -120,7 +120,7 @@ export class CourseComponent implements OnInit {
   private async loadCompetencies(): Promise<void> {
     try {
       const module = await import('../../features/diagnostico/data/competencias');
-      this.competencias.set(module.COMPETENCIAS_COMPLETAS);
+      this.competencias.set(module.competencias);
     } catch (error) {
       console.error('Error cargando competencias:', error);
     }

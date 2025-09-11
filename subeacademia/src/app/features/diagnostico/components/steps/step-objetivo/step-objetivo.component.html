@@ -1,77 +1,32 @@
-<div class="p-4 md:p-8 max-w-4xl mx-auto">
-  <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2">
-    4. Generador de Objetivos SMART
-  </h2>
-  <p class="text-gray-600 dark:text-gray-300 mb-6">
-    Describe tus metas de alto nivel. Usaremos IA para convertirlas en objetivos SMART, alineados a tus resultados.
-  </p>
-
-  <div class="space-y-4">
-    <textarea [(ngModel)]="userPrompt" rows="4"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              placeholder="Ej: 'Quiero usar IA para mejorar la eficiencia de nuestro marketing y reducir costes operativos.'"></textarea>
-
-    <div class="text-right">
-      <button (click)="generateObjectives()" [disabled]="isLoading() || userPrompt().length < 10"
-              class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-        @if (isLoading()) {
-          <span class="animate-pulse">Generando...</span>
+<div class="p-4 md:p-6" [formGroup]="form">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <input formControlName="rol" placeholder="Tu rol actual (Ej: Jefe de Proyecto)" class="w-full p-2 border rounded">
+        <select formControlName="industria" class="w-full p-2 border rounded">
+            <option value="">Selecciona tu industria</option>
+            @for (industry of industries; track industry) {
+                <option [value]="industry">{{ industry }}</option>
+            }
+        </select>
+    </div>
+    <textarea formControlName="objetivo" rows="4" placeholder="Describe tu objetivo profesional principal..." class="w-full p-2 border rounded mb-4"></textarea>
+    <button (click)="generarSugerencias()" [disabled]="isLoadingSuggestions() || !allFieldsFilled" class="w-full p-2 bg-blue-500 text-white rounded disabled:bg-gray-400">
+        @if (isLoadingSuggestions()) {
+            <span>Generando...</span>
         } @else {
-          Generar Objetivos SMART
+            <span>Generar Sugerencias con IA</span>
         }
-      </button>
-    </div>
-  </div>
-
-  @if (isLoading()) {
-    <div class="mt-8 text-center p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-      <p class="text-gray-600 dark:text-gray-300">Contactando a la IA... Esto puede tardar unos segundos.</p>
-    </div>
-  }
-
-  @if (errorMessage(); as msg) {
-    <div class="mt-8 text-center p-4 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-lg">
-        <p class="text-red-700 dark:text-red-200">{{ msg }}</p>
-    </div>
-  }
-
-  @if (generatedGoals().length > 0) {
-    <div class="mt-8">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Selecciona los objetivos para tu plan de acción (puedes elegir varios):</h3>
-      <div class="space-y-4">
-        @for (goal of generatedGoals(); track goal.id) {
-          <div class="p-4 border rounded-lg cursor-pointer transition-colors" 
-               (click)="toggleGoalSelection(goal.id)"
-               [class.bg-blue-50]="selectedGoalsMap()[goal.id]"
-               [class.border-blue-300]="selectedGoalsMap()[goal.id]"
-               [class.dark:bg-blue-900/20]="selectedGoalsMap()[goal.id]"
-               [class.dark:border-blue-700]="selectedGoalsMap()[goal.id]">
-            <div class="flex items-start">
-              <input type="checkbox" [id]="goal.id" [checked]="selectedGoalsMap()[goal.id]"
-                     class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 pointer-events-none">
-              <label [for]="goal.id" class="ml-3 w-full cursor-pointer">
-                <p class="font-bold text-gray-900 dark:text-white">{{ goal.title }}</p>
-                <div class="text-sm text-gray-600 dark:text-gray-300 mt-2 space-y-1">
-                  <p><strong>Specific:</strong> {{ goal.smart.specific }}</p>
-                  <p><strong>Measurable:</strong> {{ goal.smart.measurable }}</p>
-                  <p><strong>Achievable:</strong> {{ goal.smart.achievable }}</p>
-                  <p><strong>Relevant:</strong> {{ goal.smart.relevant }}</p>
-                  <p><strong>Time-Bound:</strong> {{ goal.smart.timeBound }}</p>
-                </div>
-              </label>
+    </button>
+    
+    @if (sugerencias().length > 0) {
+        <div class="mt-4">
+            <h3 class="font-semibold mb-2">Sugerencias:</h3>
+            <div class="space-y-2">
+                @for (sug of sugerencias(); track sug) {
+                    <div (click)="seleccionarSugerencia(sug)" class="p-3 border rounded hover:bg-gray-100 cursor-pointer">
+                        {{ sug }}
+                    </div>
+                }
             </div>
-          </div>
-        }
-      </div>
-    </div>
-  }
-
-  <div class="mt-8 flex justify-between items-center">
-    <button (click)="goToPrev()" class="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
-      Anterior
-    </button>
-    <button (click)="goToNext()" [disabled]="selectedGoals().length === 0" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-      Continuar
-    </button>
-  </div>
+        </div>
+    }
 </div>

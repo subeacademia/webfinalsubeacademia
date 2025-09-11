@@ -1,154 +1,33 @@
 <div class="bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
   <div id="pdf-content" class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6 print:flex">
+    <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Resultados y Plan de Acción</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Resultados del Diagnóstico</h1>
         <p class="text-gray-500 dark:text-gray-400 mt-1">Diagnóstico de Madurez ARES-AI</p>
       </div>
-      <div class="print-only hidden text-right text-xs">
-          <p><strong>Empresa:</strong> {{ stateService.profile().industry }}</p>
-          <p><strong>Tamaño:</strong> {{ stateService.profile().size }} empleados</p>
-          <p><strong>Fecha:</strong> {{ getCurrentDate() }}</p>
+      <div class="text-right text-xs">
+        <p><strong>Fecha:</strong> {{ getCurrentDate() }}</p>
       </div>
-      <div class="no-print">
-        <button (click)="exportToPdf()" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700">
-          Exportar a PDF
+    </div>
+
+    @if (isLoading()) {
+      <div class="text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Cargando resultados...</p>
+      </div>
+    } @else if (report()) {
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Reporte Generado</h2>
+        <p class="text-gray-600 dark:text-gray-300">Tu diagnóstico ha sido completado exitosamente.</p>
+        <button (click)="printReport()" class="mt-4 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700">
+          Imprimir Reporte
         </button>
       </div>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <!-- ARES General -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">ARES General</h3>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ aresScores().general.toFixed(2) }} / 5</p>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                <div class="h-2.5 rounded-full" [class]="getColorForScore(aresScores().general)" [style.width.%]="scoreToPercentage(aresScores().general)"></div>
-            </div>
-        </div>
-        <!-- ARES Ponderado -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">ARES Ponderado (Riesgo)</h3>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ (weightedAresScores().generalWeighted || 0).toFixed(2) }} / 5</p>
-             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                <div class="h-2.5 rounded-full" [class]="getColorForScore(weightedAresScores().generalWeighted || 0)" [style.width.%]="scoreToPercentage(weightedAresScores().generalWeighted || 0)"></div>
-            </div>
-        </div>
-        <!-- CRI (Competencias) -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Índice de Competencias (CRI)</h3>
-            <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ compScores().general.toFixed(2) }} / 5</p>
-             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                <div class="h-2.5 rounded-full" [class]="getColorForScore(compScores().general)" [style.width.%]="scoreToPercentage(compScores().general)"></div>
-            </div>
-        </div>
-        <!-- Compuesto -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Índice Compuesto (λ={{ stateService.lambdaComp() }})</h3>
-            <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ compositeScore().toFixed(2) }} / 5</p>
-             <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-2">
-                <div class="bg-blue-600 h-2.5 rounded-full" [style.width.%]="scoreToPercentage(compositeScore())"></div>
-            </div>
-        </div>
-         <!-- Gating -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex flex-col justify-center items-center">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Gating Crítico</h3>
-            @if(aresScores().gatingStatus === 'OK' && compScores().gatingStatus === 'OK') {
-              <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">OK</p>
-              <p class="text-xs text-center text-gray-500">Aprobado</p>
-            } @else {
-               <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">Bloqueado</p>
-               <p class="text-xs text-center text-gray-500">Revisa ítems críticos (deben ser ≥3)</p>
-            }
-        </div>
-    </div>
-    
-    <!-- Brechas y Plan de Acción -->
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-      <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-white">Brechas y Plan de Acción</h2>
-          <div class="flex items-center space-x-2 no-print">
-            <label for="target-level" class="text-sm">Nivel Objetivo:</label>
-            <input type="number" id="target-level" min="1" max="5" 
-                   [ngModel]="stateService.targetLevel()" 
-                   (ngModelChange)="stateService.updateTargetLevel($event)"
-                   class="w-16 p-1 border rounded dark:bg-gray-700 dark:border-gray-600">
-          </div>
+    } @else {
+      <div class="text-center py-12">
+        <p class="text-gray-600 dark:text-gray-400">No se encontraron resultados del diagnóstico.</p>
       </div>
-
-      <!-- Tabla de Brechas -->
-      <div class="overflow-x-auto mb-6">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" class="px-6 py-3">Área (Pilar / Cluster)</th>
-              <th scope="col" class="px-6 py-3">Nivel Actual</th>
-              <th scope="col" class="px-6 py-3">Objetivo</th>
-              <th scope="col" class="px-6 py-3">Brecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for(gap of gaps(); track gap.area) {
-              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ gap.area }}</td>
-                <td class="px-6 py-4">{{ gap.score.toFixed(2) }}</td>
-                <td class="px-6 py-4">{{ gap.target }}</td>
-                <td class="px-6 py-4 font-bold" [class.text-red-600]="gap.gap > 0">{{ gap.gap.toFixed(2) }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Plan de Acción (IA) -->
-      <div class="border-t pt-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Plan de Acción Sugerido por IA</h3>
-          <button (click)="generateActionPlan()" [disabled]="isLoadingPlan()" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 disabled:opacity-50 no-print">
-            @if(isLoadingPlan()) { <span class="animate-pulse">Generando...</span> } @else { Generar Plan con IA }
-          </button>
-        </div>
-        
-        @if(isLoadingPlan()) {
-          <p class="text-center text-gray-500">La IA está generando tu plan de acción personalizado...</p>
-        }
-
-        @if(actionPlan(); as plan) {
-          <p class="text-gray-600 dark:text-gray-300 mb-4 italic">{{ plan.summary }}</p>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-              <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                  <th scope="col" class="px-6 py-3">Sugerencia</th>
-                  <th scope="col" class="px-6 py-3">Responsable</th>
-                  <th scope="col" class="px-6 py-3">Plazo</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for(item of plan.items; track item.id) {
-                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-4">
-                      <textarea [(ngModel)]="item.suggestion" class="w-full p-1 border-gray-200 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600"></textarea>
-                    </td>
-                    <td class="px-6 py-4">
-                      <input type="text" [(ngModel)]="item.responsible" class="w-full p-1 border-gray-200 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                    </td>
-                    <td class="px-6 py-4">
-                      <input type="text" [(ngModel)]="item.deadline" class="w-full p-1 border-gray-200 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        } @else if (!isLoadingPlan()) {
-          <p class="text-center text-gray-500 p-4 border-2 border-dashed rounded-lg">
-            Haz clic en "Generar Plan con IA" para obtener recomendaciones personalizadas basadas en tus resultados.
-          </p>
-        }
-      </div>
-    </div>
+    }
   </div>
 </div>

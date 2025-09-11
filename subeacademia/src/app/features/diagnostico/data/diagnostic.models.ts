@@ -1,14 +1,91 @@
-// Perfil de la empresa que realiza el diagnóstico
-export interface CompanyProfile {
-  industry: string;
-  size: '1-10' | '11-50' | '51-200' | '201-1000' | '1001+';
-  iaBudgetUSD: number | null;
+export interface ObjetivoData {
+  rol: string;
+  industria: string;
+  objetivo: string;
 }
 
-// Información del usuario que completa el diagnóstico
+export interface ContextoData {
+  area: string;
+  experiencia: string;
+  equipo: string;
+}
+
+export interface Answer {
+  value: number;
+  isCritical: boolean;
+}
+
 export interface UserLead {
-    name: string;
-    email: string;
+  name: string;
+  email: string;
+  phone?: string;
+}
+
+export interface DiagnosticData {
+  objetivo: ObjetivoData;
+  contexto: ContextoData;
+  competencias: { [key: string]: Answer };
+  ares: { [key: string]: Answer };
+  lead?: UserLead; // Añadir propiedad opcional para el lead
+}
+
+export const INITIAL_DIAGNOSTIC_DATA: DiagnosticData = {
+  objetivo: {
+    rol: '',
+    industria: '',
+    objetivo: ''
+  },
+  contexto: {
+    area: '',
+    experiencia: '',
+    equipo: ''
+  },
+  competencias: {},
+  ares: {}
+};
+
+// Interfaces de compatibilidad para el sistema anterior
+export interface DiagnosticoFormValue {
+  contexto?: any;
+  ares?: any;
+  competencias?: any;
+  objetivo?: any;
+  lead?: any;
+}
+
+export interface DiagnosticoPersistedPayload {
+  id?: string;
+  data: any;
+  timestamp?: Date;
+}
+
+export interface AresItem {
+  id: string;
+  labelKey: string;
+  tooltip?: string;
+  dimension: string;
+  phase: string;
+}
+
+export interface CompetenciaDef {
+  id: string;
+  nameKey: string;
+  description?: string;
+  cluster: string;
+}
+
+export interface Segment {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface NivelCompetencia {
+  id: string;
+  name: string;
+  description: string;
+  minScore: number;
+  maxScore: number;
 }
 
 // Tipos para las preguntas y respuestas
@@ -26,11 +103,6 @@ export interface Question {
   cluster?: string;
   critical: boolean;
   weight: number;
-}
-
-export interface Answer {
-  value: number | null; // Escala de 1 a 5
-  evidence?: string; // Lo renombraremos a "Notas" en la UI
 }
 
 // Tipos para los resultados de los cálculos
@@ -82,48 +154,4 @@ export interface ObjectivesApiResponse {
 export interface ActionPlanApiResponse {
   summary: string;
   items: ActionItem[];
-}
-
-// Interfaces de compatibilidad para el sistema anterior
-export interface DiagnosticoFormValue {
-  contexto?: any;
-  ares?: any;
-  competencias?: any;
-  objetivo?: any;
-  lead?: any;
-}
-
-export interface DiagnosticoPersistedPayload {
-  id?: string;
-  data: any;
-  timestamp?: Date;
-}
-
-export interface AresItem {
-  id: string;
-  labelKey: string;
-  tooltip?: string;
-  dimension: string;
-  phase: string;
-}
-
-export interface CompetenciaDef {
-  id: string;
-  nameKey: string;
-  description?: string;
-  cluster: string;
-}
-
-export interface Segment {
-  id: string;
-  name: string;
-  description?: string;
-}
-
-export interface NivelCompetencia {
-  id: string;
-  name: string;
-  description: string;
-  minScore: number;
-  maxScore: number;
 }

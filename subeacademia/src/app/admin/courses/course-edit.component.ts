@@ -528,7 +528,7 @@ export class CourseEditComponent implements OnInit, OnDestroy {
 
   private loadCompetencies(): void {
     import('../../features/diagnostico/data/competencias').then(module => {
-      this.competencias = module.COMPETENCIAS_COMPLETAS;
+      this.competencias = module.competencias;
     });
   }
 

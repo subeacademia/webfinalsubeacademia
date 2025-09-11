@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DiagnosticFlowLoggerService } from '../../services/diagnostic-flow-logger.service';
-import { GenerativeAiService } from '../../ai/generative-ai.service';
+import { BesselAiService } from '../../ai/bessel-ai.service';
 
 @Component({
   selector: 'app-debug-panel',
@@ -138,7 +138,7 @@ import { GenerativeAiService } from '../../ai/generative-ai.service';
 })
 export class DebugPanelComponent implements OnInit, OnDestroy {
   private flowLogger = inject(DiagnosticFlowLoggerService);
-  private generativeAiService = inject(GenerativeAiService);
+  private besselAiService = inject(BesselAiService);
   
   isOpen = signal(false);
   sessionId = signal('');
@@ -231,7 +231,7 @@ export class DebugPanelComponent implements OnInit, OnDestroy {
 
   diagnoseService(): void {
     console.log('🔍 DebugPanel: Iniciando diagnóstico del servicio...');
-    this.generativeAiService.diagnoseService();
+    // this.besselAiService.diagnoseService(); // Comentado hasta que se implemente el método
     
     // También mostrar estado del flujo logger
     console.log('🔍 DebugPanel: Estado del flujo logger', {

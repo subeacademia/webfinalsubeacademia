@@ -18,7 +18,7 @@ interface Step {
     template: `
     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
       <!-- Mensaje cuando el diagnóstico está completado -->
-      @if (stateService.isCompleted()) {
+      @if (false) {
         <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg text-center">
             <p class="text-green-800 dark:text-green-200 font-semibold">¡Diagnóstico completado!</p>
             <p class="text-sm text-green-700 dark:text-green-300">Puedes navegar libremente para revisar tus respuestas.</p>
@@ -70,15 +70,12 @@ export class StepNavComponent {
 
   // Lógica para determinar si un paso está habilitado
   isStepEnabled(step: Step): boolean {
-    if (this.stateService.isCompleted()) {
-      return true; // Si está completo, todos los pasos están habilitados
-    }
     const currentStepOrder = this.activeStep()?.order || 0;
     return step.order <= currentStepOrder;
   }
   
   startNew() {
-      this.stateService.startNewDiagnostic();
+      this.stateService.reset();
       this.router.navigate(['/diagnostico/contexto']);
   }
 }
