@@ -3,7 +3,9 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { DiagnosticFlowService } from '../../../services/diagnostic-flow.service';
 import { UserLead } from '../../../data/diagnostic.models';
+import { ToastService } from '../../../../../core/ui/toast/toast.service';
 
 @Component({
   selector: 'app-step-lead',
@@ -38,13 +40,9 @@ import { UserLead } from '../../../data/diagnostic.models';
             ← Volver
           </button>
           <button type="submit" 
-                  [disabled]="leadForm.invalid || stateService.isGeneratingReport()"
+                  [disabled]="leadForm.invalid"
                   class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-            @if (stateService.isGeneratingReport()) {
-              <span>Generando...</span>
-            } @else {
-              <span>Finalizar Diagnóstico</span>
-            }
+            <span>Finalizar Diagnóstico</span>
           </button>
         </div>
       </form>
@@ -54,7 +52,9 @@ import { UserLead } from '../../../data/diagnostic.models';
 export class StepLeadComponent {
   private fb = inject(FormBuilder);
   public stateService = inject(DiagnosticStateService);
+  private flowService = inject(DiagnosticFlowService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   leadForm = this.fb.group({
     name: ['', Validators.required],
@@ -62,11 +62,15 @@ export class StepLeadComponent {
     phone: ['']
   });
 
-  submit() {
+  async submit(): Promise<void> {
     if (this.leadForm.valid) {
-      this.stateService.updateData({ lead: this.leadForm.value as UserLead });
-      this.stateService.generateReportAndNavigate();
+      // Actualizar los datos del lead en el estado
+      this.stateService.updateLead(this.leadForm.value);
+      
+      console.log('StepLead: Formulario válido. Emitiendo evento diagnosticFinished.');
+      this.flowService.emitDiagnosticFinished(); // Notifica al padre que el último paso se completó
     } else {
+      // Marcar campos como tocados para mostrar errores
       this.leadForm.markAllAsTouched();
     }
   }

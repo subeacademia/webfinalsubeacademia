@@ -38,15 +38,15 @@ import { ReportData, StrategicInitiative, ExecutiveSummary } from '../../data/re
             <div class="space-y-3">
               <div>
                 <span class="font-medium text-gray-700 dark:text-gray-300">Nivel de Madurez:</span>
-                <span class="ml-2 text-blue-600 dark:text-blue-400">{{ strategicReport()?.executiveSummary?.currentMaturity || 'No disponible' }}</span>
+                <span class="ml-2 text-blue-600 dark:text-blue-400">{{ strategicReport()?.aiMaturity?.level || 'No disponible' }}</span>
               </div>
               <div>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Desafío Principal:</span>
-                <p class="mt-1 text-gray-600 dark:text-gray-400">{{ strategicReport()?.executiveSummary?.mainChallenge || 'No disponible' }}</p>
+                <span class="font-medium text-gray-700 dark:text-gray-300">Puntuación de Madurez:</span>
+                <span class="ml-2 text-blue-600 dark:text-blue-400">{{ strategicReport()?.aiMaturity?.score || 0 }}/100</span>
               </div>
               <div>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Recomendación Estratégica:</span>
-                <p class="mt-1 text-gray-600 dark:text-gray-400">{{ strategicReport()?.executiveSummary?.strategicRecommendation || 'No disponible' }}</p>
+                <span class="font-medium text-gray-700 dark:text-gray-300">Resumen Ejecutivo:</span>
+                <p class="mt-1 text-gray-600 dark:text-gray-400">{{ strategicReport()?.executiveSummary || 'No disponible' }}</p>
               </div>
             </div>
           </div>
@@ -67,6 +67,77 @@ import { ReportData, StrategicInitiative, ExecutiveSummary } from '../../data/re
               }
             </div>
           </div>
+
+          <!-- Insights Estratégicos -->
+          @if (strategicReport()?.insights && strategicReport()!.insights.length > 0) {
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
+              <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                💡 Insights Estratégicos
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @for (insight of strategicReport()!.insights; track insight.title) {
+                  <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="text-lg">
+                        @if (insight.type === 'Fortaleza Clave') { 🛡️ }
+                        @else if (insight.type === 'Riesgo Crítico') { ⚠️ }
+                        @else { 🚀 }
+                      </span>
+                      <span class="text-sm font-medium px-2 py-1 rounded-full
+                        @if (insight.type === 'Fortaleza Clave') { bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 }
+                        @else if (insight.type === 'Riesgo Crítico') { bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 }
+                        @else { bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 }">
+                        {{ insight.type }}
+                      </span>
+                    </div>
+                    <h4 class="font-semibold text-gray-800 dark:text-white mb-2">{{ insight.title }}</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ insight.description }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Análisis de Competencias -->
+          @if (strategicReport()?.strengthsAnalysis && strategicReport()!.strengthsAnalysis.length > 0) {
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Fortalezas -->
+              <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg border border-green-200 dark:border-green-700">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  🛡️ Fortalezas Principales
+                </h3>
+                <div class="space-y-3">
+                  @for (strength of strategicReport()!.strengthsAnalysis; track strength.competencyId) {
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded border border-green-200 dark:border-green-600">
+                      <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-medium text-gray-800 dark:text-white">{{ strength.competencyName }}</h4>
+                        <span class="text-sm font-bold text-green-600">{{ strength.score }}/100</span>
+                      </div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ strength.analysis }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Debilidades -->
+              <div class="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg border border-red-200 dark:border-red-700">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                  ⚠️ Áreas de Mejora Críticas
+                </h3>
+                <div class="space-y-3">
+                  @for (weakness of strategicReport()!.weaknessesAnalysis; track weakness.competencyId) {
+                    <div class="bg-white dark:bg-gray-800 p-3 rounded border border-red-200 dark:border-red-600">
+                      <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-medium text-gray-800 dark:text-white">{{ weakness.competencyName }}</h4>
+                        <span class="text-sm font-bold text-red-600">{{ weakness.score }}/100</span>
+                      </div>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ weakness.analysis }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
 
           <!-- Iniciativas Estratégicas -->
           <div class="space-y-4">
@@ -190,7 +261,7 @@ export class StrategicReportExampleComponent {
   /**
    * Ejemplo de cómo acceder a datos específicos del reporte
    */
-  getExecutiveSummary(): ExecutiveSummary | undefined {
+  getExecutiveSummary(): string | undefined {
     return this.strategicReport()?.executiveSummary;
   }
 

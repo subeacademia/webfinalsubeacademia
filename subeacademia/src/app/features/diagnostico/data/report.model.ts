@@ -37,6 +37,27 @@ export interface ExecutiveSummary {
   strategicRecommendation: string; // Recomendación de alto nivel
 }
 
+// ===== NUEVAS INTERFACES PARA ANÁLISIS DE MADUREZ E INSIGHTS =====
+
+export interface AiMaturity {
+  level: 'Incipiente' | 'En Desarrollo' | 'Establecido' | 'Estratégico' | 'Transformador';
+  score: number; // Un puntaje de 0 a 100 calculado por la IA
+  summary: string; // Un párrafo explicando por qué se asignó este nivel
+}
+
+export interface CompetencyAnalysis {
+  competencyId: string;
+  competencyName: string;
+  score: number;
+  analysis: string; // Análisis de la IA sobre el impacto de este puntaje
+}
+
+export interface StrategicInsight {
+  title: string;
+  description: string;
+  type: 'Fortaleza Clave' | 'Riesgo Crítico' | 'Oportunidad Oculta';
+}
+
 // ===== INTERFACES LEGACY (MANTENIDAS PARA COMPATIBILIDAD) =====
 
 export interface ReportSection {
@@ -70,20 +91,31 @@ export interface DiagnosticReport {
 // ===== NUEVA INTERFAZ PRINCIPAL DE REPORTE ESTRATÉGICO =====
 
 export interface ReportData {
-  // Datos de entrada del diagnóstico
-  aresScores: Record<string, number>;
-  competencyScores: Record<string, number>;
+  id: string;
+  timestamp: Date;
+  leadInfo: {
+    name: string;
+    email: string;
+    companyName?: string;
+  };
+  contexto: any; // El contexto que ya tienes
+  aresScores: { [key: string]: number };
+  competencyScores: { id: string; name: string; score: number }[];
   companyContext: {
     industry: string;
     size: string;
     mainObjective: string;
   };
   
-  // Análisis estratégico generado por IA
-  executiveSummary: ExecutiveSummary;
-  actionPlan: StrategicInitiative[];
+  // --- NUEVOS CAMPOS DE INTELIGENCIA ---
+  aiMaturity: AiMaturity;
+  executiveSummary: string; // Un resumen ejecutivo totalmente generado por IA
+  strengthsAnalysis: CompetencyAnalysis[]; // Análisis de las 3 competencias más altas
+  weaknessesAnalysis: CompetencyAnalysis[]; // Análisis de las 3 competencias más bajas
+  insights: StrategicInsight[]; // 2-3 insights estratégicos clave (riesgos/oportunidades)
+  actionPlan: any[]; // Mantén la estructura del plan de acción que ya tienes
   
-  // Metadatos
+  // Metadatos adicionales
   generatedAt: Date;
   version: string;
 }

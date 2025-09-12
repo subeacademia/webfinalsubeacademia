@@ -1,13 +1,18 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } from '@angular/fire/firestore';
 import { DiagnosticData } from '../data/diagnostic.models';
-import { Report } from '../data/report.model';
+import { Report, ReportData } from '../data/report.model';
+import { BesselAiService } from '../../../core/ai/bessel-ai.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiagnosticsService {
   private firestore: Firestore = inject(Firestore);
+  private besselAiService = inject(BesselAiService);
+  
+  // Signal para almacenar el reporte actual
+  private currentReport = signal<ReportData | null>(null);
   
   private get diagnosticsCollection() {
     return collection(this.firestore, 'diagnostics');
@@ -54,5 +59,56 @@ export class DiagnosticsService {
       results.push({ id: doc.id, ...doc.data() });
     });
     return results;
+  }
+
+  /**
+   * MÉTODO CRÍTICO: Genera el reporte usando el servicio de IA
+   */
+  async generateReport(diagnosticData: any): Promise<ReportData | null> {
+    // --- LOG DE VERIFICACIÓN #1 ---
+    console.log('--- DIAGNOSTICS SERVICE: INICIANDO GENERACIÓN ---');
+    console.log('Datos recibidos del state:', JSON.stringify(diagnosticData, null, 2));
+
+    if (!diagnosticData || !diagnosticData.contexto || !diagnosticData.competencias) {
+      console.error('ERROR CRÍTICO: Los datos para generar el reporte son incompletos o nulos.');
+      console.error('Contexto:', diagnosticData?.contexto);
+      console.error('Competencias:', diagnosticData?.competencias);
+      return null;
+    }
+
+    try {
+      // --- LLAMADA AL CEREBRO DE IA ---
+      const reportFromAI = await this.besselAiService.generateComprehensiveReport(diagnosticData);
+      
+      // --- LOG DE VERIFICACIÓN #2 ---
+      console.log('--- DIAGNOSTICS SERVICE: REPORTE RECIBIDO DE IA ---');
+      console.log(JSON.stringify(reportFromAI, null, 2));
+
+      if (!reportFromAI) {
+        throw new Error('El servicio de IA devolvió un resultado nulo.');
+      }
+
+      // Almacenar el reporte actual
+      this.currentReport.set(reportFromAI);
+      return reportFromAI;
+
+    } catch (error) {
+      console.error('Error CATASTRÓFICO en generateReport:', error);
+      return null; 
+    }
+  }
+
+  /**
+   * Obtiene el reporte actual almacenado
+   */
+  getCurrentReport(): ReportData | null {
+    return this.currentReport();
+  }
+
+  /**
+   * Establece el reporte actual
+   */
+  setCurrentReport(report: ReportData): void {
+    this.currentReport.set(report);
   }
 }

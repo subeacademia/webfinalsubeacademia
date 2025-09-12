@@ -15,7 +15,7 @@ import { competencias } from '../data/competencias';
 })
 export class DiagnosticStateService {
   private router = inject(Router);
-  private toastService = inject(ToastService);
+  public toastService = inject(ToastService);
   private besselAiService = inject(BesselAiService);
   private diagnosticsService = inject(DiagnosticsService);
   private cursosService = inject(CursosService);
@@ -39,6 +39,20 @@ export class DiagnosticStateService {
     const totalCount = competencias.flatMap(c => c.questions).length;
     return { answered: answeredCount, total: totalCount, isComplete: answeredCount === totalCount };
   });
+
+  /**
+   * Verifica si el diagnóstico está completo para poder generar el reporte
+   */
+  public isComplete(): boolean {
+    const data = this.diagnosticData();
+    return !!(
+      data.contexto &&
+      data.objetivo &&
+      data.lead &&
+      this.aresProgress().isComplete &&
+      this.competenciasProgress().isComplete
+    );
+  }
 
   start(): void {
     this.reset();
@@ -64,6 +78,16 @@ export class DiagnosticStateService {
       const updatedSection = { ...currentData[section], [questionId]: answer };
       return { ...currentData, [section]: updatedSection };
     });
+  }
+
+  /**
+   * Actualiza los datos del lead (información de contacto)
+   */
+  updateLead(leadData: any): void {
+    this.diagnosticData.update(currentData => ({
+      ...currentData,
+      lead: leadData
+    }));
   }
 
   nextStep(): void {
@@ -94,58 +118,8 @@ export class DiagnosticStateService {
     this.currentStep.update(step => step - 1);
   }
 
-  async generateReportAndNavigate(): Promise<void> {
-    const data = this.diagnosticData();
-    if (!data) {
-      this.toastService.show('error', 'No hay datos de diagnóstico.');
-      return;
-    }
-    this.isGeneratingReport.set(true);
-    try {
-      // Usar cursos mock para evitar problemas de Firebase
-      const cursosMock = [
-        {
-          id: '1',
-          titulo: 'Curso de Introducción a la IA',
-          descripcion: 'Aprende los conceptos básicos de la inteligencia artificial',
-          precio: 99,
-          duracion: '4 semanas',
-          nivel: 'Principiante',
-          activo: true
-        }
-      ];
-      
-      // Convertir los datos al formato esperado por BesselAiService
-      const besselData = {
-        profile: {
-          industry: data.objetivo.industria,
-          role: data.objetivo.rol,
-          objective: data.objetivo.objetivo
-        },
-        aresAnswers: data.ares,
-        compAnswers: data.competencias,
-        riskLevel: 'Mínimo', // Valor por defecto
-        lambdaComp: 0.5, // Valor por defecto
-        targetLevel: 4, // Valor por defecto
-        selectedGoals: [] // Array vacío por defecto
-      };
-      
-      const report = await this.besselAiService.generateReport(besselData, cursosMock);
-      this.generatedReport.set(report);
-      
-      this.toastService.show('success', 'Reporte generado correctamente.');
-      
-      // Navegar con prefijo de idioma
-      const currentUrl = this.router.url;
-      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
-      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
-    } catch (error: any) {
-      console.error('Error al generar reporte:', error);
-      this.toastService.show('error', `No se pudo generar el reporte: ${error.message || 'Error desconocido'}`);
-    } finally {
-      this.isGeneratingReport.set(false);
-    }
-  }
+  // MÉTODO ELIMINADO: La lógica de generación y navegación se centraliza ahora en diagnostico.component.ts
+  // Esto desacopla el servicio de estado de la lógica de aplicación y navegación
 
   /**
    * NUEVO MÉTODO: Genera un reporte estratégico de alto nivel

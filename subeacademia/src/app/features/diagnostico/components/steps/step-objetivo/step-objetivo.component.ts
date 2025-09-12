@@ -44,7 +44,11 @@ export class StepObjetivoComponent {
     this.sugerencias.set([]);
     try {
       const suggestions = await this.besselAiService.generarSugerenciasDeObjetivos(this.form.value.rol!, this.form.value.industria!);
-      this.sugerencias.set(suggestions);
+      if (suggestions) {
+        this.sugerencias.set(suggestions);
+      } else {
+        this.toastService.show('error', 'No se pudieron generar las sugerencias.');
+      }
     } catch (error) {
       console.error('Error al generar sugerencias:', error);
       this.toastService.show('error', 'No se pudieron generar las sugerencias.');
@@ -61,40 +65,68 @@ export class StepObjetivoComponent {
    * Genera objetivos empresariales usando IA con contexto del usuario
    */
   async generateObjectivesWithAI(): Promise<void> {
+    const userObjective = this.form.get('objetivo')?.value;
+    if (!userObjective || userObjective.trim().length < 10) {
+      this.toastService.show('warning', 'Por favor, escribe un objetivo más detallado para que la IA pueda ayudarte a mejorarlo.');
+      return;
+    }
+
     this.isGenerating.set(true);
-    
+    const industry = this.form.get('industria')?.value || this.diagnosticState.state().objetivo?.industria || 'una empresa';
+
+    // --- PROMPT DE REFINAMIENTO DE ALTA PRECISIÓN v3 - ONE-SHOT PROMPTING ---
+    const prompt = `
+      **Rol:** Eres un Asistente de Estrategia de Negocios. Tu única tarea es refinar un objetivo de negocio dado por un cliente para que sea SMART.
+
+      **Reglas Estrictas:**
+      1.  Debes basarte 100% en la intención del objetivo proporcionado.
+      2.  No puedes inventar temas nuevos. Si el objetivo es sobre "crecimiento", tus respuestas deben ser sobre crecimiento medible.
+      3.  Tu respuesta debe ser un array JSON de 3 strings, y nada más.
+
+      **Ejemplo de cómo debes trabajar:**
+      * **Objetivo del Cliente:** "quiero crecer y posicionar mi marca"
+      * **Tu Respuesta (JSON exacto):**
+          [
+            "Incrementar la cuota de mercado en un 5% y aumentar el reconocimiento de marca en un 10% (medido por encuestas) en los próximos 18 meses.",
+            "Lograr un crecimiento de ingresos del 30% año contra año y asegurar 3 apariciones en medios de comunicación relevantes del sector antes de fin de año.",
+            "Aumentar en un 40% la base de clientes del nuevo segmento de mercado y posicionar la marca como líder en sostenibilidad en nuestro informe anual."
+          ]
+
+      **Ahora, aplica estas reglas al siguiente objetivo:**
+      * **Objetivo del Cliente:** "${userObjective}"
+      * **Tu Respuesta (JSON exacto):**
+    `;
+
     try {
-      const currentState = this.diagnosticState.state();
-      const industry = this.form.get('industria')?.value || currentState.objetivo?.industria || 'negocios en general';
-      const companySize = 'una PyME'; // Valor por defecto ya que no hay contexto específico de tamaño
-
-      // --- Prompt de Alta Calidad ---
-      const prompt = `
-        Actúa como un consultor de estrategia de negocios especializado en transformación digital e IA.
-        Para una empresa del sector "${industry}" y del tamaño de "${companySize}", genera 3 objetivos empresariales SMART (Específicos, Medibles, Alcanzables, Relevantes, con Plazo).
-        Los objetivos deben ser concisos, inspiradores y orientados a resultados.
-        Devuelve la respuesta EXCLUSIVAMENTE como un array JSON de strings. Ejemplo: ["Optimizar la eficiencia operativa en un 15% para el Q4 mediante la automatización de procesos.", "Aumentar la captación de clientes en un 20% en los próximos 6 meses.", "Mejorar la satisfacción del cliente a 9/10 para fin de año."]
-      `;
-
       const response = await this.generativeAiService.generateText(prompt);
       
-      // Limpiar y parsear la respuesta de la IA
-      const cleanedResponse = response.replace(/```json|```/g, '').trim();
-      const objectives: string[] = JSON.parse(cleanedResponse);
+      // La respuesta de la IA a veces viene con texto extra y markdown.
+      // Esta expresión regular extrae el primer bloque JSON que encuentra.
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+      if (!jsonMatch || !jsonMatch[0]) {
+        console.error("Respuesta de IA recibida:", response);
+        throw new Error("La respuesta de la IA no contenía un array JSON válido.");
+      }
+      
+      const jsonString = jsonMatch[0];
+      const objectives: string[] = JSON.parse(jsonString);
+
+      // VALIDACIÓN DE ESTRUCTURA: Verifica que sea un array válido.
+      if (!Array.isArray(objectives) || objectives.length === 0) {
+          console.error("JSON parseado pero con estructura incorrecta:", objectives);
+          throw new Error("El JSON de la IA no es un array válido de objetivos.");
+      }
 
       if (objectives && objectives.length > 0) {
-        // Asignar el primer objetivo al campo del formulario
         this.form.controls['objetivo'].setValue(objectives[0]);
-        // Opcional: guardar los otros objetivos en un estado para que el usuario elija
         this.sugerencias.set(objectives);
-        this.toastService.show('success', 'Objetivos generados exitosamente con IA');
+        this.toastService.show('success', 'Objetivo refinado con IA. Puedes editarlo si lo deseas.');
       } else {
-        console.error('La IA no devolvió objetivos válidos.');
-        this.toastService.show('error', 'No se pudieron generar objetivos válidos');
+        throw new Error("La IA devolvió una lista de objetivos vacía.");
       }
     } catch (error) {
-      console.error('Error al generar objetivos con IA:', error);
-      this.toastService.show('error', 'Error al generar objetivos con IA. Inténtalo de nuevo.');
+      console.error('Error al procesar la respuesta de la IA para objetivos:', error);
+      this.toastService.show('error', 'No pudimos refinar tu objetivo en este momento. Por favor, revisa que sea claro o inténtalo de nuevo.');
     } finally {
       this.isGenerating.set(false);
     }

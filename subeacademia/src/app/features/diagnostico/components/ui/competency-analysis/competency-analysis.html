@@ -1,0 +1,36 @@
+<div class="competency-analysis">
+  <div class="flex items-center gap-3 mb-4">
+    <div class="text-2xl">{{ getTypeIcon() }}</div>
+    <h3 class="text-lg font-bold text-gray-800 dark:text-white">{{ title }}</h3>
+  </div>
+
+  @if (analyses && analyses.length > 0) {
+    <div class="space-y-4">
+      @for (analysis of analyses; track analysis.competencyId) {
+        <div class="analysis-item {{ getTypeBgColor() }} border {{ getTypeBorderColor() }} rounded-lg p-4 hover:shadow-md transition-all duration-300">
+          <!-- Header de la competencia -->
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-semibold text-gray-800 dark:text-white">{{ analysis.competencyName }}</h4>
+            <div class="flex items-center gap-2">
+              <div class="text-sm font-medium {{ getScoreColor(analysis.score) }}">{{ analysis.score }}/100</div>
+              <div class="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  class="h-full {{ getScoreBgColor(analysis.score) }} transition-all duration-1000 ease-out"
+                  [style.width.%]="analysis.score"
+                ></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Análisis de la competencia -->
+          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{{ analysis.analysis }}</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+      <div class="text-4xl mb-2">{{ getTypeIcon() }}</div>
+      <p>No hay análisis disponibles</p>
+    </div>
+  }
+</div>

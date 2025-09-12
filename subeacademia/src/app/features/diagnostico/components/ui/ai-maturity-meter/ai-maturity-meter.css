@@ -1,0 +1,19 @@
+.ai-maturity-meter {
+  transition: all 0.3s ease;
+}
+
+.ai-maturity-meter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación del círculo de progreso */
+circle {
+  transition: stroke-dashoffset 1s ease-in-out;
+}
+
+/* Efectos de hover para el nivel de madurez */
+.inline-flex:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}

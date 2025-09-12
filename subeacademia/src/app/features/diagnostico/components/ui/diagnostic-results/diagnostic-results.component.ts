@@ -2,15 +2,27 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { Report } from '../../../data/report.model';
+import { Report, ReportData } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { StrategicCtaComponent } from '../strategic-cta/strategic-cta.component';
 import { GapAnalysisChartComponent } from '../gap-analysis-chart/gap-analysis-chart.component';
+import { AiMaturityMeterComponent } from '../ai-maturity-meter/ai-maturity-meter';
+import { StrategicInsightsComponent } from '../strategic-insights/strategic-insights';
+import { CompetencyAnalysisComponent } from '../competency-analysis/competency-analysis';
+import { AnalysisCardComponent } from '../analysis-card/analysis-card';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, StrategicCtaComponent, GapAnalysisChartComponent],
+  imports: [
+    CommonModule, 
+    StrategicCtaComponent, 
+    GapAnalysisChartComponent,
+    AiMaturityMeterComponent,
+    StrategicInsightsComponent,
+    CompetencyAnalysisComponent,
+    AnalysisCardComponent
+  ],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
@@ -20,43 +32,70 @@ export class DiagnosticResultsComponent implements OnInit {
   public stateService = inject(DiagnosticStateService);
 
   report = signal<Report | null>(null);
+  holisticReport = signal<ReportData | null>(null);
   isLoading = signal(true);
 
   ngOnInit() {
     console.log('DiagnosticResultsComponent initialized');
     
-    // Primero intentar obtener el reporte del estado (flujo normal)
-    const stateReport = this.stateService.generatedReport();
-    console.log('State report:', stateReport);
+    // --- LÓGICA CRÍTICA DE OBTENCIÓN DE DATOS ---
+    const currentReport = this.diagnosticsService.getCurrentReport();
     
-    if (stateReport) {
-      this.report.set(stateReport);
+    // --- LOG DE VERIFICACIÓN #3 ---
+    console.log('--- DIAGNOSTIC-RESULTS COMPONENT: ngOnInit ---');
+    console.log('Reporte obtenido del servicio:', JSON.stringify(currentReport, null, 2));
+
+    if (currentReport && this.isValidReportData(currentReport)) {
+      this.holisticReport.set(currentReport);
       this.isLoading.set(false);
-      console.log('Report loaded from state');
+      console.log('Report loaded from service');
     } else {
-      // Si no hay reporte en el estado, intentar obtenerlo por ID
-      const id = this.route.snapshot.paramMap.get('id');
-      console.log('ID from route:', id);
+      // Fallback: intentar obtener del estado
+      const stateReport = this.stateService.generatedStrategicReport();
+      console.log('State report fallback:', stateReport);
       
-      if (id) {
-        this.diagnosticsService.getDiagnosticResult(id).then(docSnap => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            this.report.set(data['report'] as Report);
-            console.log('Report loaded from Firebase');
-          } else {
-            console.error("No such document!");
-          }
-          this.isLoading.set(false);
-        }).catch(error => {
-          console.error("Error getting document:", error);
-          this.isLoading.set(false);
-        });
+      if (stateReport && this.isValidReportData(stateReport)) {
+        this.holisticReport.set(stateReport);
+        this.isLoading.set(false);
+        console.log('Report loaded from state fallback');
       } else {
-        console.log('No ID and no state report, showing empty state');
+        console.error("No se encontró ningún reporte para mostrar. Esto no debería pasar.");
+        this.handleInvalidReport();
         this.isLoading.set(false);
       }
     }
+  }
+
+  /**
+   * Valida que el reporte tenga la estructura mínima necesaria
+   */
+  private isValidReport(report: any): boolean {
+    return report && 
+           typeof report === 'object' && 
+           report.titulo && 
+           report.resumen && 
+           Array.isArray(report.analisisCompetencias);
+  }
+
+  /**
+   * Valida que el reporte de datos tenga la estructura mínima necesaria
+   */
+  private isValidReportData(report: any): boolean {
+    return report && 
+           typeof report === 'object' && 
+           report.executiveSummary && 
+           report.aiMaturity &&
+           Array.isArray(report.strengthsAnalysis) &&
+           Array.isArray(report.weaknessesAnalysis);
+  }
+
+  /**
+   * Maneja el caso cuando el reporte es inválido o no existe
+   */
+  private handleInvalidReport(): void {
+    console.warn('No hay reporte válido disponible. Redirigiendo al inicio del diagnóstico.');
+    // Opcional: redirigir al inicio del diagnóstico
+    // this.router.navigate(['/diagnostico/contexto']);
   }
 
   printReport() {

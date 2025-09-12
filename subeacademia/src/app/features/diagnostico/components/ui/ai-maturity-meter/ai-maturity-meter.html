@@ -1,0 +1,68 @@
+<div class="ai-maturity-meter bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <div class="text-3xl">{{ getMaturityIcon() }}</div>
+      <div>
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">Nivel de Madurez en IA</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400">{{ getMaturityDescription() }}</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="text-3xl font-bold {{ getMaturityColor() }}">{{ maturity.score || 0 }}</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">/ 100</div>
+    </div>
+  </div>
+
+  <!-- Medidor Circular -->
+  <div class="relative w-48 h-48 mx-auto mb-6">
+    <!-- Círculo de fondo -->
+    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+      <!-- Círculo de fondo -->
+      <circle
+        cx="50"
+        cy="50"
+        r="40"
+        stroke="currentColor"
+        stroke-width="8"
+        fill="none"
+        class="text-gray-200 dark:text-gray-700"
+      />
+      <!-- Círculo de progreso -->
+      <circle
+        cx="50"
+        cy="50"
+        r="40"
+        stroke="currentColor"
+        stroke-width="8"
+        fill="none"
+        stroke-linecap="round"
+        [style.stroke-dasharray]="'251.2'"
+        [style.stroke-dashoffset]="251.2 - (251.2 * (maturity.score || 0)) / 100"
+        [class]="getMaturityColor().replace('text-', 'stroke-')"
+        class="transition-all duration-1000 ease-out"
+      />
+    </svg>
+    
+    <!-- Contenido central -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center">
+      <div class="text-2xl font-bold {{ getMaturityColor() }}">{{ maturity.score || 0 }}</div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">puntos</div>
+    </div>
+  </div>
+
+  <!-- Nivel de Madurez -->
+  <div class="text-center mb-4">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full {{ getMaturityBgColor() }}">
+      <span class="text-lg font-semibold {{ getMaturityColor() }}">{{ maturity.level || 'Incipiente' }}</span>
+    </div>
+  </div>
+
+  <!-- Resumen del Análisis -->
+  @if (maturity.summary) {
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+      <h4 class="font-medium text-gray-800 dark:text-white mb-2">Análisis de Madurez</h4>
+      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{{ maturity.summary }}</p>
+    </div>
+  }
+</div>
