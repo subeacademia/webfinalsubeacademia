@@ -1,6 +1,10 @@
-import { Component, Input, OnInit, signal, computed } from '@angular/core';
+import { Component, Input, OnInit, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxChartsModule, Color, ScaleType } from '@swimlane/ngx-charts';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
+
+// Registrar todos los componentes de Chart.js
+Chart.register(...registerables);
 
 export interface CompetencyScore {
   name: string;
@@ -89,25 +93,43 @@ export interface AresScore {
         </div>
       </div>
 
-      <!-- 🎨 GRÁFICO DE DONA PARA FRAMEWORK ARES -->
+      <!-- 🎨 GRÁFICO ARES INTERACTIVO -->
       <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-200 dark:border-gray-700">
         <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6 text-center">
-          Framework ARES
+          Framework ARES-AI Interactivo
         </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Gráfico de dona -->
-          <div class="flex justify-center">
-            <ngx-charts-pie-chart
-              [results]="aresChartData"
-              [scheme]="aresColorScheme"
-              [view]="pieView"
-              [gradient]="true"
-              [tooltipDisabled]="false"
-              [animations]="true"
-              [doughnut]="true"
-              [arcWidth]="0.6">
-            </ngx-charts-pie-chart>
+          <!-- Gráfico Radar Interactivo -->
+          <div class="relative">
+            <canvas #aresRadarCanvas class="w-full h-80"></canvas>
+            
+            <!-- Tooltip personalizado para ARES -->
+            <div #aresTooltip 
+                 class="absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 
+                        rounded-lg shadow-lg p-4 pointer-events-none opacity-0 transition-opacity duration-200
+                        z-10 min-w-64 max-w-80"
+                 [style.left.px]="aresTooltipX"
+                 [style.top.px]="aresTooltipY">
+              <div class="space-y-2">
+                <h4 class="font-semibold text-gray-800 dark:text-white">{{ aresTooltipData.dimension }}</h4>
+                <div class="space-y-1 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Puntaje:</span>
+                    <span class="font-medium" [ngClass]="getAresScoreColor(aresTooltipData.score)">
+                      {{ aresTooltipData.score }}/100
+                    </span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-400">Nivel:</span>
+                    <span class="font-medium">{{ getAresLevel(aresTooltipData.score) }}</span>
+                  </div>
+                </div>
+                <div class="pt-2 border-t border-gray-200 dark:border-gray-600">
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ aresTooltipData.description }}</p>
+                </div>
+              </div>
+            </div>
           </div>
           
           <!-- Métricas detalladas -->
@@ -229,14 +251,27 @@ export interface AresScore {
     }
   `]
 })
-export class DiagnosticChartsComponent implements OnInit {
+export class DiagnosticChartsComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() competencyScores: CompetencyScore[] = [];
   @Input() aresScores: AresScore | null = null;
+  
+  @ViewChild('aresRadarCanvas', { static: true }) aresRadarCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('aresTooltip', { static: true }) aresTooltip!: ElementRef<HTMLDivElement>;
   
   // Configuración de gráficos
   radarView: [number, number] = [600, 400];
   barView: [number, number] = [600, 400];
   pieView: [number, number] = [400, 300];
+  
+  // Variables para tooltip ARES
+  private aresChart: Chart | null = null;
+  aresTooltipX = 0;
+  aresTooltipY = 0;
+  aresTooltipData = {
+    dimension: '',
+    score: 0,
+    description: ''
+  };
   
   // Esquemas de colores
   colorScheme: Color = {
@@ -283,6 +318,17 @@ export class DiagnosticChartsComponent implements OnInit {
     // Ajustar vistas según el tamaño de pantalla
     this.adjustChartViews();
     window.addEventListener('resize', () => this.adjustChartViews());
+  }
+
+  ngAfterViewInit(): void {
+    this.createAresRadarChart();
+  }
+
+  ngOnDestroy(): void {
+    if (this.aresChart) {
+      this.aresChart.destroy();
+    }
+    window.removeEventListener('resize', () => this.adjustChartViews());
   }
   
   private adjustChartViews(): void {
@@ -373,5 +419,133 @@ export class DiagnosticChartsComponent implements OnInit {
       'text-orange-600 dark:text-orange-400'
     ];
     return classes[index] || classes[0];
+  }
+
+  private createAresRadarChart(): void {
+    const ctx = this.aresRadarCanvas.nativeElement.getContext('2d');
+    if (!ctx) return;
+
+    const aresData = this.prepareAresChartData();
+    const labels = aresData.map(item => item.name);
+    const scores = aresData.map(item => item.value);
+
+    const config: ChartConfiguration = {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Puntaje ARES',
+          data: scores,
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 3,
+          pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          pointHoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false,
+            external: (context) => this.showAresTooltip(context, aresData)
+          }
+        },
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            min: 0,
+            ticks: {
+              stepSize: 20,
+              callback: function(value) {
+                return value + '/100';
+              }
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            },
+            angleLines: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            },
+            pointLabels: {
+              font: {
+                size: 12,
+                weight: 'bold'
+              },
+              color: '#374151'
+            }
+          }
+        },
+        interaction: {
+          intersect: false
+        },
+        onHover: (event, elements) => {
+          if (elements.length > 0) {
+            const index = elements[0].index;
+            this.showAresTooltip(event, aresData[index]);
+          } else {
+            this.hideAresTooltip();
+          }
+        }
+      }
+    };
+
+    this.aresChart = new Chart(ctx, config);
+  }
+
+  private showAresTooltip(event: any, data: any): void {
+    this.aresTooltipData = {
+      dimension: data.name,
+      score: data.value,
+      description: this.getAresDescription(data.name)
+    };
+    this.aresTooltipX = event.offsetX + 10;
+    this.aresTooltipY = event.offsetY - 10;
+    
+    const tooltip = this.aresTooltip.nativeElement;
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateY(-50%)';
+  }
+
+  private hideAresTooltip(): void {
+    const tooltip = this.aresTooltip.nativeElement;
+    tooltip.style.opacity = '0';
+  }
+
+  private getAresDescription(dimension: string): string {
+    const descriptions: { [key: string]: string } = {
+      'Análisis': 'Capacidad para procesar información compleja y extraer insights valiosos.',
+      'Responsabilidad': 'Compromiso con la ética y la transparencia en el uso de IA.',
+      'Estrategia': 'Visión a largo plazo y planificación estratégica en transformación digital.',
+      'Sistemas': 'Habilidades técnicas para implementar y mantener sistemas de IA.'
+    };
+    return descriptions[dimension] || 'Dimensión del framework ARES-AI';
+  }
+
+  getAresScoreColor(score: number): string {
+    if (score >= 80) return 'text-green-600 dark:text-green-400';
+    if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
+    if (score >= 40) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
+  }
+
+  getAresLevel(score: number): string {
+    if (score >= 90) return 'Excelente';
+    if (score >= 80) return 'Muy Bueno';
+    if (score >= 70) return 'Bueno';
+    if (score >= 60) return 'Satisfactorio';
+    if (score >= 40) return 'Necesita Mejora';
+    return 'Crítico';
   }
 }

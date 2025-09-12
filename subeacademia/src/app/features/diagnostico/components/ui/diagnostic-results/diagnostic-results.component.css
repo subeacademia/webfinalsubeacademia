@@ -1,3 +1,90 @@
+/* ===== DASHBOARD DE MANDO ESTRATÉGICO ===== */
+
+/* CSS Grid Layout para Dashboard de Mando */
+.grid-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "header header header"
+    "summary summary cta"
+    "ares competency cta"
+    "plan plan plan";
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+/* Estilos para los items del grid */
+.grid-header { 
+  grid-area: header; 
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+.grid-summary { 
+  grid-area: summary; 
+  @apply card-style;
+}
+
+.grid-ares { 
+  grid-area: ares; 
+  @apply card-style;
+}
+
+.grid-competency { 
+  grid-area: competency; 
+  @apply card-style;
+}
+
+.grid-plan { 
+  grid-area: plan; 
+  @apply card-style;
+}
+
+.grid-cta { 
+  grid-area: cta; 
+  @apply h-full;
+}
+
+/* Estilo unificado para tarjetas */
+.card-style {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-style:hover {
+  @apply shadow-xl transform -translate-y-1;
+}
+
+/* Media query para tablets */
+@media (max-width: 1024px) {
+  .grid-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "header header"
+      "summary cta"
+      "ares competency"
+      "plan plan";
+  }
+}
+
+/* Media query para móviles */
+@media (max-width: 768px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "summary"
+      "cta"
+      "competency"
+      "ares"
+      "plan";
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+/* ===== ESTILOS LEGACY (MANTENIDOS PARA COMPATIBILIDAD) ===== */
+
 /* Estilos personalizados para la página de resultados del diagnóstico */
 
 /* Animaciones de entrada */

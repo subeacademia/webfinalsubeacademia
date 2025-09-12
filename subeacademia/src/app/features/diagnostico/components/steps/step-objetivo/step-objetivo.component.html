@@ -12,12 +12,40 @@
             }
         </select>
     </div>
-    <textarea formControlName="objetivo" rows="4" placeholder="Describe tu objetivo profesional principal..." class="w-full p-2 border rounded mb-4"></textarea>
-    <button (click)="generarSugerencias()" [disabled]="isLoadingSuggestions() || !allFieldsFilled" class="w-full p-2 bg-blue-500 text-white rounded disabled:bg-gray-400">
+    <!-- Campo de objetivo con botón de IA integrado -->
+    <div class="relative mb-4">
+        <textarea formControlName="objetivo" rows="4" placeholder="Describe tu objetivo profesional principal..." class="w-full p-2 pr-16 border rounded"></textarea>
+        
+        <!-- Botón de IA flotante -->
+        <button 
+            type="button" 
+            (click)="generateObjectivesWithAI()" 
+            [disabled]="isGenerating()" 
+            class="absolute top-2 right-2 p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Generar objetivo con IA">
+            
+            <!-- Muestra un spinner si está cargando, si no, el icono de IA -->
+            <ng-container *ngIf="!isGenerating(); else loadingSpinner">
+                <!-- Icono de IA (varita mágica) -->
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9H3"></path>
+                </svg>
+            </ng-container>
+
+            <ng-template #loadingSpinner>
+                <!-- Spinner de carga -->
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            </ng-template>
+        </button>
+    </div>
+
+    <!-- Botón de sugerencias existente -->
+    <button (click)="generarSugerencias()" [disabled]="isLoadingSuggestions() || !allFieldsFilled" class="w-full p-2 bg-green-500 text-white rounded disabled:bg-gray-400 mb-4">
         @if (isLoadingSuggestions()) {
-            <span>Generando...</span>
+            <span>Generando sugerencias...</span>
         } @else {
-            <span>Generar Sugerencias con IA</span>
+            <span>Generar Sugerencias Detalladas</span>
         }
     </button>
     

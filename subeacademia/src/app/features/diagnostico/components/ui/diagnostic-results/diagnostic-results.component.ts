@@ -4,11 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { Report } from '../../../data/report.model';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
+import { StrategicCtaComponent } from '../strategic-cta/strategic-cta.component';
+import { GapAnalysisChartComponent } from '../gap-analysis-chart/gap-analysis-chart.component';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StrategicCtaComponent, GapAnalysisChartComponent],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
@@ -67,5 +69,47 @@ export class DiagnosticResultsComponent implements OnInit {
 
   getCurrentDate(): string {
     return new Date().toLocaleDateString();
+  }
+
+  /**
+   * Calcula la puntuación general del diagnóstico
+   */
+  getOverallScore(): number {
+    const report = this.report();
+    if (!report?.analisisCompetencias || report.analisisCompetencias.length === 0) {
+      return 0;
+    }
+
+    const totalScore = report.analisisCompetencias.reduce((sum, comp) => sum + comp.puntaje, 0);
+    const maxScore = report.analisisCompetencias.length * 5;
+    const percentage = (totalScore / maxScore) * 100;
+    
+    return Math.round(percentage);
+  }
+
+  /**
+   * Convierte los datos de competencias al formato requerido por GapAnalysisChart
+   */
+  getCompetencyScoresForGapAnalysis(): Record<string, number> {
+    const report = this.report();
+    if (!report?.analisisCompetencias || report.analisisCompetencias.length === 0) {
+      return {};
+    }
+
+    const scores: Record<string, number> = {};
+    report.analisisCompetencias.forEach(comp => {
+      // Convertir el nombre de la competencia a un formato de clave
+      const key = comp.competencia.toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[áéíóú]/g, (match) => {
+          const map: { [key: string]: string } = {
+            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u'
+          };
+          return map[match] || match;
+        });
+      scores[key] = comp.puntaje;
+    });
+
+    return scores;
   }
 }

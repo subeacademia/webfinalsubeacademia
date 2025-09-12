@@ -2,7 +2,7 @@ import { Injectable, signal, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastService, ToastKind } from '../../../core/ui/toast/toast.service';
 import { DiagnosticData, INITIAL_DIAGNOSTIC_DATA, Answer } from '../data/diagnostic.models';
-import { Report } from '../data/report.model';
+import { Report, ReportData } from '../data/report.model';
 import { BesselAiService } from '../../../core/ai/bessel-ai.service';
 import { DiagnosticsService } from './diagnostics.service';
 import { CursosService } from '../../productos/services/cursos.service';
@@ -24,6 +24,7 @@ export class DiagnosticStateService {
   currentStep = signal(0);
   isGeneratingReport = signal(false);
   generatedReport = signal<Report | null>(null);
+  generatedStrategicReport = signal<ReportData | null>(null);
 
   public state = computed(() => this.diagnosticData());
 
@@ -141,6 +142,68 @@ export class DiagnosticStateService {
     } catch (error: any) {
       console.error('Error al generar reporte:', error);
       this.toastService.show('error', `No se pudo generar el reporte: ${error.message || 'Error desconocido'}`);
+    } finally {
+      this.isGeneratingReport.set(false);
+    }
+  }
+
+  /**
+   * NUEVO MÉTODO: Genera un reporte estratégico de alto nivel
+   */
+  async generateStrategicReport(): Promise<void> {
+    if (this.isGeneratingReport()) return;
+    
+    const data = this.diagnosticData();
+    if (!data) {
+      this.toastService.show('error', 'No hay datos de diagnóstico.');
+      return;
+    }
+    
+    this.isGeneratingReport.set(true);
+    
+    try {
+      // Usar cursos mock para evitar problemas de Firebase
+      const cursosMock = [
+        {
+          id: '1',
+          titulo: 'Curso de Introducción a la IA',
+          descripcion: 'Aprende los conceptos básicos de la inteligencia artificial',
+          precio: 99,
+          duracion: '4 semanas',
+          nivel: 'Principiante',
+          activo: true
+        }
+      ];
+      
+      // Convertir los datos al formato esperado por BesselAiService
+      const besselData = {
+        profile: {
+          industry: data.objetivo.industria,
+          companySize: data.contexto?.equipo ? `${data.contexto.equipo} empleados` : 'No especificado',
+          mainObjective: data.objetivo.objetivo
+        },
+        aresAnswers: data.ares,
+        compAnswers: data.competencias,
+        riskLevel: 'Mínimo',
+        lambdaComp: 0.5,
+        targetLevel: 4,
+        selectedGoals: []
+      };
+      
+      console.log('🚀 Generando reporte estratégico con datos:', besselData);
+      
+      const strategicReport = await this.besselAiService.generateStrategicReport(besselData, cursosMock);
+      this.generatedStrategicReport.set(strategicReport);
+      
+      this.toastService.show('success', 'Reporte estratégico generado correctamente.');
+      
+      // Navegar con prefijo de idioma
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+    } catch (error: any) {
+      console.error('❌ Error al generar reporte estratégico:', error);
+      this.toastService.show('error', `No se pudo generar el reporte estratégico: ${error.message || 'Error desconocido'}`);
     } finally {
       this.isGeneratingReport.set(false);
     }
