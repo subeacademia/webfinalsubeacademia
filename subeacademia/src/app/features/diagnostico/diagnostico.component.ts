@@ -4,8 +4,6 @@ import { RouterOutlet, Router } from '@angular/router';
 import { StepNavComponent } from './components/step-nav.component';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
 import { DiagnosticsService } from './services/diagnostics.service';
-import { DiagnosticFlowService } from './services/diagnostic-flow.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-diagnostico',
@@ -27,7 +25,7 @@ import { Subscription } from 'rxjs';
             <app-step-nav></app-step-nav>
             <div class="p-2 md:p-4">
               <!-- El router-outlet ahora siempre está visible -->
-              <router-outlet></router-outlet>
+              <router-outlet (diagnosticFinished)="generateFinalReport()"></router-outlet>
             </div>
           </div>
         </div>
@@ -50,29 +48,27 @@ import { Subscription } from 'rxjs';
 export class DiagnosticoComponent implements OnInit, OnDestroy {
   private stateService = inject(DiagnosticStateService);
   private diagnosticsService = inject(DiagnosticsService);
-  private flowService = inject(DiagnosticFlowService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
   // Estado de carga centralizado en este componente
   isGeneratingReport = signal(false);
-  private subscription?: Subscription;
 
   ngOnInit() {
-    // Escuchar el evento de diagnóstico completado
-    this.subscription = this.flowService.diagnosticFinished$.subscribe(() => {
-      this.generateFinalReport();
-    });
+    // El evento ahora se maneja directamente a través del template binding
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    // No hay suscripciones que limpiar
   }
 
   // ¡ESTE ES AHORA EL ÚNICO PUNTO DE ENTRADA PARA LA GENERACIÓN DEL REPORTE!
   async generateFinalReport(): Promise<void> {
+    if (!this.stateService.isComplete()) {
+      alert('Por favor, completa todos los pasos del diagnóstico.');
+      return;
+    }
+    
     console.log('DiagnosticoComponent: Recibido evento. Iniciando generación de reporte...');
     this.isGeneratingReport.set(true);
     this.cdr.detectChanges(); // Muestra el loader

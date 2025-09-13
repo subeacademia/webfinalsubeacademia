@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -56,6 +56,8 @@ export class StepLeadComponent {
   private router = inject(Router);
   private toastService = inject(ToastService);
 
+  @Output() diagnosticFinished = new EventEmitter<void>();
+
   leadForm = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
@@ -68,7 +70,7 @@ export class StepLeadComponent {
       this.stateService.updateLead(this.leadForm.value);
       
       console.log('StepLead: Formulario válido. Emitiendo evento diagnosticFinished.');
-      this.flowService.emitDiagnosticFinished(); // Notifica al padre que el último paso se completó
+      this.diagnosticFinished.emit(); // Emite el evento al componente padre
     } else {
       // Marcar campos como tocados para mostrar errores
       this.leadForm.markAllAsTouched();
