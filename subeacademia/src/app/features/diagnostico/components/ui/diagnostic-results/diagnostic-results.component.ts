@@ -122,6 +122,169 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
               }
             </div>
 
+            <!-- ARES Phase Analysis -->
+            @if (report()?.aresPhaseAnalysis) {
+              <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                  <span class="text-4xl mr-3">📊</span>
+                  Análisis de Fases ARES
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-8 text-lg">
+                  Evaluación detallada del estado de madurez en cada fase del framework ARES
+                </p>
+                
+                <!-- Fase General -->
+                <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg p-6 mb-8">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Fase Actual</h3>
+                    <span class="px-4 py-2 bg-indigo-600 text-white rounded-full font-medium">
+                      {{ report()?.aresPhaseAnalysis?.overallPhase || 'N/A' }}
+                    </span>
+                  </div>
+                  <p class="text-gray-700 dark:text-gray-300 mb-4">
+                    {{ report()?.aresPhaseAnalysis?.phaseGap || 'Análisis en progreso...' }}
+                  </p>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <strong>Próxima Fase:</strong> {{ report()?.aresPhaseAnalysis?.nextPhase || 'N/A' }}
+                  </div>
+                </div>
+
+                <!-- Fases Individuales -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Preparación</h4>
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                      {{ report()?.aresPhaseAnalysis?.preparacion?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                      <div class="bg-blue-600 h-2 rounded-full" [style.width.%]="report()?.aresPhaseAnalysis?.preparacion?.score || 0"></div>
+                    </div>
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full" [class]="getPhaseStatusColor(report()?.aresPhaseAnalysis?.preparacion?.status)">
+                      {{ report()?.aresPhaseAnalysis?.preparacion?.status || 'N/A' }}
+                    </span>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-3">
+                      {{ report()?.aresPhaseAnalysis?.preparacion?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Diseño</h4>
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      {{ report()?.aresPhaseAnalysis?.diseno?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                      <div class="bg-green-600 h-2 rounded-full" [style.width.%]="report()?.aresPhaseAnalysis?.diseno?.score || 0"></div>
+                    </div>
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full" [class]="getPhaseStatusColor(report()?.aresPhaseAnalysis?.diseno?.status)">
+                      {{ report()?.aresPhaseAnalysis?.diseno?.status || 'N/A' }}
+                    </span>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-3">
+                      {{ report()?.aresPhaseAnalysis?.diseno?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Desarrollo</h4>
+                    <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">
+                      {{ report()?.aresPhaseAnalysis?.desarrollo?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                      <div class="bg-yellow-600 h-2 rounded-full" [style.width.%]="report()?.aresPhaseAnalysis?.desarrollo?.score || 0"></div>
+                    </div>
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full" [class]="getPhaseStatusColor(report()?.aresPhaseAnalysis?.desarrollo?.status)">
+                      {{ report()?.aresPhaseAnalysis?.desarrollo?.status || 'N/A' }}
+                    </span>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-3">
+                      {{ report()?.aresPhaseAnalysis?.desarrollo?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                    <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Monitoreo</h4>
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                      {{ report()?.aresPhaseAnalysis?.monitoreo?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                      <div class="bg-purple-600 h-2 rounded-full" [style.width.%]="report()?.aresPhaseAnalysis?.monitoreo?.score || 0"></div>
+                    </div>
+                    <span class="inline-block px-2 py-1 text-xs font-medium rounded-full" [class]="getPhaseStatusColor(report()?.aresPhaseAnalysis?.monitoreo?.status)">
+                      {{ report()?.aresPhaseAnalysis?.monitoreo?.status || 'N/A' }}
+                    </span>
+                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-3">
+                      {{ report()?.aresPhaseAnalysis?.monitoreo?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Organizational Maturity -->
+            @if (report()?.organizationalMaturity) {
+              <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                  <span class="text-4xl mr-3">🏢</span>
+                  Madurez Organizacional en IA
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-8 text-lg">
+                  Evaluación de los pilares fundamentales para la transformación digital
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-lg p-6">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-3">Cultura</h3>
+                    <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                      {{ report()?.organizationalMaturity?.culture?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2 mb-3">
+                      <div class="bg-blue-600 h-2 rounded-full" [style.width.%]="report()?.organizationalMaturity?.culture?.score || 0"></div>
+                    </div>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                      {{ report()?.organizationalMaturity?.culture?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-lg p-6">
+                    <h3 class="font-semibold text-green-800 dark:text-green-300 mb-3">Procesos</h3>
+                    <div class="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">
+                      {{ report()?.organizationalMaturity?.processes?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-green-200 dark:bg-green-800 rounded-full h-2 mb-3">
+                      <div class="bg-green-600 h-2 rounded-full" [style.width.%]="report()?.organizationalMaturity?.processes?.score || 0"></div>
+                    </div>
+                    <p class="text-sm text-green-700 dark:text-green-300">
+                      {{ report()?.organizationalMaturity?.processes?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-900/30 rounded-lg p-6">
+                    <h3 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">Tecnología</h3>
+                    <div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">
+                      {{ report()?.organizationalMaturity?.technology?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-yellow-200 dark:bg-yellow-800 rounded-full h-2 mb-3">
+                      <div class="bg-yellow-600 h-2 rounded-full" [style.width.%]="report()?.organizationalMaturity?.technology?.score || 0"></div>
+                    </div>
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                      {{ report()?.organizationalMaturity?.technology?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+
+                  <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-900/30 rounded-lg p-6">
+                    <h3 class="font-semibold text-purple-800 dark:text-purple-300 mb-3">Gobernanza</h3>
+                    <div class="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+                      {{ report()?.organizationalMaturity?.governance?.score || 0 }}/100
+                    </div>
+                    <div class="w-full bg-purple-200 dark:bg-purple-800 rounded-full h-2 mb-3">
+                      <div class="bg-purple-600 h-2 rounded-full" [style.width.%]="report()?.organizationalMaturity?.governance?.score || 0"></div>
+                    </div>
+                    <p class="text-sm text-purple-700 dark:text-purple-300">
+                      {{ report()?.organizationalMaturity?.governance?.description || 'Análisis en progreso...' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+
             <!-- Competency Analysis -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
               <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
@@ -702,5 +865,18 @@ export class DiagnosticResultsComponent implements OnInit {
   getCompetencyName(competencyId: string): string {
     const competency = this.report()?.competencyScores?.find((c: any) => c.id === competencyId);
     return competency?.name || competencyId;
+  }
+
+  getPhaseStatusColor(status: string): string {
+    switch (status?.toLowerCase()) {
+      case 'completado':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'en progreso':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'pendiente':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
   }
 }

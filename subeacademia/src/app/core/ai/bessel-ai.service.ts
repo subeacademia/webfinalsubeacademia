@@ -806,7 +806,7 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     - Considera el contexto específico de su industria, tamaño de empresa y objetivos
     - Sé específico y personalizado en cada análisis
 
-    1.  **Cálculo y Justificación del Nivel de Madurez (aiMaturity):**
+    1.  **Análisis Completo de Madurez de IA (aiMaturity):**
         - Analiza los datos completos para calcular un puntaje de madurez (\`score\`) de 0 a 100
         - Considera no solo las puntuaciones numéricas, sino también la coherencia de las respuestas, la profundidad del autoconocimiento, y la alineación entre objetivos y capacidades
         - Asigna un \`level\` basado en estos rangos EXACTOS:
@@ -815,9 +815,29 @@ ${JSON.stringify(contextoAdicional, null, 2)}
           * Establecido: 41-60 puntos
           * Estratégico: 61-80 puntos
           * Transformador: 81-100 puntos
-        - Escribe un \`summary\` detallado (mínimo 4-5 oraciones) que justifique tu calificación basándote en los datos específicos del usuario, mencionando respuestas concretas, patrones identificados, y cómo estos impactan su madurez en IA.
+        - Escribe un \`summary\` detallado (mínimo 6-8 oraciones) que incluya:
+          * Justificación de la calificación basada en datos específicos del usuario
+          * Análisis de las fases ARES en las que se encuentra la empresa (Preparación, Diseño, Desarrollo, Monitoreo)
+          * Evaluación de la madurez organizacional en IA (cultura, procesos, tecnología, gobernanza)
+          * Identificación de las fortalezas y debilidades más críticas en la transformación digital
+          * Recomendaciones específicas para avanzar al siguiente nivel de madurez
 
-    2.  **Análisis de Fortalezas (strengthsAnalysis):**
+    2.  **Análisis de Fases ARES (aresPhaseAnalysis):**
+        - Analiza las respuestas ARES para determinar en qué fase se encuentra la organización
+        - Evalúa cada fase (Preparación, Diseño, Desarrollo, Monitoreo) con puntuación 0-100
+        - Determina el estado de cada fase: "Completado", "En Progreso", o "Pendiente"
+        - Identifica la fase general actual y la siguiente fase a alcanzar
+        - Describe qué falta para avanzar a la siguiente fase
+        - Basa el análisis en las respuestas específicas del usuario sobre gobernanza, procesos, tecnología y cultura
+
+    3.  **Análisis de Madurez Organizacional (organizationalMaturity):**
+        - Evalúa la cultura de IA (colaboración, experimentación, aceptación del cambio)
+        - Analiza los procesos (metodologías ágiles, gestión de proyectos, gobernanza)
+        - Revisa la tecnología (infraestructura, herramientas, automatización)
+        - Examina la gobernanza (comités, cumplimiento, supervisión humana)
+        - Cada dimensión debe tener puntuación 0-100 y descripción específica
+
+    4.  **Análisis de Fortalezas (strengthsAnalysis):**
         - Identifica las 3 competencias con el puntaje más alto
         - Para cada fortaleza, analiza las respuestas específicas del usuario que la respaldan
         - Escribe un \`analysis\` detallado que explique CÓMO esta fortaleza específica puede ser utilizada para alcanzar su objetivo principal: "${companyContext.mainObjective}"
@@ -832,16 +852,19 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         - Incluye ejemplos concretos de cómo esta debilidad podría impactar sus objetivos
 
     4.  **Resumen Ejecutivo (executiveSummary):**
-        - Escribe un resumen ejecutivo detallado (mínimo 5-6 oraciones) para un CEO
+        - Escribe un resumen ejecutivo detallado (mínimo 6-8 oraciones) para un CEO
         - Basa tu análisis en los datos específicos y respuestas del usuario
         - Incluye:
           * El nivel de madurez actual y su significado estratégico específico para su empresa
+          * Análisis de las fases ARES donde se encuentra la organización (Preparación, Diseño, Desarrollo, Monitoreo)
           * Las fortalezas clave identificadas y cómo apalancarlas en su contexto
-          * La brecha más crítica que impide el progreso hacia su objetivo
-          * El impacto específico en el objetivo principal: "${companyContext.mainObjective}"
+          * La brecha más crítica que impide el progreso en la adopción de IA
+          * Evaluación del estado de gobernanza, cultura y procesos de IA
           * Una recomendación estratégica concreta y accionable basada en sus datos
           * El potencial de crecimiento y ROI esperado específico para su situación
+          * Timeline realista para alcanzar el siguiente nivel de madurez
         - Debe ser directo, sin rodeos, y orientado a la toma de decisiones ejecutivas
+        - NO repitas el objetivo principal del usuario, enfócate en el análisis estratégico
 
     5.  **Plan de Acción Personalizado (actionPlan):**
         - Genera un plan de acción DETALLADO y PERSONALIZADO basado en los datos específicos del usuario
@@ -856,6 +879,21 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     **FORMATO DE SALIDA OBLIGATORIO (JSON):**
     {
       "aiMaturity": { "level": "...", "score": ..., "summary": "..." },
+      "aresPhaseAnalysis": {
+        "preparacion": { "score": ..., "status": "Completado|En Progreso|Pendiente", "description": "..." },
+        "diseno": { "score": ..., "status": "Completado|En Progreso|Pendiente", "description": "..." },
+        "desarrollo": { "score": ..., "status": "Completado|En Progreso|Pendiente", "description": "..." },
+        "monitoreo": { "score": ..., "status": "Completado|En Progreso|Pendiente", "description": "..." },
+        "overallPhase": "Preparación|Diseño|Desarrollo|Monitoreo",
+        "nextPhase": "Preparación|Diseño|Desarrollo|Monitoreo",
+        "phaseGap": "Descripción de lo que falta para avanzar a la siguiente fase"
+      },
+      "organizationalMaturity": {
+        "culture": { "score": ..., "description": "..." },
+        "processes": { "score": ..., "description": "..." },
+        "technology": { "score": ..., "description": "..." },
+        "governance": { "score": ..., "description": "..." }
+      },
       "executiveSummary": "...",
       "strengthsAnalysis": [ { "competencyId": "...", "competencyName": "...", "score": ..., "analysis": "..." }, ... ],
       "weaknessesAnalysis": [ { "competencyId": "...", "competencyName": "...", "score": ..., "analysis": "..." }, ... ],
