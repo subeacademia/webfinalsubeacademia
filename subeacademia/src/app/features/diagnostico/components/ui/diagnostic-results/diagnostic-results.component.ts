@@ -333,12 +333,12 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
             </div>
 
             <!-- Recommendations -->
-            <div class="bg-gradient-to-r from-green-500 to-teal-600 rounded-xl shadow-lg p-8 text-white">
-              <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <div class="bg-gradient-to-r from-green-500 to-teal-600 dark:from-green-600 dark:to-teal-700 rounded-xl shadow-lg p-8 text-white">
+              <h2 class="text-2xl font-bold mb-4 flex items-center text-white">
                 💡 Recomendaciones Generales
               </h2>
               <div class="prose prose-lg max-w-none prose-invert">
-                <p class="leading-relaxed">
+                <p class="leading-relaxed text-white">
                   {{ report()?.executiveSummary || 'Tus recomendaciones están siendo generadas...' }}
                 </p>
               </div>

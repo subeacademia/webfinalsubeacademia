@@ -742,9 +742,9 @@ ${JSON.stringify(contextoAdicional, null, 2)}
 
     // Construir el contexto de la empresa
     const companyContext = {
-      industry: data.contexto?.industria || data.objetivo?.industria || 'No especificada',
-      size: data.contexto?.equipo || 'No especificada',
-      mainObjective: data.objetivo?.objetivo || 'No especificado'
+      industry: data.contexto?.industria || 'No especificada',
+      size: data.contexto?.equipo ? `${data.contexto.equipo} personas` : 'No especificada',
+      mainObjective: data.objetivo?.objetivo?.[0] || 'No especificado' // Solo el primer objetivo para evitar duplicación
     };
 
     // Calcular puntuaciones ARES y de competencias
@@ -1038,7 +1038,7 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         score: Math.round(avgScore),
         summary: `Basado en el análisis de tus competencias y pilares ARES, tu nivel de madurez en IA es ${maturityLevel.toLowerCase()}. Tu puntaje promedio de ${Math.round(avgScore)}/100 indica ${avgScore >= 60 ? 'un buen nivel de preparación' : avgScore >= 40 ? 'áreas significativas de mejora' : 'necesidad crítica de desarrollo'} para implementar estrategias de IA efectivas.`
       },
-      executiveSummary: `Tu empresa se encuentra en un nivel de madurez ${maturityLevel.toLowerCase()} en IA con un puntaje de ${Math.round(avgScore)}/100. ${avgScore >= 60 ? 'Tienes una base sólida para implementar estrategias de IA avanzadas.' : avgScore >= 40 ? 'Es crucial desarrollar competencias fundamentales antes de implementar soluciones complejas.' : 'Es imperativo establecer una base sólida de competencias antes de considerar cualquier implementación de IA.'} Tu objetivo principal de ${companyContext.mainObjective} puede alcanzarse mediante un plan de acción estructurado que aborde las brechas identificadas.`,
+      executiveSummary: `Tu empresa se encuentra en un nivel de madurez ${maturityLevel.toLowerCase()} en IA con un puntaje de ${Math.round(avgScore)}/100. ${avgScore >= 60 ? 'Tienes una base sólida para implementar estrategias de IA avanzadas.' : avgScore >= 40 ? 'Es crucial desarrollar competencias fundamentales antes de implementar soluciones complejas.' : 'Es imperativo establecer una base sólida de competencias antes de considerar cualquier implementación de IA.'} El objetivo de ${companyContext.mainObjective} puede alcanzarse mediante un plan de acción estructurado que aborde las brechas identificadas.`,
       strengthsAnalysis: strengths,
       weaknessesAnalysis: weaknesses,
       insights: insights,

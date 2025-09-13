@@ -14,8 +14,27 @@ import { DiagnosticStateService } from '../../../services/diagnostic-state.servi
       <form [formGroup]="form" (ngSubmit)="next()">
         <div class="space-y-4">
           <div>
+            <label for="rol" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tu Rol o Posición</label>
+            <input type="text" id="rol" formControlName="rol" placeholder="Ej: Gerente de Marketing, Director de TI, CEO" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          </div>
+          <div>
+            <label for="industria" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Industria o Sector</label>
+            <select id="industria" formControlName="industria" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <option value="">Selecciona una industria</option>
+              <option value="Tecnología">Tecnología</option>
+              <option value="Finanzas">Finanzas</option>
+              <option value="Salud">Salud</option>
+              <option value="Educación">Educación</option>
+              <option value="Retail">Retail</option>
+              <option value="Manufactura">Manufactura</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Consultoría">Consultoría</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div>
             <label for="area" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Área o Departamento</label>
-            <input type="text" id="area" formControlName="area" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <input type="text" id="area" formControlName="area" placeholder="Ej: Marketing, Ventas, RRHH, IT" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           </div>
           <div>
             <label for="experiencia" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Años de Experiencia</label>
@@ -43,9 +62,11 @@ export class StepContextoComponent {
   private router = inject(Router);
 
   form = this.fb.group({
-    area: ['rrhh', Validators.required],
-    experiencia: ['5', [Validators.required, Validators.min(0)]],
-    equipo: ['20', [Validators.required, Validators.min(0)]]
+    rol: ['', Validators.required],
+    industria: ['', Validators.required],
+    area: ['', Validators.required],
+    experiencia: ['', [Validators.required, Validators.min(0)]],
+    equipo: ['', [Validators.required, Validators.min(0)]]
   });
 
   constructor() {
