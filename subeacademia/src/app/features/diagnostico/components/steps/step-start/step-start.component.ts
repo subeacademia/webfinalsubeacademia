@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
 
 @Component({
   selector: 'app-step-start',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, UiButtonComponent],
   template: `
     <div class="text-center animate-fade-in">
       <div class="mb-8">
@@ -13,8 +14,8 @@ import { Router, ActivatedRoute } from '@angular/router';
           Diagnóstico de Madurez ARES-AI
         </h1>
         <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-          Evalúa la madurez de tu organización en Inteligencia Artificial y 
-          obtén un plan personalizado para acelerar tu transformación digital
+          Evalúa la madurez en Inteligencia Artificial y obtén un plan personalizado 
+          para acelerar tu transformación digital
         </p>
       </div>
       
@@ -27,14 +28,64 @@ import { Router, ActivatedRoute } from '@angular/router';
         </div>
       </div>
 
-      <button 
-        (click)="comenzarDiagnostico()"
-        class="btn-primary text-lg px-8 py-4 text-xl font-semibold transform hover:scale-105 transition-all duration-200 shadow-2xl">
-        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-        </svg>
-        Comenzar Diagnóstico
-      </button>
+      <!-- Selección de tipo de diagnóstico -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-semibold text-white mb-6">
+          ¿Cómo quieres realizar tu diagnóstico?
+        </h2>
+        
+        <div class="flex flex-col sm:flex-row gap-6 justify-center max-w-4xl mx-auto">
+          <!-- Opción Empresa -->
+          <div class="flex-1 max-w-md">
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-blue-400/50 transition-all duration-300 hover:scale-105">
+              <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Como Empresa</h3>
+                <p class="text-gray-300 mb-6 text-sm leading-relaxed">
+                  Evalúa la madurez de tu organización en IA. Incluye análisis de competencias, 
+                  procesos, cultura y estrategia organizacional.
+                </p>
+                <app-ui-button
+                  variant="primary"
+                  size="lg"
+                  (clicked)="comenzarDiagnosticoEmpresa()"
+                  class="w-full">
+                  Realizar diagnóstico como empresa
+                </app-ui-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opción Persona -->
+          <div class="flex-1 max-w-md">
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:border-green-400/50 transition-all duration-300 hover:scale-105">
+              <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-3">Como Persona</h3>
+                <p class="text-gray-300 mb-6 text-sm leading-relaxed">
+                  Evalúa tus competencias personales en IA. Adaptado para niños (8-17) y adultos (18+). 
+                  Incluye recomendaciones educativas personalizadas.
+                </p>
+                <app-ui-button
+                  variant="secondary"
+                  size="lg"
+                  (clicked)="comenzarDiagnosticoPersona()"
+                  class="w-full">
+                  Realizar diagnóstico como persona
+                </app-ui-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="mt-8 text-gray-400 text-sm">
         <p>Tu información está segura y solo se utiliza para generar tu diagnóstico personalizado</p>
@@ -60,8 +111,8 @@ export class StepStartComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  comenzarDiagnostico(): void {
-    console.log('Navegando al siguiente paso del diagnóstico');
+  comenzarDiagnosticoEmpresa(): void {
+    console.log('Navegando al diagnóstico de empresa');
     
     // Navegar directamente a la ruta contexto usando navegación relativa
     this.router.navigate(['contexto'], { relativeTo: this.route.parent }).then(() => {
@@ -72,6 +123,17 @@ export class StepStartComponent {
       this.router.navigate(['/es', 'diagnostico', 'contexto']).catch(fallbackErr => {
         console.error('❌ Error en fallback de navegación:', fallbackErr);
       });
+    });
+  }
+
+  comenzarDiagnosticoPersona(): void {
+    console.log('Navegando al diagnóstico de persona');
+    
+    // Navegar al diagnóstico de persona
+    this.router.navigate(['/es', 'diagnostico-persona', 'edad']).then(() => {
+      console.log('✅ Navegación completada exitosamente a diagnóstico de persona');
+    }).catch(error => {
+      console.error('❌ Error en navegación a diagnóstico de persona:', error);
     });
   }
 }

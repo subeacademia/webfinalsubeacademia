@@ -46,14 +46,24 @@ export class CompetencyQuestionCardComponent implements OnInit {
 
   ngOnInit() {
     this.answerForm = this.fb.group({
-      value: [this.initialAnswer.value],
+      value: [this.initialAnswer.value || 0],
+    });
+
+    // Emitir el valor inicial inmediatamente para que se registre como respuesta
+    const initialValue = this.initialAnswer.value || 0;
+    this.answerChange.emit({ 
+      value: initialValue, 
+      isCritical: this.question.isCritical || false 
     });
 
     this.answerForm.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)))
       .subscribe(value => {
         const answerValue = value.value ? Number(value.value) : 0;
-        this.answerChange.emit({ value: answerValue, isCritical: this.question.isCritical || false });
+        this.answerChange.emit({ 
+          value: answerValue, 
+          isCritical: this.question.isCritical || false 
+        });
       });
   }
 }

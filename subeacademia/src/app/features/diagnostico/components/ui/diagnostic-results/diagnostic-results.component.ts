@@ -84,7 +84,7 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
                   <div class="text-blue-200 text-sm mt-1">Basado en tu evaluación</div>
                 </div>
                 <div class="text-center bg-white/10 rounded-lg p-6 backdrop-blur-sm">
-                  <div class="text-5xl font-bold mb-2">{{ report()?.aiMaturity?.score || 'N/A' }}/100</div>
+                  <div class="text-5xl font-bold mb-2">{{ (report()?.aiMaturity?.score ?? 'N/A') }}/100</div>
                   <div class="text-blue-100 text-lg font-medium">Puntuación Total</div>
                   <div class="text-blue-200 text-sm mt-1">Competencias + ARES</div>
                 </div>
@@ -107,7 +107,7 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
                 <div class="w-full bg-white/20 rounded-full h-4">
                   <div 
                     class="bg-gradient-to-r from-yellow-400 to-green-400 h-4 rounded-full transition-all duration-1000 ease-out"
-                    [style.width.%]="report()?.aiMaturity?.score || 0">
+                    [style.width.%]="(report()?.aiMaturity?.score ?? 0)">
                   </div>
                 </div>
               </div>
@@ -448,25 +448,42 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
                             </div>
                           }
 
+                          @if (action.painPoint) {
+                            <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                              <h5 class="text-sm font-medium text-red-800 dark:text-red-300 mb-1">⚠️ Dolor que atacamos:</h5>
+                              <p class="text-sm text-red-700 dark:text-red-200">{{ action.painPoint }}</p>
+                            </div>
+                          }
+
                           @if (action.expectedOutcome) {
                             <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                              <h5 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">Resultado esperado:</h5>
+                              <h5 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">✅ Resultado esperado:</h5>
                               <p class="text-sm text-yellow-700 dark:text-yellow-200">{{ action.expectedOutcome }}</p>
                             </div>
                           }
                           
-                          <!-- Timeline y competencia objetivo -->
+                          <!-- Timeline, competencia objetivo y dimensión ARES -->
                           <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                             <div class="flex items-center">
                               <span class="mr-2">⏱️</span>
                               <span>{{ action.timeline || getEstimatedTime(action.accion) }}</span>
                             </div>
-                            @if (action.competencyTarget) {
-                              <div class="flex items-center">
-                                <span class="mr-2">🎯</span>
-                                <span>{{ getCompetencyName(action.competencyTarget) }}</span>
-                              </div>
-                            }
+                            <div class="flex items-center gap-4">
+                              @if (action.competencyTarget) {
+                                <div class="flex items-center">
+                                  <span class="mr-2">🎯</span>
+                                  <span>{{ getCompetencyName(action.competencyTarget) }}</span>
+                                </div>
+                              }
+                              @if (action.aresDimension) {
+                                <div class="flex items-center">
+                                  <span class="mr-2">🏗️</span>
+                                  <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
+                                    ARES: {{ action.aresDimension }}
+                                  </span>
+                                </div>
+                              }
+                            </div>
                           </div>
                         </div>
                       }
@@ -723,26 +740,26 @@ export class DiagnosticResultsComponent implements OnInit {
 
   getMaturityGap(): string {
     const score = this.report()?.aiMaturity?.score;
-    if (!score) return 'N/A';
+    if (score === null || score === undefined) return 'N/A';
     
     // Calcular el próximo nivel basado en el score actual
     if (score >= 81) return 'Transformador'; // Ya es Transformador, no hay siguiente
     if (score >= 61) return 'Transformador'; // Ya es Estratégico, próximo es Transformador
     if (score >= 41) return 'Estratégico';   // Ya es Establecido, próximo es Estratégico
     if (score >= 21) return 'Establecido';   // Ya es En Desarrollo, próximo es Establecido
-    return 'En Desarrollo'; // Ya es Incipiente, próximo es En Desarrollo
+    return 'En Desarrollo'; // Ya es Incipiente (incluye 0), próximo es En Desarrollo
   }
 
   getPointsToNextLevel(): string {
     const score = this.report()?.aiMaturity?.score;
-    if (!score) return 'N/A';
+    if (score === null || score === undefined) return 'N/A';
     
     // Calcular puntos exactos necesarios para el próximo nivel
     if (score >= 81) return '0'; // Ya es Transformador, no hay siguiente
     if (score >= 61) return (81 - score).toString();  // Para llegar a Transformador (81)
     if (score >= 41) return (61 - score).toString();  // Para llegar a Estratégico (61)
     if (score >= 21) return (41 - score).toString();  // Para llegar a Establecido (41)
-    return (21 - score).toString(); // Para llegar a En Desarrollo (21)
+    return (21 - score).toString(); // Para llegar a En Desarrollo (21) - incluye score 0
   }
 
   getCompetencyDescription(competencyId: string): string {

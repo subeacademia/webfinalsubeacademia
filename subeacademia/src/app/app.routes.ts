@@ -41,6 +41,7 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
       { path: 'diagnostico', loadChildren: () => import('./features/diagnostico/diagnostico.routes').then(m => m.DIAGNOSTICO_ROUTES) },
+      { path: 'diagnostico-persona', loadChildren: () => import('./features/diagnostico-persona/diagnostico-persona.routes').then(m => m.DIAGNOSTICO_PERSONA_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'productos', loadChildren: () => import('./features/productos/productos.routes').then(m => m.PRODUCTOS_ROUTES) },
       { path: 'proyectos', loadChildren: () => import('./features/projects/projects.routes').then(m => m.PROJECTS_ROUTES) },

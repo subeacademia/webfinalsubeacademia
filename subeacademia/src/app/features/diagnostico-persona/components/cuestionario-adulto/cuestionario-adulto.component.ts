@@ -1,0 +1,417 @@
+import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { UiButtonComponent } from '../../../../shared/ui-kit/button/button';
+import { SessionService, QuestionItem } from '../../services/session.service';
+
+@Component({
+  selector: 'app-cuestionario-adulto',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, UiButtonComponent],
+  template: `
+    <div class="max-w-4xl mx-auto">
+      <!-- Header con progreso -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+            Cuestionario para Adultos
+          </h2>
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            Página {{ currentPage }} de {{ totalPages }}
+          </span>
+        </div>
+        
+        <!-- Barra de progreso -->
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+          <div 
+            class="bg-gradient-to-r from-green-500 to-teal-500 h-3 rounded-full transition-all duration-300"
+            [style.width.%]="progressPercentage">
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          {{ Math.round(progressPercentage) }}% completado
+        </p>
+      </div>
+
+      <!-- Preguntas -->
+      <form [formGroup]="questionnaireForm" (ngSubmit)="onSubmit()" class="space-y-8">
+        <div *ngFor="let question of currentQuestions; let i = index" class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="mb-4">
+            <label class="block text-lg font-medium text-gray-900 dark:text-white mb-3">
+              {{ question.text }}
+            </label>
+            
+            <!-- Preguntas V/F/No sé -->
+            <div *ngIf="question.type === 'vf'" class="space-y-3">
+              <div class="flex space-x-6">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    [formControlName]="question.code"
+                    value="V"
+                    class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Verdadero</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    [formControlName]="question.code"
+                    value="F"
+                    class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">Falso</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    [formControlName]="question.code"
+                    value="?"
+                    class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300"
+                  />
+                  <span class="ml-2 text-gray-700 dark:text-gray-300">No estoy seguro</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Escala Likert (1-5) -->
+            <div *ngIf="question.type === 'likert'" class="space-y-3">
+              <div class="flex justify-between items-center space-x-4">
+                <span class="text-sm text-gray-500 dark:text-gray-400">Totalmente en desacuerdo</span>
+                <div class="flex space-x-2">
+                  <label *ngFor="let option of likertOptions" class="flex flex-col items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      [formControlName]="question.code"
+                      [value]="option.value"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ option.label }}</span>
+                  </label>
+                </div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Totalmente de acuerdo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="flex justify-between pt-6">
+          <app-ui-button
+            type="button"
+            variant="ghost"
+            (clicked)="previousPage()"
+            [disabled]="currentPage === 1"
+            class="flex items-center"
+          >
+            ← Anterior
+          </app-ui-button>
+
+          <div class="flex space-x-4">
+            <app-ui-button
+              type="button"
+              variant="secondary"
+              (clicked)="saveProgress()"
+              class="flex items-center"
+            >
+              💾 Guardar
+            </app-ui-button>
+
+            <app-ui-button
+              *ngIf="currentPage < totalPages"
+              type="button"
+              variant="primary"
+              (clicked)="nextPage()"
+              [disabled]="!isCurrentPageValid()"
+              class="flex items-center"
+            >
+              Siguiente →
+            </app-ui-button>
+
+            <app-ui-button
+              *ngIf="currentPage === totalPages"
+              type="submit"
+              variant="primary"
+              [disabled]="!isCurrentPageValid()"
+              class="flex items-center"
+            >
+              Finalizar Cuestionario ✓
+            </app-ui-button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Mensaje de guardado automático -->
+      <div class="mt-4 text-center">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          💡 Tus respuestas se guardan automáticamente
+        </p>
+        
+        <!-- Debug temporal -->
+        <div class="mt-4 p-4 bg-yellow-100 dark:bg-yellow-900 rounded">
+          <h3 class="font-bold text-yellow-800 dark:text-yellow-200">DEBUG INFO:</h3>
+          <p class="text-sm text-yellow-700 dark:text-yellow-300">
+            Página válida: {{ isCurrentPageValid() }} | 
+            Progreso: {{ Math.round(progressPercentage) }}% | 
+            Preguntas respondidas: {{ getAnsweredQuestionsCount() }}/{{ questions.length }}
+          </p>
+          <button 
+            type="button" 
+            (click)="debugForm()" 
+            class="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">
+            Debug Formulario
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+  changeDetection: ChangeDetectionStrategy.Default,
+})
+export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private sessionService = inject(SessionService);
+  private cdr = inject(ChangeDetectorRef);
+
+  questionnaireForm: FormGroup;
+  questions: QuestionItem[] = [];
+  currentPage = 1;
+  questionsPerPage = 4;
+  totalPages = 0;
+  currentQuestions: QuestionItem[] = [];
+
+  // Exponer Math para el template
+  Math = Math;
+
+  likertOptions = [
+    { value: '1', label: '1' },
+    { value: '2', label: '2' },
+    { value: '3', label: '3' },
+    { value: '4', label: '4' },
+    { value: '5', label: '5' }
+  ];
+
+  get progressPercentage(): number {
+    if (!this.questions || this.questions.length === 0) {
+      return 0;
+    }
+    
+    const answeredQuestions = this.getAnsweredQuestionsCount();
+    const percentage = (answeredQuestions / this.questions.length) * 100;
+    console.log(`📊 Progreso: ${answeredQuestions}/${this.questions.length} = ${percentage.toFixed(1)}%`);
+    return percentage;
+  }
+
+  constructor() {
+    this.questionnaireForm = this.fb.group({});
+  }
+
+  ngOnInit(): void {
+    this.loadQuestions();
+    this.setupForm();
+    this.loadExistingResponses();
+    this.updateCurrentQuestions();
+    
+    // Crear sesión si no existe
+    this.ensureSessionExists();
+    
+    // Escuchar cambios en el formulario para guardar automáticamente
+    // IMPORTANTE: Suscribirse DESPUÉS de setupForm() para que funcione correctamente
+    this.setupFormChangeListener();
+  }
+
+  ngOnDestroy(): void {
+    // Guardar progreso al salir
+    this.saveProgress();
+  }
+
+  private loadQuestions(): void {
+    this.questions = this.sessionService.getQuestions('adulto');
+    this.totalPages = Math.ceil(this.questions.length / this.questionsPerPage);
+  }
+
+  private ensureSessionExists(): void {
+    // Intentar cargar sesión existente
+    const sessionExists = this.sessionService.loadSessionFromStorage();
+    
+    if (!sessionExists) {
+      // Si no hay sesión, crear una nueva con datos por defecto
+      const edad = this.route.snapshot.queryParams['edad'] || 32;
+      const consent = {
+        acepto: true,
+        tutor: '',
+        asentimientoMenor: false
+      };
+      
+      this.sessionService.createSession(edad, 'adulto', consent);
+      console.log('✅ Sesión creada para adulto');
+    } else {
+      console.log('✅ Sesión existente cargada');
+    }
+  }
+
+  private setupForm(): void {
+    const formControls: any = {};
+    this.questions.forEach(question => {
+      formControls[question.code] = [null];
+    });
+    this.questionnaireForm = this.fb.group(formControls);
+  }
+
+  private setupFormChangeListener(): void {
+    // Escuchar cambios en el formulario para guardar automáticamente
+    this.questionnaireForm.valueChanges.subscribe((values) => {
+      console.log('🔄 Formulario cambió:', values);
+      console.log('📊 Página válida:', this.isCurrentPageValid());
+      console.log('📈 Progreso:', this.progressPercentage + '%');
+      console.log('🔍 Preguntas actuales:', this.currentQuestions.map(q => q.code));
+      console.log('🔍 Valores de preguntas actuales:', this.currentQuestions.map(q => ({
+        code: q.code,
+        value: this.questionnaireForm.get(q.code)?.value
+      })));
+      this.saveCurrentPageResponses();
+      
+      // Forzar detección de cambios para actualizar la UI
+      this.cdr.detectChanges();
+    });
+  }
+
+  private loadExistingResponses(): void {
+    const responses = this.sessionService.currentResponses();
+    Object.keys(responses).forEach(code => {
+      if (this.questionnaireForm.get(code)) {
+        this.questionnaireForm.get(code)?.setValue(responses[code]);
+      }
+    });
+  }
+
+  private updateCurrentQuestions(): void {
+    const startIndex = (this.currentPage - 1) * this.questionsPerPage;
+    const endIndex = startIndex + this.questionsPerPage;
+    this.currentQuestions = this.questions.slice(startIndex, endIndex);
+  }
+
+  getAnsweredQuestionsCount(): number {
+    let count = 0;
+    this.questions.forEach(question => {
+      const control = this.questionnaireForm.get(question.code);
+      const value = control?.value;
+      if (value !== null && value !== undefined && value !== '') {
+        count++;
+        console.log(`✅ Pregunta respondida: ${question.code} = "${value}"`);
+      } else {
+        console.log(`❌ Pregunta sin responder: ${question.code}`);
+      }
+    });
+    console.log(`📊 Total respondidas: ${count}/${this.questions.length}`);
+    return count;
+  }
+
+  isCurrentPageValid(): boolean {
+    if (!this.currentQuestions || this.currentQuestions.length === 0) {
+      console.log('❌ No hay preguntas actuales');
+      return false;
+    }
+    
+    console.log('🔍 Validando página actual:', this.currentPage);
+    console.log('📝 Preguntas en página:', this.currentQuestions.length);
+    
+    // Verificar que todas las preguntas de la página actual tengan respuesta
+    for (const question of this.currentQuestions) {
+      const control = this.questionnaireForm.get(question.code);
+      if (!control) {
+        console.log('❌ No hay control para pregunta:', question.code);
+        return false;
+      }
+      
+      const value = control.value;
+      console.log(`📋 Pregunta ${question.code}: valor = "${value}"`);
+      
+      // Verificar que el valor no sea null, undefined, o string vacío
+      if (value === null || value === undefined || value === '') {
+        console.log('❌ Pregunta sin respuesta:', question.code);
+        return false;
+      }
+    }
+    
+    console.log('✅ Página válida');
+    return true;
+  }
+
+  nextPage(): void {
+    if (this.isCurrentPageValid() && this.currentPage < this.totalPages) {
+      this.saveCurrentPageResponses();
+      this.currentPage++;
+      this.updateCurrentQuestions();
+      this.cdr.detectChanges();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.saveCurrentPageResponses();
+      this.currentPage--;
+      this.updateCurrentQuestions();
+      this.cdr.detectChanges();
+    }
+  }
+
+  saveProgress(): void {
+    this.saveCurrentPageResponses();
+    // Mostrar mensaje de guardado (opcional)
+    console.log('Progreso guardado');
+  }
+
+  private saveCurrentPageResponses(): void {
+    // Guardar todas las respuestas del formulario, no solo las de la página actual
+    this.questions.forEach(question => {
+      const value = this.questionnaireForm.get(question.code)?.value;
+      if (value && value !== '') {
+        this.sessionService.updateResponse(question.code, value);
+        console.log(`💾 Guardada respuesta: ${question.code} = "${value}"`);
+      }
+    });
+  }
+
+  onSubmit(): void {
+    if (this.questionnaireForm.valid) {
+      this.saveCurrentPageResponses();
+      this.router.navigate(['/es/diagnostico-persona/resumen']);
+    }
+  }
+
+  debugForm(): void {
+    console.log('🔍 === DEBUG FORMULARIO ===');
+    console.log('📊 Formulario válido:', this.questionnaireForm.valid);
+    console.log('📊 Formulario completo:', this.questionnaireForm.value);
+    console.log('📊 Preguntas totales:', this.questions.length);
+    console.log('📊 Preguntas en página actual:', this.currentQuestions.length);
+    console.log('📊 Página actual:', this.currentPage);
+    console.log('📊 Total páginas:', this.totalPages);
+    
+    console.log('🔍 === VALORES DE PREGUNTAS ACTUALES ===');
+    this.currentQuestions.forEach(question => {
+      const control = this.questionnaireForm.get(question.code);
+      const value = control?.value;
+      console.log(`${question.code}: "${value}" (${value === null ? 'NULL' : value === undefined ? 'UNDEFINED' : value === '' ? 'EMPTY' : 'HAS_VALUE'})`);
+    });
+    
+    console.log('🔍 === TODAS LAS RESPUESTAS ===');
+    this.questions.forEach(question => {
+      const control = this.questionnaireForm.get(question.code);
+      const value = control?.value;
+      if (value !== null && value !== undefined && value !== '') {
+        console.log(`✅ ${question.code}: "${value}"`);
+      } else {
+        console.log(`❌ ${question.code}: "${value}"`);
+      }
+    });
+    
+    console.log('🔍 === VALIDACIÓN ===');
+    console.log('Página válida:', this.isCurrentPageValid());
+    console.log('Progreso:', this.progressPercentage + '%');
+    console.log('Respondidas:', this.getAnsweredQuestionsCount());
+  }
+}

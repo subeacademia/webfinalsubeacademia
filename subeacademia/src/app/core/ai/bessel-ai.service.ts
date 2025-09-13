@@ -404,10 +404,10 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       'Sostenibilidad': 0
     };
 
-    if (!aresAnswers) {
-      console.warn('⚠️ No hay respuestas ARES disponibles, usando valores por defecto');
+    if (!aresAnswers || Object.keys(aresAnswers).length === 0) {
+      console.warn('⚠️ No hay respuestas ARES disponibles');
       Object.keys(scores).forEach(dimension => {
-        scores[dimension] = 40; // Valor por defecto para "En Desarrollo" (nivel 2 de 5)
+        scores[dimension] = 0; // Sin respuestas = 0 puntos
       });
       return scores;
     }
@@ -440,7 +440,7 @@ ${JSON.stringify(contextoAdicional, null, 2)}
           }
         }
         
-        if (score > 0) {
+        if (score >= 1) { // Incluir valor 1 (Inexistente) como respuesta válida
           // Determinar a qué dimensión pertenece esta pregunta
           // Buscar en las preguntas ARES para encontrar el pilar
           const question = aresQuestions.find(q => q.id === questionId);
@@ -460,8 +460,8 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
         console.log(`📊 ${dimension}: promedio ${average.toFixed(2)} -> ${scores[dimension]}/100 (${questionScores.length} preguntas)`);
       } else {
-        scores[dimension] = 40; // Valor por defecto para "En Desarrollo"
-        console.log(`⚠️ ${dimension}: no hay respuestas válidas, usando 40/100`);
+        scores[dimension] = 0; // Sin respuestas válidas = 0 puntos
+        console.log(`⚠️ ${dimension}: no hay respuestas válidas, usando 0/100`);
       }
     });
 
@@ -475,10 +475,10 @@ ${JSON.stringify(contextoAdicional, null, 2)}
   private calculateCompetencyScores(compAnswers: any): Record<string, number> {
     const scores: Record<string, number> = {};
 
-    if (!compAnswers) {
-      console.warn('⚠️ No hay respuestas de competencias disponibles, usando valores por defecto');
+    if (!compAnswers || Object.keys(compAnswers).length === 0) {
+      console.warn('⚠️ No hay respuestas de competencias disponibles');
       competencias.forEach(comp => {
-        scores[comp.id] = 40; // Valor por defecto para "En Desarrollo" (nivel 2 de 5)
+        scores[comp.id] = 0; // Sin respuestas = 0 puntos
       });
       return scores;
     }
@@ -508,7 +508,7 @@ ${JSON.stringify(contextoAdicional, null, 2)}
           }
         }
         
-        if (score > 0) {
+        if (score >= 1) { // Incluir valor 1 (Inexistente) como respuesta válida
           questionScores.push(score);
           console.log(`📊 ${comp.name} - ${question.id}: ${score}/5`);
         }
@@ -520,8 +520,8 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         scores[comp.id] = Math.round(average * 20); // Convertir de 1-5 a 0-100
         console.log(`📊 ${comp.name}: promedio ${average.toFixed(2)} -> ${scores[comp.id]}/100 (${questionScores.length} preguntas)`);
       } else {
-        scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
-        console.log(`⚠️ ${comp.name}: no hay respuestas válidas, usando 40/100`);
+        scores[comp.id] = 0; // Sin respuestas válidas = 0 puntos
+        console.log(`⚠️ ${comp.name}: no hay respuestas válidas, usando 0/100`);
       }
     });
 
@@ -645,9 +645,9 @@ Eres 'ARES-AI', un consultor de estrategia de IA de clase mundial de Sube Academ
 **Tu Tarea (Proceso de Pensamiento a seguir):**
 1. **Evaluar Madurez:** Basado en el promedio y distribución de TODOS los puntajes (ARES y competencias), y el contexto de la empresa, determina un nivel de madurez en IA ('Incipiente', 'En Desarrollo', 'Establecido', 'Estratégico', 'Transformador'). Calcula un puntaje numérico de 0 a 100 para este nivel. Escribe un resumen conciso que justifique tu elección.
 2. **Analizar Fortalezas:** Identifica las 3 competencias con el puntaje más alto. Para cada una, escribe un \`analysis\` personalizado que explique cómo esta fortaleza puede ser apalancada para alcanzar su \`objetivo\` principal.
-3. **Analizar Debilidades:** Identifica las 3 competencias con el puntaje más bajo. Para cada una, escribe un \`analysis\` que explique el riesgo que esta debilidad representa para su negocio y su \`objetivo\`. Sé directo y claro sobre el "dolor".
+3. **Analizar Debilidades:** SIEMPRE identifica áreas de mejora (competencias o dimensiones ARES con puntaje < 100). Prioriza las competencias y dimensiones ARES con los puntajes más bajos. Para cada una, escribe un \`analysis\` que explique el riesgo que esta debilidad representa para su negocio y su \`objetivo\`. Sé directo y claro sobre el "dolor".
 4. **Extraer Insights Estratégicos:** Basado en la combinación de fortalezas, debilidades y el contexto, genera 2 o 3 \`StrategicInsight\`. Por ejemplo, si tienen alta 'Innovación' pero baja 'Ética en IA', un insight de 'Riesgo Crítico' podría ser "Riesgo de desarrollar soluciones de IA no adoptadas por el mercado por falta de confianza". Si tienen alta 'Gestión de Datos' y están en 'Retail', una 'Oportunidad Oculta' podría ser "Oportunidad de liderar el mercado con personalización predictiva de la demanda".
-5. **Generar Resumen Ejecutivo:** Escribe un párrafo conciso y potente para un CEO, resumiendo el nivel de madurez, el principal desafío y la recomendación estratégica más importante.
+5. **Generar Resumen Ejecutivo:** Escribe un párrafo conciso y potente para un CEO, resumiendo el nivel de madurez, el principal desafío y la recomendación estratégica más importante. NO repitas el objetivo principal del cliente (ya aparece en el contexto), enfócate en el análisis estratégico y el plan de acción.
 6. **Generar Plan de Acción:** (Mantén la lógica que ya tienes para esto, pero asegúrate de que esté alineado con el análisis de debilidades).
 
 **Output (Formato JSON estricto):**
@@ -845,23 +845,27 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         - Conecta la fortaleza con oportunidades específicas en su industria
 
     3.  **Análisis de Debilidades (weaknessesAnalysis):**
-        - Identifica las 3 competencias con el puntaje más bajo
+        - SIEMPRE identifica áreas de mejora (competencias o dimensiones ARES con puntaje < 100)
+        - Prioriza las competencias y dimensiones ARES con los puntajes más bajos
         - Analiza las respuestas específicas que revelan estas debilidades
         - Para cada debilidad, escribe un \`analysis\` que describa el "dolor" específico que esto causa en su contexto empresarial
         - Conecta la debilidad con riesgos de negocio tangibles y específicos de su industria
         - Incluye ejemplos concretos de cómo esta debilidad podría impactar sus objetivos
+        - Si todas las competencias tienen puntajes altos, identifica oportunidades de optimización
 
     4.  **Resumen Ejecutivo (executiveSummary):**
         - Escribe un resumen ejecutivo detallado (mínimo 6-8 oraciones) para un CEO
         - Basa tu análisis en los datos específicos y respuestas del usuario
+        - NO repitas el objetivo principal del cliente (ya aparece en "Contexto de tu Organización")
+        - Enfócate en el valor estratégico y el plan de acción
         - Incluye:
           * El nivel de madurez actual y su significado estratégico específico para su empresa
           * Análisis de las fases ARES donde se encuentra la organización (Preparación, Diseño, Desarrollo, Monitoreo)
           * Las fortalezas clave identificadas y cómo apalancarlas en su contexto
           * La brecha más crítica que impide el progreso en la adopción de IA
-          * Evaluación del estado de gobernanza, cultura y procesos de IA
           * Una recomendación estratégica concreta y accionable basada en sus datos
           * El potencial de crecimiento y ROI esperado específico para su situación
+          * Menciona las áreas prioritarias del plan de acción sin duplicar información
           * Timeline realista para alcanzar el siguiente nivel de madurez
         - Debe ser directo, sin rodeos, y orientado a la toma de decisiones ejecutivas
         - NO repitas el objetivo principal del usuario, enfócate en el análisis estratégico
@@ -1042,7 +1046,12 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     const competencyValues = Object.values(competencyScores);
     const aresValues = Object.values(aresScores);
     const allScores = [...competencyValues, ...aresValues];
-    const avgScore = allScores.reduce((sum, score) => sum + score, 0) / allScores.length;
+    
+    // Evitar división por cero
+    let avgScore = 0;
+    if (allScores.length > 0) {
+      avgScore = allScores.reduce((sum, score) => sum + score, 0) / allScores.length;
+    }
     
     // Determinar nivel de madurez basado en rangos correctos
     let maturityLevel: 'Incipiente' | 'En Desarrollo' | 'Establecido' | 'Estratégico' | 'Transformador';
@@ -1077,18 +1086,40 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       });
     
     // Debilidades: competencias con puntaje más bajo
+    // Si no hay puntajes perfectos (100/100), siempre generar áreas de mejora
     const weaknesses = sortedCompetencies
-      .filter(([id, score]) => score < 60) // Solo competencias que necesitan mejora
-      .slice(-3)
+      .filter(([id, score]) => score < 100) // Cualquier competencia que no sea perfecta
+      .slice(-Math.min(3, sortedCompetencies.length)) // Tomar hasta 3, o todas si hay menos
       .map(([id, score]) => {
         const competency = competencias.find(c => c.id === id);
+        const criticality = score < 40 ? 'crítica' : score < 60 ? 'importante' : 'oportunidad de optimización';
+        const urgency = score < 40 ? 'urgente' : score < 60 ? 'prioritaria' : 'recomendada';
+        
         return {
           competencyId: id,
           competencyName: competency?.name || 'Competencia',
           score: Math.round(score),
-          analysis: `Tu puntaje en ${competency?.name || 'esta área'} (${Math.round(score)}/100) representa un área de mejora crítica que puede impedir el logro de tu objetivo de ${companyContext.mainObjective}. Es fundamental desarrollar esta competencia para asegurar el éxito en la implementación de IA.`
+          analysis: `Tu puntaje en ${competency?.name || 'esta área'} (${Math.round(score)}/100) representa una mejora ${criticality} que puede ${score < 60 ? 'impedir' : 'optimizar'} el logro de tu objetivo de ${companyContext.mainObjective}. Es ${urgency} desarrollar esta competencia para ${score < 60 ? 'asegurar el éxito' : 'maximizar el impacto'} en la implementación de IA.`
         };
       });
+
+    // Incluir dimensiones ARES en las áreas de mejora si tienen puntajes bajos
+    const aresEntries = Object.entries(aresScores);
+    const aresWeaknesses = aresEntries
+      .filter(([dimension, score]) => score < 100) // Cualquier dimensión que no sea perfecta
+      .sort((a, b) => a[1] - b[1]) // Ordenar de menor a mayor puntaje
+      .slice(0, 2) // Tomar las 2 dimensiones con menor puntaje
+      .map(([dimension, score]) => ({
+        competencyId: `ares-${dimension.toLowerCase()}`,
+        competencyName: `Dimensión ARES: ${dimension}`,
+        score: Math.round(score),
+        analysis: `La dimensión ${dimension} (${Math.round(score)}/100) requiere atención ${score < 40 ? 'crítica' : score < 60 ? 'prioritaria' : 'para optimización'} en el framework ARES-AI. Esta mejora es ${score < 60 ? 'fundamental' : 'recomendada'} para alcanzar tu objetivo de ${companyContext.mainObjective}.`
+      }));
+
+    // Combinar debilidades de competencias y ARES
+    const allWeaknesses = [...weaknesses, ...aresWeaknesses]
+      .sort((a, b) => a.score - b.score) // Ordenar por puntaje (menor primero)
+      .slice(0, 3); // Tomar las 3 más críticas
 
     // Generar insights basados en el análisis real
     const insights: StrategicInsight[] = [];
@@ -1129,74 +1160,371 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         score: Math.round(avgScore),
         summary: `Basado en el análisis de tus competencias y pilares ARES, tu nivel de madurez en IA es ${maturityLevel.toLowerCase()}. Tu puntaje promedio de ${Math.round(avgScore)}/100 indica ${avgScore >= 60 ? 'un buen nivel de preparación' : avgScore >= 40 ? 'áreas significativas de mejora' : 'necesidad crítica de desarrollo'} para implementar estrategias de IA efectivas.`
       },
-      executiveSummary: `Tu empresa se encuentra en un nivel de madurez ${maturityLevel.toLowerCase()} en IA con un puntaje de ${Math.round(avgScore)}/100. ${avgScore >= 60 ? 'Tienes una base sólida para implementar estrategias de IA avanzadas.' : avgScore >= 40 ? 'Es crucial desarrollar competencias fundamentales antes de implementar soluciones complejas.' : 'Es imperativo establecer una base sólida de competencias antes de considerar cualquier implementación de IA.'} El objetivo de ${companyContext.mainObjective} puede alcanzarse mediante un plan de acción estructurado que aborde las brechas identificadas.`,
+      executiveSummary: this.generateExecutiveSummary(maturityLevel, avgScore, allWeaknesses, companyContext),
       strengthsAnalysis: strengths,
-      weaknessesAnalysis: weaknesses,
+      weaknessesAnalysis: allWeaknesses,
       insights: insights,
-      actionPlan: this.generateActionPlan(weaknesses, companyContext, avgScore),
+      actionPlan: this.generateActionPlan(allWeaknesses, companyContext, avgScore),
       generatedAt: new Date(),
       version: '3.0.0-fallback'
     };
   }
 
   /**
-   * Genera un plan de acción detallado basado en las debilidades identificadas
+   * Genera un resumen ejecutivo mejorado sin duplicidad de información
+   */
+  private generateExecutiveSummary(maturityLevel: string, avgScore: number, weaknesses: any[], companyContext: any): string {
+    const score = Math.round(avgScore);
+    
+    // Determinar el enfoque estratégico basado en el nivel de madurez
+    let strategicFocus = '';
+    let recommendedApproach = '';
+    let expectedOutcome = '';
+    
+    if (score < 40) {
+      strategicFocus = 'establecimiento de competencias fundamentales';
+      recommendedApproach = 'un programa de capacitación estructurado que desarrolle las bases necesarias';
+      expectedOutcome = 'preparar a tu organización para futuras implementaciones de IA';
+    } else if (score < 60) {
+      strategicFocus = 'consolidación de capacidades existentes';
+      recommendedApproach = 'una estrategia de desarrollo incremental que fortalezca las áreas débiles';
+      expectedOutcome = 'elevar tu nivel de madurez a un estado más competitivo';
+    } else if (score < 80) {
+      strategicFocus = 'optimización y escalamiento';
+      recommendedApproach = 'iniciativas de mejora continua y adopción de mejores prácticas';
+      expectedOutcome = 'maximizar el ROI de tus inversiones en IA';
+    } else {
+      strategicFocus = 'liderazgo e innovación';
+      recommendedApproach = 'estrategias avanzadas de transformación digital';
+      expectedOutcome = 'mantener tu ventaja competitiva en el mercado';
+    }
+    
+    // Identificar las áreas más críticas para mencionar en el plan de acción
+    const criticalAreas = weaknesses.slice(0, 2).map(w => w.competencyName).join(' y ');
+    const hasMultipleAreas = weaknesses.length > 2;
+    
+    return `Tu empresa se encuentra en un nivel de madurez ${maturityLevel.toLowerCase()} en IA con un puntaje de ${score}/100. ` +
+           `Para alcanzar tu objetivo estratégico, recomendamos enfocarse en el ${strategicFocus} mediante ${recommendedApproach}. ` +
+           `El plan de acción prioriza el desarrollo de ${criticalAreas}${hasMultipleAreas ? ` y otras áreas críticas` : ''}, ` +
+           `con el objetivo de ${expectedOutcome}. ` +
+           `Esta estrategia te permitirá avanzar sistemáticamente hacia una implementación exitosa de IA que impulse tu crecimiento empresarial.`;
+  }
+
+  /**
+   * Genera un plan de acción detallado basado en las debilidades identificadas y fases ARES-AI
    */
   private generateActionPlan(weaknesses: any[], companyContext: any, avgScore: number): any[] {
     const actionPlan = [];
     
-    // Plan de acción para competencias críticas
+    // Determinar el nivel de madurez actual para personalizar el plan
+    const maturityLevel = avgScore < 20 ? 'Incipiente' : 
+                         avgScore < 40 ? 'En Desarrollo' :
+                         avgScore < 60 ? 'Establecido' :
+                         avgScore < 80 ? 'Estratégico' : 'Transformador';
+
+    // FASE 1: FUNDAMENTOS CRÍTICOS (Para todos los niveles excepto Transformador)
+    if (maturityLevel !== 'Transformador') {
+      actionPlan.push({
+        area: 'Fundamentos Críticos para IA',
+        priority: 'Alta',
+        timeline: '3-6 meses',
+        description: this.getPainPointDescription(maturityLevel, 'fundamentos'),
+        actions: this.generateFundamentalActions(weaknesses, companyContext, maturityLevel)
+      });
+    }
+
+    // FASE 2: DESARROLLO DE COMPETENCIAS ESPECÍFICAS
     if (weaknesses.length > 0) {
       actionPlan.push({
         area: 'Desarrollo de Competencias Críticas',
         priority: 'Alta',
-        timeline: '3-6 meses',
-        description: 'Enfoque en las competencias con menor puntaje para establecer una base sólida',
-        actions: weaknesses.slice(0, 2).map((weakness, index) => ({
-          accion: `Desarrollar competencia en ${weakness.competencyName}`,
-          descripcion: `Implementar un programa de capacitación específico para mejorar ${weakness.competencyName} desde ${weakness.score}/100 hasta al menos 60/100.`,
-          timeline: `${2 + index} meses`,
-          recursos: ['Cursos especializados', 'Mentoría personalizada', 'Práctica guiada', 'Recursos de aprendizaje'],
-          kpis: [`Puntaje de ${weakness.competencyName}`, 'Aplicación práctica', 'Retroalimentación del equipo'],
-          expectedOutcome: `Mejora del ${60 - weakness.score}% en ${weakness.competencyName}`,
-          competencyTarget: weakness.competencyId,
-          aresDimension: 'Agilidad'
-        }))
+        timeline: '4-8 meses',
+        description: this.getPainPointDescription(maturityLevel, 'competencias'),
+        actions: this.generateCompetencyActions(weaknesses, companyContext)
       });
     }
 
-    // Plan de acción para implementación de IA
-    if (avgScore >= 40) {
+    // FASE 3: IMPLEMENTACIÓN ARES-AI
+    if (avgScore >= 30) {
       actionPlan.push({
-        area: 'Implementación Estratégica de IA',
-        priority: avgScore >= 60 ? 'Alta' : 'Media',
+        area: 'Implementación Framework ARES-AI',
+        priority: avgScore >= 50 ? 'Alta' : 'Media',
         timeline: '6-12 meses',
-        description: 'Desarrollo e implementación de soluciones de IA alineadas con los objetivos estratégicos',
-        actions: [
-          {
-            accion: 'Auditoría de capacidades actuales',
-            descripcion: 'Realizar una evaluación completa de las capacidades tecnológicas y organizacionales para IA',
-            timeline: '1 mes',
-            recursos: ['Consultor especializado', 'Herramientas de evaluación', 'Equipo interno'],
-            kpis: ['Inventario de capacidades', 'Gaps identificados', 'Roadmap definido'],
-            expectedOutcome: 'Mapa claro de capacidades y brechas',
-            competencyTarget: 'comp_1',
-            aresDimension: 'Responsabilidad'
-          },
-          {
-            accion: 'Piloto de implementación',
-            descripcion: `Desarrollar e implementar un piloto de IA enfocado en ${companyContext.mainObjective}`,
-            timeline: '3-4 meses',
-            recursos: ['Proveedor de IA', 'Equipo técnico', 'Presupuesto asignado'],
-            kpis: ['ROI del piloto', 'Adopción del equipo', 'Métricas de impacto'],
-            expectedOutcome: 'Validación de viabilidad y ROI',
-            competencyTarget: 'comp_2',
-            aresDimension: 'Ética'
-          }
-        ]
+        description: this.getPainPointDescription(maturityLevel, 'ares'),
+        actions: this.generateAresActions(companyContext, maturityLevel, avgScore)
+      });
+    }
+
+    // FASE 4: ESCALAMIENTO Y OPTIMIZACIÓN
+    if (avgScore >= 50) {
+      actionPlan.push({
+        area: 'Escalamiento y Optimización',
+        priority: 'Media',
+        timeline: '6-18 meses',
+        description: this.getPainPointDescription(maturityLevel, 'escalamiento'),
+        actions: this.generateScalingActions(companyContext, maturityLevel)
       });
     }
 
     return actionPlan;
+  }
+
+  /**
+   * Genera descripción del dolor específico según nivel de madurez
+   */
+  private getPainPointDescription(level: string, phase: string): string {
+    const painPoints = {
+      'fundamentos': {
+        'Incipiente': 'Tu organización carece de las bases fundamentales para IA. Sin competencias básicas, cultura de datos y entendimiento de IA, cualquier implementación está destinada al fracaso, desperdiciando recursos y generando frustración en el equipo.',
+        'En Desarrollo': 'Aunque tienes algunos conocimientos, las brechas fundamentales en competencias críticas están impidiendo que aproveches las oportunidades de IA, limitando tu competitividad y crecimiento.',
+        'Establecido': 'Para alcanzar un nivel estratégico, necesitas consolidar competencias avanzadas que te permitan liderar la transformación digital en tu industria.',
+        'Estratégico': 'Para mantener tu ventaja competitiva, debes optimizar y expandir tus capacidades de IA hacia nuevos horizontes estratégicos.'
+      },
+      'competencias': {
+        'Incipiente': 'Las competencias críticas identificadas representan barreras insuperables que te impiden siquiera considerar implementaciones básicas de IA, bloqueando cualquier progreso digital.',
+        'En Desarrollo': 'Las competencias débiles están creando cuellos de botella que limitan severamente el impacto y adopción de cualquier iniciativa de IA en tu organización.',
+        'Establecido': 'Para avanzar al siguiente nivel, necesitas fortalecer competencias específicas que te permitan implementar estrategias de IA más sofisticadas y ambiciosas.',
+        'Estratégico': 'La optimización de competencias clave te permitirá maximizar el ROI de tus inversiones en IA y mantener tu liderazgo en el mercado.'
+      },
+      'ares': {
+        'Incipiente': 'Sin un framework estructurado como ARES-AI, tu organización navegará a ciegas en la implementación de IA, aumentando riesgos y reduciendo probabilidades de éxito.',
+        'En Desarrollo': 'La falta de un framework ARES-AI está resultando en implementaciones fragmentadas y sin coordinación, desperdiciando esfuerzos y recursos.',
+        'Establecido': 'Para alcanzar madurez estratégica, necesitas implementar el framework ARES-AI que garantice gobernanza, ética y sostenibilidad en todas tus iniciativas.',
+        'Estratégico': 'El framework ARES-AI te permitirá escalar exitosamente tus iniciativas de IA manteniendo estándares de excelencia y responsabilidad.'
+      },
+      'escalamiento': {
+        'Incipiente': 'No aplica en este nivel - enfócate primero en fundamentos.',
+        'En Desarrollo': 'No aplica en este nivel - consolida primero las bases.',
+        'Establecido': 'Sin un plan de escalamiento estructurado, tus iniciativas de IA se quedarán limitadas a proyectos aislados, perdiendo oportunidades de transformación organizacional.',
+        'Estratégico': 'Para mantener el liderazgo, necesitas expandir tus capacidades de IA hacia nuevas áreas de negocio y mercados, maximizando el impacto estratégico.'
+      }
+    };
+
+    return (painPoints as any)[phase]?.[level] || 'Desarrollo de capacidades específicas para tu nivel de madurez.';
+  }
+
+  /**
+   * Genera acciones fundamentales según nivel de madurez
+   */
+  private generateFundamentalActions(weaknesses: any[], companyContext: any, level: string): any[] {
+    const actions = [];
+
+    if (level === 'Incipiente') {
+      actions.push(
+        {
+          accion: 'Auditoría de Conocimientos Base en IA',
+          descripcion: 'Realizar evaluación completa del nivel de conocimiento actual del equipo sobre IA, datos y transformación digital para identificar brechas críticas.',
+          timeline: '2-3 semanas',
+          recursos: ['Consultor especializado', 'Herramientas de evaluación', 'Tiempo del equipo'],
+          kpis: ['Nivel de conocimiento actual', 'Brechas identificadas', 'Plan de capacitación'],
+          expectedOutcome: 'Mapa claro de conocimientos y brechas fundamentales',
+          painPoint: 'Sin conocimiento base, cualquier implementación de IA fracasará',
+          aresDimension: 'Agilidad'
+        },
+        {
+          accion: 'Creación de Cultura de Datos',
+          descripcion: 'Implementar programa para desarrollar mentalidad basada en datos en toda la organización, desde toma de decisiones hasta análisis de resultados.',
+          timeline: '2-3 meses',
+          recursos: ['Capacitación especializada', 'Herramientas de visualización', 'Mentoría'],
+          kpis: ['Adopción de métricas basadas en datos', 'Calidad de decisiones', 'Cultura organizacional'],
+          expectedOutcome: 'Organización que piensa y actúa basada en datos',
+          painPoint: 'Sin cultura de datos, las iniciativas de IA no tendrán adopción',
+            aresDimension: 'Responsabilidad'
+          },
+          {
+          accion: 'Definición de Estrategia de IA',
+          descripcion: 'Desarrollar estrategia clara de IA alineada con objetivos de negocio, definiendo prioridades, recursos necesarios y roadmap de implementación.',
+          timeline: '1-2 meses',
+          recursos: ['Consultor estratégico', 'Equipo directivo', 'Análisis de mercado'],
+          kpis: ['Estrategia documentada', 'Roadmap definido', 'Presupuesto asignado'],
+          expectedOutcome: 'Hoja de ruta clara para la transformación digital',
+          painPoint: 'Sin estrategia clara, los esfuerzos de IA serán dispersos e ineficientes',
+          aresDimension: 'Ética'
+        }
+      );
+    } else if (level === 'En Desarrollo') {
+      actions.push(
+        {
+          accion: 'Fortalecimiento de Gobernanza de Datos',
+          descripcion: 'Establecer políticas, procedimientos y roles claros para la gestión, calidad y seguridad de datos en la organización.',
+          timeline: '2-3 meses',
+          recursos: ['Especialista en gobernanza', 'Herramientas de gestión', 'Capacitación del equipo'],
+          kpis: ['Políticas implementadas', 'Calidad de datos', 'Cumplimiento normativo'],
+          expectedOutcome: 'Datos confiables y seguros para iniciativas de IA',
+          painPoint: 'Sin gobernanza, los datos serán inconsistentes y riesgosos para IA',
+          aresDimension: 'Responsabilidad'
+        },
+        {
+          accion: 'Desarrollo de Capacidades Técnicas Básicas',
+          descripcion: 'Capacitar al equipo en herramientas y tecnologías básicas de IA, incluyendo plataformas de datos, APIs y herramientas de automatización.',
+            timeline: '3-4 meses',
+          recursos: ['Cursos especializados', 'Plataformas de práctica', 'Mentoría técnica'],
+          kpis: ['Competencias técnicas desarrolladas', 'Proyectos piloto exitosos', 'Autonomía del equipo'],
+          expectedOutcome: 'Equipo capaz de manejar herramientas básicas de IA',
+          painPoint: 'Sin capacidades técnicas, dependerás completamente de proveedores externos',
+          aresDimension: 'Agilidad'
+        }
+      );
+    }
+
+    return actions;
+  }
+
+  /**
+   * Genera acciones específicas para competencias críticas
+   */
+  private generateCompetencyActions(weaknesses: any[], companyContext: any): any[] {
+    return weaknesses.slice(0, 3).map((weakness, index) => ({
+      accion: `Desarrollo Intensivo: ${weakness.competencyName}`,
+      descripcion: `Programa integral de desarrollo para ${weakness.competencyName} desde ${weakness.score}/100 hasta al menos 70/100, incluyendo teoría, práctica y aplicación en proyectos reales.`,
+      timeline: `${3 + index} meses`,
+      recursos: [
+        'Curso especializado certificado',
+        'Mentoría personalizada',
+        'Proyectos prácticos reales',
+        'Herramientas y plataformas específicas',
+        'Evaluación continua y feedback'
+      ],
+      kpis: [
+        `Puntaje de ${weakness.competencyName}`,
+        'Proyectos prácticos completados',
+        'Aplicación en contexto real',
+        'Feedback del equipo y stakeholders'
+      ],
+      expectedOutcome: `Dominio sólido de ${weakness.competencyName} aplicable en contexto empresarial`,
+      painPoint: `Esta debilidad está bloqueando ${companyContext.mainObjective}`,
+      competencyTarget: weakness.competencyId,
+      aresDimension: this.mapCompetencyToAres(weakness.competencyId)
+    }));
+  }
+
+  /**
+   * Genera acciones para implementación del framework ARES-AI
+   */
+  private generateAresActions(companyContext: any, level: string, avgScore: number): any[] {
+    const actions = [];
+
+    actions.push(
+      {
+        accion: 'Implementación de Agilidad en IA',
+        descripcion: 'Establecer procesos ágiles para desarrollo, testing y deployment de soluciones de IA, permitiendo iteración rápida y adaptación continua.',
+        timeline: '2-3 meses',
+        recursos: ['Metodologías ágiles', 'Herramientas de gestión', 'Capacitación del equipo'],
+        kpis: ['Velocidad de desarrollo', 'Tiempo de respuesta', 'Adaptabilidad'],
+        expectedOutcome: 'Capacidad de desarrollo ágil para soluciones de IA',
+        painPoint: 'Sin agilidad, tus proyectos de IA serán lentos y obsoletos antes de completarse',
+        aresDimension: 'Agilidad'
+      },
+      {
+        accion: 'Framework de Responsabilidad en IA',
+        descripcion: 'Implementar políticas y procedimientos para asegurar que todas las iniciativas de IA sean responsables, transparentes y alineadas con valores organizacionales.',
+        timeline: '3-4 meses',
+        recursos: ['Consultor en ética de IA', 'Políticas documentadas', 'Sistemas de monitoreo'],
+        kpis: ['Políticas implementadas', 'Casos de uso documentados', 'Auditorías de cumplimiento'],
+        expectedOutcome: 'IA responsable y alineada con valores organizacionales',
+        painPoint: 'Sin responsabilidad, tus iniciativas de IA pueden generar riesgos legales y de reputación',
+        aresDimension: 'Responsabilidad'
+      },
+      {
+        accion: 'Ética y Transparencia en IA',
+        descripcion: 'Desarrollar y implementar principios éticos claros para el uso de IA, incluyendo transparencia, equidad y privacidad.',
+        timeline: '2-3 meses',
+        recursos: ['Especialista en ética', 'Marco ético documentado', 'Capacitación del equipo'],
+        kpis: ['Principios éticos adoptados', 'Casos de uso evaluados', 'Transparencia implementada'],
+        expectedOutcome: 'IA ética y transparente que genera confianza',
+        painPoint: 'Sin ética clara, tu IA puede generar sesgos y pérdida de confianza',
+            aresDimension: 'Ética'
+      },
+      {
+        accion: 'Sostenibilidad en Iniciativas de IA',
+        descripcion: 'Integrar consideraciones de sostenibilidad ambiental y social en todas las iniciativas de IA, optimizando recursos y minimizando impacto.',
+        timeline: '3-4 meses',
+        recursos: ['Consultor en sostenibilidad', 'Métricas de impacto', 'Herramientas de optimización'],
+        kpis: ['Impacto ambiental medido', 'Eficiencia de recursos', 'Sostenibilidad documentada'],
+        expectedOutcome: 'IA sostenible que contribuye positivamente al medio ambiente',
+        painPoint: 'Sin sostenibilidad, tus iniciativas de IA pueden generar impacto ambiental negativo',
+        aresDimension: 'Sostenibilidad'
+      }
+    );
+
+    return actions;
+  }
+
+  /**
+   * Genera acciones de escalamiento para niveles avanzados
+   */
+  private generateScalingActions(companyContext: any, level: string): any[] {
+    if (level === 'Establecido') {
+      return [
+        {
+          accion: 'Expansión de IA a Nuevas Áreas de Negocio',
+          descripcion: `Identificar y priorizar nuevas áreas de negocio donde aplicar IA para maximizar el impacto en ${companyContext.mainObjective}.`,
+          timeline: '4-6 meses',
+          recursos: ['Análisis de mercado', 'Equipos especializados', 'Presupuesto de expansión'],
+          kpis: ['Nuevas áreas identificadas', 'Pilotos implementados', 'ROI de expansión'],
+          expectedOutcome: 'IA implementada en múltiples áreas de negocio',
+          painPoint: 'Sin expansión, tu IA se limitará a áreas específicas perdiendo oportunidades',
+          aresDimension: 'Agilidad'
+        },
+        {
+          accion: 'Automatización Avanzada de Procesos',
+          descripcion: 'Implementar automatización inteligente en procesos críticos para aumentar eficiencia y liberar recursos humanos para tareas estratégicas.',
+          timeline: '6-8 meses',
+          recursos: ['Plataformas de automatización', 'Especialistas en RPA', 'Integración de sistemas'],
+          kpis: ['Procesos automatizados', 'Eficiencia ganada', 'Recursos liberados'],
+          expectedOutcome: 'Procesos clave automatizados con IA',
+          painPoint: 'Sin automatización, seguirás perdiendo eficiencia en procesos repetitivos',
+          aresDimension: 'Responsabilidad'
+        }
+      ];
+    } else if (level === 'Estratégico') {
+      return [
+        {
+          accion: 'Liderazgo en Innovación de IA',
+          descripcion: 'Posicionar a la organización como líder en innovación de IA en su industria, desarrollando capacidades únicas y diferenciadoras.',
+          timeline: '8-12 meses',
+          recursos: ['I+D especializado', 'Partnerships estratégicos', 'Inversión en innovación'],
+          kpis: ['Patentes desarrolladas', 'Liderazgo reconocido', 'Innovaciones únicas'],
+          expectedOutcome: 'Posición de liderazgo en IA en la industria',
+          painPoint: 'Sin innovación, tus competidores te superarán en capacidades de IA',
+          aresDimension: 'Agilidad'
+        },
+        {
+          accion: 'Ecosistema de IA Integrado',
+          descripcion: 'Crear un ecosistema completo de IA que integre todas las iniciativas, datos y capacidades en una plataforma unificada.',
+          timeline: '12-18 meses',
+          recursos: ['Arquitectura de datos', 'Plataformas integradas', 'Equipo de integración'],
+          kpis: ['Ecosistema unificado', 'Sinergias identificadas', 'Eficiencia total'],
+          expectedOutcome: 'Ecosistema de IA completamente integrado',
+          painPoint: 'Sin integración, tus iniciativas de IA seguirán siendo fragmentadas',
+          aresDimension: 'Responsabilidad'
+        }
+      ];
+    }
+
+    return [];
+  }
+
+  /**
+   * Mapea competencias a dimensiones ARES
+   */
+  private mapCompetencyToAres(competencyId: string): string {
+    const mapping: Record<string, string> = {
+      'pensamiento-critico': 'Agilidad',
+      'resolucion-problemas': 'Agilidad',
+      'alfabetizacion-datos': 'Responsabilidad',
+      'comunicacion-efectiva': 'Responsabilidad',
+      'colaboracion-equipo': 'Responsabilidad',
+      'creatividad-innovacion': 'Agilidad',
+      'diseno-tecnologico': 'Agilidad',
+      'automatizacion-agentes-ia': 'Agilidad',
+      'adaptabilidad-flexibilidad': 'Agilidad',
+      'etica-responsabilidad': 'Ética',
+      'sostenibilidad': 'Sostenibilidad',
+      'aprendizaje-continuo': 'Agilidad',
+      'liderazgo-ia': 'Responsabilidad'
+    };
+
+    return mapping[competencyId] || 'Agilidad';
   }
 }

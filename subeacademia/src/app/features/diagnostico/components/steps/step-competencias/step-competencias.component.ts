@@ -12,15 +12,6 @@ import { Answer } from '../../../data/diagnostic.models';
   imports: [CommonModule, CompetencyQuestionCardComponent],
   template: `
     <div class="p-4 md:p-6">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Autoevaluación de Competencias</h2>
-      <p class="text-gray-600 dark:text-gray-300 mb-4">
-        Evalúa tu nivel en las siguientes competencias clave.
-      </p>
-      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3 mb-6">
-        <p class="text-sm text-blue-700 dark:text-blue-200">
-          Progreso: {{ stateService.competenciasProgress().answered }} / {{ stateService.competenciasProgress().total }}
-        </p>
-      </div>
       @for (competency of allCompetencies; track competency.id) {
         <div class="mb-6">
           <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{{ competency.name }}</h3>
@@ -41,8 +32,7 @@ import { Answer } from '../../../data/diagnostic.models';
           ← Volver
         </button>
         <button (click)="next()" 
-                [disabled]="!isComplete()"
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
           Continuar →
         </button>
       </div>
@@ -55,7 +45,7 @@ export class StepCompetenciasComponent {
   allCompetencies = competencias;
 
   getAnswerForQuestion(questionId: string): Answer {
-    return this.stateService.state().competencias[questionId] || { value: 0, isCritical: false };
+    return this.stateService.state().competencias[questionId] || { value: 0, isCritical: false, evidence: '' };
   }
 
   onAnswerChange(questionId: string, answer: Answer) {
@@ -67,11 +57,10 @@ export class StepCompetenciasComponent {
   }
 
   next() {
-    if (this.isComplete()) {
-      const currentUrl = this.router.url;
-      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
-      this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
-    }
+    // Permitir avanzar sin validar si todas las preguntas están respondidas
+    const currentUrl = this.router.url;
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
   }
 
   previous() {

@@ -29,13 +29,21 @@ export class DiagnosticStateService {
   public state = computed(() => this.diagnosticData());
 
   public aresProgress = computed(() => {
-    const answeredCount = Object.keys(this.diagnosticData().ares).length;
+    const aresData = this.diagnosticData().ares;
+    // Considerar una respuesta válida si existe y tiene un valor (incluyendo 0)
+    const answeredCount = Object.keys(aresData).filter(key => 
+      aresData[key] && (aresData[key].value !== null && aresData[key].value !== undefined)
+    ).length;
     const totalCount = aresQuestions.length;
     return { answered: answeredCount, total: totalCount, isComplete: answeredCount === totalCount };
   });
 
   public competenciasProgress = computed(() => {
-    const answeredCount = Object.keys(this.diagnosticData().competencias).length;
+    const competenciasData = this.diagnosticData().competencias;
+    // Considerar una respuesta válida si existe y tiene un valor (incluyendo 0)
+    const answeredCount = Object.keys(competenciasData).filter(key => 
+      competenciasData[key] && (competenciasData[key].value !== null && competenciasData[key].value !== undefined)
+    ).length;
     const totalCount = competencias.flatMap(c => c.questions).length;
     return { answered: answeredCount, total: totalCount, isComplete: answeredCount === totalCount };
   });

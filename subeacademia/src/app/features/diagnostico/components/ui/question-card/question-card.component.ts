@@ -68,16 +68,27 @@ export class QuestionCardComponent implements OnInit {
 
   ngOnInit() {
     this.answerForm = this.fb.group({
-      value: [this.initialAnswer.value],
-      evidence: [''],
+      value: [this.initialAnswer.value || 0],
+      evidence: [this.initialAnswer.evidence || ''],
     });
 
+    // Emitir el valor inicial inmediatamente para que se registre como respuesta
+    const initialValue = this.initialAnswer.value || 0;
+    this.answerChange.emit({ 
+      value: initialValue, 
+      isCritical: this.question.critical,
+      evidence: this.initialAnswer.evidence || ''
+    });
 
     this.answerForm.valueChanges
       .pipe(debounceTime(400), distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)))
       .subscribe(value => {
         const answerValue = value.value ? Number(value.value) : 0;
-        this.answerChange.emit({ value: answerValue, isCritical: this.question.critical });
+        this.answerChange.emit({ 
+          value: answerValue, 
+          isCritical: this.question.critical,
+          evidence: value.evidence || ''
+        });
       });
   }
 }

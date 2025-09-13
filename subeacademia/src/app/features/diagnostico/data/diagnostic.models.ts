@@ -8,13 +8,13 @@ export interface ContextoData {
   rol: string;
   industria: string;
   area: string;
-  experiencia: string;
   equipo: string;
 }
 
 export interface Answer {
   value: number;
   isCritical: boolean;
+  evidence?: string;
 }
 
 export interface UserLead {
@@ -41,7 +41,6 @@ export const INITIAL_DIAGNOSTIC_DATA: DiagnosticData = {
     rol: '',
     industria: '',
     area: '',
-    experiencia: '',
     equipo: ''
   },
   competencias: {},
