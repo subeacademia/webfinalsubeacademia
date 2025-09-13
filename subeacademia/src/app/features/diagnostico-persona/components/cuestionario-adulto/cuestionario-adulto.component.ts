@@ -50,6 +50,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     type="radio"
                     [formControlName]="question.code"
                     value="V"
+                    (change)="onRadioChange(question.code, 'V')"
                     class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                   />
                   <span class="ml-2 text-gray-700 dark:text-gray-300">Verdadero</span>
@@ -59,6 +60,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     type="radio"
                     [formControlName]="question.code"
                     value="F"
+                    (change)="onRadioChange(question.code, 'F')"
                     class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
                   />
                   <span class="ml-2 text-gray-700 dark:text-gray-300">Falso</span>
@@ -68,6 +70,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     type="radio"
                     [formControlName]="question.code"
                     value="?"
+                    (change)="onRadioChange(question.code, '?')"
                     class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300"
                   />
                   <span class="ml-2 text-gray-700 dark:text-gray-300">No estoy seguro</span>
@@ -85,6 +88,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                       type="radio"
                       [formControlName]="question.code"
                       [value]="option.value"
+                      (change)="onRadioChange(question.code, option.value)"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
                     <span class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ option.label }}</span>
@@ -181,6 +185,9 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
   questionsPerPage = 4;
   totalPages = 0;
   currentQuestions: QuestionItem[] = [];
+  
+  // Respuestas del usuario
+  userResponses: { [key: string]: string } = {};
 
   // Exponer Math para el template
   Math = Math;
@@ -198,7 +205,7 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
       return 0;
     }
     
-    const answeredQuestions = this.getAnsweredQuestionsCount();
+    const answeredQuestions = Object.keys(this.userResponses).length;
     const percentage = (answeredQuestions / this.questions.length) * 100;
     console.log(`📊 Progreso: ${answeredQuestions}/${this.questions.length} = ${percentage.toFixed(1)}%`);
     return percentage;
@@ -280,11 +287,8 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
 
   private loadExistingResponses(): void {
     const responses = this.sessionService.currentResponses();
-    Object.keys(responses).forEach(code => {
-      if (this.questionnaireForm.get(code)) {
-        this.questionnaireForm.get(code)?.setValue(responses[code]);
-      }
-    });
+    this.userResponses = { ...responses };
+    console.log('📥 Respuestas cargadas:', this.userResponses);
   }
 
   private updateCurrentQuestions(): void {
@@ -294,17 +298,7 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
   }
 
   getAnsweredQuestionsCount(): number {
-    let count = 0;
-    this.questions.forEach(question => {
-      const control = this.questionnaireForm.get(question.code);
-      const value = control?.value;
-      if (value !== null && value !== undefined && value !== '') {
-        count++;
-        console.log(`✅ Pregunta respondida: ${question.code} = "${value}"`);
-      } else {
-        console.log(`❌ Pregunta sin responder: ${question.code}`);
-      }
-    });
+    const count = Object.keys(this.userResponses).length;
     console.log(`📊 Total respondidas: ${count}/${this.questions.length}`);
     return count;
   }
@@ -320,17 +314,11 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
     
     // Verificar que todas las preguntas de la página actual tengan respuesta
     for (const question of this.currentQuestions) {
-      const control = this.questionnaireForm.get(question.code);
-      if (!control) {
-        console.log('❌ No hay control para pregunta:', question.code);
-        return false;
-      }
-      
-      const value = control.value;
+      const value = this.userResponses[question.code];
       console.log(`📋 Pregunta ${question.code}: valor = "${value}"`);
       
       // Verificar que el valor no sea null, undefined, o string vacío
-      if (value === null || value === undefined || value === '') {
+      if (!value || value === '') {
         console.log('❌ Pregunta sin respuesta:', question.code);
         return false;
       }
@@ -365,48 +353,53 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
   }
 
   private saveCurrentPageResponses(): void {
-    // Guardar todas las respuestas del formulario, no solo las de la página actual
-    this.questions.forEach(question => {
-      const value = this.questionnaireForm.get(question.code)?.value;
+    // Guardar todas las respuestas del usuario
+    Object.keys(this.userResponses).forEach(code => {
+      const value = this.userResponses[code];
       if (value && value !== '') {
-        this.sessionService.updateResponse(question.code, value);
-        console.log(`💾 Guardada respuesta: ${question.code} = "${value}"`);
+        this.sessionService.updateResponse(code, value);
+        console.log(`💾 Guardada respuesta: ${code} = "${value}"`);
       }
     });
   }
 
   onSubmit(): void {
-    if (this.questionnaireForm.valid) {
+    if (this.isCurrentPageValid()) {
       this.saveCurrentPageResponses();
       this.router.navigate(['/es/diagnostico-persona/resumen']);
     }
   }
 
+  onRadioChange(questionCode: string, value: string): void {
+    console.log(`🔘 Radio cambiado: ${questionCode} = "${value}"`);
+    
+    // Guardar en userResponses
+    this.userResponses[questionCode] = value;
+    console.log(`✅ Valor guardado: ${questionCode} = "${value}"`);
+    
+    // Guardar en el servicio de sesión
+    this.sessionService.updateResponse(questionCode, value);
+    
+    // Forzar detección de cambios
+    this.cdr.detectChanges();
+    
+    console.log(`📊 Progreso actualizado: ${Object.keys(this.userResponses).length}/${this.questions.length}`);
+  }
+
   debugForm(): void {
     console.log('🔍 === DEBUG FORMULARIO ===');
-    console.log('📊 Formulario válido:', this.questionnaireForm.valid);
-    console.log('📊 Formulario completo:', this.questionnaireForm.value);
     console.log('📊 Preguntas totales:', this.questions.length);
     console.log('📊 Preguntas en página actual:', this.currentQuestions.length);
     console.log('📊 Página actual:', this.currentPage);
     console.log('📊 Total páginas:', this.totalPages);
     
+    console.log('🔍 === RESPUESTAS DEL USUARIO ===');
+    console.log('userResponses:', this.userResponses);
+    
     console.log('🔍 === VALORES DE PREGUNTAS ACTUALES ===');
     this.currentQuestions.forEach(question => {
-      const control = this.questionnaireForm.get(question.code);
-      const value = control?.value;
-      console.log(`${question.code}: "${value}" (${value === null ? 'NULL' : value === undefined ? 'UNDEFINED' : value === '' ? 'EMPTY' : 'HAS_VALUE'})`);
-    });
-    
-    console.log('🔍 === TODAS LAS RESPUESTAS ===');
-    this.questions.forEach(question => {
-      const control = this.questionnaireForm.get(question.code);
-      const value = control?.value;
-      if (value !== null && value !== undefined && value !== '') {
-        console.log(`✅ ${question.code}: "${value}"`);
-      } else {
-        console.log(`❌ ${question.code}: "${value}"`);
-      }
+      const value = this.userResponses[question.code];
+      console.log(`${question.code}: "${value}" (${value ? 'HAS_VALUE' : 'NO_VALUE'})`);
     });
     
     console.log('🔍 === VALIDACIÓN ===');
