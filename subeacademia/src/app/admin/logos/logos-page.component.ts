@@ -5,7 +5,7 @@ import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { MediaService } from '../../core/data/media.service';
 import { StorageService } from '../../core/storage.service';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 
 @Component({
     standalone: true,

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, AsyncPipe } from '@angular/common';
-import { I18nService } from '../../i18n/i18n.service';
-import { SettingsService, SiteSettings } from '../../data/settings.service';
-import { ThemeService } from '../../../shared/theme.service';
-import { AuthService } from '../../services/auth.service';
+import { I18nService } from '../../../i18n/i18n.service';
+import { SettingsService, SiteSettings } from '../../../data/settings.service';
+import { ThemeService } from '../../../../shared/theme.service';
+import { AuthService } from '../../../services/auth.service';
 import { User } from '@angular/fire/auth';
 
 @Component({

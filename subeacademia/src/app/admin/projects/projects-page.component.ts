@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProjectsService } from '../../core/data/projects.service';
 import { Project } from '../../core/models';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

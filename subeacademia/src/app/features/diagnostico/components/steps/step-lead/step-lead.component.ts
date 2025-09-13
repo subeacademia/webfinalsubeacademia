@@ -1,48 +1,69 @@
-import { Component, inject, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { DiagnosticFlowService } from '../../../services/diagnostic-flow.service';
-import { UserLead } from '../../../data/diagnostic.models';
-import { ToastService } from '../../../../../core/ui/toast/toast.service';
+import { DiagnosticsService } from '../../../services/diagnostics.service';
+import { ToastService } from '../../../../../core/services/ui/toast/toast.service';
 
 @Component({
   selector: 'app-step-lead',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <div class="p-4 md:p-6 max-w-lg mx-auto">
-      <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">¡Casi listo!</h2>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">
-        Déjanos tus datos para enviarte el informe completo y personalizado a tu correo.
-      </p>
-      <form [formGroup]="leadForm" (ngSubmit)="submit()">
-        <div class="space-y-4">
-          <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
-            <input type="text" id="name" formControlName="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
-            <input type="email" id="email" formControlName="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          </div>
-          <div>
-            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono (Opcional)</label>
-            <input type="tel" id="phone" formControlName="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+    <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-fade-in">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+        <h2 class="text-2xl font-bold mb-1 text-gray-800 dark:text-white">¡Ya casi terminamos!</h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Completa tus datos para recibir tu diagnóstico personalizado.</p>
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+          <input type="text" id="name" formControlName="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+          <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
+            Tu nombre es requerido.
           </div>
         </div>
-        
-        <!-- Botones de navegación -->
-        <div class="mt-8 flex justify-between">
-          <button type="button" (click)="previous()" 
-                  class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-            ← Volver
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Corporativo</label>
+          <input type="email" id="email" formControlName="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+           <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-red-500 text-sm mt-1">
+            Por favor, ingresa un email válido.
+           </div>
+        </div>
+      
+        <div>
+          <label for="companyName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la Empresa (Opcional)</label>
+          <input type="text" id="companyName" formControlName="companyName" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+        </div>
+      
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <input id="acceptTerms" formControlName="acceptTerms" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+          </div>
+          <div class="ml-3 text-sm">
+            <label for="acceptTerms" class="font-medium text-gray-700 dark:text-gray-300">Acepto los <a routerLink="/terminos" target="_blank" class="text-blue-600 hover:underline">términos y condiciones</a></label>
+          </div>
+        </div>
+         <div *ngIf="form.get('acceptTerms')?.invalid && form.get('acceptTerms')?.touched" class="text-red-500 text-sm">
+            Debes aceptar los términos para continuar.
+         </div>
+      
+        <div class="flex justify-between items-center pt-4">
+          <button type="button" (click)="diagnosticStateService.previousStep()" class="px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+            Anterior
           </button>
-          <button type="submit" 
-                  [disabled]="leadForm.invalid"
-                  class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-            <span>Finalizar Diagnóstico</span>
+          <button 
+            type="submit" 
+            class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            [disabled]="form.invalid || isGenerating">
+            @if (isGenerating) {
+              <span class="flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Generando...
+              </span>
+            } @else {
+              <span>Finalizar y Ver mi Diagnóstico</span>
+            }
           </button>
         </div>
       </form>
@@ -50,36 +71,53 @@ import { ToastService } from '../../../../../core/ui/toast/toast.service';
   `
 })
 export class StepLeadComponent {
-  private fb = inject(FormBuilder);
-  public stateService = inject(DiagnosticStateService);
-  private flowService = inject(DiagnosticFlowService);
-  private router = inject(Router);
-  private toastService = inject(ToastService);
-
   @Output() diagnosticFinished = new EventEmitter<void>();
 
-  leadForm = this.fb.group({
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private diagnosticsService = inject(DiagnosticsService);
+  private toastService = inject(ToastService);
+  public diagnosticStateService = inject(DiagnosticStateService);
+
+  isGenerating = false;
+
+  form = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['']
+    companyName: [''],
+    acceptTerms: [false, Validators.requiredTrue]
   });
 
   async submit(): Promise<void> {
-    if (this.leadForm.valid) {
-      // Actualizar los datos del lead en el estado
-      this.stateService.updateLead(this.leadForm.value);
+    if (this.form.valid && !this.isGenerating) {
+      this.diagnosticStateService.updateLead(this.form.value);
+      console.log('StepLead: Formulario válido. Iniciando generación de reporte...');
+      this.isGenerating = true;
       
-      console.log('StepLead: Formulario válido. Emitiendo evento diagnosticFinished.');
-      this.diagnosticFinished.emit(); // Emite el evento al componente padre
-    } else {
-      // Marcar campos como tocados para mostrar errores
-      this.leadForm.markAllAsTouched();
+      try {
+        if (!this.diagnosticStateService.isComplete()) {
+          this.toastService.show('error', 'Por favor, completa todos los pasos del diagnóstico.');
+          return;
+        }
+        
+        const report = await this.diagnosticsService.generateReport(this.diagnosticStateService.state());
+        if (!report) {
+          throw new Error('El servicio de diagnóstico devolvió un reporte nulo.');
+        }
+        
+        this.diagnosticsService.setCurrentReport(report);
+        const currentUrl = this.router.url;
+        const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+        this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+        
+      } catch (error) {
+        console.error('Error al generar el diagnóstico:', error);
+        this.toastService.show('error', 'Hubo un problema al generar tu diagnóstico. La IA no respondió correctamente. Por favor, inténtalo de nuevo.');
+      } finally {
+        this.isGenerating = false;
+      }
+    } else if (this.form.invalid) {
+      this.form.markAllAsTouched();
     }
-  }
-
-  previous() {
-    const currentUrl = this.router.url;
-    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
-    this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
   }
 }

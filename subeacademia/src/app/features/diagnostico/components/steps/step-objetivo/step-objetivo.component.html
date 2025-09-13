@@ -1,77 +1,63 @@
-<div class="p-4 md:p-6" [formGroup]="form">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <input formControlName="rol" placeholder="Tu rol actual (Ej: Jefe de Proyecto)" class="w-full p-2 border rounded">
-        <select formControlName="industria" class="w-full p-2 border rounded">
-            <option value="">Selecciona tu industria</option>
-            @for (category of industries; track category.category) {
-                <optgroup [label]="category.category">
-                    @for (option of category.options; track option) {
-                        <option [value]="option">{{ option }}</option>
-                    }
-                </optgroup>
-            }
-        </select>
+<div class="p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-fade-in">
+  <form [formGroup]="form" (ngSubmit)="next()">
+    <h2 class="text-2xl font-bold mb-1 text-gray-900 dark:text-white">¿Cuál es tu principal objetivo de negocio?</h2>
+    <p class="text-gray-600 dark:text-gray-400 mb-4">Describe tu meta principal. Nuestra IA te ayudará a refinarla en objetivos SMART.</p>
+    
+    <div class="relative">
+      <textarea 
+        formControlName="objetivoPrincipal" 
+        class="w-full p-4 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+        rows="4" 
+        placeholder="Ej: Quiero mejorar la presencia de mi marca en redes sociales, especialmente en LinkedIn, para atraer más clientes.">
+      </textarea>
+      <button 
+        type="button" 
+        (click)="generateObjectivesWithAI()" 
+        [disabled]="isGenerating() || form.get('objetivoPrincipal')?.invalid" 
+        class="absolute top-3 right-3 p-2 rounded-full bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        aria-label="Generar objetivos con IA">
+        <ng-container *ngIf="!isGenerating(); else loadingSpinner">
+          <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+        </ng-container>
+        <ng-template #loadingSpinner>
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+        </ng-template>
+      </button>
     </div>
-    <!-- Campo de objetivo con botón de IA integrado -->
-    <div class="relative mb-4">
-        <textarea formControlName="objetivo" rows="4" placeholder="Describe tu objetivo profesional principal..." class="w-full p-2 pr-16 border rounded"></textarea>
-        
-        <!-- Botón de IA flotante -->
-        <button 
-            type="button" 
-            (click)="generateObjectivesWithAI()" 
-            [disabled]="isGenerating()" 
-            class="absolute top-2 right-2 p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Generar objetivo con IA">
-            
-            <!-- Muestra un spinner si está cargando, si no, el icono de IA -->
-            <ng-container *ngIf="!isGenerating(); else loadingSpinner">
-                <!-- Icono de IA (varita mágica) -->
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18m9-9H3"></path>
-                </svg>
-            </ng-container>
-
-            <ng-template #loadingSpinner>
-                <!-- Spinner de carga -->
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            </ng-template>
-        </button>
+    <div *ngIf="form.get('objetivoPrincipal')?.invalid && form.get('objetivoPrincipal')?.touched" class="text-red-500 text-sm mt-1">
+      Por favor, escribe un objetivo más detallado (mínimo 15 caracteres).
     </div>
 
-    <!-- Botón de sugerencias existente -->
-    <button (click)="generarSugerencias()" [disabled]="isLoadingSuggestions() || !allFieldsFilled" class="w-full p-2 bg-green-500 text-white rounded disabled:bg-gray-400 mb-4">
-        @if (isLoadingSuggestions()) {
-            <span>Generando sugerencias...</span>
-        } @else {
-            <span>Generar Sugerencias Detalladas</span>
-        }
-    </button>
-    
-    @if (sugerencias().length > 0) {
-        <div class="mt-4">
-            <h3 class="font-semibold mb-2">Sugerencias:</h3>
-            <div class="space-y-2">
-                @for (sug of sugerencias(); track sug) {
-                    <div (click)="seleccionarSugerencia(sug)" class="p-3 border rounded hover:bg-gray-100 cursor-pointer">
-                        {{ sug }}
-                    </div>
-                }
-            </div>
-        </div>
-    }
-    
-    <!-- Botones de navegación -->
-    <div class="mt-8 flex justify-between">
-        <button (click)="previous()" 
-                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
-            ← Volver
-        </button>
-        <button (click)="next()" 
-                [disabled]="form.invalid"
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-            Continuar →
-        </button>
+    <div *ngIf="suggestedObjectives().length > 0" class="mt-6 animate-fade-in">
+      <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-3">Sugerencias de la IA (puedes seleccionar más de una):</h3>
+      <div class="space-y-3">
+        <label *ngFor="let objective of suggestedObjectives()" 
+               class="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+               [class.bg-blue-50]="isChecked(objective)"
+               [class.dark:bg-blue-900/50]="isChecked(objective)"
+               [class.border-blue-500]="isChecked(objective)"
+               [class.dark:border-blue-500]="isChecked(objective)">
+          <input 
+            type="checkbox" 
+            [value]="objective" 
+            [checked]="isChecked(objective)"
+            (change)="onCheckboxChange($event)" 
+            class="h-5 w-5 rounded border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+          <span class="ml-4 text-gray-800 dark:text-gray-300">{{ objective }}</span>
+        </label>
+      </div>
+      <div *ngIf="selectedObjectives.invalid && selectedObjectives.touched" class="text-red-500 text-sm mt-2">
+        Por favor, selecciona al menos un objetivo para continuar.
+      </div>
     </div>
+    
+    <div class="mt-8 flex justify-between items-center">
+      <button type="button" (click)="diagnosticStateService.previousStep()" class="px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+        Anterior
+      </button>
+      <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed" [disabled]="form.invalid">
+        Siguiente
+      </button>
+    </div>
+  </form>
 </div>

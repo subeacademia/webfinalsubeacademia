@@ -5,7 +5,7 @@ import { switchMap, takeUntil, tap, catchError } from 'rxjs/operators';
 import { Subject, Observable, BehaviorSubject, of } from 'rxjs';
 import { SettingsService, TypewriterPhrase } from '../../core/data/settings.service';
 import { I18nService } from '../../core/i18n/i18n.service';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { AuthCoreService } from '../../core/auth-core.service';
 
 @Component({

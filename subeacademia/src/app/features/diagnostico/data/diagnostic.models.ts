@@ -1,7 +1,7 @@
 export interface ObjetivoData {
   rol: string;
   industria: string;
-  objetivo: string;
+  objetivo: string[];
 }
 
 export interface ContextoData {
@@ -33,7 +33,7 @@ export const INITIAL_DIAGNOSTIC_DATA: DiagnosticData = {
   objetivo: {
     rol: '',
     industria: '',
-    objetivo: ''
+    objetivo: []
   },
   contexto: {
     area: '',

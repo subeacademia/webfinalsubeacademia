@@ -1,6 +1,6 @@
 import { Injectable, signal, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastService, ToastKind } from '../../../core/ui/toast/toast.service';
+import { ToastService, ToastKind } from '../../../core/services/ui/toast/toast.service';
 import { DiagnosticData, INITIAL_DIAGNOSTIC_DATA, Answer } from '../data/diagnostic.models';
 import { Report, ReportData } from '../data/report.model';
 import { BesselAiService } from '../../../core/ai/bessel-ai.service';
@@ -48,6 +48,8 @@ export class DiagnosticStateService {
     return !!(
       data.contexto &&
       data.objetivo &&
+      data.objetivo.objetivo &&
+      data.objetivo.objetivo.length > 0 &&
       data.lead &&
       this.aresProgress().isComplete &&
       this.competenciasProgress().isComplete
@@ -90,27 +92,48 @@ export class DiagnosticStateService {
     }));
   }
 
+  /**
+   * Actualiza los objetivos seleccionados
+   */
+  updateObjetivo(objetivos: string[]): void {
+    this.diagnosticData.update(currentData => ({
+      ...currentData,
+      objetivo: {
+        ...currentData.objetivo,
+        objetivo: objetivos
+      }
+    }));
+  }
+
   nextStep(): void {
     this.currentStep.update(step => step + 1);
     
     // Navegar al siguiente paso basado en el paso actual
     const currentUrl = this.router.url;
-    console.log('Current URL:', currentUrl);
+    console.log('🔍 DiagnosticStateService.nextStep() - Current URL:', currentUrl);
+    console.log('🔍 Current step:', this.currentStep());
+    
+    // Detectar prefijo de idioma
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    console.log('🔍 Language prefix detected:', languagePrefix);
     
     if (currentUrl.includes('/contexto')) {
-      console.log('Navigating to ares');
-      this.router.navigate(['/diagnostico/ares']);
+      console.log('✅ Navigating to ares');
+      this.router.navigate([`/${languagePrefix}/diagnostico/ares`]);
     } else if (currentUrl.includes('/ares')) {
-      console.log('Navigating to competencias');
-      this.router.navigate(['/diagnostico/competencias']);
+      console.log('✅ Navigating to competencias');
+      this.router.navigate([`/${languagePrefix}/diagnostico/competencias`]);
     } else if (currentUrl.includes('/competencias')) {
-      console.log('Navigating to objetivo');
-      this.router.navigate(['/diagnostico/objetivo']);
+      console.log('✅ Navigating to objetivo');
+      this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
     } else if (currentUrl.includes('/objetivo')) {
-      console.log('Navigating to finalizar');
-      this.router.navigate(['/diagnostico/finalizar']);
+      console.log('✅ Navigating to finalizar');
+      this.router.navigate([`/${languagePrefix}/diagnostico/finalizar`]);
     } else {
-      console.log('No navigation match found for URL:', currentUrl);
+      console.log('❌ No navigation match found for URL:', currentUrl);
+      // Fallback: navegar a la página de inicio si no se encuentra una ruta válida
+      console.log('🔄 Fallback: navigating to home');
+      this.router.navigate([`/${languagePrefix}/`]);
     }
   }
 
@@ -120,6 +143,68 @@ export class DiagnosticStateService {
 
   // MÉTODO ELIMINADO: La lógica de generación y navegación se centraliza ahora en diagnostico.component.ts
   // Esto desacopla el servicio de estado de la lógica de aplicación y navegación
+
+  /**
+   * Maneja la finalización del diagnóstico y genera el reporte
+   */
+  async handleDiagnosticFinished(): Promise<void> {
+    if (this.isGeneratingReport()) return;
+    
+    const data = this.diagnosticData();
+    if (!data) {
+      this.toastService.show('error', 'No hay datos de diagnóstico.');
+      return;
+    }
+    
+    this.isGeneratingReport.set(true);
+    
+    try {
+      // Usar cursos mock para evitar problemas de Firebase
+      const cursosMock = [
+        {
+          id: '1',
+          titulo: 'Curso de Introducción a la IA',
+          descripcion: 'Aprende los conceptos básicos de la inteligencia artificial',
+          precio: 99,
+          duracion: '4 semanas',
+          nivel: 'Principiante',
+          activo: true
+        }
+      ];
+      
+      // Convertir los datos al formato esperado por BesselAiService
+      const besselData = {
+        profile: {
+          industry: data.objetivo.industria,
+          companySize: data.contexto?.equipo ? `${data.contexto.equipo} empleados` : 'No especificado',
+          mainObjective: data.objetivo.objetivo
+        },
+        aresAnswers: data.ares,
+        compAnswers: data.competencias,
+        riskLevel: 'Mínimo',
+        lambdaComp: 0.5,
+        targetLevel: 4,
+        selectedGoals: []
+      };
+      
+      console.log('🚀 Generando reporte estratégico con datos:', besselData);
+      
+      const strategicReport = await this.besselAiService.generateStrategicReport(besselData, cursosMock);
+      this.generatedStrategicReport.set(strategicReport);
+      
+      this.toastService.show('success', 'Reporte estratégico generado correctamente.');
+      
+      // Navegar con prefijo de idioma
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+    } catch (error: any) {
+      console.error('❌ Error al generar reporte estratégico:', error);
+      this.toastService.show('error', `No se pudo generar el reporte estratégico: ${error.message || 'Error desconocido'}`);
+    } finally {
+      this.isGeneratingReport.set(false);
+    }
+  }
 
   /**
    * NUEVO MÉTODO: Genera un reporte estratégico de alto nivel

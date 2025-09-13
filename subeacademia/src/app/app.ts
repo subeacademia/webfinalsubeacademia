@@ -4,8 +4,8 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { I18nService } from './core/i18n/i18n.service';
 import { SeoService } from './core/seo/seo.service';
 import { Subject, filter, takeUntil } from 'rxjs';
-import { AppShellComponent } from './core/ui/app-shell/app-shell.component';
-import { ToastContainerComponent } from './core/ui/toast/toast.container';
+import { AppShellComponent } from './core/services/ui/app-shell/app-shell.component';
+import { ToastContainerComponent } from './core/services/ui/toast/toast.container';
 import { ChatbotComponent } from './shared/ui/chatbot/chatbot.component';
 import { ThemeService } from './shared/theme.service';
 

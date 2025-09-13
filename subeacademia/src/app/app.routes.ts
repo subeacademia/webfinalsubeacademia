@@ -41,6 +41,7 @@ export const routes: Routes = [
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
       { path: 'metodologia', loadChildren: () => import('./features/methodology/methodology.routes').then(m => m.METHODOLOGY_ROUTES) },
       { path: 'contacto', loadChildren: () => import('./features/contact/contact.routes').then(m => m.CONTACT_ROUTES) },
+      { path: 'terminos', loadChildren: () => import('./features/legal/legal.routes').then(m => m.LEGAL_ROUTES) },
     ],
   },
 

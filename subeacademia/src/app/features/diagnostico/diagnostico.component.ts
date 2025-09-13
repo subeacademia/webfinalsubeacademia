@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { StepNavComponent } from './components/step-nav.component';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
-import { DiagnosticsService } from './services/diagnostics.service';
 
 @Component({
   selector: 'app-diagnostico',
@@ -47,12 +46,9 @@ import { DiagnosticsService } from './services/diagnostics.service';
 })
 export class DiagnosticoComponent implements OnInit, OnDestroy {
   private stateService = inject(DiagnosticStateService);
-  private diagnosticsService = inject(DiagnosticsService);
-  private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  // Estado de carga centralizado en este componente
-  isGeneratingReport = signal(false);
+  // Estado de carga centralizado en el servicio de estado
+  isGeneratingReport = this.stateService.isGeneratingReport;
 
   ngOnInit() {
     // El evento ahora se maneja directamente a través del template binding
@@ -71,25 +67,15 @@ export class DiagnosticoComponent implements OnInit, OnDestroy {
     
     console.log('DiagnosticoComponent: Recibido evento. Iniciando generación de reporte...');
     this.isGeneratingReport.set(true);
-    this.cdr.detectChanges(); // Muestra el loader
 
     try {
-      const report = await this.diagnosticsService.generateReport(this.stateService.state());
-      if (!report) {
-        throw new Error('El servicio de diagnóstico devolvió un reporte nulo.');
-      }
-      this.diagnosticsService.setCurrentReport(report);
-      
-      // Navegar con prefijo de idioma
-      const currentUrl = this.router.url;
-      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
-      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+      await this.stateService.handleDiagnosticFinished();
     } catch (error) {
       console.error('Error final en la generación del diagnóstico:', error);
       alert('Hubo un problema al generar tu diagnóstico. La IA no respondió correctamente. Por favor, inténtalo de nuevo.');
     } finally {
       this.isGeneratingReport.set(false);
-      this.cdr.detectChanges(); // Oculta el loader
     }
   }
+
 }

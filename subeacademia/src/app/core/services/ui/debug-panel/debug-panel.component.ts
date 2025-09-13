@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DiagnosticFlowLoggerService } from '../../services/diagnostic-flow-logger.service';
-import { BesselAiService } from '../../ai/bessel-ai.service';
+import { DiagnosticFlowLoggerService } from '../../../services/diagnostic-flow-logger.service';
+import { BesselAiService } from '../../../ai/bessel-ai.service';
 
 @Component({
   selector: 'app-debug-panel',

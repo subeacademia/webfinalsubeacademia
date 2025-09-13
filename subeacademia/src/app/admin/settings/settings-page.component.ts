@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SettingsService, SiteSettings } from '../../core/data/settings.service';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { TypewriterManagerComponent } from './typewriter-manager.component';
 
 @Component({
