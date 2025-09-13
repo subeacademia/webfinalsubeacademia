@@ -393,7 +393,7 @@ ${JSON.stringify(contextoAdicional, null, 2)}
   }
 
   /**
-   * Calcula las puntuaciones ARES basadas en las respuestas
+   * Calcula las puntuaciones ARES basadas en las respuestas reales
    */
   private calculateAresScores(aresAnswers: any): Record<string, number> {
     const scores: Record<string, number> = {
@@ -403,26 +403,66 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       'Sostenibilidad': 0
     };
 
-    // Lógica para calcular puntuaciones ARES
-    // Por ahora, valores de ejemplo - implementar lógica real
-    Object.keys(scores).forEach(dimension => {
-      scores[dimension] = Math.floor(Math.random() * 40) + 30; // 30-70
+    if (!aresAnswers) {
+      console.warn('⚠️ No hay respuestas ARES disponibles, usando valores por defecto');
+      Object.keys(scores).forEach(dimension => {
+        scores[dimension] = 50; // Valor neutro
+      });
+      return scores;
+    }
+
+    // Calcular puntuaciones reales basadas en las respuestas
+    const dimensions = ['Agilidad', 'Responsabilidad', 'Ética', 'Sostenibilidad'];
+    
+    dimensions.forEach(dimension => {
+      const dimensionKey = dimension.toLowerCase();
+      const answers = aresAnswers[dimensionKey] || aresAnswers[dimension];
+      
+      if (answers && typeof answers === 'object') {
+        const values = Object.values(answers).filter(val => typeof val === 'number') as number[];
+        if (values.length > 0) {
+          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+          scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
+        } else {
+          scores[dimension] = 50; // Valor neutro si no hay datos
+        }
+      } else {
+        scores[dimension] = 50; // Valor neutro si no hay datos
+      }
     });
 
+    console.log('📊 Puntuaciones ARES calculadas:', scores);
     return scores;
   }
 
   /**
-   * Calcula las puntuaciones de competencias basadas en las respuestas
+   * Calcula las puntuaciones de competencias basadas en las respuestas reales
    */
   private calculateCompetencyScores(compAnswers: any): Record<string, number> {
     const scores: Record<string, number> = {};
 
-    // Mapear las competencias disponibles
+    if (!compAnswers) {
+      console.warn('⚠️ No hay respuestas de competencias disponibles, usando valores por defecto');
+      competencias.forEach(comp => {
+        scores[comp.id] = 50; // Valor neutro
+      });
+      return scores;
+    }
+
+    // Calcular puntuaciones reales basadas en las respuestas
     competencias.forEach(comp => {
-      scores[comp.id] = Math.floor(Math.random() * 40) + 30; // 30-70
+      const answer = compAnswers[comp.id];
+      
+      if (typeof answer === 'number' && answer >= 1 && answer <= 5) {
+        scores[comp.id] = Math.round(answer * 20); // Convertir de 1-5 a 0-100
+      } else if (typeof answer === 'object' && answer.score) {
+        scores[comp.id] = Math.round(answer.score * 20); // Si viene como objeto con score
+      } else {
+        scores[comp.id] = 50; // Valor neutro si no hay datos válidos
+      }
     });
 
+    console.log('📊 Puntuaciones de competencias calculadas:', scores);
     return scores;
   }
 
