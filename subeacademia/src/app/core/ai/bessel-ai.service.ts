@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom, timeout, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Report, ReportData, StrategicInitiative, ExecutiveSummary, AiMaturity, CompetencyAnalysis, StrategicInsight } from '../../features/diagnostico/data/report.model';
 import { competencias } from '../../features/diagnostico/data/competencias';
@@ -406,10 +406,12 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     if (!aresAnswers) {
       console.warn('⚠️ No hay respuestas ARES disponibles, usando valores por defecto');
       Object.keys(scores).forEach(dimension => {
-        scores[dimension] = 50; // Valor neutro
+        scores[dimension] = 40; // Valor por defecto para "En Desarrollo" (nivel 2 de 5)
       });
       return scores;
     }
+
+    console.log('🔍 Respuestas ARES recibidas:', aresAnswers);
 
     // Calcular puntuaciones reales basadas en las respuestas
     const dimensions = ['Agilidad', 'Responsabilidad', 'Ética', 'Sostenibilidad'];
@@ -419,15 +421,32 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       const answers = aresAnswers[dimensionKey] || aresAnswers[dimension];
       
       if (answers && typeof answers === 'object') {
-        const values = Object.values(answers).filter(val => typeof val === 'number') as number[];
+        // Buscar valores numéricos en las respuestas
+        const values = Object.values(answers).filter(val => {
+          if (typeof val === 'number') return true;
+          if (typeof val === 'object' && val !== null && 'value' in val) {
+            return typeof val.value === 'number';
+          }
+          return false;
+        }).map(val => {
+          if (typeof val === 'number') return val;
+          if (typeof val === 'object' && val !== null && 'value' in val) {
+            return val.value;
+          }
+          return 0;
+        }) as number[];
+
         if (values.length > 0) {
           const average = values.reduce((sum, val) => sum + val, 0) / values.length;
           scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
+          console.log(`📊 ${dimension}: promedio ${average} -> ${scores[dimension]}/100`);
         } else {
-          scores[dimension] = 50; // Valor neutro si no hay datos
+          scores[dimension] = 40; // Valor por defecto para "En Desarrollo"
+          console.log(`⚠️ ${dimension}: no se encontraron valores válidos, usando 40/100`);
         }
       } else {
-        scores[dimension] = 50; // Valor neutro si no hay datos
+        scores[dimension] = 40; // Valor por defecto para "En Desarrollo"
+        console.log(`⚠️ ${dimension}: no hay respuestas, usando 40/100`);
       }
     });
 
@@ -444,10 +463,12 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     if (!compAnswers) {
       console.warn('⚠️ No hay respuestas de competencias disponibles, usando valores por defecto');
       competencias.forEach(comp => {
-        scores[comp.id] = 50; // Valor neutro
+        scores[comp.id] = 40; // Valor por defecto para "En Desarrollo" (nivel 2 de 5)
       });
       return scores;
     }
+
+    console.log('🔍 Respuestas de competencias recibidas:', compAnswers);
 
     // Calcular puntuaciones reales basadas en las respuestas
     competencias.forEach(comp => {
@@ -455,10 +476,28 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       
       if (typeof answer === 'number' && answer >= 1 && answer <= 5) {
         scores[comp.id] = Math.round(answer * 20); // Convertir de 1-5 a 0-100
-      } else if (typeof answer === 'object' && answer.score) {
-        scores[comp.id] = Math.round(answer.score * 20); // Si viene como objeto con score
+        console.log(`📊 ${comp.name}: ${answer} -> ${scores[comp.id]}/100`);
+      } else if (typeof answer === 'object' && answer !== null && 'value' in answer) {
+        const value = answer.value;
+        if (typeof value === 'number' && value >= 1 && value <= 5) {
+          scores[comp.id] = Math.round(value * 20); // Convertir de 1-5 a 0-100
+          console.log(`📊 ${comp.name}: ${value} (objeto) -> ${scores[comp.id]}/100`);
+        } else {
+          scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
+          console.log(`⚠️ ${comp.name}: valor inválido en objeto, usando 40/100`);
+        }
+      } else if (typeof answer === 'object' && answer !== null && 'score' in answer) {
+        const score = answer.score;
+        if (typeof score === 'number' && score >= 1 && score <= 5) {
+          scores[comp.id] = Math.round(score * 20); // Convertir de 1-5 a 0-100
+          console.log(`📊 ${comp.name}: ${score} (score) -> ${scores[comp.id]}/100`);
+        } else {
+          scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
+          console.log(`⚠️ ${comp.name}: score inválido, usando 40/100`);
+        }
       } else {
-        scores[comp.id] = 50; // Valor neutro si no hay datos válidos
+        scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
+        console.log(`⚠️ ${comp.name}: no hay respuesta válida, usando 40/100`);
       }
     });
 
@@ -726,8 +765,13 @@ ${JSON.stringify(contextoAdicional, null, 2)}
 
     1.  **Cálculo y Justificación del Nivel de Madurez (aiMaturity):**
         - Calcula un puntaje de madurez (\`score\`) de 0 a 100. Basa tu cálculo en un promedio ponderado: las competencias valen un 60% y los pilares ARES un 40%. Un puntaje promedio de 1 en la escala de 1-5 equivale a un 0/100, y un 5 equivale a un 100/100.
-        - Asigna un \`level\` ('Incipiente', 'En Desarrollo', 'Establecido', 'Estratégico', 'Transformador') basado en el score.
-        - Escribe un \`summary\` que justifique tu calificación, mencionando específicamente los puntajes más bajos y cómo impactan la madurez general. Ejemplo: "Tu nivel es 'En Desarrollo' (45/100) principalmente porque, aunque tienes una base en Agilidad, tus bajas puntuaciones en 'Ética en IA' y 'Gestión de Datos' representan un riesgo fundamental que impide un avance sostenido."
+        - Asigna un \`level\` basado en estos rangos EXACTOS:
+          * Incipiente: 0-20 puntos
+          * En Desarrollo: 21-40 puntos  
+          * Establecido: 41-60 puntos
+          * Estratégico: 61-80 puntos
+          * Transformador: 81-100 puntos
+        - Escribe un \`summary\` detallado (mínimo 3-4 oraciones) que justifique tu calificación, mencionando específicamente los puntajes más bajos, las fortalezas identificadas, y cómo impactan la madurez general. Incluye recomendaciones estratégicas específicas.
 
     2.  **Análisis de Fortalezas (strengthsAnalysis):**
         - Identifica las 3 competencias con el puntaje más alto.
@@ -738,10 +782,23 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         - Para cada una, escribe un \`analysis\` que describa el "dolor" que esto causa. Conecta la debilidad con un riesgo de negocio tangible. Ejemplo: "Tu puntaje crítico en 'Gestión de Datos' (1.5/5) significa que cualquier iniciativa de IA fracasará por falta de 'combustible' de calidad. Esto se traduce en decisiones de negocio basadas en intuición y una alta probabilidad de invertir en tecnología que no podrán utilizar, impactando negativamente el ROI."
 
     4.  **Resumen Ejecutivo (executiveSummary):**
-        - Escribe un párrafo potente para un CEO. Comienza con el nivel de madurez, menciona la brecha más importante (la debilidad que más choca con su objetivo) y finaliza con una recomendación estratégica de alto nivel. Debe ser directo, sin rodeos.
+        - Escribe un resumen ejecutivo detallado (mínimo 4-5 oraciones) para un CEO. Debe incluir:
+          * El nivel de madurez actual y su significado estratégico
+          * Las fortalezas clave que pueden apalancarse
+          * La brecha más crítica que impide el progreso
+          * El impacto específico en el objetivo principal: "${companyContext.mainObjective}"
+          * Una recomendación estratégica concreta y accionable
+          * El potencial de crecimiento y el ROI esperado
+        - Debe ser directo, sin rodeos, y orientado a la toma de decisiones ejecutivas.
 
-    5.  **Plan de Acción (actionPlan):**
-        - Genera un plan de acción detallado como lo has hecho antes, pero asegúrate de que las iniciativas propuestas aborden DIRECTAMENTE las debilidades identificadas en el punto 3.
+    5.  **Plan de Acción Personalizado (actionPlan):**
+        - Genera un plan de acción DETALLADO y PERSONALIZADO que aborde DIRECTAMENTE las debilidades identificadas y se alinee con el objetivo principal del usuario: "${companyContext.mainObjective}".
+        - Cada área debe tener un nombre específico basado en las debilidades reales.
+        - Cada acción debe ser CONCRETA, MEDIBLE y con TIMELINE específico.
+        - Incluye recursos específicos, KPIs medibles y resultados esperados.
+        - Conecta cada acción con el objetivo principal del usuario.
+        - Usa fechas reales basadas en la fecha actual.
+        - Genera 3-5 áreas de mejora máximo, cada una con 2-3 acciones específicas.
 
     **FORMATO DE SALIDA OBLIGATORIO (JSON):**
     {
@@ -749,7 +806,26 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       "executiveSummary": "...",
       "strengthsAnalysis": [ { "competencyId": "...", "competencyName": "...", "score": ..., "analysis": "..." }, ... ],
       "weaknessesAnalysis": [ { "competencyId": "...", "competencyName": "...", "score": ..., "analysis": "..." }, ... ],
-      "actionPlan": [ ... ]
+      "actionPlan": [
+        {
+          "area": "Nombre específico del área de mejora",
+          "priority": "Alta|Media|Baja",
+          "timeline": "X meses",
+          "description": "Descripción detallada del área y su importancia",
+          "actions": [
+            {
+              "accion": "Acción específica y concreta",
+              "descripcion": "Descripción detallada de la acción",
+              "timeline": "X semanas/meses",
+              "recursos": ["recurso1", "recurso2", "recurso3"],
+              "kpis": ["KPI1", "KPI2"],
+              "expectedOutcome": "Resultado esperado específico",
+              "competencyTarget": "ID de la competencia que mejora",
+              "aresDimension": "Dimensión ARES relacionada"
+            }
+          ]
+        }
+      ]
     }
   `;
 
@@ -763,7 +839,23 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     console.log('📤 Enviando payload comprehensivo a la API:', JSON.stringify(payload));
 
     try {
-      const response = await firstValueFrom(this.http.post<any>(this.apiUrl, payload));
+      const response = await firstValueFrom(
+        this.http.post<any>(this.apiUrl, payload).pipe(
+          timeout(30000), // 30 segundos de timeout (más corto)
+          catchError((error: HttpErrorResponse) => {
+            console.error('❌ Error HTTP en la llamada a la API:', error);
+            if (error.status === 504) {
+              throw new Error('La API tardó demasiado en responder (timeout). Por favor, inténtalo de nuevo.');
+            } else if (error.status === 500) {
+              throw new Error('Error interno del servidor. Por favor, inténtalo más tarde.');
+            } else if (error.status === 429) {
+              throw new Error('Demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.');
+            } else {
+              throw new Error(`Error de conexión: ${error.message}`);
+            }
+          })
+        )
+      );
       console.log('📥 Respuesta cruda de la API:', response);
 
       let responseText = '';
@@ -821,11 +913,199 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         return reportData;
       } catch (parseError) {
         console.error('❌ Error fatal al parsear JSON comprehensivo:', parseError, 'Texto recibido:', responseText);
-        return null; // Devuelve null explícitamente en caso de CUALQUIER error de parseo.
+        console.log('🔄 Generando reporte de fallback debido a error de parseo...');
+        return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
       }
     } catch (error) {
       console.error('❌ Error en la llamada a la API comprehensiva:', error);
-      throw error;
+      
+      // Si es un error de timeout o conexión, intentar generar un reporte de fallback
+      if (error instanceof Error && (
+        error.message.includes('timeout') || 
+        error.message.includes('API tardó demasiado') ||
+        error.message.includes('Error de conexión') ||
+        error.message.includes('Error interno del servidor')
+      )) {
+        console.log('🔄 Generando reporte de fallback debido a error de API...');
+        return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+      }
+      
+      // Para cualquier otro error, también generar reporte de fallback
+      console.log('🔄 Generando reporte de fallback debido a error inesperado...');
+      return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
     }
+  }
+
+  /**
+   * Genera un reporte de fallback cuando la API falla
+   */
+  private generateFallbackReport(
+    data: any, 
+    companyContext: any, 
+    aresScores: Record<string, number>, 
+    competencyScores: Record<string, number>
+  ): ReportData {
+    console.log('🔄 Generando reporte de fallback...');
+    
+    // Calcular nivel de madurez basado en puntuaciones reales
+    const competencyValues = Object.values(competencyScores);
+    const aresValues = Object.values(aresScores);
+    const allScores = [...competencyValues, ...aresValues];
+    const avgScore = allScores.reduce((sum, score) => sum + score, 0) / allScores.length;
+    
+    // Determinar nivel de madurez basado en rangos correctos
+    let maturityLevel: 'Incipiente' | 'En Desarrollo' | 'Establecido' | 'Estratégico' | 'Transformador';
+    if (avgScore >= 81) {
+      maturityLevel = 'Transformador';
+    } else if (avgScore >= 61) {
+      maturityLevel = 'Estratégico';
+    } else if (avgScore >= 41) {
+      maturityLevel = 'Establecido';
+    } else if (avgScore >= 21) {
+      maturityLevel = 'En Desarrollo';
+    } else {
+      maturityLevel = 'Incipiente';
+    }
+    
+    // Identificar fortalezas y debilidades basadas en puntuaciones reales
+    const competencyEntries = Object.entries(competencyScores);
+    const sortedCompetencies = competencyEntries.sort((a, b) => b[1] - a[1]);
+    
+    // Fortalezas: competencias con puntaje más alto (pero solo si son realmente altas)
+    const strengths = sortedCompetencies
+      .filter(([id, score]) => score >= 60) // Solo competencias con puntaje alto
+      .slice(0, 3)
+      .map(([id, score]) => {
+        const competency = competencias.find(c => c.id === id);
+        return {
+          competencyId: id,
+          competencyName: competency?.name || 'Competencia',
+          score: Math.round(score),
+          analysis: `Tu competencia en ${competency?.name || 'esta área'} (${Math.round(score)}/100) es una fortaleza clave que puedes apalancar para alcanzar tu objetivo de ${companyContext.mainObjective}. Esta fortaleza te permite abordar desafíos complejos y tomar decisiones informadas en la implementación de IA.`
+        };
+      });
+    
+    // Debilidades: competencias con puntaje más bajo
+    const weaknesses = sortedCompetencies
+      .filter(([id, score]) => score < 60) // Solo competencias que necesitan mejora
+      .slice(-3)
+      .map(([id, score]) => {
+        const competency = competencias.find(c => c.id === id);
+        return {
+          competencyId: id,
+          competencyName: competency?.name || 'Competencia',
+          score: Math.round(score),
+          analysis: `Tu puntaje en ${competency?.name || 'esta área'} (${Math.round(score)}/100) representa un área de mejora crítica que puede impedir el logro de tu objetivo de ${companyContext.mainObjective}. Es fundamental desarrollar esta competencia para asegurar el éxito en la implementación de IA.`
+        };
+      });
+
+    // Generar insights basados en el análisis real
+    const insights: StrategicInsight[] = [];
+    if (avgScore < 40) {
+      insights.push({
+        title: 'Riesgo Crítico de Implementación',
+        description: `Con un puntaje de madurez de ${Math.round(avgScore)}/100, existe un alto riesgo de que las iniciativas de IA fracasen. Es crucial desarrollar competencias fundamentales antes de implementar soluciones complejas.`,
+        type: 'Riesgo Crítico'
+      });
+    } else if (avgScore < 60) {
+      insights.push({
+        title: 'Oportunidad de Crecimiento',
+        description: `Tu nivel actual de madurez en IA presenta potencial significativo de mejora que puede impactar directamente en ${companyContext.mainObjective}. Con el plan de acción adecuado, puedes alcanzar un nivel estratégico.`,
+        type: 'Oportunidad Oculta'
+      });
+    } else {
+      insights.push({
+        title: 'Fortaleza Estratégica',
+        description: `Tu nivel de madurez en IA te posiciona como una organización preparada para liderar la transformación digital. Puedes apalancar esta ventaja para superar a la competencia.`,
+        type: 'Fortaleza Clave'
+      });
+    }
+
+    return {
+      id: this.generateId(),
+      timestamp: new Date(),
+      leadInfo: {
+        name: data.lead?.name || 'Usuario',
+        email: data.lead?.email || 'usuario@empresa.com',
+        companyName: data.lead?.companyName || 'Empresa'
+      },
+      contexto: data,
+      aresScores,
+      competencyScores: this.formatCompetencyScores(competencyScores),
+      companyContext,
+      aiMaturity: {
+        level: maturityLevel,
+        score: Math.round(avgScore),
+        summary: `Basado en el análisis de tus competencias y pilares ARES, tu nivel de madurez en IA es ${maturityLevel.toLowerCase()}. Tu puntaje promedio de ${Math.round(avgScore)}/100 indica ${avgScore >= 60 ? 'un buen nivel de preparación' : avgScore >= 40 ? 'áreas significativas de mejora' : 'necesidad crítica de desarrollo'} para implementar estrategias de IA efectivas.`
+      },
+      executiveSummary: `Tu empresa se encuentra en un nivel de madurez ${maturityLevel.toLowerCase()} en IA con un puntaje de ${Math.round(avgScore)}/100. ${avgScore >= 60 ? 'Tienes una base sólida para implementar estrategias de IA avanzadas.' : avgScore >= 40 ? 'Es crucial desarrollar competencias fundamentales antes de implementar soluciones complejas.' : 'Es imperativo establecer una base sólida de competencias antes de considerar cualquier implementación de IA.'} Tu objetivo principal de ${companyContext.mainObjective} puede alcanzarse mediante un plan de acción estructurado que aborde las brechas identificadas.`,
+      strengthsAnalysis: strengths,
+      weaknessesAnalysis: weaknesses,
+      insights: insights,
+      actionPlan: this.generateActionPlan(weaknesses, companyContext, avgScore),
+      generatedAt: new Date(),
+      version: '3.0.0-fallback'
+    };
+  }
+
+  /**
+   * Genera un plan de acción detallado basado en las debilidades identificadas
+   */
+  private generateActionPlan(weaknesses: any[], companyContext: any, avgScore: number): any[] {
+    const actionPlan = [];
+    
+    // Plan de acción para competencias críticas
+    if (weaknesses.length > 0) {
+      actionPlan.push({
+        area: 'Desarrollo de Competencias Críticas',
+        priority: 'Alta',
+        timeline: '3-6 meses',
+        description: 'Enfoque en las competencias con menor puntaje para establecer una base sólida',
+        actions: weaknesses.slice(0, 2).map((weakness, index) => ({
+          accion: `Desarrollar competencia en ${weakness.competencyName}`,
+          descripcion: `Implementar un programa de capacitación específico para mejorar ${weakness.competencyName} desde ${weakness.score}/100 hasta al menos 60/100.`,
+          timeline: `${2 + index} meses`,
+          recursos: ['Cursos especializados', 'Mentoría personalizada', 'Práctica guiada', 'Recursos de aprendizaje'],
+          kpis: [`Puntaje de ${weakness.competencyName}`, 'Aplicación práctica', 'Retroalimentación del equipo'],
+          expectedOutcome: `Mejora del ${60 - weakness.score}% en ${weakness.competencyName}`,
+          competencyTarget: weakness.competencyId,
+          aresDimension: 'Agilidad'
+        }))
+      });
+    }
+
+    // Plan de acción para implementación de IA
+    if (avgScore >= 40) {
+      actionPlan.push({
+        area: 'Implementación Estratégica de IA',
+        priority: avgScore >= 60 ? 'Alta' : 'Media',
+        timeline: '6-12 meses',
+        description: 'Desarrollo e implementación de soluciones de IA alineadas con los objetivos estratégicos',
+        actions: [
+          {
+            accion: 'Auditoría de capacidades actuales',
+            descripcion: 'Realizar una evaluación completa de las capacidades tecnológicas y organizacionales para IA',
+            timeline: '1 mes',
+            recursos: ['Consultor especializado', 'Herramientas de evaluación', 'Equipo interno'],
+            kpis: ['Inventario de capacidades', 'Gaps identificados', 'Roadmap definido'],
+            expectedOutcome: 'Mapa claro de capacidades y brechas',
+            competencyTarget: 'comp_1',
+            aresDimension: 'Responsabilidad'
+          },
+          {
+            accion: 'Piloto de implementación',
+            descripcion: `Desarrollar e implementar un piloto de IA enfocado en ${companyContext.mainObjective}`,
+            timeline: '3-4 meses',
+            recursos: ['Proveedor de IA', 'Equipo técnico', 'Presupuesto asignado'],
+            kpis: ['ROI del piloto', 'Adopción del equipo', 'Métricas de impacto'],
+            expectedOutcome: 'Validación de viabilidad y ROI',
+            competencyTarget: 'comp_2',
+            aresDimension: 'Ética'
+          }
+        ]
+      });
+    }
+
+    return actionPlan;
   }
 }

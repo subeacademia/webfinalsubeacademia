@@ -158,7 +158,7 @@ export class StepLeadComponent {
     acceptTerms: [false, Validators.requiredTrue]
   });
 
-  async submit(): Promise<void> {
+  async submit(retryCount = 0): Promise<void> {
     if (this.form.valid && !this.isGenerating) {
       this.diagnosticStateService.updateLead(this.form.value);
       console.log('StepLead: Formulario válido. Iniciando generación de reporte...');
@@ -167,6 +167,7 @@ export class StepLeadComponent {
       try {
         if (!this.diagnosticStateService.isComplete()) {
           this.toastService.show('error', 'Por favor, completa todos los pasos del diagnóstico.');
+          this.isGenerating = false;
           return;
         }
         
@@ -179,12 +180,44 @@ export class StepLeadComponent {
         const currentUrl = this.router.url;
         const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
         this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+        this.isGenerating = false; // Éxito, reset
         
       } catch (error) {
         console.error('Error al generar el diagnóstico:', error);
-        this.toastService.show('error', 'Hubo un problema al generar tu diagnóstico. La IA no respondió correctamente. Por favor, inténtalo de nuevo.');
-      } finally {
-        this.isGenerating = false;
+        
+        // Intentar retry automático para errores de timeout (máximo 2 intentos)
+        if (retryCount < 2 && error instanceof Error && 
+            (error.message.includes('timeout') || error.message.includes('API tardó demasiado'))) {
+          console.log(`🔄 Reintentando generación de diagnóstico (intento ${retryCount + 1}/2)...`);
+          this.toastService.show('info', 'La IA tardó en responder. Reintentando...');
+          
+          // Esperar 3 segundos antes del retry
+          setTimeout(() => {
+            // No reset isGenerating aquí, se reseteará en la siguiente llamada
+            this.submit(retryCount + 1);
+          }, 3000);
+          return; // IMPORTANTE: return aquí para evitar el manejo de error adicional
+        }
+        
+        // Si llegamos aquí, significa que se agotaron los reintentos o es un error no reintentable
+        let errorMessage = 'Hubo un problema al generar tu diagnóstico. Por favor, inténtalo de nuevo.';
+        
+        if (error instanceof Error) {
+          if (error.message.includes('timeout') || error.message.includes('API tardó demasiado')) {
+            errorMessage = 'La IA tardó demasiado en responder después de varios intentos. Por favor, inténtalo más tarde.';
+          } else if (error.message.includes('Error de conexión')) {
+            errorMessage = 'Error de conexión. Verifica tu internet e inténtalo de nuevo.';
+          } else if (error.message.includes('Demasiadas solicitudes')) {
+            errorMessage = 'Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.';
+          } else if (error.message.includes('Error interno del servidor')) {
+            errorMessage = 'Error del servidor. Inténtalo más tarde.';
+          } else if (error.message.includes('reporte nulo')) {
+            errorMessage = 'La IA generó un reporte vacío o inválido. Por favor, inténtalo de nuevo.';
+          }
+        }
+        
+        this.toastService.show('error', errorMessage);
+        this.isGenerating = false; // Error final, reset
       }
     } else if (this.form.invalid) {
       this.form.markAllAsTouched();

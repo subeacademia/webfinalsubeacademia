@@ -94,6 +94,16 @@ export class DiagnosticsService {
 
     } catch (error) {
       console.error('Error CATASTRÓFICO en generateReport:', error);
+      
+      // Si es un error de timeout o conexión, lanzar el error para que se maneje en el componente
+      if (error instanceof Error && (
+        error.message.includes('timeout') || 
+        error.message.includes('API tardó demasiado') ||
+        error.message.includes('Error de conexión')
+      )) {
+        throw error; // Re-lanzar para que el componente pueda mostrar el mensaje apropiado
+      }
+      
       return null; 
     }
   }

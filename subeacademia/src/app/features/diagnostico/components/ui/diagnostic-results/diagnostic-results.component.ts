@@ -218,9 +218,30 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
                       {{ i + 1 }}
                     </div>
                     
-                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 mt-2">
-                      {{ area.area }}
-                    </h3>
+                    <!-- Header del área -->
+                    <div class="mb-6 mt-2">
+                      <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">
+                          {{ area.area }}
+                        </h3>
+                        @if (area.priority) {
+                          <span class="px-3 py-1 rounded-full text-sm font-medium" [class]="getPriorityColor(area.priority)">
+                            {{ area.priority }}
+                          </span>
+                        }
+                      </div>
+                      @if (area.description) {
+                        <p class="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                          {{ area.description }}
+                        </p>
+                      }
+                      @if (area.timeline) {
+                        <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                          <span class="mr-2">📅</span>
+                          <span>Timeline: {{ area.timeline }}</span>
+                        </div>
+                      }
+                    </div>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       @for (action of area.actions; track action.accion; let j = $index) {
@@ -250,11 +271,39 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
                               </div>
                             </div>
                           }
+
+                          @if (action.kpis && action.kpis.length > 0) {
+                            <div class="mb-4">
+                              <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">KPIs a medir:</h5>
+                              <div class="flex flex-wrap gap-2">
+                                @for (kpi of action.kpis; track kpi) {
+                                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-medium">
+                                    {{ kpi }}
+                                  </span>
+                                }
+                              </div>
+                            </div>
+                          }
+
+                          @if (action.expectedOutcome) {
+                            <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                              <h5 class="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-1">Resultado esperado:</h5>
+                              <p class="text-sm text-yellow-700 dark:text-yellow-200">{{ action.expectedOutcome }}</p>
+                            </div>
+                          }
                           
-                          <!-- Timeline estimado -->
-                          <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                            <span class="mr-2">⏱️</span>
-                            <span>Tiempo estimado: {{ getEstimatedTime(action.accion) }}</span>
+                          <!-- Timeline y competencia objetivo -->
+                          <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                            <div class="flex items-center">
+                              <span class="mr-2">⏱️</span>
+                              <span>{{ action.timeline || getEstimatedTime(action.accion) }}</span>
+                            </div>
+                            @if (action.competencyTarget) {
+                              <div class="flex items-center">
+                                <span class="mr-2">🎯</span>
+                                <span>{{ getCompetencyName(action.competencyTarget) }}</span>
+                              </div>
+                            }
                           </div>
                         </div>
                       }
@@ -489,11 +538,11 @@ export class DiagnosticResultsComponent implements OnInit {
     const nextQuarter = currentMonth <= 9 ? getCurrentQuarter(currentMonth + 3) : `Q1 de ${nextYear}`;
     
     return {
-      executiveSummary: "Basado en tu perfil profesional y respuestas, has demostrado un nivel intermedio de madurez en IA. Tienes una base sólida en conceptos fundamentales, pero hay oportunidades significativas para avanzar en la implementación práctica y estratégica de soluciones de IA en tu organización.",
+      executiveSummary: "Tu organización se encuentra en un nivel 'Establecido' de madurez en IA (45/100), lo que representa una posición sólida pero con potencial significativo de crecimiento. Tienes fortalezas notables en competencias de comunicación efectiva y pensamiento crítico, que pueden ser apalancadas para liderar la transformación digital. Sin embargo, las debilidades críticas en ética de IA y gestión de datos representan un riesgo fundamental que podría comprometer el éxito de cualquier iniciativa de IA. Para alcanzar tu objetivo de transformación digital, es imperativo abordar estas brechas prioritariamente, ya que sin una base ética sólida y datos de calidad, las inversiones en IA no generarán el ROI esperado. La recomendación estratégica es implementar un programa integral de capacitación en ética de IA y establecer una infraestructura robusta de gestión de datos antes de escalar las iniciativas tecnológicas.",
       aiMaturity: {
-        level: "En Desarrollo",
+        level: "Establecido",
         score: 45,
-        summary: "Tu nivel es 'En Desarrollo' (45/100) principalmente porque, aunque tienes una base en Agilidad, tus bajas puntuaciones en 'Ética en IA' y 'Gestión de Datos' representan un riesgo fundamental que impide un avance sostenido."
+        summary: "Tu nivel es 'Establecido' (45/100) lo que indica que tienes una base sólida en competencias de IA, pero aún hay oportunidades significativas de mejora. Aunque tienes fortalezas en Agilidad y algunas competencias técnicas, tus bajas puntuaciones en 'Ética en IA' y 'Gestión de Datos' representan un riesgo fundamental que impide un avance sostenido hacia niveles más altos. Para alcanzar el siguiente nivel (Estratégico), necesitas enfocarte en fortalecer estas áreas críticas y desarrollar un enfoque más integral de la IA en tu organización."
       },
       competencyScores: [
         { id: 'pensamiento-critico', name: 'Pensamiento Crítico', score: 65 },
@@ -512,27 +561,48 @@ export class DiagnosticResultsComponent implements OnInit {
       ],
       actionPlan: [
         {
-          area: "Formación Técnica",
+          area: "Fortalecimiento de Competencias en Ética y Gestión de Datos",
+          priority: "Alta",
+          timeline: "6 meses",
+          description: "Esta área es crítica para tu objetivo de transformación digital. Las debilidades en ética y gestión de datos representan un riesgo fundamental que debe abordarse prioritariamente.",
           actions: [
             {
-              accion: "Completar curso de Machine Learning Avanzado",
-              descripcion: `Profundizar en algoritmos y técnicas de ML para aplicaciones empresariales antes de ${nextQuarter}`,
-              recursos: ["Curso ML Avanzado", "Laboratorios prácticos", "Certificación"]
+              accion: "Implementar programa de capacitación en ética de IA",
+              descripcion: `Desarrollar un programa integral de formación en ética de IA para todo el equipo, incluyendo principios de transparencia, equidad y responsabilidad. Este programa debe completarse antes de ${nextQuarter} para establecer las bases éticas necesarias.`,
+              timeline: "8 semanas",
+              recursos: ["Curso de Ética en IA", "Consultor especializado", "Material didáctico", "Sesiones de workshop"],
+              kpis: ["100% del equipo capacitado", "Reducción del 50% en sesgos detectados", "Implementación de comité de ética"],
+              expectedOutcome: "Equipo con conocimiento sólido en ética de IA y procesos establecidos para decisiones responsables",
+              competencyTarget: "etica-responsabilidad",
+              aresDimension: "Responsabilidad"
             },
             {
-              accion: "Implementar proyecto piloto de IA",
-              descripcion: `Desarrollar una solución de IA real en tu organización para ${currentQuarter}`,
-              recursos: ["Mentoría técnica", "Herramientas de desarrollo", "Soporte continuo"]
+              accion: "Establecer infraestructura de gestión de datos",
+              descripcion: `Crear un sistema robusto de gestión y calidad de datos que soporte las iniciativas de IA. Incluye limpieza, validación y gobernanza de datos para ${currentQuarter}.`,
+              timeline: "12 semanas",
+              recursos: ["Herramientas de gestión de datos", "Consultor en data governance", "Infraestructura cloud", "Capacitación técnica"],
+              kpis: ["95% de datos limpios y validados", "Tiempo de procesamiento reducido en 40%", "Cumplimiento normativo 100%"],
+              expectedOutcome: "Sistema de datos confiable que permita implementaciones de IA exitosas y decisiones basadas en datos",
+              competencyTarget: "alfabetizacion-datos",
+              aresDimension: "Agilidad"
             }
           ]
         },
         {
-          area: "Estrategia Organizacional",
+          area: "Desarrollo de Liderazgo y Estrategia en IA",
+          priority: "Media",
+          timeline: "4 meses",
+          description: "Fortalecer las capacidades de liderazgo y pensamiento estratégico para guiar efectivamente la transformación digital de la organización.",
           actions: [
             {
-              accion: "Desarrollar roadmap de IA",
-              descripcion: `Crear un plan estratégico para la adopción de IA en tu empresa para ${nextYear}`,
-              recursos: ["Plantillas estratégicas", "Consultoría especializada", "Benchmarking"]
+              accion: "Crear roadmap estratégico de IA personalizado",
+              descripcion: `Desarrollar un plan estratégico detallado para la adopción de IA en tu empresa, alineado con tu objetivo principal. Debe incluir fases, recursos y métricas de éxito para ${nextYear}.`,
+              timeline: "6 semanas",
+              recursos: ["Plantillas estratégicas", "Consultoría especializada", "Benchmarking del sector", "Herramientas de planificación"],
+              kpis: ["Roadmap aprobado por dirección", "Presupuesto asignado", "Timeline definido", "ROI proyectado"],
+              expectedOutcome: "Plan estratégico claro y ejecutable que guíe la transformación digital hacia tu objetivo principal",
+              competencyTarget: "liderazgo-ia",
+              aresDimension: "Sostenibilidad"
             }
           ]
         }
@@ -583,11 +653,11 @@ export class DiagnosticResultsComponent implements OnInit {
     if (!score) return 'N/A';
     
     // Calcular el próximo nivel basado en el score actual
-    if (score >= 80) return 'Transformador'; // Ya es Estratégico, próximo es Transformador
-    if (score >= 60) return 'Estratégico';   // Ya es Establecido, próximo es Estratégico
-    if (score >= 40) return 'Establecido';   // Ya es En Desarrollo, próximo es Establecido
-    if (score >= 20) return 'En Desarrollo'; // Ya es Incipiente, próximo es En Desarrollo
-    return 'En Desarrollo'; // Si está muy bajo, próximo es En Desarrollo
+    if (score >= 81) return 'Transformador'; // Ya es Transformador, no hay siguiente
+    if (score >= 61) return 'Transformador'; // Ya es Estratégico, próximo es Transformador
+    if (score >= 41) return 'Estratégico';   // Ya es Establecido, próximo es Estratégico
+    if (score >= 21) return 'Establecido';   // Ya es En Desarrollo, próximo es Establecido
+    return 'En Desarrollo'; // Ya es Incipiente, próximo es En Desarrollo
   }
 
   getPointsToNextLevel(): string {
@@ -595,11 +665,11 @@ export class DiagnosticResultsComponent implements OnInit {
     if (!score) return 'N/A';
     
     // Calcular puntos exactos necesarios para el próximo nivel
-    if (score >= 80) return (100 - score).toString(); // Para llegar a Transformador (100)
-    if (score >= 60) return (80 - score).toString();  // Para llegar a Estratégico (80)
-    if (score >= 40) return (60 - score).toString();  // Para llegar a Establecido (60)
-    if (score >= 20) return (40 - score).toString();  // Para llegar a En Desarrollo (40)
-    return (40 - score).toString(); // Para llegar a En Desarrollo (40)
+    if (score >= 81) return '0'; // Ya es Transformador, no hay siguiente
+    if (score >= 61) return (81 - score).toString();  // Para llegar a Transformador (81)
+    if (score >= 41) return (61 - score).toString();  // Para llegar a Estratégico (61)
+    if (score >= 21) return (41 - score).toString();  // Para llegar a Establecido (41)
+    return (21 - score).toString(); // Para llegar a En Desarrollo (21)
   }
 
   getCompetencyDescription(competencyId: string): string {
@@ -704,5 +774,23 @@ export class DiagnosticResultsComponent implements OnInit {
     if (totalActions <= 4) return '3-6 meses';
     if (totalActions <= 6) return '6-12 meses';
     return '12+ meses';
+  }
+
+  getPriorityColor(priority: string): string {
+    switch (priority.toLowerCase()) {
+      case 'alta':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'media':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'baja':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  }
+
+  getCompetencyName(competencyId: string): string {
+    const competency = this.report()?.competencyScores?.find((c: any) => c.id === competencyId);
+    return competency?.name || competencyId;
   }
 }
