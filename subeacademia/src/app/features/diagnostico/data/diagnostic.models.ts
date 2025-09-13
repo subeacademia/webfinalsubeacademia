@@ -17,10 +17,49 @@ export interface Answer {
   evidence?: string;
 }
 
+export type LeadType = 'persona_natural' | 'empresa';
+
 export interface UserLead {
   name: string;
   email: string;
   phone?: string;
+  type: LeadType;
+  companyName?: string; // Solo para empresas
+  position?: string; // Cargo en la empresa
+  industry?: string; // Industria de la empresa
+  companySize?: string; // Tamaño de la empresa
+  acceptsCommunications: boolean;
+}
+
+// Interfaz para los leads guardados en la base de datos
+export interface LeadData {
+  id?: string;
+  // Datos del lead
+  name: string;
+  email: string;
+  phone?: string;
+  type: LeadType;
+  companyName?: string;
+  position?: string;
+  industry?: string;
+  companySize?: string;
+  acceptsCommunications: boolean;
+  
+  // Datos del diagnóstico
+  diagnosticData?: DiagnosticData;
+  diagnosticResponses?: {
+    objetivo?: ObjetivoData;
+    contexto?: ContextoData;
+    competencias?: { [key: string]: Answer };
+    ares?: { [key: string]: Answer };
+  };
+  
+  // Metadatos
+  createdAt: Date;
+  updatedAt: Date;
+  source: 'diagnostico_empresa' | 'diagnostico_persona';
+  status: 'nuevo' | 'contactado' | 'interesado' | 'no_interesado' | 'convertido';
+  notes?: string; // Notas del administrador
 }
 
 export interface DiagnosticData {

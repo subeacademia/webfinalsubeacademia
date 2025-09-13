@@ -227,7 +227,6 @@ export class BesselAiService {
       try {
         const cleanedText = responseText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
         const strategicData = JSON.parse(cleanedText);
-        console.log('✅ Reporte estratégico parseado con éxito:', strategicData);
 
         // Construir el ReportData completo
         const reportData: ReportData = {
@@ -412,7 +411,6 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       return scores;
     }
 
-    console.log('🔍 Respuestas ARES recibidas:', aresAnswers);
 
     // Mapeo de pilares ARES a las dimensiones del framework
     const pillarMapping: Record<string, string> = {
@@ -448,7 +446,6 @@ ${JSON.stringify(contextoAdicional, null, 2)}
             const mappedDimension = pillarMapping[question.pillar];
             if (mappedDimension === dimension) {
               questionScores.push(score);
-              console.log(`📊 ${dimension} - ${questionId}: ${score}/5`);
             }
           }
         }
@@ -458,19 +455,20 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       if (questionScores.length > 0) {
         const average = questionScores.reduce((sum, score) => sum + score, 0) / questionScores.length;
         scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
-        console.log(`📊 ${dimension}: promedio ${average.toFixed(2)} -> ${scores[dimension]}/100 (${questionScores.length} preguntas)`);
       } else {
         scores[dimension] = 0; // Sin respuestas válidas = 0 puntos
-        console.log(`⚠️ ${dimension}: no hay respuestas válidas, usando 0/100`);
       }
     });
 
-    console.log('📊 Puntuaciones ARES calculadas:', scores);
     return scores;
   }
 
   /**
    * Calcula las puntuaciones de competencias basadas en las respuestas reales
+   * Implementa un sistema de ponderación inteligente que considera:
+   * 1. Preguntas críticas tienen mayor peso
+   * 2. Consistencia entre preguntas (penaliza grandes diferencias)
+   * 3. Ponderación por importancia de la competencia
    */
   private calculateCompetencyScores(compAnswers: any): Record<string, number> {
     const scores: Record<string, number> = {};
@@ -483,11 +481,10 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       return scores;
     }
 
-    console.log('🔍 Respuestas de competencias recibidas:', compAnswers);
 
     // Calcular puntuaciones reales basadas en las respuestas de las preguntas individuales
     competencias.forEach(comp => {
-      const questionScores: number[] = [];
+      const questionScores: { score: number; isCritical: boolean; weight: number }[] = [];
       
       // Recopilar puntuaciones de todas las preguntas de esta competencia
       comp.questions.forEach(question => {
@@ -509,24 +506,59 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         }
         
         if (score >= 1) { // Incluir valor 1 (Inexistente) como respuesta válida
-          questionScores.push(score);
-          console.log(`📊 ${comp.name} - ${question.id}: ${score}/5`);
+          // Asignar peso: preguntas críticas tienen peso 2, normales peso 1
+          const weight = question.isCritical ? 2 : 1;
+          questionScores.push({ 
+            score, 
+            isCritical: question.isCritical || false, 
+            weight 
+          });
         }
       });
       
-      // Calcular promedio de la competencia
+      // Calcular puntuación ponderada de la competencia
       if (questionScores.length > 0) {
-        const average = questionScores.reduce((sum, score) => sum + score, 0) / questionScores.length;
-        scores[comp.id] = Math.round(average * 20); // Convertir de 1-5 a 0-100
-        console.log(`📊 ${comp.name}: promedio ${average.toFixed(2)} -> ${scores[comp.id]}/100 (${questionScores.length} preguntas)`);
+        const totalWeight = questionScores.reduce((sum, q) => sum + q.weight, 0);
+        const weightedSum = questionScores.reduce((sum, q) => sum + (q.score * q.weight), 0);
+        const weightedAverage = weightedSum / totalWeight;
+        
+        // Aplicar factor de consistencia: penalizar grandes diferencias entre preguntas
+        const consistencyFactor = this.calculateConsistencyFactor(questionScores);
+        
+        // Calcular puntuación final con factor de consistencia
+        const finalScore = Math.round(weightedAverage * 20 * consistencyFactor); // Convertir de 1-5 a 0-100
+        scores[comp.id] = Math.min(100, Math.max(0, finalScore)); // Asegurar rango 0-100
+        
       } else {
         scores[comp.id] = 0; // Sin respuestas válidas = 0 puntos
-        console.log(`⚠️ ${comp.name}: no hay respuestas válidas, usando 0/100`);
       }
     });
 
-    console.log('📊 Puntuaciones de competencias calculadas:', scores);
     return scores;
+  }
+
+  /**
+   * Calcula el factor de consistencia para penalizar grandes diferencias entre preguntas
+   * Si hay mucha diferencia entre preguntas (ej: 1 y 5), reduce el puntaje final
+   */
+  private calculateConsistencyFactor(questionScores: { score: number; isCritical: boolean; weight: number }[]): number {
+    if (questionScores.length <= 1) return 1.0;
+    
+    const scores = questionScores.map(q => q.score);
+    const min = Math.min(...scores);
+    const max = Math.max(...scores);
+    const range = max - min;
+    
+    // Si la diferencia es muy grande (4 puntos), aplicar penalización
+    if (range >= 4) {
+      return 0.7; // Penalización del 30%
+    } else if (range >= 3) {
+      return 0.85; // Penalización del 15%
+    } else if (range >= 2) {
+      return 0.95; // Penalización del 5%
+    }
+    
+    return 1.0; // Sin penalización
   }
 
   /**
@@ -575,7 +607,6 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       try {
         const cleanedText = responseText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
         const holisticData = JSON.parse(cleanedText);
-        console.log('✅ Reporte holístico parseado con éxito:', holisticData);
 
         // Construir el ReportData completo
         const reportData: ReportData = {
@@ -759,6 +790,39 @@ ${JSON.stringify(contextoAdicional, null, 2)}
   }
 
   /**
+   * Ejecuta una operación con reintentos y backoff exponencial
+   */
+  private async executeWithRetry<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 Intento ${attempt + 1}/${maxRetries + 1} de la operación...`);
+        return await operation();
+      } catch (error) {
+        lastError = error as Error;
+        console.warn(`⚠️ Intento ${attempt + 1} falló:`, error);
+        
+        // Si es el último intento, no esperar
+        if (attempt === maxRetries) {
+          break;
+        }
+        
+        // Calcular delay con backoff exponencial
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.log(`⏳ Esperando ${delay}ms antes del siguiente intento...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw lastError!;
+  }
+
+  /**
    * MÉTODO CRÍTICO: Genera un reporte comprehensivo con análisis de consultor
    */
   async generateComprehensiveReport(data: any): Promise<ReportData | null> {
@@ -934,19 +998,20 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     console.log('📤 Enviando payload comprehensivo a la API:', JSON.stringify(payload));
 
     try {
+      // Intentar una sola vez con timeout largo
       const response = await firstValueFrom(
         this.http.post<any>(this.apiUrl, payload).pipe(
-          timeout(30000), // 30 segundos de timeout (más corto)
+          timeout(120000), // 120 segundos de timeout (2 minutos)
           catchError((error: HttpErrorResponse) => {
             console.error('❌ Error HTTP en la llamada a la API:', error);
-            if (error.status === 504) {
-              throw new Error('La API tardó demasiado en responder (timeout). Por favor, inténtalo de nuevo.');
+            if (error.status === 504 || (error as any).name === 'TimeoutError') {
+              throw new Error('La API tardó demasiado en responder (timeout). Generando reporte de fallback...');
             } else if (error.status === 500) {
-              throw new Error('Error interno del servidor. Por favor, inténtalo más tarde.');
+              throw new Error('Error interno del servidor. Generando reporte de fallback...');
             } else if (error.status === 429) {
-              throw new Error('Demasiadas solicitudes. Por favor, espera un momento e inténtalo de nuevo.');
+              throw new Error('Demasiadas solicitudes. Generando reporte de fallback...');
             } else {
-              throw new Error(`Error de conexión: ${error.message}`);
+              throw new Error(`Error de conexión: ${error.message}. Generando reporte de fallback...`);
             }
           })
         )
@@ -980,7 +1045,6 @@ ${JSON.stringify(contextoAdicional, null, 2)}
             throw new Error("El JSON de la IA no tiene la estructura de ReportData requerida.");
         }
 
-        console.log('✅ Reporte comprehensivo parseado con éxito:', comprehensiveData);
 
         // Construir el ReportData completo
         const reportData: ReportData = {
@@ -1014,20 +1078,15 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     } catch (error) {
       console.error('❌ Error en la llamada a la API comprehensiva:', error);
       
-      // Si es un error de timeout o conexión, intentar generar un reporte de fallback
-      if (error instanceof Error && (
-        error.message.includes('timeout') || 
-        error.message.includes('API tardó demasiado') ||
-        error.message.includes('Error de conexión') ||
-        error.message.includes('Error interno del servidor')
-      )) {
-        console.log('🔄 Generando reporte de fallback debido a error de API...');
-        return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+      // Siempre generar reporte de fallback para cualquier error
+      console.log('🔄 Generando reporte de fallback debido a error de API...');
+      try {
+        const fallbackReport = this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+        return fallbackReport;
+      } catch (fallbackError) {
+        console.error('❌ Error generando reporte de fallback:', fallbackError);
+        throw new Error('No se pudo generar el reporte. Por favor, inténtalo de nuevo.');
       }
-      
-      // Para cualquier otro error, también generar reporte de fallback
-      console.log('🔄 Generando reporte de fallback debido a error inesperado...');
-      return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
     }
   }
 
@@ -1510,19 +1569,19 @@ ${JSON.stringify(contextoAdicional, null, 2)}
    */
   private mapCompetencyToAres(competencyId: string): string {
     const mapping: Record<string, string> = {
-      'pensamiento-critico': 'Agilidad',
-      'resolucion-problemas': 'Agilidad',
-      'alfabetizacion-datos': 'Responsabilidad',
-      'comunicacion-efectiva': 'Responsabilidad',
-      'colaboracion-equipo': 'Responsabilidad',
-      'creatividad-innovacion': 'Agilidad',
-      'diseno-tecnologico': 'Agilidad',
-      'automatizacion-agentes-ia': 'Agilidad',
-      'adaptabilidad-flexibilidad': 'Agilidad',
-      'etica-responsabilidad': 'Ética',
+      'pensamiento_critico': 'Agilidad',
+      'resolucion_problemas': 'Agilidad',
+      'alfabetizacion_datos': 'Responsabilidad',
+      'comunicacion': 'Responsabilidad',
+      'colaboracion': 'Responsabilidad',
+      'creatividad_innovacion': 'Agilidad',
+      'diseno_tecnologico': 'Agilidad',
+      'automatizacion_agentes_ia': 'Agilidad',
+      'adaptabilidad_flexibilidad': 'Agilidad',
+      'etica_responsabilidad': 'Ética',
       'sostenibilidad': 'Sostenibilidad',
-      'aprendizaje-continuo': 'Agilidad',
-      'liderazgo-ia': 'Responsabilidad'
+      'aprendizaje_continuo': 'Agilidad',
+      'liderazgo_ia': 'Responsabilidad'
     };
 
     return mapping[competencyId] || 'Agilidad';

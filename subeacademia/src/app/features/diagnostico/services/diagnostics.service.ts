@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } from '@angular/fire/firestore';
-import { DiagnosticData } from '../data/diagnostic.models';
+import { DiagnosticData, UserLead } from '../data/diagnostic.models';
 import { Report, ReportData } from '../data/report.model';
 import { BesselAiService } from '../../../core/ai/bessel-ai.service';
+import { LeadsService } from '../../../core/services/leads.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { BesselAiService } from '../../../core/ai/bessel-ai.service';
 export class DiagnosticsService {
   private firestore: Firestore = inject(Firestore);
   private besselAiService = inject(BesselAiService);
+  private leadsService = inject(LeadsService);
   
   // Signal para almacenar el reporte actual
   private currentReport = signal<ReportData | null>(null);
@@ -43,6 +45,37 @@ export class DiagnosticsService {
         stack: e?.stack
       });
       throw e;
+    }
+  }
+
+  /**
+   * Guarda un diagnóstico completo con lead en la colección de leads
+   */
+  async saveDiagnosticWithLead(data: DiagnosticData, report: Report): Promise<string> {
+    try {
+      console.log('💾 [DiagnosticsService] Guardando diagnóstico con lead...');
+      
+      if (!data.lead) {
+        throw new Error('No se encontraron datos del lead en el diagnóstico');
+      }
+
+      // Determinar el tipo de fuente basado en el tipo de lead
+      const source = data.lead.type === 'empresa' ? 'diagnostico_empresa' : 'diagnostico_persona';
+      
+      // Guardar en la colección de leads
+      const leadId = await this.leadsService.saveLead(data.lead, data, source);
+      
+      // También guardar en la colección de diagnósticos para compatibilidad
+      const diagnosticId = await this.saveDiagnosticResult(data, report);
+      
+      console.log('✅ [DiagnosticsService] Diagnóstico guardado exitosamente');
+      console.log('Lead ID:', leadId);
+      console.log('Diagnostic ID:', diagnosticId);
+      
+      return leadId;
+    } catch (error) {
+      console.error('❌ [DiagnosticsService] Error guardando diagnóstico con lead:', error);
+      throw error;
     }
   }
 

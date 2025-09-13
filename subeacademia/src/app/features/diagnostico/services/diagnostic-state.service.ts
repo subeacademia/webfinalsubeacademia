@@ -21,12 +21,14 @@ export class DiagnosticStateService {
   private cursosService = inject(CursosService);
 
   private diagnosticData = signal<DiagnosticData>(JSON.parse(JSON.stringify(INITIAL_DIAGNOSTIC_DATA)));
+  private leadType = signal<'persona_natural' | 'empresa' | null>(null);
   currentStep = signal(0);
   isGeneratingReport = signal(false);
   generatedReport = signal<Report | null>(null);
   generatedStrategicReport = signal<ReportData | null>(null);
 
   public state = computed(() => this.diagnosticData());
+  public currentLeadType = computed(() => this.leadType());
 
   public aresProgress = computed(() => {
     const aresData = this.diagnosticData().ares;
@@ -58,7 +60,6 @@ export class DiagnosticStateService {
       data.objetivo &&
       data.objetivo.objetivo &&
       data.objetivo.objetivo.length > 0 &&
-      data.lead &&
       this.aresProgress().isComplete &&
       this.competenciasProgress().isComplete
     );
@@ -69,8 +70,44 @@ export class DiagnosticStateService {
     this.currentStep.set(1);
   }
 
+  setLeadType(type: 'persona_natural' | 'empresa'): void {
+    this.leadType.set(type);
+    console.log('Tipo de lead establecido:', type);
+  }
+
+  updateLead(leadData: any): void {
+    const currentData = this.diagnosticData();
+    const leadType = this.leadType();
+    
+    console.log('🔍 updateLead: leadData recibido:', leadData);
+    console.log('🔍 updateLead: leadType actual:', leadType);
+    console.log('🔍 updateLead: currentData antes:', currentData);
+    
+    if (!leadType) {
+      console.error('❌ No se ha establecido el tipo de lead');
+      return;
+    }
+
+    // Crear el objeto lead con el tipo ya establecido
+    const lead = {
+      ...leadData,
+      type: leadType
+    };
+
+    console.log('🔍 updateLead: lead creado:', lead);
+
+    this.diagnosticData.set({
+      ...currentData,
+      lead
+    });
+    
+    console.log('✅ Lead actualizado:', lead);
+    console.log('🔍 updateLead: currentData después:', this.diagnosticData());
+  }
+
   reset(): void {
     this.diagnosticData.set(JSON.parse(JSON.stringify(INITIAL_DIAGNOSTIC_DATA)));
+    this.leadType.set(null);
     this.currentStep.set(0);
     this.isGeneratingReport.set(false);
     this.generatedReport.set(null);
@@ -90,15 +127,6 @@ export class DiagnosticStateService {
     });
   }
 
-  /**
-   * Actualiza los datos del lead (información de contacto)
-   */
-  updateLead(leadData: any): void {
-    this.diagnosticData.update(currentData => ({
-      ...currentData,
-      lead: leadData
-    }));
-  }
 
   /**
    * Actualiza los objetivos seleccionados

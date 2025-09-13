@@ -85,38 +85,74 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
         <h2 class="text-2xl font-bold mb-1 text-gray-800 dark:text-white">¡Ya casi terminamos!</h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Completa tus datos para recibir tu diagnóstico personalizado.</p>
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
-          <input type="text" id="name" formControlName="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-          <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
-            Tu nombre es requerido.
+        
+        <!-- Tipo de Lead (solo informativo) -->
+        <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    [class]="diagnosticStateService.currentLeadType() === 'empresa' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
+                {{ diagnosticStateService.currentLeadType() === 'empresa' ? '🏢 Empresa' : '👤 Persona Natural' }}
+              </span>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm text-blue-700 dark:text-blue-300">
+                {{ diagnosticStateService.currentLeadType() === 'empresa' ? 'Diagnóstico organizacional' : 'Diagnóstico personal' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos personales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre Completo</label>
+            <input type="text" id="name" formControlName="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
+              Tu nombre es requerido.
+            </div>
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <input type="email" id="email" formControlName="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+            <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-red-500 text-sm mt-1">
+              Por favor, ingresa un email válido.
+            </div>
           </div>
         </div>
 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Corporativo</label>
-          <input type="email" id="email" formControlName="email" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-           <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-red-500 text-sm mt-1">
-            Por favor, ingresa un email válido.
-           </div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono (Opcional)</label>
+          <input type="tel" id="phone" formControlName="phone" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
         </div>
+
       
-        <div>
-          <label for="companyName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la Empresa (Opcional)</label>
-          <input type="text" id="companyName" formControlName="companyName" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
-        </div>
-      
-        <div class="flex items-start">
-          <div class="flex items-center h-5">
-            <input id="acceptTerms" formControlName="acceptTerms" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+        <!-- Checkboxes de consentimiento -->
+        <div class="space-y-3">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="acceptTerms" formControlName="acceptTerms" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="acceptTerms" class="font-medium text-gray-700 dark:text-gray-300">Acepto los <a routerLink="/terminos" target="_blank" class="text-blue-600 hover:underline">términos y condiciones</a></label>
+            </div>
           </div>
-          <div class="ml-3 text-sm">
-            <label for="acceptTerms" class="font-medium text-gray-700 dark:text-gray-300">Acepto los <a routerLink="/terminos" target="_blank" class="text-blue-600 hover:underline">términos y condiciones</a></label>
-          </div>
-        </div>
-         <div *ngIf="form.get('acceptTerms')?.invalid && form.get('acceptTerms')?.touched" class="text-red-500 text-sm">
+          <div *ngIf="form.get('acceptTerms')?.invalid && form.get('acceptTerms')?.touched" class="text-red-500 text-sm">
             Debes aceptar los términos para continuar.
-         </div>
+          </div>
+
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="acceptsCommunications" formControlName="acceptsCommunications" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700">
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="acceptsCommunications" class="font-medium text-gray-700 dark:text-gray-300">
+                Acepto recibir comunicaciones sobre servicios relacionados con IA y transformación digital
+              </label>
+            </div>
+          </div>
+        </div>
       
         <div class="flex justify-between items-center pt-4">
           <button type="button" (click)="diagnosticStateService.previousStep()" class="px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
@@ -154,27 +190,66 @@ export class StepLeadComponent {
   form = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    companyName: [''],
+    phone: [''],
+    acceptsCommunications: [true, Validators.requiredTrue],
     acceptTerms: [false, Validators.requiredTrue]
   });
 
   async submit(retryCount = 0): Promise<void> {
     if (this.form.valid && !this.isGenerating) {
-      this.diagnosticStateService.updateLead(this.form.value);
-      console.log('StepLead: Formulario válido. Iniciando generación de reporte...');
+      // Preparar datos del lead
+      const leadData = {
+        name: this.form.value.name,
+        email: this.form.value.email,
+        phone: this.form.value.phone,
+        acceptsCommunications: this.form.value.acceptsCommunications
+      };
+      
+      // Obtener el tipo de lead actual
+      const leadType = this.diagnosticStateService.currentLeadType();
+      console.log('🔍 StepLead: Tipo de lead actual:', leadType);
+      
+      // Si no hay tipo de lead, establecer uno por defecto basado en la URL
+      if (!leadType) {
+        const currentUrl = this.router.url;
+        const isEmpresa = currentUrl.includes('/empresa') || currentUrl.includes('empresa');
+        const defaultType = isEmpresa ? 'empresa' : 'persona_natural';
+        console.log('🔍 StepLead: No hay tipo de lead, estableciendo:', defaultType);
+        this.diagnosticStateService.setLeadType(defaultType);
+      }
+      
+      // Actualizar el lead ANTES de la validación
+      console.log('🔍 StepLead: Actualizando lead con datos:', leadData);
+      this.diagnosticStateService.updateLead(leadData);
+      
+      // Verificar que el diagnóstico esté completo
+      if (!this.diagnosticStateService.isComplete()) {
+        this.toastService.show('error', 'Por favor, completa todos los pasos del diagnóstico.');
+        return;
+      }
+      
       this.isGenerating = true;
+      console.log('StepLead: Iniciando generación de reporte...');
+      this.toastService.show('info', '🤖 Generando tu diagnóstico personalizado... Esto puede tomar hasta 2 minutos.');
       
       try {
-        if (!this.diagnosticStateService.isComplete()) {
-          this.toastService.show('error', 'Por favor, completa todos los pasos del diagnóstico.');
-          this.isGenerating = false;
-          return;
-        }
+        // Obtener el estado completo del diagnóstico
+        const diagnosticState = this.diagnosticStateService.state();
+        console.log('🔍 StepLead: Estado completo del diagnóstico:', diagnosticState);
+        console.log('🔍 StepLead: Lead en el estado:', diagnosticState.lead);
         
-        const report = await this.diagnosticsService.generateReport(this.diagnosticStateService.state());
+        const report = await this.diagnosticsService.generateReport(diagnosticState);
         if (!report) {
           throw new Error('El servicio de diagnóstico devolvió un reporte nulo.');
         }
+        
+        // Mostrar mensaje de éxito
+        this.toastService.show('success', '✅ Diagnóstico generado exitosamente');
+        
+        // Guardar el diagnóstico con lead en la base de datos
+        console.log('🔍 StepLead: Intentando guardar con estado:', diagnosticState);
+        const leadId = await this.diagnosticsService.saveDiagnosticWithLead(diagnosticState, report as any);
+        console.log('✅ Lead guardado con ID:', leadId);
         
         this.diagnosticsService.setCurrentReport(report);
         const currentUrl = this.router.url;

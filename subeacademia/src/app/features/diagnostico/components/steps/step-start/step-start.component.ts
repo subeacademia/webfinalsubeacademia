@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
 
 @Component({
@@ -110,9 +111,13 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
 export class StepStartComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly diagnosticStateService = inject(DiagnosticStateService);
 
   comenzarDiagnosticoEmpresa(): void {
     console.log('Navegando al diagnóstico de empresa');
+    
+    // Establecer el tipo de lead como empresa
+    this.diagnosticStateService.setLeadType('empresa');
     
     // Navegar directamente a la ruta contexto usando navegación relativa
     this.router.navigate(['contexto'], { relativeTo: this.route.parent }).then(() => {
@@ -128,6 +133,9 @@ export class StepStartComponent {
 
   comenzarDiagnosticoPersona(): void {
     console.log('Navegando al diagnóstico de persona');
+    
+    // Establecer el tipo de lead como persona natural
+    this.diagnosticStateService.setLeadType('persona_natural');
     
     // Navegar al diagnóstico de persona
     this.router.navigate(['/es', 'diagnostico-persona', 'edad']).then(() => {

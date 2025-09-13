@@ -151,22 +151,6 @@ import { SessionService, QuestionItem } from '../../services/session.service';
         <p class="text-sm text-gray-500 dark:text-gray-400">
           💡 Tus respuestas se guardan automáticamente
         </p>
-        
-        <!-- Debug temporal -->
-        <div class="mt-4 p-4 bg-yellow-100 dark:bg-yellow-900 rounded">
-          <h3 class="font-bold text-yellow-800 dark:text-yellow-200">DEBUG INFO:</h3>
-          <p class="text-sm text-yellow-700 dark:text-yellow-300">
-            Página válida: {{ isCurrentPageValid() }} | 
-            Progreso: {{ Math.round(progressPercentage) }}% | 
-            Preguntas respondidas: {{ getAnsweredQuestionsCount() }}/{{ questions.length }}
-          </p>
-          <button 
-            type="button" 
-            (click)="debugForm()" 
-            class="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">
-            Debug Formulario
-          </button>
-        </div>
       </div>
     </div>
   `,
@@ -386,25 +370,4 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
     console.log(`📊 Progreso actualizado: ${Object.keys(this.userResponses).length}/${this.questions.length}`);
   }
 
-  debugForm(): void {
-    console.log('🔍 === DEBUG FORMULARIO ===');
-    console.log('📊 Preguntas totales:', this.questions.length);
-    console.log('📊 Preguntas en página actual:', this.currentQuestions.length);
-    console.log('📊 Página actual:', this.currentPage);
-    console.log('📊 Total páginas:', this.totalPages);
-    
-    console.log('🔍 === RESPUESTAS DEL USUARIO ===');
-    console.log('userResponses:', this.userResponses);
-    
-    console.log('🔍 === VALORES DE PREGUNTAS ACTUALES ===');
-    this.currentQuestions.forEach(question => {
-      const value = this.userResponses[question.code];
-      console.log(`${question.code}: "${value}" (${value ? 'HAS_VALUE' : 'NO_VALUE'})`);
-    });
-    
-    console.log('🔍 === VALIDACIÓN ===');
-    console.log('Página válida:', this.isCurrentPageValid());
-    console.log('Progreso:', this.progressPercentage + '%');
-    console.log('Respondidas:', this.getAnsweredQuestionsCount());
-  }
 }
