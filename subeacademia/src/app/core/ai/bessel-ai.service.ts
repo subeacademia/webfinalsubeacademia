@@ -4,6 +4,7 @@ import { firstValueFrom, timeout, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Report, ReportData, StrategicInitiative, ExecutiveSummary, AiMaturity, CompetencyAnalysis, StrategicInsight } from '../../features/diagnostico/data/report.model';
 import { competencias } from '../../features/diagnostico/data/competencias';
+import { aresQuestions } from '../../features/diagnostico/data/ares-items';
 
 // Interfaz para los datos del diagnóstico
 export interface DiagnosticData {
@@ -413,40 +414,54 @@ ${JSON.stringify(contextoAdicional, null, 2)}
 
     console.log('🔍 Respuestas ARES recibidas:', aresAnswers);
 
-    // Calcular puntuaciones reales basadas en las respuestas
-    const dimensions = ['Agilidad', 'Responsabilidad', 'Ética', 'Sostenibilidad'];
-    
-    dimensions.forEach(dimension => {
-      const dimensionKey = dimension.toLowerCase();
-      const answers = aresAnswers[dimensionKey] || aresAnswers[dimension];
-      
-      if (answers && typeof answers === 'object') {
-        // Buscar valores numéricos en las respuestas
-        const values = Object.values(answers).filter(val => {
-          if (typeof val === 'number') return true;
-          if (typeof val === 'object' && val !== null && 'value' in val) {
-            return typeof val.value === 'number';
-          }
-          return false;
-        }).map(val => {
-          if (typeof val === 'number') return val;
-          if (typeof val === 'object' && val !== null && 'value' in val) {
-            return val.value;
-          }
-          return 0;
-        }) as number[];
+    // Mapeo de pilares ARES a las dimensiones del framework
+    const pillarMapping: Record<string, string> = {
+      'Agilidad': 'Agilidad',
+      'Responsabilidad y Ética': 'Responsabilidad',
+      'Sostenibilidad': 'Sostenibilidad'
+    };
 
-        if (values.length > 0) {
-          const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-          scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
-          console.log(`📊 ${dimension}: promedio ${average} -> ${scores[dimension]}/100`);
-        } else {
-          scores[dimension] = 40; // Valor por defecto para "En Desarrollo"
-          console.log(`⚠️ ${dimension}: no se encontraron valores válidos, usando 40/100`);
+    // Calcular puntuaciones reales basadas en las respuestas de preguntas individuales
+    Object.keys(scores).forEach(dimension => {
+      const questionScores: number[] = [];
+      
+      // Buscar todas las preguntas que pertenecen a esta dimensión
+      Object.keys(aresAnswers).forEach(questionId => {
+        const answer = aresAnswers[questionId];
+        let score = 0;
+        
+        // Extraer el valor numérico de la respuesta
+        if (typeof answer === 'number' && answer >= 1 && answer <= 5) {
+          score = answer;
+        } else if (typeof answer === 'object' && answer !== null && 'value' in answer) {
+          const value = answer.value;
+          if (typeof value === 'number' && value >= 1 && value <= 5) {
+            score = value;
+          }
         }
+        
+        if (score > 0) {
+          // Determinar a qué dimensión pertenece esta pregunta
+          // Buscar en las preguntas ARES para encontrar el pilar
+          const question = aresQuestions.find(q => q.id === questionId);
+          if (question) {
+            const mappedDimension = pillarMapping[question.pillar];
+            if (mappedDimension === dimension) {
+              questionScores.push(score);
+              console.log(`📊 ${dimension} - ${questionId}: ${score}/5`);
+            }
+          }
+        }
+      });
+      
+      // Calcular promedio de la dimensión
+      if (questionScores.length > 0) {
+        const average = questionScores.reduce((sum, score) => sum + score, 0) / questionScores.length;
+        scores[dimension] = Math.round(average * 20); // Convertir de 1-5 a 0-100
+        console.log(`📊 ${dimension}: promedio ${average.toFixed(2)} -> ${scores[dimension]}/100 (${questionScores.length} preguntas)`);
       } else {
         scores[dimension] = 40; // Valor por defecto para "En Desarrollo"
-        console.log(`⚠️ ${dimension}: no hay respuestas, usando 40/100`);
+        console.log(`⚠️ ${dimension}: no hay respuestas válidas, usando 40/100`);
       }
     });
 
@@ -470,34 +485,43 @@ ${JSON.stringify(contextoAdicional, null, 2)}
 
     console.log('🔍 Respuestas de competencias recibidas:', compAnswers);
 
-    // Calcular puntuaciones reales basadas en las respuestas
+    // Calcular puntuaciones reales basadas en las respuestas de las preguntas individuales
     competencias.forEach(comp => {
-      const answer = compAnswers[comp.id];
+      const questionScores: number[] = [];
       
-      if (typeof answer === 'number' && answer >= 1 && answer <= 5) {
-        scores[comp.id] = Math.round(answer * 20); // Convertir de 1-5 a 0-100
-        console.log(`📊 ${comp.name}: ${answer} -> ${scores[comp.id]}/100`);
-      } else if (typeof answer === 'object' && answer !== null && 'value' in answer) {
-        const value = answer.value;
-        if (typeof value === 'number' && value >= 1 && value <= 5) {
-          scores[comp.id] = Math.round(value * 20); // Convertir de 1-5 a 0-100
-          console.log(`📊 ${comp.name}: ${value} (objeto) -> ${scores[comp.id]}/100`);
-        } else {
-          scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
-          console.log(`⚠️ ${comp.name}: valor inválido en objeto, usando 40/100`);
+      // Recopilar puntuaciones de todas las preguntas de esta competencia
+      comp.questions.forEach(question => {
+        const answer = compAnswers[question.id];
+        let score = 0;
+        
+        if (typeof answer === 'number' && answer >= 1 && answer <= 5) {
+          score = answer;
+        } else if (typeof answer === 'object' && answer !== null && 'value' in answer) {
+          const value = answer.value;
+          if (typeof value === 'number' && value >= 1 && value <= 5) {
+            score = value;
+          }
+        } else if (typeof answer === 'object' && answer !== null && 'score' in answer) {
+          const answerScore = answer.score;
+          if (typeof answerScore === 'number' && answerScore >= 1 && answerScore <= 5) {
+            score = answerScore;
+          }
         }
-      } else if (typeof answer === 'object' && answer !== null && 'score' in answer) {
-        const score = answer.score;
-        if (typeof score === 'number' && score >= 1 && score <= 5) {
-          scores[comp.id] = Math.round(score * 20); // Convertir de 1-5 a 0-100
-          console.log(`📊 ${comp.name}: ${score} (score) -> ${scores[comp.id]}/100`);
-        } else {
-          scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
-          console.log(`⚠️ ${comp.name}: score inválido, usando 40/100`);
+        
+        if (score > 0) {
+          questionScores.push(score);
+          console.log(`📊 ${comp.name} - ${question.id}: ${score}/5`);
         }
+      });
+      
+      // Calcular promedio de la competencia
+      if (questionScores.length > 0) {
+        const average = questionScores.reduce((sum, score) => sum + score, 0) / questionScores.length;
+        scores[comp.id] = Math.round(average * 20); // Convertir de 1-5 a 0-100
+        console.log(`📊 ${comp.name}: promedio ${average.toFixed(2)} -> ${scores[comp.id]}/100 (${questionScores.length} preguntas)`);
       } else {
         scores[comp.id] = 40; // Valor por defecto para "En Desarrollo"
-        console.log(`⚠️ ${comp.name}: no hay respuesta válida, usando 40/100`);
+        console.log(`⚠️ ${comp.name}: no hay respuestas válidas, usando 40/100`);
       }
     });
 
@@ -751,54 +775,83 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     const aresScores = this.calculateAresScores(data.ares);
     const competencyScores = this.calculateCompetencyScores(data.competencias);
 
-    // --- CONSTRUCCIÓN DEL SUPER-PROMPT ---
+    // --- CONSTRUCCIÓN DEL SUPER-PROMPT MEJORADO ---
     const prompt = `
     **ROL Y OBJETIVO:**
-    Eres 'ARES-AI', un consultor de estrategia de IA de élite de Sube Academia. Tu misión es analizar en profundidad los datos de un diagnóstico de una empresa y generar un reporte estratégico que sea denso, perspicaz y 100% personalizado. El cliente debe sentir que este análisis fue hecho por un humano experto que entiende su negocio. Tu salida DEBE ser un único objeto JSON válido, sin ningún texto o explicación adicional.
+    Eres 'ARES-AI', un consultor de estrategia de IA de élite de Sube Academia. Tu misión es analizar en profundidad los datos completos de un diagnóstico de una empresa y generar un reporte estratégico que sea denso, perspicaz y 100% personalizado. El cliente debe sentir que este análisis fue hecho por un humano experto que entiende su negocio. Tu salida DEBE ser un único objeto JSON válido, sin ningún texto o explicación adicional.
 
-    **DATOS DEL CLIENTE PARA TU ANÁLISIS:**
-    - **Contexto de Negocio:** ${JSON.stringify(companyContext)}
-    - **Puntuaciones en Framework ARES-AI (de 1 a 5):** ${JSON.stringify(aresScores)}
-    - **Puntuaciones en 13 Competencias Clave (de 1 a 5):** ${JSON.stringify(competencyScores)}
+    **DATOS COMPLETOS DEL CLIENTE PARA TU ANÁLISIS:**
+    A continuación tienes acceso a TODOS los datos detallados que el usuario proporcionó en su diagnóstico. Analiza cada respuesta individual, encuentra patrones, conexiones y matices que solo un experto humano podría detectar:
+
+    **Datos Completos del Diagnóstico:**
+    \`\`\`json
+    ${JSON.stringify(data, null, 2)}
+    \`\`\`
+
+    **Contexto de Negocio Calculado:**
+    ${JSON.stringify(companyContext, null, 2)}
+
+    **Puntuaciones ARES-AI Calculadas:**
+    ${JSON.stringify(aresScores, null, 2)}
+
+    **Puntuaciones de Competencias Calculadas:**
+    ${JSON.stringify(competencyScores, null, 2)}
 
     **INSTRUCCIONES PRECISAS PARA TU ANÁLISIS (DEBES SEGUIRLAS AL PIE DE LA LETRA):**
 
+    **ANÁLISIS PROFUNDO REQUERIDO:**
+    - Examina CADA respuesta individual del usuario en los datos completos
+    - Identifica patrones, inconsistencias y oportunidades ocultas
+    - Conecta respuestas aparentemente no relacionadas para extraer insights únicos
+    - Considera el contexto específico de su industria, tamaño de empresa y objetivos
+    - Sé específico y personalizado en cada análisis
+
     1.  **Cálculo y Justificación del Nivel de Madurez (aiMaturity):**
-        - Calcula un puntaje de madurez (\`score\`) de 0 a 100. Basa tu cálculo en un promedio ponderado: las competencias valen un 60% y los pilares ARES un 40%. Un puntaje promedio de 1 en la escala de 1-5 equivale a un 0/100, y un 5 equivale a un 100/100.
+        - Analiza los datos completos para calcular un puntaje de madurez (\`score\`) de 0 a 100
+        - Considera no solo las puntuaciones numéricas, sino también la coherencia de las respuestas, la profundidad del autoconocimiento, y la alineación entre objetivos y capacidades
         - Asigna un \`level\` basado en estos rangos EXACTOS:
           * Incipiente: 0-20 puntos
           * En Desarrollo: 21-40 puntos  
           * Establecido: 41-60 puntos
           * Estratégico: 61-80 puntos
           * Transformador: 81-100 puntos
-        - Escribe un \`summary\` detallado (mínimo 3-4 oraciones) que justifique tu calificación, mencionando específicamente los puntajes más bajos, las fortalezas identificadas, y cómo impactan la madurez general. Incluye recomendaciones estratégicas específicas.
+        - Escribe un \`summary\` detallado (mínimo 4-5 oraciones) que justifique tu calificación basándote en los datos específicos del usuario, mencionando respuestas concretas, patrones identificados, y cómo estos impactan su madurez en IA.
 
     2.  **Análisis de Fortalezas (strengthsAnalysis):**
-        - Identifica las 3 competencias con el puntaje más alto.
-        - Para cada una, escribe un \`analysis\` detallado que explique CÓMO esta fortaleza específica puede ser utilizada para alcanzar su objetivo principal: "${companyContext.mainObjective}". Sé concreto. Ejemplo: "Tu alta competencia en 'Innovación y Creatividad' (4.5/5) es tu mayor activo. Deberías apalancarla para diseñar soluciones de IA disruptivas en la experiencia de cliente, lo que impactará directamente tu objetivo de diferenciarte de la competencia."
+        - Identifica las 3 competencias con el puntaje más alto
+        - Para cada fortaleza, analiza las respuestas específicas del usuario que la respaldan
+        - Escribe un \`analysis\` detallado que explique CÓMO esta fortaleza específica puede ser utilizada para alcanzar su objetivo principal: "${companyContext.mainObjective}"
+        - Incluye ejemplos concretos basados en sus respuestas y contexto empresarial
+        - Conecta la fortaleza con oportunidades específicas en su industria
 
     3.  **Análisis de Debilidades (weaknessesAnalysis):**
-        - Identifica las 3 competencias con el puntaje más bajo.
-        - Para cada una, escribe un \`analysis\` que describa el "dolor" que esto causa. Conecta la debilidad con un riesgo de negocio tangible. Ejemplo: "Tu puntaje crítico en 'Gestión de Datos' (1.5/5) significa que cualquier iniciativa de IA fracasará por falta de 'combustible' de calidad. Esto se traduce en decisiones de negocio basadas en intuición y una alta probabilidad de invertir en tecnología que no podrán utilizar, impactando negativamente el ROI."
+        - Identifica las 3 competencias con el puntaje más bajo
+        - Analiza las respuestas específicas que revelan estas debilidades
+        - Para cada debilidad, escribe un \`analysis\` que describa el "dolor" específico que esto causa en su contexto empresarial
+        - Conecta la debilidad con riesgos de negocio tangibles y específicos de su industria
+        - Incluye ejemplos concretos de cómo esta debilidad podría impactar sus objetivos
 
     4.  **Resumen Ejecutivo (executiveSummary):**
-        - Escribe un resumen ejecutivo detallado (mínimo 4-5 oraciones) para un CEO. Debe incluir:
-          * El nivel de madurez actual y su significado estratégico
-          * Las fortalezas clave que pueden apalancarse
-          * La brecha más crítica que impide el progreso
+        - Escribe un resumen ejecutivo detallado (mínimo 5-6 oraciones) para un CEO
+        - Basa tu análisis en los datos específicos y respuestas del usuario
+        - Incluye:
+          * El nivel de madurez actual y su significado estratégico específico para su empresa
+          * Las fortalezas clave identificadas y cómo apalancarlas en su contexto
+          * La brecha más crítica que impide el progreso hacia su objetivo
           * El impacto específico en el objetivo principal: "${companyContext.mainObjective}"
-          * Una recomendación estratégica concreta y accionable
-          * El potencial de crecimiento y el ROI esperado
-        - Debe ser directo, sin rodeos, y orientado a la toma de decisiones ejecutivas.
+          * Una recomendación estratégica concreta y accionable basada en sus datos
+          * El potencial de crecimiento y ROI esperado específico para su situación
+        - Debe ser directo, sin rodeos, y orientado a la toma de decisiones ejecutivas
 
     5.  **Plan de Acción Personalizado (actionPlan):**
-        - Genera un plan de acción DETALLADO y PERSONALIZADO que aborde DIRECTAMENTE las debilidades identificadas y se alinee con el objetivo principal del usuario: "${companyContext.mainObjective}".
-        - Cada área debe tener un nombre específico basado en las debilidades reales.
-        - Cada acción debe ser CONCRETA, MEDIBLE y con TIMELINE específico.
-        - Incluye recursos específicos, KPIs medibles y resultados esperados.
-        - Conecta cada acción con el objetivo principal del usuario.
-        - Usa fechas reales basadas en la fecha actual.
-        - Genera 3-5 áreas de mejora máximo, cada una con 2-3 acciones específicas.
+        - Genera un plan de acción DETALLADO y PERSONALIZADO basado en los datos específicos del usuario
+        - Aborda DIRECTAMENTE las debilidades identificadas y se alinea con su objetivo principal: "${companyContext.mainObjective}"
+        - Cada área debe tener un nombre específico basado en las debilidades reales identificadas en sus respuestas
+        - Cada acción debe ser CONCRETA, MEDIBLE y con TIMELINE específico
+        - Incluye recursos específicos, KPIs medibles y resultados esperados
+        - Conecta cada acción con el objetivo principal del usuario y su contexto empresarial
+        - Usa fechas reales basadas en la fecha actual
+        - Genera 3-5 áreas de mejora máximo, cada una con 2-3 acciones específicas
 
     **FORMATO DE SALIDA OBLIGATORIO (JSON):**
     {

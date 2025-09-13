@@ -159,38 +159,10 @@ export class DiagnosticStateService {
     this.isGeneratingReport.set(true);
     
     try {
-      // Usar cursos mock para evitar problemas de Firebase
-      const cursosMock = [
-        {
-          id: '1',
-          titulo: 'Curso de Introducción a la IA',
-          descripcion: 'Aprende los conceptos básicos de la inteligencia artificial',
-          precio: 99,
-          duracion: '4 semanas',
-          nivel: 'Principiante',
-          activo: true
-        }
-      ];
+      console.log('🚀 Generando reporte comprehensivo con datos reales:', data);
       
-      // Convertir los datos al formato esperado por BesselAiService
-      const besselData = {
-        profile: {
-          industry: data.objetivo.industria,
-          companySize: data.contexto?.equipo ? `${data.contexto.equipo} empleados` : 'No especificado',
-          mainObjective: data.objetivo.objetivo
-        },
-        aresAnswers: data.ares,
-        compAnswers: data.competencias,
-        riskLevel: 'Mínimo',
-        lambdaComp: 0.5,
-        targetLevel: 4,
-        selectedGoals: []
-      };
-      
-      console.log('🚀 Generando reporte estratégico con datos:', besselData);
-      
-      const strategicReport = await this.besselAiService.generateStrategicReport(besselData, cursosMock);
-      this.generatedStrategicReport.set(strategicReport);
+      const comprehensiveReport = await this.besselAiService.generateComprehensiveReport(data);
+      this.generatedStrategicReport.set(comprehensiveReport);
       
       this.toastService.show('success', 'Reporte estratégico generado correctamente.');
       
@@ -221,38 +193,10 @@ export class DiagnosticStateService {
     this.isGeneratingReport.set(true);
     
     try {
-      // Usar cursos mock para evitar problemas de Firebase
-      const cursosMock = [
-        {
-          id: '1',
-          titulo: 'Curso de Introducción a la IA',
-          descripcion: 'Aprende los conceptos básicos de la inteligencia artificial',
-          precio: 99,
-          duracion: '4 semanas',
-          nivel: 'Principiante',
-          activo: true
-        }
-      ];
+      console.log('🚀 Generando reporte comprehensivo con datos reales:', data);
       
-      // Convertir los datos al formato esperado por BesselAiService
-      const besselData = {
-        profile: {
-          industry: data.objetivo.industria,
-          companySize: data.contexto?.equipo ? `${data.contexto.equipo} empleados` : 'No especificado',
-          mainObjective: data.objetivo.objetivo
-        },
-        aresAnswers: data.ares,
-        compAnswers: data.competencias,
-        riskLevel: 'Mínimo',
-        lambdaComp: 0.5,
-        targetLevel: 4,
-        selectedGoals: []
-      };
-      
-      console.log('🚀 Generando reporte estratégico con datos:', besselData);
-      
-      const strategicReport = await this.besselAiService.generateStrategicReport(besselData, cursosMock);
-      this.generatedStrategicReport.set(strategicReport);
+      const comprehensiveReport = await this.besselAiService.generateComprehensiveReport(data);
+      this.generatedStrategicReport.set(comprehensiveReport);
       
       this.toastService.show('success', 'Reporte estratégico generado correctamente.');
       

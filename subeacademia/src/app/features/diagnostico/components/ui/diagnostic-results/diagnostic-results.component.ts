@@ -512,103 +512,13 @@ export class DiagnosticResultsComponent implements OnInit {
       this.report.set(currentReport);
       this.isLoading.set(false);
     } else {
-      console.log('⚠️ No hay reporte disponible, generando uno de ejemplo...');
-      // Solo usar reporte de ejemplo si no hay uno real
-      setTimeout(() => {
-        this.report.set(this.generateSampleReport());
-        this.isLoading.set(false);
-      }, 2000);
+      console.log('⚠️ No hay reporte disponible, redirigiendo al diagnóstico...');
+      // Si no hay reporte, redirigir al diagnóstico
+      this.isLoading.set(false);
+      this.startNewDiagnostic();
     }
   }
 
-  private generateSampleReport(): any {
-    const currentYear = new Date().getFullYear();
-    const nextYear = currentYear + 1;
-    const currentMonth = new Date().getMonth() + 1;
-    
-    // Calcular trimestres actuales
-    const getCurrentQuarter = (month: number) => {
-      if (month <= 3) return `Q1 de ${currentYear}`;
-      if (month <= 6) return `Q2 de ${currentYear}`;
-      if (month <= 9) return `Q3 de ${currentYear}`;
-      return `Q4 de ${currentYear}`;
-    };
-    
-    const currentQuarter = getCurrentQuarter(currentMonth);
-    const nextQuarter = currentMonth <= 9 ? getCurrentQuarter(currentMonth + 3) : `Q1 de ${nextYear}`;
-    
-    return {
-      executiveSummary: "Tu organización se encuentra en un nivel 'Establecido' de madurez en IA (45/100), lo que representa una posición sólida pero con potencial significativo de crecimiento. Tienes fortalezas notables en competencias de comunicación efectiva y pensamiento crítico, que pueden ser apalancadas para liderar la transformación digital. Sin embargo, las debilidades críticas en ética de IA y gestión de datos representan un riesgo fundamental que podría comprometer el éxito de cualquier iniciativa de IA. Para alcanzar tu objetivo de transformación digital, es imperativo abordar estas brechas prioritariamente, ya que sin una base ética sólida y datos de calidad, las inversiones en IA no generarán el ROI esperado. La recomendación estratégica es implementar un programa integral de capacitación en ética de IA y establecer una infraestructura robusta de gestión de datos antes de escalar las iniciativas tecnológicas.",
-      aiMaturity: {
-        level: "Establecido",
-        score: 45,
-        summary: "Tu nivel es 'Establecido' (45/100) lo que indica que tienes una base sólida en competencias de IA, pero aún hay oportunidades significativas de mejora. Aunque tienes fortalezas en Agilidad y algunas competencias técnicas, tus bajas puntuaciones en 'Ética en IA' y 'Gestión de Datos' representan un riesgo fundamental que impide un avance sostenido hacia niveles más altos. Para alcanzar el siguiente nivel (Estratégico), necesitas enfocarte en fortalecer estas áreas críticas y desarrollar un enfoque más integral de la IA en tu organización."
-      },
-      competencyScores: [
-        { id: 'pensamiento-critico', name: 'Pensamiento Crítico', score: 65 },
-        { id: 'resolucion-problemas', name: 'Resolución de Problemas', score: 45 },
-        { id: 'alfabetizacion-datos', name: 'Alfabetización de Datos', score: 55 },
-        { id: 'comunicacion-efectiva', name: 'Comunicación Efectiva', score: 70 },
-        { id: 'colaboracion-equipo', name: 'Colaboración y Trabajo en Equipo', score: 60 },
-        { id: 'creatividad-innovacion', name: 'Creatividad e Innovación', score: 50 },
-        { id: 'diseno-tecnologico', name: 'Diseño Tecnológico', score: 40 },
-        { id: 'automatizacion-agentes-ia', name: 'Automatización y Agentes IA', score: 35 },
-        { id: 'adaptabilidad-flexibilidad', name: 'Adaptabilidad y Flexibilidad', score: 55 },
-        { id: 'etica-responsabilidad', name: 'Ética y Responsabilidad', score: 30 },
-        { id: 'sostenibilidad', name: 'Sostenibilidad', score: 25 },
-        { id: 'aprendizaje-continuo', name: 'Aprendizaje Continuo', score: 60 },
-        { id: 'liderazgo-ia', name: 'Liderazgo en IA', score: 40 }
-      ],
-      actionPlan: [
-        {
-          area: "Fortalecimiento de Competencias en Ética y Gestión de Datos",
-          priority: "Alta",
-          timeline: "6 meses",
-          description: "Esta área es crítica para tu objetivo de transformación digital. Las debilidades en ética y gestión de datos representan un riesgo fundamental que debe abordarse prioritariamente.",
-          actions: [
-            {
-              accion: "Implementar programa de capacitación en ética de IA",
-              descripcion: `Desarrollar un programa integral de formación en ética de IA para todo el equipo, incluyendo principios de transparencia, equidad y responsabilidad. Este programa debe completarse antes de ${nextQuarter} para establecer las bases éticas necesarias.`,
-              timeline: "8 semanas",
-              recursos: ["Curso de Ética en IA", "Consultor especializado", "Material didáctico", "Sesiones de workshop"],
-              kpis: ["100% del equipo capacitado", "Reducción del 50% en sesgos detectados", "Implementación de comité de ética"],
-              expectedOutcome: "Equipo con conocimiento sólido en ética de IA y procesos establecidos para decisiones responsables",
-              competencyTarget: "etica-responsabilidad",
-              aresDimension: "Responsabilidad"
-            },
-            {
-              accion: "Establecer infraestructura de gestión de datos",
-              descripcion: `Crear un sistema robusto de gestión y calidad de datos que soporte las iniciativas de IA. Incluye limpieza, validación y gobernanza de datos para ${currentQuarter}.`,
-              timeline: "12 semanas",
-              recursos: ["Herramientas de gestión de datos", "Consultor en data governance", "Infraestructura cloud", "Capacitación técnica"],
-              kpis: ["95% de datos limpios y validados", "Tiempo de procesamiento reducido en 40%", "Cumplimiento normativo 100%"],
-              expectedOutcome: "Sistema de datos confiable que permita implementaciones de IA exitosas y decisiones basadas en datos",
-              competencyTarget: "alfabetizacion-datos",
-              aresDimension: "Agilidad"
-            }
-          ]
-        },
-        {
-          area: "Desarrollo de Liderazgo y Estrategia en IA",
-          priority: "Media",
-          timeline: "4 meses",
-          description: "Fortalecer las capacidades de liderazgo y pensamiento estratégico para guiar efectivamente la transformación digital de la organización.",
-          actions: [
-            {
-              accion: "Crear roadmap estratégico de IA personalizado",
-              descripcion: `Desarrollar un plan estratégico detallado para la adopción de IA en tu empresa, alineado con tu objetivo principal. Debe incluir fases, recursos y métricas de éxito para ${nextYear}.`,
-              timeline: "6 semanas",
-              recursos: ["Plantillas estratégicas", "Consultoría especializada", "Benchmarking del sector", "Herramientas de planificación"],
-              kpis: ["Roadmap aprobado por dirección", "Presupuesto asignado", "Timeline definido", "ROI proyectado"],
-              expectedOutcome: "Plan estratégico claro y ejecutable que guíe la transformación digital hacia tu objetivo principal",
-              competencyTarget: "liderazgo-ia",
-              aresDimension: "Sostenibilidad"
-            }
-          ]
-        }
-      ]
-    };
-  }
 
   navigateToCourses(): void {
     const currentUrl = this.router.url;
