@@ -11,6 +11,76 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
+    <!-- Preloader elegante -->
+    @if (isGenerating) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl">
+          <!-- Animación de IA -->
+          <div class="relative mb-6">
+            <div class="w-20 h-20 mx-auto relative">
+              <!-- Círculo exterior giratorio -->
+              <div class="absolute inset-0 rounded-full border-4 border-blue-200 dark:border-blue-800"></div>
+              <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600 animate-spin"></div>
+              
+              <!-- Círculo interior con pulso -->
+              <div class="absolute inset-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse"></div>
+              
+              <!-- Icono de IA en el centro -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L13.09 8.26L20 9L13.09 9.74L12 16L10.91 9.74L4 9L10.91 8.26L12 2Z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Texto principal -->
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            🤖 Inteligencia Artificial Trabajando
+          </h3>
+          
+          <!-- Descripción -->
+          <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+            Nuestra IA está analizando tus respuestas para crear un diagnóstico 
+            <strong class="text-blue-600 dark:text-blue-400">completamente personalizado</strong> 
+            y un plan de acción estratégico.
+          </p>
+          
+          <!-- Progreso -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>Analizando perfil profesional...</span>
+              <span class="text-green-500">✓</span>
+            </div>
+            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>Evaluando competencias en IA...</span>
+              <span class="text-green-500">✓</span>
+            </div>
+            <div class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+              <span>Generando objetivos SMART...</span>
+              <span class="text-green-500">✓</span>
+            </div>
+            <div class="flex items-center justify-between text-sm text-blue-600 dark:text-blue-400">
+              <span>Creando diagnóstico personalizado...</span>
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-500">
+              <span>Diseñando plan de acción estratégico...</span>
+              <span class="text-gray-400">⏳</span>
+            </div>
+          </div>
+          
+          <!-- Tiempo estimado -->
+          <div class="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <p class="text-sm text-blue-700 dark:text-blue-300">
+              ⏱️ Tiempo estimado: 30-60 segundos
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Formulario principal -->
     <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-fade-in">
       <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
         <h2 class="text-2xl font-bold mb-1 text-gray-800 dark:text-white">¡Ya casi terminamos!</h2>

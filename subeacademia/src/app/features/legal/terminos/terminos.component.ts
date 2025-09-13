@@ -32,6 +32,20 @@ import { RouterLink } from '@angular/router';
               Ofrecemos diagnósticos de madurez en IA, cursos de capacitación, consultoría estratégica y herramientas 
               de evaluación para empresas y profesionales.
             </p>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg mb-6">
+              <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-300 mb-3">
+                🎯 Nuestro Compromiso Contigo
+              </h3>
+              <p class="text-blue-800 dark:text-blue-200 mb-4">
+                Al completar nuestro diagnóstico gratuito, te proporcionamos un análisis personalizado de tu madurez en IA 
+                y un plan de acción estratégico. Este servicio es completamente gratuito y sin compromiso.
+              </p>
+              <p class="text-blue-800 dark:text-blue-200">
+                <strong>Nuestro objetivo:</strong> Ayudarte a entender tu situación actual con la IA y mostrarte el camino 
+                hacia la transformación digital exitosa de tu organización.
+              </p>
+            </div>
 
             <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">3. Uso del Servicio</h2>
             <div class="text-gray-700 dark:text-gray-300 mb-6">
@@ -52,6 +66,39 @@ import { RouterLink } from '@angular/router';
               Los datos recopilados durante el diagnóstico se utilizan únicamente para generar reportes personalizados 
               y mejorar nuestros servicios.
             </p>
+            
+            <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-lg mb-6">
+              <h3 class="text-lg font-semibold text-green-900 dark:text-green-300 mb-3">
+                📧 Uso de Información de Contacto
+              </h3>
+              <p class="text-green-800 dark:text-green-200 mb-4">
+                <strong>Transparencia total:</strong> Al proporcionar su información de contacto (nombre, email corporativo, empresa), 
+                usted acepta que:
+              </p>
+              <ul class="list-disc pl-6 space-y-2 text-green-800 dark:text-green-200">
+                <li><strong>Diagnóstico gratuito:</strong> Utilizaremos su email para enviarle su diagnóstico personalizado</li>
+                <li><strong>Servicios comerciales:</strong> Podremos contactarle para ofrecerle nuestros servicios de consultoría y formación</li>
+                <li><strong>Marketing relevante:</strong> Le enviaremos información sobre cursos, eventos y novedades de IA</li>
+                <li><strong>Confidencialidad:</strong> Sus datos serán tratados con la máxima confidencialidad y seguridad</li>
+                <li><strong>Derecho de baja:</strong> Puede darse de baja de nuestras comunicaciones en cualquier momento</li>
+              </ul>
+              
+              <div class="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-700">
+                <h4 class="font-semibold text-green-900 dark:text-green-300 mb-2">
+                  💼 ¿Por qué nos contactamos?
+                </h4>
+                <p class="text-sm text-green-700 dark:text-green-300">
+                  Basándonos en tu diagnóstico, identificamos oportunidades específicas donde nuestros servicios 
+                  pueden ayudarte a alcanzar tus objetivos de IA. Nuestro equipo de expertos puede ofrecerte:
+                </p>
+                <ul class="list-disc pl-4 mt-2 text-sm text-green-700 dark:text-green-300">
+                  <li>Consultoría estratégica personalizada</li>
+                  <li>Formación especializada para tu equipo</li>
+                  <li>Implementación de soluciones de IA</li>
+                  <li>Mentoría en transformación digital</li>
+                </ul>
+              </div>
+            </div>
 
             <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">5. Propiedad Intelectual</h2>
             <p class="text-gray-700 dark:text-gray-300 mb-6">
@@ -86,15 +133,38 @@ import { RouterLink } from '@angular/router';
               competentes de Madrid, España.
             </p>
 
-            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">10. Contacto</h2>
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">10. Valor del Diagnóstico Gratuito</h2>
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-lg mb-6">
+              <h3 class="text-lg font-semibold text-purple-900 dark:text-purple-300 mb-3">
+                💎 Lo que recibes GRATIS
+              </h3>
+              <p class="text-purple-800 dark:text-purple-200 mb-4">
+                Nuestro diagnóstico de madurez en IA tiene un valor comercial de <strong>€299</strong>, 
+                pero lo ofrecemos completamente gratis para ayudarte a:
+              </p>
+              <ul class="list-disc pl-6 space-y-2 text-purple-800 dark:text-purple-200">
+                <li>Identificar tu nivel actual de madurez en IA</li>
+                <li>Descubrir brechas específicas en tu organización</li>
+                <li>Recibir un plan de acción personalizado</li>
+                <li>Obtener recomendaciones estratégicas específicas</li>
+                <li>Acceder a insights de expertos en IA</li>
+              </ul>
+              <p class="text-sm text-purple-700 dark:text-purple-300 mt-4">
+                <strong>¿Por qué es gratis?</strong> Creemos en el valor de la educación y queremos ayudarte 
+                a dar el primer paso hacia la transformación digital. Nuestro objetivo es establecer una 
+                relación de confianza y mostrarte el valor que podemos aportar a tu organización.
+              </p>
+            </div>
+
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-4">11. Contacto</h2>
             <p class="text-gray-700 dark:text-gray-300 mb-6">
               Si tiene preguntas sobre estos términos y condiciones, puede contactarnos en:
             </p>
             <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
               <p class="text-gray-700 dark:text-gray-300">
-                <strong>Email:</strong> legal@subeacademia.com<br>
-                <strong>Teléfono:</strong> +34 900 123 456<br>
-                <strong>Dirección:</strong> Calle de la Innovación, 123, 28001 Madrid, España
+                <strong>Email:</strong> contacto@subeia.tech<br>
+                <strong>Teléfono:</strong> +569 6506 8064<br>
+                <strong>Dirección:</strong> Fco. Mansilla 1007, Castro, Región de Los Lagos, Chile.
               </p>
             </div>
           </div>

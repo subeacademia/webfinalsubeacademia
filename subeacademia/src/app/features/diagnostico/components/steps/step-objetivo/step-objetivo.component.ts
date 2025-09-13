@@ -71,7 +71,7 @@ export class StepObjetivoComponent implements OnInit, OnDestroy {
     const checkbox = event.target as HTMLInputElement;
     if (checkbox.checked) {
       this.selectedObjectives.push(new FormControl(checkbox.value));
-    } else {
+      } else {
       const index = this.selectedObjectives.controls.findIndex(x => x.value === checkbox.value);
       if (index > -1) {
         this.selectedObjectives.removeAt(index);
@@ -94,17 +94,23 @@ export class StepObjetivoComponent implements OnInit, OnDestroy {
     this.suggestedObjectives.set([]);
     this.selectedObjectives.clear();
 
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const nextYear = currentYear + 1;
+    
     const prompt = `Eres un consultor de estrategia. Refina este objetivo de negocio para que sea SMART. 
 
 OBJETIVO: "${userObjective}"
+
+IMPORTANTE: Estamos en ${currentMonth}/${currentYear}. Genera objetivos con fechas realistas y actuales.
 
 RESPUESTA REQUERIDA: Solo devuelve un array JSON con exactamente 3 objetivos SMART. No incluyas texto adicional, explicaciones, ni formato markdown.
 
 FORMATO:
 ["objetivo SMART 1", "objetivo SMART 2", "objetivo SMART 3"]
 
-EJEMPLO:
-["Incrementar ventas en 25% en 12 meses", "Reducir costos operativos en 15% para Q4", "Aumentar satisfacción del cliente a 90% en 6 meses"]`;
+EJEMPLO (fechas actuales para ${currentYear}):
+["Incrementar ventas en 25% para diciembre de ${currentYear}", "Reducir costos operativos en 15% para Q4 de ${currentYear}", "Aumentar satisfacción del cliente a 90% para marzo de ${nextYear}"]`;
 
     try {
       const response = await this.generativeAiService.generateText(prompt);
@@ -193,7 +199,7 @@ EJEMPLO:
       this.isGenerating.set(false);
     }
   }
-  
+
   next(): void {
     if (this.form.valid) {
       this.diagnosticStateService.updateObjetivo(this.selectedObjectives.value);

@@ -26,6 +26,12 @@ export const routes: Routes = [
     loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent),
   },
 
+  // Páginas legales SIN idioma (accesibles globalmente)
+  { 
+    path: 'terminos', 
+    loadComponent: () => import('./features/legal/terminos/terminos.component').then(m => m.TerminosComponent),
+  },
+
 
 
   // Público con idioma restringido
