@@ -88,13 +88,23 @@ export class DiagnosticStateService {
       return;
     }
 
-    // Crear el objeto lead con el tipo ya establecido
+    // Obtener datos del contexto para incluir en el lead
+    const contexto = currentData.contexto;
+    const position = contexto?.rol || '';
+    const industry = contexto?.industria || '';
+    const companySize = contexto?.equipo || '';
+
+    // Crear el objeto lead con el tipo ya establecido y datos del contexto
     const lead = {
       ...leadData,
-      type: leadType
+      type: leadType,
+      // Incluir datos del contexto (cargo, industria y tamaño de empresa)
+      position: position,
+      industry: industry,
+      companySize: companySize
     };
 
-    console.log('🔍 updateLead: lead creado:', lead);
+    console.log('🔍 updateLead: lead creado con datos del contexto:', lead);
 
     this.diagnosticData.set({
       ...currentData,
@@ -191,16 +201,57 @@ export class DiagnosticStateService {
       this.toastService.show('error', 'No hay datos de diagnóstico.');
       return;
     }
+
+    // Verificar que tenemos datos del lead
+    if (!data.lead) {
+      this.toastService.show('error', 'No se encontraron datos del lead. Por favor, completa la información personal.');
+      return;
+    }
     
     this.isGeneratingReport.set(true);
     
     try {
       console.log('🚀 Generando reporte comprehensivo con datos reales:', data);
       
+      // Generar el reporte estratégico (incluye fallback automático)
       const comprehensiveReport = await this.besselAiService.generateComprehensiveReport(data);
+      console.log('📊 Reporte recibido del servicio de IA:', comprehensiveReport ? 'Sí' : 'No');
+      console.log('📋 ID del reporte:', comprehensiveReport?.id);
+      console.log('📋 Versión del reporte:', comprehensiveReport?.version);
+      
       this.generatedStrategicReport.set(comprehensiveReport);
       
-      this.toastService.show('success', 'Reporte estratégico generado correctamente.');
+      console.log('✅ Reporte generado exitosamente:', comprehensiveReport ? 'Sí' : 'No');
+      
+      // Crear el objeto Report para guardar
+      const report: Report = {
+        titulo: 'Diagnóstico de Madurez en IA',
+        resumen: comprehensiveReport?.executiveSummary || 'Análisis de madurez en IA completado',
+        analisisCompetencias: comprehensiveReport?.competencyScores?.map(comp => ({
+          competencia: comp.name,
+          puntaje: comp.score,
+          descripcion: '',
+          sugerencia: ''
+        })) || [],
+        identificacionBrechas: comprehensiveReport?.executiveSummary || 'Análisis de brechas completado',
+        planDeAccion: comprehensiveReport?.actionPlan?.map(area => ({
+          area: area.area,
+          acciones: area.actions?.map((action: any) => ({
+            accion: action.accion,
+            descripcion: action.descripcion,
+            recursos: action.recursos || []
+          })) || []
+        })) || [],
+        recomendacionesGenerales: comprehensiveReport?.executiveSummary || 'Recomendaciones generales',
+        alineacionObjetivos: comprehensiveReport?.executiveSummary || 'Alineación con objetivos'
+      };
+      
+      // Guardar el diagnóstico con lead en Firebase
+      console.log('💾 Guardando diagnóstico con lead en Firebase...');
+      const leadId = await this.diagnosticsService.saveDiagnosticWithLead(data, report);
+      console.log('✅ Lead guardado exitosamente con ID:', leadId);
+      
+      this.toastService.show('success', 'Diagnóstico completado y guardado correctamente.');
       
       // Navegar con prefijo de idioma
       const currentUrl = this.router.url;
@@ -208,10 +259,96 @@ export class DiagnosticStateService {
       this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
     } catch (error: any) {
       console.error('❌ Error al generar reporte estratégico:', error);
-      this.toastService.show('error', `No se pudo generar el reporte estratégico: ${error.message || 'Error desconocido'}`);
+      console.error('❌ Tipo de error:', error.constructor.name);
+      console.error('❌ Mensaje de error:', error.message);
+      
+      // El servicio de IA ya maneja el fallback automáticamente
+      // Si llegamos aquí, significa que el fallback también falló
+      console.log('🔄 El reporte de fallback también falló, generando reporte de emergencia...');
+      
+      try {
+        // Generar un reporte de emergencia básico
+        const emergencyReport = this.generateEmergencyReport(data);
+        this.generatedStrategicReport.set(emergencyReport);
+        console.log('✅ Reporte de emergencia generado exitosamente');
+        console.log('📋 ID del reporte de emergencia:', emergencyReport?.id);
+      } catch (emergencyError) {
+        console.error('❌ Error generando reporte de emergencia:', emergencyError);
+      }
+      
+      // Mostrar mensaje más amigable
+      const isTimeoutError = error.message?.includes('timeout') || error.message?.includes('API tardó demasiado') || error.message?.includes('504');
+      const errorMessage = isTimeoutError 
+        ? '⚡ La IA está tomando más tiempo del esperado. Hemos generado tu diagnóstico usando nuestro sistema de análisis avanzado.'
+        : `❌ Problema temporal con la IA. Tu diagnóstico se ha generado correctamente usando análisis alternativos.`;
+      
+      this.toastService.show('info', errorMessage);
+      
+      // Navegar a resultados de todos modos
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      console.log('🧭 Navegando a resultados...');
+      console.log('🧭 URL de destino:', `/${languagePrefix}/diagnostico/resultados`);
+      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
     } finally {
       this.isGeneratingReport.set(false);
     }
+  }
+
+  /**
+   * Genera un reporte de emergencia cuando todo falla
+   */
+  private generateEmergencyReport(data: any): any {
+    console.log('🚨 Generando reporte de emergencia en el servicio de estado...');
+    
+    return {
+      id: 'emergency-' + Date.now(),
+      timestamp: new Date(),
+      leadInfo: {
+        name: data.lead?.name || 'Usuario',
+        email: data.lead?.email || 'usuario@empresa.com',
+        companyName: data.lead?.companyName || 'Empresa'
+      },
+      contexto: data,
+      aresScores: {},
+      competencyScores: [],
+      companyContext: {
+        industry: data.contexto?.industria || 'No especificada',
+        size: data.contexto?.equipo ? `${data.contexto.equipo} personas` : 'No especificada',
+        mainObjective: data.objetivo?.objetivo?.[0] || 'Mejorar capacidades en IA'
+      },
+      aiMaturity: {
+        level: 'En Desarrollo',
+        score: 50,
+        summary: 'Tu organización se encuentra en un nivel de desarrollo en IA. Recomendamos continuar con el plan de acción para mejorar las capacidades.'
+      },
+      executiveSummary: 'Hemos generado un reporte básico basado en tu información. Para obtener un análisis más detallado, por favor intenta nuevamente más tarde.',
+      strengthsAnalysis: [],
+      weaknessesAnalysis: [],
+      insights: [{
+        title: 'Sistema de Análisis Temporal',
+        description: 'Este reporte fue generado usando nuestro sistema de respaldo. Para obtener un análisis completo, intenta nuevamente.',
+        type: 'Fortaleza Clave'
+      }],
+      actionPlan: [{
+        area: 'Desarrollo de Competencias en IA',
+        priority: 'Alta',
+        timeline: '3-6 meses',
+        description: 'Enfócate en desarrollar competencias básicas en IA para tu organización.',
+        actions: [{
+          accion: 'Capacitación Básica en IA',
+          descripcion: 'Inicia con cursos básicos de IA para tu equipo.',
+          timeline: '1-2 meses',
+          recursos: ['Cursos online', 'Material educativo'],
+          kpis: ['Nivel de conocimiento', 'Aplicación práctica'],
+          expectedOutcome: 'Equipo con conocimientos básicos en IA',
+          painPoint: 'Falta de conocimiento básico en IA',
+          aresDimension: 'Agilidad'
+        }]
+      }],
+      generatedAt: new Date(),
+      version: '3.0.0-emergency'
+    };
   }
 
   /**

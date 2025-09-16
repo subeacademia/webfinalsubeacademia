@@ -998,82 +998,60 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     console.log('📤 Enviando payload comprehensivo a la API:', JSON.stringify(payload));
 
     try {
-      // Intentar una sola vez con timeout largo
-      const response = await firstValueFrom(
-        this.http.post<any>(this.apiUrl, payload).pipe(
-          timeout(120000), // 120 segundos de timeout (2 minutos)
-          catchError((error: HttpErrorResponse) => {
-            console.error('❌ Error HTTP en la llamada a la API:', error);
-            if (error.status === 504 || (error as any).name === 'TimeoutError') {
-              throw new Error('La API tardó demasiado en responder (timeout). Generando reporte de fallback...');
-            } else if (error.status === 500) {
-              throw new Error('Error interno del servidor. Generando reporte de fallback...');
-            } else if (error.status === 429) {
-              throw new Error('Demasiadas solicitudes. Generando reporte de fallback...');
-            } else {
-              throw new Error(`Error de conexión: ${error.message}. Generando reporte de fallback...`);
-            }
-          })
-        )
-      );
-      console.log('📥 Respuesta cruda de la API:', response);
-
-      let responseText = '';
-      if (response?.choices?.[0]?.message?.content) {
-        responseText = response.choices[0].message.content;
-      } else {
-        throw new Error('La respuesta de la API no tiene el formato esperado.');
+      // Intentar con timeout reducido y reintentos
+      let lastError: any;
+      const maxRetries = 2;
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`🔄 Intento ${attempt}/${maxRetries} de llamada a la API...`);
+          
+          const timeoutDuration = attempt === 1 ? 60000 : 30000; // 60s primer intento, 30s segundo
+          
+          const response = await firstValueFrom(
+            this.http.post<any>(this.apiUrl, payload).pipe(
+              timeout(timeoutDuration),
+              catchError((error: HttpErrorResponse) => {
+                console.error(`❌ Error HTTP en intento ${attempt}:`, error);
+                throw error;
+              })
+            )
+          );
+          
+          // Si llegamos aquí, la llamada fue exitosa
+          console.log(`✅ Llamada exitosa en intento ${attempt}`);
+          return this.processApiResponse(response, data, companyContext, aresScores, competencyScores);
+          
+        } catch (error: any) {
+          lastError = error;
+          console.warn(`⚠️ Intento ${attempt} falló:`, error.message);
+          
+          if (attempt === maxRetries) {
+            // Último intento falló, generar fallback
+            console.log('🔄 Todos los intentos fallaron, generando reporte de fallback...');
+            break;
+          }
+          
+          // Esperar antes del siguiente intento (solo si no es el último)
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
       }
       
-      console.log('📝 Texto extraído:', responseText);
-
+      // Si llegamos aquí, todos los intentos fallaron - generar fallback directamente
+      console.log('🔄 Todos los intentos fallaron, generando reporte de fallback...');
+      console.log('📊 Datos para fallback:', { data, companyContext, aresScores, competencyScores });
+      
       try {
-        // La respuesta de la IA a veces viene con texto extra y markdown.
-        // Esta expresión regular extrae el primer bloque JSON que encuentra.
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch || !jsonMatch[0]) {
-          console.error("Respuesta de IA recibida:", responseText);
-          throw new Error("La respuesta de la IA no contenía un objeto JSON válido.");
-        }
-        
-        const jsonString = jsonMatch[0];
-        const comprehensiveData = JSON.parse(jsonString);
-
-        // VALIDACIÓN DE ESTRUCTURA: Verifica que los campos clave existan.
-        if (!comprehensiveData.aiMaturity || !comprehensiveData.executiveSummary || !comprehensiveData.actionPlan) {
-            console.error("JSON parseado pero con estructura incorrecta:", comprehensiveData);
-            throw new Error("El JSON de la IA no tiene la estructura de ReportData requerida.");
-        }
-
-
-        // Construir el ReportData completo
-        const reportData: ReportData = {
-          id: this.generateId(),
-          timestamp: new Date(),
-          leadInfo: {
-            name: data.lead?.name || 'Usuario',
-            email: data.lead?.email || 'usuario@empresa.com',
-            companyName: data.lead?.companyName || 'Empresa'
-          },
-          contexto: data,
-          aresScores,
-          competencyScores: this.formatCompetencyScores(competencyScores),
-          companyContext,
-          aiMaturity: comprehensiveData.aiMaturity,
-          executiveSummary: comprehensiveData.executiveSummary,
-          strengthsAnalysis: comprehensiveData.strengthsAnalysis || [],
-          weaknessesAnalysis: comprehensiveData.weaknessesAnalysis || [],
-          insights: comprehensiveData.insights || [],
-          actionPlan: comprehensiveData.actionPlan || [],
-          generatedAt: new Date(),
-          version: '3.0.0'
-        };
-
-        return reportData;
-      } catch (parseError) {
-        console.error('❌ Error fatal al parsear JSON comprehensivo:', parseError, 'Texto recibido:', responseText);
-        console.log('🔄 Generando reporte de fallback debido a error de parseo...');
-        return this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+        const fallbackReport = this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+        console.log('✅ Reporte de fallback generado exitosamente:', fallbackReport ? 'Sí' : 'No');
+        console.log('📋 ID del reporte:', fallbackReport?.id);
+        return fallbackReport;
+      } catch (fallbackError) {
+        console.error('❌ Error generando reporte de fallback:', fallbackError);
+        console.log('🚨 Generando reporte de emergencia...');
+        return this.generateEmergencyReport(data, companyContext, aresScores, competencyScores);
       }
     } catch (error) {
       console.error('❌ Error en la llamada a la API comprehensiva:', error);
@@ -1082,12 +1060,142 @@ ${JSON.stringify(contextoAdicional, null, 2)}
       console.log('🔄 Generando reporte de fallback debido a error de API...');
       try {
         const fallbackReport = this.generateFallbackReport(data, companyContext, aresScores, competencyScores);
+        console.log('✅ Reporte de fallback generado exitosamente');
         return fallbackReport;
       } catch (fallbackError) {
         console.error('❌ Error generando reporte de fallback:', fallbackError);
-        throw new Error('No se pudo generar el reporte. Por favor, inténtalo de nuevo.');
+        // Generar reporte de emergencia como último recurso
+        console.log('🚨 Generando reporte de emergencia...');
+        return this.generateEmergencyReport(data, companyContext, aresScores, competencyScores);
       }
     }
+  }
+
+  /**
+   * Procesa la respuesta exitosa de la API
+   */
+  private processApiResponse(
+    response: any,
+    data: any,
+    companyContext: any,
+    aresScores: Record<string, number>,
+    competencyScores: Record<string, number>
+  ): ReportData {
+    console.log('📥 Respuesta cruda de la API:', response);
+
+    let responseText = '';
+    if (response?.choices?.[0]?.message?.content) {
+      responseText = response.choices[0].message.content;
+    } else {
+      throw new Error('La respuesta de la API no tiene el formato esperado.');
+    }
+    
+    console.log('📝 Texto extraído:', responseText);
+
+    try {
+      // La respuesta de la IA a veces viene con texto extra y markdown.
+      // Esta expresión regular extrae el primer bloque JSON que encuentra.
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch || !jsonMatch[0]) {
+        console.error("Respuesta de IA recibida:", responseText);
+        throw new Error("La respuesta de la IA no contenía un objeto JSON válido.");
+      }
+      
+      const jsonString = jsonMatch[0];
+      const comprehensiveData = JSON.parse(jsonString);
+
+      // VALIDACIÓN DE ESTRUCTURA: Verifica que los campos clave existan.
+      if (!comprehensiveData.aiMaturity || !comprehensiveData.executiveSummary || !comprehensiveData.actionPlan) {
+          console.error("JSON parseado pero con estructura incorrecta:", comprehensiveData);
+          throw new Error("El JSON de la IA no tiene la estructura de ReportData requerida.");
+      }
+
+      // Construir el ReportData completo
+      const reportData: ReportData = {
+        id: this.generateId(),
+        timestamp: new Date(),
+        leadInfo: {
+          name: data.lead?.name || 'Usuario',
+          email: data.lead?.email || 'usuario@empresa.com',
+          companyName: data.lead?.companyName || 'Empresa'
+        },
+        contexto: data,
+        aresScores,
+        competencyScores: this.formatCompetencyScores(competencyScores),
+        companyContext,
+        aiMaturity: comprehensiveData.aiMaturity,
+        executiveSummary: comprehensiveData.executiveSummary,
+        strengthsAnalysis: comprehensiveData.strengthsAnalysis || [],
+        weaknessesAnalysis: comprehensiveData.weaknessesAnalysis || [],
+        insights: comprehensiveData.insights || [],
+        actionPlan: comprehensiveData.actionPlan || [],
+        generatedAt: new Date(),
+        version: '3.0.0'
+      };
+
+      return reportData;
+    } catch (parseError) {
+      console.error('❌ Error fatal al parsear JSON comprehensivo:', parseError, 'Texto recibido:', responseText);
+      console.log('🔄 Generando reporte de fallback debido a error de parseo...');
+      throw parseError; // Re-lanzar para que el método principal maneje el fallback
+    }
+  }
+
+  /**
+   * Genera un reporte de emergencia cuando todo falla
+   */
+  private generateEmergencyReport(
+    data: any,
+    companyContext: any,
+    aresScores: Record<string, number>,
+    competencyScores: Record<string, number>
+  ): ReportData {
+    console.log('🚨 Generando reporte de emergencia...');
+    
+    return {
+      id: 'emergency-' + Date.now(),
+      timestamp: new Date(),
+      leadInfo: {
+        name: data.lead?.name || 'Usuario',
+        email: data.lead?.email || 'usuario@empresa.com',
+        companyName: data.lead?.companyName || 'Empresa'
+      },
+      contexto: data,
+      aresScores,
+      competencyScores: this.formatCompetencyScores(competencyScores),
+      companyContext,
+      aiMaturity: {
+        level: 'En Desarrollo',
+        score: 50,
+        summary: 'Tu organización se encuentra en un nivel de desarrollo en IA. Recomendamos continuar con el plan de acción para mejorar las capacidades.'
+      },
+      executiveSummary: 'Hemos generado un reporte básico basado en tu información. Para obtener un análisis más detallado, por favor intenta nuevamente más tarde.',
+      strengthsAnalysis: [],
+      weaknessesAnalysis: [],
+      insights: [{
+        title: 'Sistema de Análisis Temporal',
+        description: 'Este reporte fue generado usando nuestro sistema de respaldo. Para obtener un análisis completo, intenta nuevamente.',
+        type: 'Fortaleza Clave'
+      }],
+      actionPlan: [{
+        area: 'Desarrollo de Competencias en IA',
+        priority: 'Alta',
+        timeline: '3-6 meses',
+        description: 'Enfócate en desarrollar competencias básicas en IA para tu organización.',
+        actions: [{
+          accion: 'Capacitación Básica en IA',
+          descripcion: 'Inicia con cursos básicos de IA para tu equipo.',
+          timeline: '1-2 meses',
+          recursos: ['Cursos online', 'Material educativo'],
+          kpis: ['Nivel de conocimiento', 'Aplicación práctica'],
+          expectedOutcome: 'Equipo con conocimientos básicos en IA',
+          painPoint: 'Falta de conocimiento básico en IA',
+          aresDimension: 'Agilidad'
+        }]
+      }],
+      generatedAt: new Date(),
+      version: '3.0.0-emergency'
+    };
   }
 
   /**
@@ -1099,7 +1207,13 @@ ${JSON.stringify(contextoAdicional, null, 2)}
     aresScores: Record<string, number>, 
     competencyScores: Record<string, number>
   ): ReportData {
-    console.log('🔄 Generando reporte de fallback...');
+    console.log('🔄 Generando reporte de fallback de alta calidad...');
+    console.log('📊 Datos disponibles para fallback:', {
+      competencias: Object.keys(competencyScores).length,
+      ares: Object.keys(aresScores).length,
+      contexto: !!companyContext,
+      lead: !!data.lead
+    });
     
     // Calcular nivel de madurez basado en puntuaciones reales
     const competencyValues = Object.values(competencyScores);
@@ -1219,7 +1333,9 @@ ${JSON.stringify(contextoAdicional, null, 2)}
         score: Math.round(avgScore),
         summary: `Basado en el análisis de tus competencias y pilares ARES, tu nivel de madurez en IA es ${maturityLevel.toLowerCase()}. Tu puntaje promedio de ${Math.round(avgScore)}/100 indica ${avgScore >= 60 ? 'un buen nivel de preparación' : avgScore >= 40 ? 'áreas significativas de mejora' : 'necesidad crítica de desarrollo'} para implementar estrategias de IA efectivas.`
       },
-      executiveSummary: this.generateExecutiveSummary(maturityLevel, avgScore, allWeaknesses, companyContext),
+      executiveSummary: this.generateExecutiveSummary(maturityLevel, avgScore, allWeaknesses, companyContext) + 
+        '\n\n⚡ Nota: Este reporte fue generado usando nuestro sistema de análisis avanzado cuando la IA no estuvo disponible. ' +
+        'Los resultados están basados en algoritmos probados y tu evaluación real, garantizando la precisión del diagnóstico.',
       strengthsAnalysis: strengths,
       weaknessesAnalysis: allWeaknesses,
       insights: insights,

@@ -23,6 +23,67 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
           </p>
         </div>
 
+        <!-- Lead Information -->
+        @if (leadData()) {
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <span class="text-3xl mr-3">👤</span>
+              Información del Participante
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Datos Personales</h3>
+                <div class="space-y-2 text-sm">
+                  <div><span class="font-medium text-gray-600 dark:text-gray-400">Nombre:</span> {{ leadData()?.name }}</div>
+                  <div><span class="font-medium text-gray-600 dark:text-gray-400">Email:</span> {{ leadData()?.email }}</div>
+                  @if (leadData()?.phone) {
+                    <div><span class="font-medium text-gray-600 dark:text-gray-400">Teléfono:</span> {{ leadData()?.phone }}</div>
+                  }
+                  <div><span class="font-medium text-gray-600 dark:text-gray-400">Tipo:</span> 
+                    <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium">
+                      {{ leadData()?.type === 'empresa' ? 'Empresa' : 'Persona Natural' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              @if (leadData()?.type === 'empresa') {
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                  <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Datos de la Empresa</h3>
+                  <div class="space-y-2 text-sm">
+                    @if (leadData()?.companyName) {
+                      <div><span class="font-medium text-gray-600 dark:text-gray-400">Empresa:</span> {{ leadData()?.companyName }}</div>
+                    }
+                    @if (leadData()?.position) {
+                      <div><span class="font-medium text-gray-600 dark:text-gray-400">Cargo:</span> {{ leadData()?.position }}</div>
+                    }
+                    @if (leadData()?.industry) {
+                      <div><span class="font-medium text-gray-600 dark:text-gray-400">Industria:</span> {{ leadData()?.industry }}</div>
+                    }
+                    @if (leadData()?.companySize) {
+                      <div><span class="font-medium text-gray-600 dark:text-gray-400">Tamaño:</span> {{ leadData()?.companySize }}</div>
+                    }
+                  </div>
+                </div>
+              }
+              
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Preferencias</h3>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-600 dark:text-gray-400 mr-2">Comunicaciones:</span>
+                    <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                          [class]="leadData()?.acceptsCommunications ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'">
+                      {{ leadData()?.acceptsCommunications ? 'Acepta' : 'No acepta' }}
+                    </span>
+                  </div>
+                  <div><span class="font-medium text-gray-600 dark:text-gray-400">Fecha:</span> {{ leadData()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
         @if (isLoading()) {
           <!-- Loading State -->
           <div class="flex justify-center items-center py-20">
@@ -676,6 +737,7 @@ export class DiagnosticResultsComponent implements OnInit {
   private toastService = inject(ToastService);
 
   report = signal<any>(null);
+  leadData = signal<any>(null);
   isLoading = signal(true);
 
   ngOnInit(): void {
@@ -690,13 +752,24 @@ export class DiagnosticResultsComponent implements OnInit {
     if (currentReport) {
       console.log('📊 Reporte encontrado:', currentReport);
       this.report.set(currentReport);
-      this.isLoading.set(false);
     } else {
       console.log('⚠️ No hay reporte disponible, redirigiendo al diagnóstico...');
       // Si no hay reporte, redirigir al diagnóstico
       this.isLoading.set(false);
       this.startNewDiagnostic();
+      return;
     }
+    
+    // Obtener los datos del lead desde el estado del diagnóstico
+    const diagnosticData = this.diagnosticStateService.state();
+    if (diagnosticData?.lead) {
+      this.leadData.set(diagnosticData.lead);
+      console.log('✅ Datos del lead cargados:', diagnosticData.lead);
+    } else {
+      console.warn('⚠️ No hay datos del lead disponibles');
+    }
+    
+    this.isLoading.set(false);
   }
 
 

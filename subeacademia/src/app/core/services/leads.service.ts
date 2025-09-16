@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, orderBy, updateDoc, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, orderBy, updateDoc, collectionData, deleteDoc, limit } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { LeadData, UserLead, DiagnosticData } from '../../features/diagnostico/data/diagnostic.models';
 
@@ -197,6 +197,115 @@ export class LeadsService {
       return leads;
     } catch (error) {
       console.error('Error buscando leads por email:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualiza un lead completo
+   */
+  async updateLead(id: string, leadData: Partial<LeadData>): Promise<void> {
+    try {
+      const docRef = doc(this.firestore, 'leads', id);
+      await updateDoc(docRef, {
+        ...leadData,
+        updatedAt: new Date()
+      });
+      console.log('✅ [LeadsService] Lead actualizado correctamente');
+    } catch (error) {
+      console.error('❌ [LeadsService] Error actualizando lead:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un lead
+   */
+  async deleteLead(id: string): Promise<void> {
+    try {
+      const docRef = doc(this.firestore, 'leads', id);
+      await deleteDoc(docRef);
+      console.log('✅ [LeadsService] Lead eliminado correctamente');
+    } catch (error) {
+      console.error('❌ [LeadsService] Error eliminando lead:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verifica la conectividad con Firebase
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      const testQuery = query(this.leadsCollection, limit(1));
+      await getDocs(testQuery);
+      console.log('✅ [LeadsService] Conexión con Firebase exitosa');
+      return true;
+    } catch (error) {
+      console.error('❌ [LeadsService] Error de conexión con Firebase:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Obtiene estadísticas de leads
+   */
+  async getLeadsStats(): Promise<{
+    total: number;
+    byType: { persona_natural: number; empresa: number };
+    byStatus: { [key: string]: number };
+    thisMonth: number;
+    acceptsCommunications: number;
+  }> {
+    try {
+      // Convertir Observable a Promise para obtener los datos
+      const allLeads = await new Promise<LeadData[]>((resolve, reject) => {
+        const subscription = this.getLeads().subscribe({
+          next: (leads) => {
+            subscription.unsubscribe();
+            resolve(leads);
+          },
+          error: reject
+        });
+      });
+
+      const now = new Date();
+      const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const stats = {
+        total: allLeads.length,
+        byType: { persona_natural: 0, empresa: 0 },
+        byStatus: {} as { [key: string]: number },
+        thisMonth: 0,
+        acceptsCommunications: 0
+      };
+
+      allLeads.forEach(lead => {
+        // Por tipo
+        if (lead.type === 'persona_natural') {
+          stats.byType.persona_natural++;
+        } else if (lead.type === 'empresa') {
+          stats.byType.empresa++;
+        }
+
+        // Por estado
+        const status = lead.status || 'nuevo';
+        stats.byStatus[status] = (stats.byStatus[status] || 0) + 1;
+
+        // Este mes
+        if (lead.createdAt && lead.createdAt >= thisMonth) {
+          stats.thisMonth++;
+        }
+
+        // Acepta comunicaciones
+        if (lead.acceptsCommunications) {
+          stats.acceptsCommunications++;
+        }
+      });
+
+      return stats;
+    } catch (error) {
+      console.error('Error obteniendo estadísticas:', error);
       throw error;
     }
   }

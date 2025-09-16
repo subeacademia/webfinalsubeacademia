@@ -127,6 +127,23 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
           <input type="tel" id="phone" formControlName="phone" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
         </div>
 
+        <!-- Campos específicos para empresas -->
+        @if (diagnosticStateService.currentLeadType() === 'empresa') {
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Datos de la Empresa</h3>
+            
+            <div class="grid grid-cols-1 gap-4">
+              <div>
+                <label for="companyName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la Empresa</label>
+                <input type="text" id="companyName" formControlName="companyName" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                <div *ngIf="form.get('companyName')?.invalid && form.get('companyName')?.touched" class="text-red-500 text-sm mt-1">
+                  El nombre de la empresa es requerido.
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
       
         <!-- Checkboxes de consentimiento -->
         <div class="space-y-3">
@@ -191,18 +208,31 @@ export class StepLeadComponent {
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     phone: [''],
+    // Campos específicos para empresas (solo los que no se piden en el perfil)
+    companyName: [''],
     acceptsCommunications: [true, Validators.requiredTrue],
     acceptTerms: [false, Validators.requiredTrue]
   });
 
   async submit(retryCount = 0): Promise<void> {
+    // Validación adicional para empresas
+    if (this.diagnosticStateService.currentLeadType() === 'empresa') {
+      this.form.get('companyName')?.setValidators([Validators.required]);
+      this.form.get('companyName')?.updateValueAndValidity();
+    } else {
+      this.form.get('companyName')?.clearValidators();
+      this.form.get('companyName')?.updateValueAndValidity();
+    }
+
     if (this.form.valid && !this.isGenerating) {
       // Preparar datos del lead
       const leadData = {
         name: this.form.value.name,
         email: this.form.value.email,
         phone: this.form.value.phone,
-        acceptsCommunications: this.form.value.acceptsCommunications
+        acceptsCommunications: this.form.value.acceptsCommunications,
+        // Campos específicos para empresas (solo los que no se piden en el perfil)
+        companyName: this.form.value.companyName
       };
       
       // Obtener el tipo de lead actual
@@ -233,25 +263,11 @@ export class StepLeadComponent {
       this.toastService.show('info', '🤖 Generando tu diagnóstico personalizado... Esto puede tomar hasta 2 minutos.');
       
       try {
-        // Obtener el estado completo del diagnóstico
-        const diagnosticState = this.diagnosticStateService.state();
-        console.log('🔍 StepLead: Estado completo del diagnóstico:', diagnosticState);
-        console.log('🔍 StepLead: Lead en el estado:', diagnosticState.lead);
+        // Usar el nuevo flujo de generación de reporte que incluye el guardado
+        console.log('🔍 StepLead: Usando nuevo flujo de generación de reporte...');
+        await this.diagnosticStateService.handleDiagnosticFinished();
         
-        const report = await this.diagnosticsService.generateReport(diagnosticState);
-        if (!report) {
-          throw new Error('El servicio de diagnóstico devolvió un reporte nulo.');
-        }
-        
-        // Mostrar mensaje de éxito
-        this.toastService.show('success', '✅ Diagnóstico generado exitosamente');
-        
-        // Guardar el diagnóstico con lead en la base de datos
-        console.log('🔍 StepLead: Intentando guardar con estado:', diagnosticState);
-        const leadId = await this.diagnosticsService.saveDiagnosticWithLead(diagnosticState, report as any);
-        console.log('✅ Lead guardado con ID:', leadId);
-        
-        this.diagnosticsService.setCurrentReport(report);
+        // Navegar a resultados
         const currentUrl = this.router.url;
         const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
         this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);

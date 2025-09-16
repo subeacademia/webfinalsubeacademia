@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe, NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Firestore, collection, collectionData, orderBy, query, doc, docData } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { UiModalComponent } from '../../shared/ui-kit/modal/modal';
+import { ConfirmationModalComponent } from '../../shared/ui-kit/confirmation-modal/confirmation-modal.component';
+import { ToastComponent } from '../../shared/ui-kit/toast/toast.component';
 import { PdfService } from '../../features/diagnostico/services/pdf.service';
 import { LeadsService } from '../../core/services/leads.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { LeadData, LeadType } from '../../features/diagnostico/data/diagnostic.models';
 import { Subscription } from 'rxjs';
 
@@ -21,17 +25,89 @@ interface DiagnosticRow {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, NgIf, NgFor, DatePipe, UiModalComponent],
+  imports: [CommonModule, DatePipe, UiModalComponent, ConfirmationModalComponent, ToastComponent, FormsModule],
   template: `
+    <!-- Header con estadísticas -->
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold mb-4">Gestión de Leads</h1>
+      <p class="text-[var(--muted)] mb-4">Administra los leads capturados desde el diagnóstico de IA</p>
+      
+      <!-- Tarjetas de estadísticas -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" *ngIf="stats()">
+        <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+          <div class="flex items-center">
+            <div class="p-2 bg-blue-100 rounded-lg">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-[var(--muted)]">Total Leads</p>
+              <p class="text-2xl font-semibold">{{ stats()?.total || 0 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+          <div class="flex items-center">
+            <div class="p-2 bg-green-100 rounded-lg">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-[var(--muted)]">Aceptan Comunicaciones</p>
+              <p class="text-2xl font-semibold">{{ stats()?.acceptsCommunications || 0 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+          <div class="flex items-center">
+            <div class="p-2 bg-purple-100 rounded-lg">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-[var(--muted)]">Este Mes</p>
+              <p class="text-2xl font-semibold">{{ stats()?.thisMonth || 0 }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+          <div class="flex items-center">
+            <div class="p-2 bg-orange-100 rounded-lg">
+              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-medium text-[var(--muted)]">Fuente</p>
+              <p class="text-sm font-semibold">Diagnóstico</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
     <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">Leads · Diagnósticos</h1>
       <div class="flex gap-2">
         <button class="btn btn-sm" (click)="filterByType('all')" [class.btn-primary]="currentFilter() === 'all'">Todos</button>
         <button class="btn btn-sm" (click)="filterByType('persona_natural')" [class.btn-primary]="currentFilter() === 'persona_natural'">Personas</button>
         <button class="btn btn-sm" (click)="filterByType('empresa')" [class.btn-primary]="currentFilter() === 'empresa'">Empresas</button>
+        </div>
+        <div class="flex gap-2">
+          <input type="text" placeholder="Buscar por nombre o email..." 
+                 [(ngModel)]="searchTerm" 
+                 (input)="onSearchChange()"
+                 class="input input-sm w-64">
+        </div>
       </div>
     </div>
 
+    <!-- Tabla de leads -->
     <div class="border rounded overflow-hidden">
       <div class="grid grid-cols-12 bg-[var(--panel)]/50 p-3 text-sm font-medium">
         <div class="col-span-2">Tipo</div>
@@ -40,9 +116,9 @@ interface DiagnosticRow {
         <div class="col-span-2">Empresa</div>
         <div class="col-span-2">Estado</div>
         <div class="col-span-1">Fecha</div>
-        <div class="col-span-1 text-right">Acción</div>
+        <div class="col-span-1 text-right">Acciones</div>
       </div>
-      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-12 p-3 border-t items-center text-sm">
+      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-12 p-3 border-t items-center text-sm hover:bg-[var(--panel)]/30">
         <div class="col-span-2">
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 [class]="d.tipo === 'empresa' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
@@ -60,11 +136,16 @@ interface DiagnosticRow {
         </div>
         <div class="col-span-1">{{ d.fecha | date: 'short' }}</div>
         <div class="col-span-1 text-right">
-          <button class="btn btn-sm" (click)="open(d.id)">Ver</button>
+          <div class="flex gap-1">
+            <button class="btn btn-xs" (click)="open(d.id)">Ver</button>
+            <button class="btn btn-xs btn-outline" (click)="editLead(d.id)">Editar</button>
+            <button class="btn btn-xs btn-error" (click)="deleteLead(d.id)">Eliminar</button>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Paginación -->
     <div class="mt-3 flex items-center gap-2">
       <button class="btn" (click)="prev()" [disabled]="page() === 1">Anterior</button>
       <div>Página {{ page() }} / {{ totalPages() }}</div>
@@ -78,7 +159,12 @@ interface DiagnosticRow {
           <div class="text-lg font-semibold truncate">{{ leadNombre() || 'Detalle del diagnóstico' }}</div>
           <div class="text-sm text-[var(--muted)]">{{ selectedFecha() | date: 'medium' }}</div>
         </div>
-        <button class="btn" (click)="downloadPdf()" [disabled]="!canDownloadPdf()">Descargar PDF</button>
+        <div class="flex gap-2">
+          <button class="btn btn-sm" (click)="downloadPdf()" [disabled]="!canDownloadPdf()">Descargar PDF</button>
+          <button class="btn btn-sm btn-outline" (click)="toggleEditMode()">
+            {{ isEditMode() ? 'Cancelar' : 'Editar' }}
+          </button>
+        </div>
       </div>
       <div slot="body">
         <div #printArea class="space-y-6">
@@ -95,45 +181,84 @@ interface DiagnosticRow {
             </div>
             <div>
               <div class="text-sm text-[var(--muted)]">Estado</div>
-              <div class="font-medium">
+              <div class="font-medium" *ngIf="!isEditMode()">
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                       [class]="getStatusClass(leadEstado())">
                   {{ getStatusLabel(leadEstado()) }}
                 </span>
               </div>
+              <select *ngIf="isEditMode()" [(ngModel)]="editForm().status" class="select select-sm w-full">
+                <option value="nuevo">Nuevo</option>
+                <option value="contactado">Contactado</option>
+                <option value="interesado">Interesado</option>
+                <option value="no_interesado">No Interesado</option>
+                <option value="convertido">Convertido</option>
+              </select>
             </div>
             <div>
               <div class="text-sm text-[var(--muted)]">Nombre</div>
-              <div class="font-medium">{{ leadNombre() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadNombre() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().name" class="input input-sm w-full" placeholder="Nombre">
             </div>
             <div>
               <div class="text-sm text-[var(--muted)]">Email</div>
-              <div class="font-medium">{{ leadEmail() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadEmail() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().email" class="input input-sm w-full" placeholder="Email">
             </div>
             <div>
               <div class="text-sm text-[var(--muted)]">Teléfono</div>
-              <div class="font-medium">{{ leadTelefono() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadTelefono() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().phone" class="input input-sm w-full" placeholder="Teléfono">
             </div>
             <div>
               <div class="text-sm text-[var(--muted)]">Comunicaciones</div>
-              <div class="font-medium">{{ leadAceptaComunicaciones() ? 'Sí' : 'No' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadAceptaComunicaciones() ? 'Sí' : 'No' }}</div>
+              <label class="flex items-center gap-2" *ngIf="isEditMode()">
+                <input type="checkbox" [(ngModel)]="editForm().acceptsCommunications" class="checkbox checkbox-sm">
+                <span class="text-sm">Acepta comunicaciones</span>
+              </label>
             </div>
             <div *ngIf="leadTipo() === 'empresa'">
               <div class="text-sm text-[var(--muted)]">Empresa</div>
-              <div class="font-medium">{{ leadEmpresa() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadEmpresa() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().companyName" class="input input-sm w-full" placeholder="Empresa">
             </div>
             <div *ngIf="leadTipo() === 'empresa'">
               <div class="text-sm text-[var(--muted)]">Cargo</div>
-              <div class="font-medium">{{ leadCargo() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadCargo() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().position" class="input input-sm w-full" placeholder="Cargo">
             </div>
             <div *ngIf="leadTipo() === 'empresa'">
               <div class="text-sm text-[var(--muted)]">Industria</div>
-              <div class="font-medium">{{ leadIndustria() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadIndustria() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().industry" class="input input-sm w-full" placeholder="Industria">
             </div>
             <div *ngIf="leadTipo() === 'empresa'">
               <div class="text-sm text-[var(--muted)]">Tamaño Empresa</div>
-              <div class="font-medium">{{ leadTamanoEmpresa() || '-' }}</div>
+              <div class="font-medium" *ngIf="!isEditMode()">{{ leadTamanoEmpresa() || '-' }}</div>
+              <input *ngIf="isEditMode()" [(ngModel)]="editForm().companySize" class="input input-sm w-full" placeholder="Tamaño">
             </div>
+          </div>
+
+          <!-- Notas del administrador -->
+          <div>
+            <div class="text-sm text-[var(--muted)] mb-2">Notas del Administrador</div>
+            <div *ngIf="!isEditMode()" class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <div class="text-sm text-yellow-800 dark:text-yellow-200">{{ selected()?.notes || 'Sin notas' }}</div>
+            </div>
+            <textarea *ngIf="isEditMode()" 
+                      [(ngModel)]="editForm().notes" 
+                      class="textarea textarea-sm w-full" 
+                      placeholder="Agregar notas sobre este lead..."
+                      rows="3"></textarea>
+          </div>
+
+          <!-- Botones de acción en modo edición -->
+          <div *ngIf="isEditMode()" class="flex gap-2 pt-4 border-t">
+            <button class="btn btn-sm btn-primary" (click)="saveChanges()" [disabled]="isSaving()">
+              {{ isSaving() ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+            <button class="btn btn-sm btn-outline" (click)="cancelEdit()">Cancelar</button>
           </div>
 
           <!-- Metadatos -->
@@ -173,18 +298,54 @@ interface DiagnosticRow {
 
           <!-- ARES (respuestas) -->
           <div>
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-sm text-[var(--muted)]">ARES · Evaluación de Madurez en IA</div>
-              <div class="text-xs text-[var(--muted)]">Total: {{ aresCount() }} preguntas</div>
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-lg font-semibold text-[var(--fg)]">ARES · Evaluación de Madurez en IA</div>
+              <div class="text-sm text-[var(--muted)] bg-[var(--panel)] px-3 py-1 rounded-full">
+                {{ aresCount() }} preguntas evaluadas
+              </div>
             </div>
-            <div class="max-h-72 overflow-auto border border-[var(--border)] rounded">
-              <div class="grid grid-cols-1 gap-0">
-                <div *ngFor="let kv of aresEntries()" class="flex items-center justify-between gap-3 px-3 py-2 border-t border-[var(--border)] hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <div class="text-sm text-[var(--muted)] flex-1">{{ kv.key }}</div>
-                  <div class="text-sm font-medium text-right min-w-[60px]">
+            
+            <!-- Resumen de puntuaciones ARES -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+                <div class="text-sm text-[var(--muted)] mb-1">Puntuación General</div>
+                <div class="text-2xl font-bold" [class]="getGeneralScoreClass()">
+                  {{ getGeneralAresScore() }}/5
+                </div>
+              </div>
+              <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+                <div class="text-sm text-[var(--muted)] mb-1">Nivel de Madurez</div>
+                <div class="text-lg font-semibold" [class]="getMaturityLevelClass()">
+                  {{ getMaturityLevel() }}
+                </div>
+              </div>
+              <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+                <div class="text-sm text-[var(--muted)] mb-1">Progreso</div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="h-2 rounded-full transition-all duration-300" 
+                       [class]="getProgressBarClass()"
+                       [style.width.%]="getProgressPercentage()"></div>
+                </div>
+                <div class="text-xs text-[var(--muted)] mt-1">{{ getProgressPercentage() }}% completado</div>
+              </div>
+            </div>
+
+            <!-- Detalle de respuestas ARES -->
+            <div class="max-h-80 overflow-auto border border-[var(--border)] rounded-lg">
+              <div class="divide-y divide-[var(--border)]">
+                <div *ngFor="let kv of aresEntries(); let i = index" 
+                     class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[var(--panel)]/50 transition-colors">
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-[var(--fg)] truncate">{{ kv.key }}</div>
+                    <div class="text-xs text-[var(--muted)] mt-1">Pregunta {{ i + 1 }}</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="text-sm font-medium text-[var(--muted)]">
+                      {{ kv.value ?? '-' }}/5
+                    </div>
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                           [class]="getScoreClass(kv.value)">
-                      {{ kv.value ?? '-' }}
+                      {{ getScoreLabel(kv.value) }}
                     </span>
                   </div>
                 </div>
@@ -194,15 +355,45 @@ interface DiagnosticRow {
 
           <!-- Competencias -->
           <div>
-            <div class="text-sm text-[var(--muted)] mb-2">Competencias en IA · Evaluación</div>
-            <div class="max-h-72 overflow-auto border border-[var(--border)] rounded">
-              <div class="grid grid-cols-1 gap-0">
-                <div *ngFor="let kv of competenciasEntries()" class="flex items-center justify-between gap-3 px-3 py-2 border-t border-[var(--border)] hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <div class="text-sm text-[var(--muted)] flex-1">{{ kv.key }}</div>
-                  <div class="text-sm font-medium text-right min-w-[60px]">
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-lg font-semibold text-[var(--fg)]">Competencias en IA · Evaluación</div>
+              <div class="text-sm text-[var(--muted)] bg-[var(--panel)] px-3 py-1 rounded-full">
+                {{ competenciasEntries().length }} competencias evaluadas
+              </div>
+            </div>
+
+            <!-- Resumen de competencias -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+                <div class="text-sm text-[var(--muted)] mb-1">Puntuación Promedio</div>
+                <div class="text-2xl font-bold" [class]="getGeneralScoreClass()">
+                  {{ getGeneralCompetenciesScore() }}/5
+                </div>
+              </div>
+              <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
+                <div class="text-sm text-[var(--muted)] mb-1">Nivel de Competencia</div>
+                <div class="text-lg font-semibold" [class]="getMaturityLevelClass()">
+                  {{ getCompetencyLevel() }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Detalle de competencias -->
+            <div class="max-h-80 overflow-auto border border-[var(--border)] rounded-lg">
+              <div class="divide-y divide-[var(--border)]">
+                <div *ngFor="let kv of competenciasEntries(); let i = index" 
+                     class="flex items-center justify-between gap-4 px-4 py-3 hover:bg-[var(--panel)]/50 transition-colors">
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium text-[var(--fg)] truncate">{{ kv.key }}</div>
+                    <div class="text-xs text-[var(--muted)] mt-1">Competencia {{ i + 1 }}</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="text-sm font-medium text-[var(--muted)]">
+                      {{ kv.value ?? '-' }}/5
+                    </div>
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                           [class]="getScoreClass(kv.value)">
-                      {{ kv.value ?? '-' }}
+                      {{ getScoreLabel(kv.value) }}
                     </span>
                   </div>
                 </div>
@@ -217,17 +408,24 @@ interface DiagnosticRow {
               {{ resumen }}
             </div>
           </div>
-
-          <!-- Notas del administrador -->
-          <div *ngIf="selected()?.notes">
-            <div class="text-sm text-[var(--muted)] mb-2">Notas del Administrador</div>
-            <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
-              <div class="text-sm text-yellow-800 dark:text-yellow-200">{{ selected()?.notes }}</div>
-            </div>
-          </div>
         </div>
       </div>
     </app-ui-modal>
+
+    <!-- Modal de Confirmación -->
+    <app-confirmation-modal 
+      [isOpen]="showDeleteConfirm()"
+      title="Eliminar Lead"
+      message="¿Estás seguro de que quieres eliminar este lead? Esta acción no se puede deshacer."
+      type="danger"
+      confirmText="Eliminar"
+      cancelText="Cancelar"
+      (confirm)="confirmDelete()"
+      (cancel)="cancelDelete()">
+    </app-confirmation-modal>
+
+    <!-- Toast Notifications -->
+    <app-toast #toastComponent></app-toast>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -236,13 +434,17 @@ export class AdminDiagnosticLeadsComponent {
   private readonly router = inject(Router);
   private readonly pdfService = inject(PdfService);
   private readonly leadsService = inject(LeadsService);
+  private readonly notificationService = inject(NotificationService);
 
   @ViewChild('printArea') printArea?: ElementRef<HTMLElement>;
+  @ViewChild('toastComponent') toastComponent?: ToastComponent;
 
   page = signal(1);
   pageSize = 20;
   lang = signal('es');
   currentFilter = signal<'all' | 'persona_natural' | 'empresa'>('all');
+  searchTerm = '';
+  stats = signal<any>(null);
 
   private readonly rowsSig = signal<DiagnosticRow[]>([]);
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.rowsSig().length / this.pageSize)));
@@ -252,14 +454,24 @@ export class AdminDiagnosticLeadsComponent {
   });
 
   readonly filteredLeads = computed(() => {
-    const leads = this.rowsSig();
+    let leads = this.rowsSig();
     const filter = this.currentFilter();
     
-    if (filter === 'all') {
-      return leads;
+    // Filtrar por tipo
+    if (filter !== 'all') {
+      leads = leads.filter(lead => lead.tipo === filter);
     }
     
-    return leads.filter(lead => lead.tipo === filter);
+    // Filtrar por término de búsqueda
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      leads = leads.filter(lead => 
+        lead.nombre.toLowerCase().includes(term) || 
+        lead.email.toLowerCase().includes(term)
+      );
+    }
+    
+    return leads;
   });
 
   isOpen = signal(false);
@@ -268,7 +480,51 @@ export class AdminDiagnosticLeadsComponent {
   private readonly selectedSig = signal<any | null>(null);
   selected = this.selectedSig;
 
+  // Estados para edición
+  isEditMode = signal(false);
+  isSaving = signal(false);
+  editForm = signal({
+    name: '',
+    email: '',
+    phone: '',
+    status: 'nuevo' as LeadData['status'],
+    acceptsCommunications: false,
+    companyName: '',
+    position: '',
+    industry: '',
+    companySize: '',
+    notes: ''
+  });
+
+  // Estados para confirmación de eliminación
+  showDeleteConfirm = signal(false);
+  leadToDelete = signal<string | null>(null);
+
   constructor(){
+    this.testFirebaseConnection();
+    this.loadLeads();
+    this.loadStats();
+  }
+
+  private async testFirebaseConnection() {
+    try {
+      const isConnected = await this.leadsService.testConnection();
+      if (!isConnected) {
+        this.notificationService.warning('Conexión Firebase', 'Hay problemas de conectividad con la base de datos. Algunas funciones pueden no funcionar correctamente.');
+      }
+    } catch (error) {
+      console.error('Error verificando conexión:', error);
+    }
+  }
+
+  ngAfterViewInit() {
+    // Inicializar el servicio de notificaciones
+    if (this.toastComponent) {
+      this.notificationService.setToastComponent(this.toastComponent);
+    }
+  }
+
+  private loadLeads() {
     // Cargar leads desde la nueva colección
     this.leadsService.getLeads().subscribe((leads: LeadData[]) => {
       const mapped = leads.map((lead) => ({
@@ -283,6 +539,15 @@ export class AdminDiagnosticLeadsComponent {
       } as DiagnosticRow));
       this.rowsSig.set(mapped);
     });
+  }
+
+  private async loadStats() {
+    try {
+      const stats = await this.leadsService.getLeadsStats();
+      this.stats.set(stats);
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
   }
 
   prev(){ if (this.page() > 1) this.page.set(this.page() - 1); }
@@ -430,24 +695,226 @@ export class AdminDiagnosticLeadsComponent {
 
   getScoreClass(value: any): string {
     if (value === null || value === undefined || value === '-') {
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
     
     const numValue = typeof value === 'number' ? value : parseFloat(value);
     
     if (isNaN(numValue)) {
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
     
     if (numValue >= 4) {
-      return 'bg-green-100 text-green-800';
+      return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
     } else if (numValue >= 3) {
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
     } else if (numValue >= 2) {
-      return 'bg-orange-100 text-orange-800';
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
     } else {
-      return 'bg-red-100 text-red-800';
+      return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
     }
+  }
+
+  getScoreLabel(value: any): string {
+    if (value === null || value === undefined || value === '-') {
+      return 'Sin datos';
+    }
+    
+    const numValue = typeof value === 'number' ? value : parseFloat(value);
+    
+    if (isNaN(numValue)) {
+      return 'Sin datos';
+    }
+    
+    if (numValue >= 4) {
+      return 'Excelente';
+    } else if (numValue >= 3) {
+      return 'Bueno';
+    } else if (numValue >= 2) {
+      return 'Regular';
+    } else {
+      return 'Necesita mejora';
+    }
+  }
+
+  // Métodos para cálculos de ARES
+  getGeneralAresScore(): number {
+    const ares = this.selected()?.diagnosticData?.ares || this.selected()?.diagnosticResponses?.ares || {};
+    const scores = Object.values(ares).map((value: any) => 
+      typeof value === 'object' && value !== null ? value.value : value
+    ).filter(score => typeof score === 'number' && !isNaN(score));
+    
+    if (scores.length === 0) return 0;
+    return Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 10) / 10;
+  }
+
+  getGeneralScoreClass(): string {
+    const score = this.getGeneralAresScore();
+    if (score >= 4) return 'text-green-600 dark:text-green-400';
+    if (score >= 3) return 'text-yellow-600 dark:text-yellow-400';
+    if (score >= 2) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
+  }
+
+  getMaturityLevel(): string {
+    const score = this.getGeneralAresScore();
+    if (score >= 4.5) return 'Avanzado';
+    if (score >= 3.5) return 'Intermedio';
+    if (score >= 2.5) return 'Básico';
+    if (score >= 1.5) return 'Inicial';
+    return 'Principiante';
+  }
+
+  getMaturityLevelClass(): string {
+    const score = this.getGeneralAresScore();
+    if (score >= 4.5) return 'text-green-600 dark:text-green-400';
+    if (score >= 3.5) return 'text-blue-600 dark:text-blue-400';
+    if (score >= 2.5) return 'text-yellow-600 dark:text-yellow-400';
+    if (score >= 1.5) return 'text-orange-600 dark:text-orange-400';
+    return 'text-red-600 dark:text-red-400';
+  }
+
+  getProgressPercentage(): number {
+    const ares = this.selected()?.diagnosticData?.ares || this.selected()?.diagnosticResponses?.ares || {};
+    const totalQuestions = Object.keys(ares).length;
+    const answeredQuestions = Object.values(ares).filter(value => 
+      value !== null && value !== undefined && value !== '-'
+    ).length;
+    
+    if (totalQuestions === 0) return 0;
+    return Math.round((answeredQuestions / totalQuestions) * 100);
+  }
+
+  getProgressBarClass(): string {
+    const percentage = this.getProgressPercentage();
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 60) return 'bg-blue-500';
+    if (percentage >= 40) return 'bg-yellow-500';
+    if (percentage >= 20) return 'bg-orange-500';
+    return 'bg-red-500';
+  }
+
+  // Métodos para competencias
+  getGeneralCompetenciesScore(): number {
+    const competencias = this.selected()?.diagnosticData?.competencias || this.selected()?.diagnosticResponses?.competencias || {};
+    const scores = Object.values(competencias).map((value: any) => 
+      typeof value === 'object' && value !== null ? value.value : value
+    ).filter(score => typeof score === 'number' && !isNaN(score));
+    
+    if (scores.length === 0) return 0;
+    return Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 10) / 10;
+  }
+
+  getCompetencyLevel(): string {
+    const score = this.getGeneralCompetenciesScore();
+    if (score >= 4.5) return 'Experto';
+    if (score >= 3.5) return 'Avanzado';
+    if (score >= 2.5) return 'Intermedio';
+    if (score >= 1.5) return 'Básico';
+    return 'Principiante';
+  }
+
+  // Métodos para búsqueda
+  onSearchChange() {
+    this.page.set(1); // Reset a la primera página al buscar
+  }
+
+  // Métodos para edición
+  editLead(id: string) {
+    this.open(id);
+    this.toggleEditMode();
+  }
+
+  toggleEditMode() {
+    if (!this.isEditMode()) {
+      // Inicializar formulario de edición con datos actuales
+      const lead = this.selected();
+      if (lead) {
+        this.editForm.set({
+          name: lead.name || '',
+          email: lead.email || '',
+          phone: lead.phone || '',
+          status: lead.status || 'nuevo',
+          acceptsCommunications: lead.acceptsCommunications || false,
+          companyName: lead.companyName || '',
+          position: lead.position || '',
+          industry: lead.industry || '',
+          companySize: lead.companySize || '',
+          notes: lead.notes || ''
+        });
+      }
+    }
+    this.isEditMode.set(!this.isEditMode());
+  }
+
+  async saveChanges() {
+    if (!this.selectedId()) return;
+    
+    this.isSaving.set(true);
+    try {
+      await this.leadsService.updateLead(this.selectedId()!, this.editForm());
+      this.isEditMode.set(false);
+      this.loadLeads(); // Recargar la lista
+      this.loadStats(); // Recargar estadísticas
+      this.notificationService.success('Lead actualizado', 'Los cambios se han guardado correctamente');
+    } catch (error: any) {
+      console.error('❌ Error actualizando lead:', error);
+      
+      let errorMessage = 'No se pudieron guardar los cambios.';
+      if (error?.code === 'permission-denied') {
+        errorMessage = 'No tienes permisos para actualizar este lead.';
+      } else if (error?.code === 'not-found') {
+        errorMessage = 'El lead no existe o fue eliminado.';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      this.notificationService.error('Error al actualizar', errorMessage);
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  cancelEdit() {
+    this.isEditMode.set(false);
+  }
+
+  // Métodos para eliminación
+  deleteLead(id: string) {
+    this.leadToDelete.set(id);
+    this.showDeleteConfirm.set(true);
+  }
+
+  async confirmDelete() {
+    const id = this.leadToDelete();
+    if (!id) return;
+
+    try {
+      await this.leadsService.deleteLead(id);
+      this.loadLeads(); // Recargar la lista
+      this.loadStats(); // Recargar estadísticas
+      this.notificationService.success('Lead eliminado', 'El lead se ha eliminado correctamente');
+    } catch (error: any) {
+      console.error('❌ Error eliminando lead:', error);
+      
+      let errorMessage = 'No se pudo eliminar el lead.';
+      if (error?.code === 'permission-denied') {
+        errorMessage = 'No tienes permisos para eliminar este lead.';
+      } else if (error?.code === 'not-found') {
+        errorMessage = 'El lead no existe o ya fue eliminado.';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      this.notificationService.error('Error al eliminar', errorMessage);
+    } finally {
+      this.cancelDelete();
+    }
+  }
+
+  cancelDelete() {
+    this.showDeleteConfirm.set(false);
+    this.leadToDelete.set(null);
   }
 }
 

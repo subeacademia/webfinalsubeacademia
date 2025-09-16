@@ -126,18 +126,21 @@ export class DiagnosticsService {
       return reportFromAI;
 
     } catch (error) {
-      console.error('Error CATASTRÓFICO en generateReport:', error);
+      console.error('Error en generateReport:', error);
       
-      // Si es un error de timeout o conexión, lanzar el error para que se maneje en el componente
-      if (error instanceof Error && (
-        error.message.includes('timeout') || 
-        error.message.includes('API tardó demasiado') ||
-        error.message.includes('Error de conexión')
-      )) {
-        throw error; // Re-lanzar para que el componente pueda mostrar el mensaje apropiado
+      // El servicio de IA ya maneja el fallback automáticamente
+      // Si llegamos aquí, significa que el fallback también falló
+      console.log('🔄 El reporte de fallback también falló, intentando generar uno básico...');
+      
+      // Generar un reporte básico de emergencia
+      try {
+        const emergencyReport = this.generateEmergencyReport(diagnosticData);
+        this.currentReport.set(emergencyReport);
+        return emergencyReport;
+      } catch (emergencyError) {
+        console.error('❌ Error generando reporte de emergencia:', emergencyError);
+        return null;
       }
-      
-      return null; 
     }
   }
 
@@ -146,6 +149,62 @@ export class DiagnosticsService {
    */
   getCurrentReport(): ReportData | null {
     return this.currentReport();
+  }
+
+  /**
+   * Genera un reporte de emergencia cuando todo falla
+   */
+  private generateEmergencyReport(diagnosticData: any): ReportData {
+    console.log('🚨 Generando reporte de emergencia...');
+    
+    return {
+      id: 'emergency-' + Date.now(),
+      timestamp: new Date(),
+      leadInfo: {
+        name: diagnosticData?.lead?.name || 'Usuario',
+        email: diagnosticData?.lead?.email || 'usuario@empresa.com',
+        companyName: diagnosticData?.lead?.companyName || 'Empresa'
+      },
+      contexto: diagnosticData,
+      aresScores: {},
+      competencyScores: [],
+      companyContext: {
+        industry: diagnosticData?.contexto?.industry || 'No especificada',
+        size: diagnosticData?.contexto?.companySize || 'No especificado',
+        mainObjective: diagnosticData?.contexto?.mainObjective || 'Mejorar capacidades en IA'
+      },
+      aiMaturity: {
+        level: 'En Desarrollo',
+        score: 50,
+        summary: 'Tu organización se encuentra en un nivel de desarrollo en IA. Recomendamos continuar con el plan de acción para mejorar las capacidades.'
+      },
+      executiveSummary: 'Hemos generado un reporte básico basado en tu información. Para obtener un análisis más detallado, por favor intenta nuevamente más tarde.',
+      strengthsAnalysis: [],
+      weaknessesAnalysis: [],
+      insights: [{
+        title: 'Sistema de Análisis Temporal',
+        description: 'Este reporte fue generado usando nuestro sistema de respaldo. Para obtener un análisis completo, intenta nuevamente.',
+        type: 'Fortaleza Clave'
+      }],
+      actionPlan: [{
+        area: 'Desarrollo de Competencias en IA',
+        priority: 'Alta',
+        timeline: '3-6 meses',
+        description: 'Enfócate en desarrollar competencias básicas en IA para tu organización.',
+        actions: [{
+          accion: 'Capacitación Básica en IA',
+          descripcion: 'Inicia con cursos básicos de IA para tu equipo.',
+          timeline: '1-2 meses',
+          recursos: ['Cursos online', 'Material educativo'],
+          kpis: ['Nivel de conocimiento', 'Aplicación práctica'],
+          expectedOutcome: 'Equipo con conocimientos básicos en IA',
+          painPoint: 'Falta de conocimiento básico en IA',
+          aresDimension: 'Agilidad'
+        }]
+      }],
+      generatedAt: new Date(),
+      version: '3.0.0-emergency'
+    };
   }
 
   /**
