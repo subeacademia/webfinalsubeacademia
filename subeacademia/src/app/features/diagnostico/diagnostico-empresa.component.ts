@@ -1,11 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CUESTIONARIO_EMPRESAS } from './data/empresa-questions';
 import { ReporteDiagnosticoEmpresa, MetadataEmpresa, RespuestaItem } from './data/empresa-diagnostic.models';
 import { EmpresaScoringService } from './services/empresa-scoring.service';
 import { DiagnosticsService } from './services/diagnostics.service';
 import { GenerativeAiService } from '../../core/ai/generative-ai.service';
+import { ScrollService } from '../../core/services/scroll/scroll.service';
 import { PROMPT_PLAN_DE_ACCION } from './data/empresa-prompt';
 import { AiProcessingLoaderComponent } from './components/ui/ai-processing-loader/ai-processing-loader.component';
 import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa-results.component';
@@ -19,55 +21,55 @@ import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa
     <div class="container mx-auto p-4 md:p-8 text-gray-800 dark:text-white">
       @if (step() === 'metadata') {
         <div class="max-w-2xl mx-auto">
-          <h1 class="text-3xl font-bold mb-4">Diagnóstico de Madurez en IA para Empresas</h1>
-          <p class="mb-8 text-gray-600 dark:text-gray-300">Comencemos con algunos datos sobre tu empresa para contextualizar el resultado. Esta información es clave para generar un análisis preciso.</p>
-          <form [formGroup]="metadataForm" (ngSubmit)="startSurvey()" class="space-y-4">
-            <input formControlName="razonSocial" placeholder="Razón Social" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500">
-            <input formControlName="nombreContacto" placeholder="Tu Nombre Completo" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500">
-            <input formControlName="emailContacto" type="email" placeholder="Tu Email de Contacto" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500">
-            <select formControlName="ventasUFAnual" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500">
+          <h1 class="text-2xl md:text-3xl font-bold mb-3 md:mb-4">Diagnóstico de Madurez en IA para Empresas</h1>
+          <p class="mb-6 md:mb-8 text-gray-600 dark:text-gray-300 text-sm md:text-base">Comencemos con algunos datos sobre tu empresa para contextualizar el resultado. Esta información es clave para generar un análisis preciso.</p>
+          <form [formGroup]="metadataForm" (ngSubmit)="startSurvey()" class="space-y-3 md:space-y-4">
+            <input formControlName="razonSocial" placeholder="Razón Social" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
+            <input formControlName="nombreContacto" placeholder="Tu Nombre Completo" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
+            <input formControlName="emailContacto" type="email" placeholder="Tu Email de Contacto" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
+            <select formControlName="ventasUFAnual" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
               <option value="" disabled>Ventas Anuales en UF (año anterior)</option>
               <option value="0-2400">Hasta 2.400 UF (Micro empresa)</option>
               <option value="2401-25000">2.401 - 25.000 UF (Pequeña empresa)</option>
               <option value="25001-100000">25.001 - 100.000 UF (Mediana empresa)</option>
               <option value="100001+">Más de 100.000 UF (Grande empresa)</option>
             </select>
-            <button type="submit" [disabled]="metadataForm.invalid" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">Comenzar Diagnóstico</button>
+            <button type="submit" [disabled]="metadataForm.invalid" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 text-base">Comenzar Diagnóstico</button>
           </form>
         </div>
       } @else if (isStepNumber() && getCurrentStepNumber() >= 0 && getCurrentStepNumber() < CUESTIONARIO_EMPRESAS.length) {
         <div class="max-w-3xl mx-auto">
-          <div class="mb-4">
-            <p class="text-sm text-gray-500">Dimensión {{ getCurrentStepNumber() + 1 }} de {{ CUESTIONARIO_EMPRESAS.length }}</p>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
-              <div class="bg-blue-600 h-2.5 rounded-full" [style.width.%]="((getCurrentStepNumber() + 1) / CUESTIONARIO_EMPRESAS.length) * 100"></div>
+          <div class="mb-3 md:mb-4">
+            <p class="text-xs md:text-sm text-gray-500">Dimensión {{ getCurrentStepNumber() + 1 }} de {{ CUESTIONARIO_EMPRESAS.length }}</p>
+            <div class="w-full bg-gray-200 rounded-full h-2 md:h-2.5 dark:bg-gray-700 mt-1">
+              <div class="bg-blue-600 h-2 md:h-2.5 rounded-full" [style.width.%]="((getCurrentStepNumber() + 1) / CUESTIONARIO_EMPRESAS.length) * 100"></div>
             </div>
           </div>
-          <h2 class="text-2xl font-bold mb-6">{{ getCurrentDimension().nombre }}</h2>
-          <form [formGroup]="getCurrentForm()" class="space-y-6">
+          <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">{{ getCurrentDimension().nombre }}</h2>
+          <form [formGroup]="getCurrentForm()" class="space-y-4 md:space-y-6">
               @for(item of getCurrentDimension().items; track item.n) {
-                  <div class="p-4 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
-                      <label class="block mb-3 font-semibold text-lg">{{ item.texto }}</label>
+                  <div class="p-3 md:p-4 border rounded-lg shadow-sm bg-white dark:bg-gray-800">
+                      <label class="block mb-2 md:mb-3 font-semibold text-base md:text-lg">{{ item.texto }}</label>
                       @if (item.tipo === 'Likert') {
-                          <div class="flex justify-center gap-2 md:gap-4">
+                          <div class="flex justify-center gap-1 md:gap-2 overflow-x-auto pb-2">
                               @for(option of getLikertOptions(); track option.value) {
-                                  <label class="flex flex-col items-center space-y-1 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer min-w-[80px] text-center">
+                                  <label class="flex flex-col items-center space-y-1 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer min-w-[60px] md:min-w-[80px] text-center">
                                       <input type="radio" [formControlName]="'item' + item.n" [value]="option.value" class="form-radio h-4 w-4 text-blue-600">
-                                      <span class="text-lg font-bold">{{option.value}}</span>
+                                      <span class="text-base md:text-lg font-bold">{{option.value}}</span>
                                       <span class="text-xs text-gray-600 dark:text-gray-400 leading-tight">{{option.label}}</span>
                                   </label>
                               }
                           </div>
                       }
                       @if (item.tipo === 'VFNS') {
-                          <div class="flex flex-wrap justify-center gap-4">
-                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="V" class="form-radio h-5 w-5 text-blue-600"> <span>Verdadero</span></label>
-                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="F" class="form-radio h-5 w-5 text-blue-600"> <span>Falso</span></label>
-                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="NS" class="form-radio h-5 w-5 text-blue-600"> <span>No sé</span></label>
+                          <div class="flex flex-wrap justify-center gap-2 md:gap-4">
+                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="V" class="form-radio h-4 w-4 md:h-5 md:w-5 text-blue-600"> <span class="text-sm md:text-base">Verdadero</span></label>
+                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="F" class="form-radio h-4 w-4 md:h-5 md:w-5 text-blue-600"> <span class="text-sm md:text-base">Falso</span></label>
+                              <label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"><input type="radio" [formControlName]="'item' + item.n" value="NS" class="form-radio h-4 w-4 md:h-5 md:w-5 text-blue-600"> <span class="text-sm md:text-base">No sé</span></label>
                           </div>
                       }
                       @if (item.tipo === 'Madurez') {
-                         <select [formControlName]="'item' + item.n" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500">
+                         <select [formControlName]="'item' + item.n" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
                            <option [ngValue]="null" disabled>Selecciona un nivel...</option>
                            <option value="I">Incipiente</option>
                            <option value="B">Básico</option>
@@ -79,9 +81,9 @@ import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa
                   </div>
               }
           </form>
-          <div class="flex justify-between mt-8">
-              <button (click)="previousStep()" [disabled]="step() === 0" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400">Anterior</button>
-              <button (click)="nextStep()" [disabled]="getCurrentForm().invalid" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">Siguiente</button>
+          <div class="flex flex-col sm:flex-row justify-between gap-3 mt-6 md:mt-8">
+              <button (click)="previousStep()" [disabled]="step() === 0" class="w-full sm:w-auto bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed text-base">Anterior</button>
+              <button (click)="nextStep()" [disabled]="getCurrentForm().invalid" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-base">Siguiente</button>
           </div>
         </div>
       } @else if (step() === 'processing') {
@@ -97,6 +99,7 @@ export class DiagnosticoEmpresaComponent {
     private scoringService = inject(EmpresaScoringService);
     private diagnosticsService = inject(DiagnosticsService);
     private aiService = inject(GenerativeAiService);
+    private scrollService = inject(ScrollService);
 
     CUESTIONARIO_EMPRESAS = CUESTIONARIO_EMPRESAS;
     step = signal<'metadata' | number | 'processing' | 'results'>('metadata');
@@ -128,7 +131,13 @@ export class DiagnosticoEmpresaComponent {
       });
     }
 
-    startSurvey() { if (this.metadataForm.valid) this.step.set(0); }
+    startSurvey() { 
+        if (this.metadataForm.valid) {
+            this.step.set(0);
+            // Hacer scroll al inicio después de cambiar de paso
+            this.scrollService.scrollToMainContent();
+        }
+    }
 
     // Método para obtener las opciones de la escala Likert con etiquetas
     getLikertOptions() {
@@ -162,6 +171,8 @@ export class DiagnosticoEmpresaComponent {
     nextStep() {
       if (this.step() as number < CUESTIONARIO_EMPRESAS.length - 1) {
         this.step.update(s => (s as number) + 1);
+        // Hacer scroll al inicio después de cambiar de paso
+        this.scrollService.scrollToMainContent();
       } else {
         this.submitFullSurvey();
       }
@@ -169,8 +180,12 @@ export class DiagnosticoEmpresaComponent {
     previousStep() {
       if (this.step() as number > 0) {
         this.step.update(s => (s as number) - 1);
+        // Hacer scroll al inicio después de cambiar de paso
+        this.scrollService.scrollToMainContent();
       } else {
         this.step.set('metadata');
+        // Hacer scroll al inicio después de volver al metadata
+        this.scrollService.scrollToMainContent();
       }
     }
 
@@ -257,5 +272,7 @@ export class DiagnosticoEmpresaComponent {
         console.log('🎯 Mostrando resultados finales...');
         this.finalReport.set(reporte);
         this.step.set('results');
+        // Hacer scroll al inicio cuando se muestren los resultados
+        this.scrollService.scrollToMainContent();
     }
 }

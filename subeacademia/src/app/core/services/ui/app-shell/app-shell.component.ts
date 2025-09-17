@@ -14,7 +14,7 @@ import { User } from '@angular/fire/auth';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
-        <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16" role="navigation" aria-label="Navegación principal">
+        <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16 px-4 md:px-6" role="navigation" aria-label="Navegación principal">
            <a [routerLink]="['/', currentLang()]" 
               class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]"
                [attr.aria-label]="'Ir a página de inicio - ' + brandName()">
@@ -24,13 +24,15 @@ import { User } from '@angular/fire/auth';
 
         <!-- Botones móviles con mejor accesibilidad -->
         <div class="md:hidden flex items-center gap-2">
-          <button class="btn" 
+          <button class="nav-toggle p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" 
                   (click)="toggleNav()" 
                   [attr.aria-expanded]="navOpen()"
                   [attr.aria-controls]="navOpen() ? 'mobile-nav' : null"
                   aria-label="Abrir menú de navegación">
             <span class="sr-only">Menú</span>
-            ☰
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
           
           <button class="theme-toggle" 
@@ -148,12 +150,12 @@ import { User } from '@angular/fire/auth';
 
       <!-- Navegación móvil con mejor accesibilidad -->
       <div [class.nav--open]="navOpen()" 
-           class="md:hidden border-t border-white/10 bg-[var(--panel)]/90 nav" 
+           class="md:hidden border-t border-white/10 bg-[var(--panel)]/95 backdrop-blur nav" 
            *ngIf="navOpen()"
            id="mobile-nav"
            role="navigation"
            aria-label="Menú móvil">
-        <div class="container mx-auto max-w-7xl py-3 space-y-2">
+        <div class="container mx-auto max-w-7xl py-4 px-4 space-y-2">
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang()]" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
@@ -247,7 +249,7 @@ import { User } from '@angular/fire/auth';
       </div>
     </header>
 
-    <main class="container mx-auto max-w-7xl pt-24 pb-8" id="main-content" role="main">
+    <main class="container mx-auto max-w-7xl pt-20 md:pt-24 pb-8 px-4 md:px-6" id="main-content" role="main">
       <ng-content />
     </main>
 

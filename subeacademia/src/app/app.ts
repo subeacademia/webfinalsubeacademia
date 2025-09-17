@@ -7,17 +7,20 @@ import { Subject, filter, takeUntil } from 'rxjs';
 import { AppShellComponent } from './core/services/ui/app-shell/app-shell.component';
 import { ToastContainerComponent } from './core/services/ui/toast/toast.container';
 import { ChatbotComponent } from './shared/ui/chatbot/chatbot.component';
+import { ScrollToTopComponent } from './shared/ui/scroll-to-top/scroll-to-top.component';
 import { ThemeService } from './shared/theme.service';
+import { ScrollService } from './core/services/scroll/scroll.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppShellComponent, ChatbotComponent, CommonModule, ToastContainerComponent],
+  imports: [RouterOutlet, AppShellComponent, ChatbotComponent, ScrollToTopComponent, CommonModule, ToastContainerComponent],
   template: `
     <app-shell>
       <router-outlet />
       <app-chatbot *ngIf="!isAdminRoute" />
       <app-toast-container />
+      <app-scroll-to-top />
     </app-shell>
   `,
   styleUrl: './app.css'
@@ -28,6 +31,7 @@ export class App implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly i18n = inject(I18nService);
   private readonly seo = inject(SeoService);
+  private readonly scrollService = inject(ScrollService);
   private readonly unsubscribe$ = new Subject<void>();
   isAdminRoute = false;
   

@@ -14,9 +14,9 @@ import { DiagnosticStateService } from './services/diagnostic-state.service';
       <app-step-nav></app-step-nav>
       
       <main>
-        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto py-4 md:py-6 px-4 md:px-6">
           <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
-            <div class="p-2 md:p-4">
+            <div class="p-4 md:p-6">
               <!-- El router-outlet ahora siempre está visible -->
               <router-outlet (diagnosticFinished)="generateFinalReport()"></router-outlet>
             </div>

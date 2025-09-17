@@ -1,7 +1,8 @@
 import { Component, inject, ChangeDetectionStrategy, computed, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { DiagnosticStateService } from '../services/diagnostic-state.service';
+import { ScrollService } from '../../../core/services/scroll/scroll.service';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -14,38 +15,44 @@ interface Step {
 @Component({
 	selector: 'app-step-nav',
 	standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <!-- Solo mostrar la barra de navegación si NO estamos en la página de inicio o en el diagnóstico de empresas -->
     @if (shouldShowNavigation()) {
       <!-- Barra de navegación integrada -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
           <!-- Navegación de pasos -->
-          <nav class="flex flex-wrap justify-center gap-x-1 gap-y-2 mb-4">
+          <nav class="flex flex-wrap justify-center gap-x-1 gap-y-2 mb-3 md:mb-4">
             @for (step of steps; track step.path) {
-              <a [routerLink]="isStepEnabled(step) ? step.path : null"
-                 routerLinkActive="bg-blue-600 text-white shadow-lg transform scale-105"
-                 [class.bg-blue-100]="isStepEnabled(step) && activeStep()?.order === step.order"
-                 [class.text-blue-700]="isStepEnabled(step) && activeStep()?.order === step.order"
+              <button 
+                 (click)="isStepEnabled(step) ? navigateToStep(step.path) : null"
+                 [class.bg-blue-600]="activeStep()?.order === step.order"
+                 [class.text-white]="activeStep()?.order === step.order"
+                 [class.shadow-lg]="activeStep()?.order === step.order"
+                 [class.transform]="activeStep()?.order === step.order"
+                 [class.scale-105]="activeStep()?.order === step.order"
+                 [class.bg-blue-100]="isStepEnabled(step) && activeStep()?.order !== step.order"
+                 [class.text-blue-700]="isStepEnabled(step) && activeStep()?.order !== step.order"
                  [class.text-gray-400]="!isStepEnabled(step)"
                  [class.pointer-events-none]="!isStepEnabled(step)"
                  [class.opacity-50]="!isStepEnabled(step)"
-                 class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md">
+                 [disabled]="!isStepEnabled(step)"
+                 class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md border-none bg-transparent cursor-pointer">
                 {{ step.label }}
-              </a>
+              </button>
             }
           </nav>
 
           <!-- Progreso de la página actual -->
-          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() }}</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() }}</p>
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-3 md:p-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+              <div class="flex-1">
+                <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() }}</h2>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() }}</p>
               </div>
-              <div class="flex items-center space-x-4">
+              <div class="flex items-center space-x-3 md:space-x-4 w-full md:w-auto">
                 <div class="text-right">
                   <div class="text-sm font-semibold text-gray-900 dark:text-white">
                     {{ getCurrentProgress().answered }} / {{ getCurrentProgress().total }}
@@ -54,7 +61,7 @@ interface Step {
                     {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% completado
                   </div>
                 </div>
-                <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                <div class="w-24 md:w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 md:h-3 overflow-hidden">
                   <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
                        [style.width.%]="(getCurrentProgress().answered / getCurrentProgress().total) * 100">
                   </div>
@@ -81,6 +88,7 @@ interface Step {
 export class StepNavComponent {
   router = inject(Router);
   stateService = inject(DiagnosticStateService);
+  scrollService = inject(ScrollService);
 
   // Exponer Math para el template
   Math = Math;
@@ -187,7 +195,20 @@ export class StepNavComponent {
   
   startNew() {
       this.stateService.reset();
-      this.router.navigate(['/diagnostico/contexto']);
+      this.router.navigate(['/diagnostico/contexto']).then(() => {
+        // Hacer scroll al inicio después de navegar
+        this.scrollService.scrollToMainContent();
+      });
+  }
+
+  /**
+   * Maneja la navegación entre pasos con scroll automático
+   */
+  navigateToStep(stepPath: string): void {
+    this.router.navigate([stepPath]).then(() => {
+      // Hacer scroll al inicio del contenido principal
+      this.scrollService.scrollToMainContent();
+    });
   }
 
   // Método para determinar si mostrar la navegación

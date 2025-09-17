@@ -10,11 +10,11 @@ import { SessionService, QuestionItem } from '../../services/session.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, UiButtonComponent],
   template: `
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto px-4 md:px-6">
       <!-- Header con progreso -->
-      <div class="mb-8">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div class="mb-6 md:mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-3 md:mb-4 gap-2">
+          <h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
             Cuestionario para Adultos
           </h2>
           <span class="text-sm text-gray-600 dark:text-gray-400">
@@ -23,29 +23,29 @@ import { SessionService, QuestionItem } from '../../services/session.service';
         </div>
         
         <!-- Barra de progreso -->
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 md:h-3">
           <div 
-            class="bg-gradient-to-r from-green-500 to-teal-500 h-3 rounded-full transition-all duration-300"
+            class="bg-gradient-to-r from-green-500 to-teal-500 h-2 md:h-3 rounded-full transition-all duration-300"
             [style.width.%]="progressPercentage">
           </div>
         </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+        <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-2">
           {{ Math.round(progressPercentage) }}% completado
         </p>
       </div>
 
       <!-- Preguntas -->
-      <form [formGroup]="questionnaireForm" (ngSubmit)="onSubmit()" class="space-y-8">
-        <div *ngFor="let question of currentQuestions; let i = index" class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-          <div class="mb-4">
-            <label class="block text-lg font-medium text-gray-900 dark:text-white mb-3">
+      <form [formGroup]="questionnaireForm" (ngSubmit)="onSubmit()" class="space-y-6 md:space-y-8">
+        <div *ngFor="let question of currentQuestions; let i = index" class="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="mb-3 md:mb-4">
+            <label class="block text-base md:text-lg font-medium text-gray-900 dark:text-white mb-2 md:mb-3">
               {{ question.text }}
             </label>
             
             <!-- Preguntas V/F/No sé -->
             <div *ngIf="question.type === 'vf'" class="space-y-3">
-              <div class="flex space-x-6">
-                <label class="flex items-center cursor-pointer">
+              <div class="flex flex-col sm:flex-row gap-3 sm:gap-6">
+                <label class="flex items-center cursor-pointer min-h-[44px]">
                   <input
                     type="radio"
                     [formControlName]="question.code"
@@ -53,9 +53,9 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     (change)="onRadioChange(question.code, 'V')"
                     class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
                   />
-                  <span class="ml-2 text-gray-700 dark:text-gray-300">Verdadero</span>
+                  <span class="ml-2 text-sm md:text-base text-gray-700 dark:text-gray-300">Verdadero</span>
                 </label>
-                <label class="flex items-center cursor-pointer">
+                <label class="flex items-center cursor-pointer min-h-[44px]">
                   <input
                     type="radio"
                     [formControlName]="question.code"
@@ -63,9 +63,9 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     (change)="onRadioChange(question.code, 'F')"
                     class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
                   />
-                  <span class="ml-2 text-gray-700 dark:text-gray-300">Falso</span>
+                  <span class="ml-2 text-sm md:text-base text-gray-700 dark:text-gray-300">Falso</span>
                 </label>
-                <label class="flex items-center cursor-pointer">
+                <label class="flex items-center cursor-pointer min-h-[44px]">
                   <input
                     type="radio"
                     [formControlName]="question.code"
@@ -73,17 +73,20 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                     (change)="onRadioChange(question.code, '?')"
                     class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300"
                   />
-                  <span class="ml-2 text-gray-700 dark:text-gray-300">No estoy seguro</span>
+                  <span class="ml-2 text-sm md:text-base text-gray-700 dark:text-gray-300">No estoy seguro</span>
                 </label>
               </div>
             </div>
 
             <!-- Escala Likert (1-5) -->
             <div *ngIf="question.type === 'likert'" class="space-y-3">
-              <div class="flex justify-between items-center space-x-4">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Totalmente en desacuerdo</span>
-                <div class="flex space-x-2">
-                  <label *ngFor="let option of likertOptions" class="flex flex-col items-center cursor-pointer">
+              <div class="flex flex-col space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Totalmente en desacuerdo</span>
+                  <span class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Totalmente de acuerdo</span>
+                </div>
+                <div class="flex justify-center space-x-1 md:space-x-2 overflow-x-auto pb-2">
+                  <label *ngFor="let option of likertOptions" class="flex flex-col items-center cursor-pointer min-w-[40px] md:min-w-[50px]">
                     <input
                       type="radio"
                       [formControlName]="question.code"
@@ -91,33 +94,32 @@ import { SessionService, QuestionItem } from '../../services/session.service';
                       (change)="onRadioChange(question.code, option.value)"
                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
-                    <span class="text-sm text-gray-700 dark:text-gray-300 mt-1">{{ option.label }}</span>
+                    <span class="text-xs md:text-sm text-gray-700 dark:text-gray-300 mt-1">{{ option.label }}</span>
                   </label>
                 </div>
-                <span class="text-sm text-gray-500 dark:text-gray-400">Totalmente de acuerdo</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Navegación -->
-        <div class="flex justify-between pt-6">
+        <div class="flex flex-col sm:flex-row justify-between gap-4 pt-4 md:pt-6">
           <app-ui-button
             type="button"
             variant="ghost"
             (clicked)="previousPage()"
             [disabled]="currentPage === 1"
-            class="flex items-center"
+            class="flex items-center w-full sm:w-auto"
           >
             ← Anterior
           </app-ui-button>
 
-          <div class="flex space-x-4">
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
             <app-ui-button
               type="button"
               variant="secondary"
               (clicked)="saveProgress()"
-              class="flex items-center"
+              class="flex items-center justify-center w-full sm:w-auto"
             >
               💾 Guardar
             </app-ui-button>
@@ -128,7 +130,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
               variant="primary"
               (clicked)="nextPage()"
               [disabled]="!isCurrentPageValid()"
-              class="flex items-center"
+              class="flex items-center justify-center w-full sm:w-auto"
             >
               Siguiente →
             </app-ui-button>
@@ -138,7 +140,7 @@ import { SessionService, QuestionItem } from '../../services/session.service';
               type="submit"
               variant="primary"
               [disabled]="!isCurrentPageValid()"
-              class="flex items-center"
+              class="flex items-center justify-center w-full sm:w-auto"
             >
               Finalizar Cuestionario ✓
             </app-ui-button>
