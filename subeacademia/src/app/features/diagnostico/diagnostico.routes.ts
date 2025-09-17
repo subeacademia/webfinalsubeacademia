@@ -10,6 +10,11 @@ import { DiagnosticResultsComponent } from './components/ui/diagnostic-results/d
 
 export const DIAGNOSTICO_ROUTES: Routes = [
   {
+    path: 'empresas',
+    loadComponent: () => import('./diagnostico-empresa.component').then(m => m.DiagnosticoEmpresaComponent),
+    title: 'Diagnóstico para Empresas'
+  },
+  {
     path: '',
     component: DiagnosticoComponent,
     children: [

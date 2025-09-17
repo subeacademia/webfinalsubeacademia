@@ -50,13 +50,12 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
                   Evalúa la madurez de tu organización en IA. Incluye análisis de competencias, 
                   procesos, cultura y estrategia organizacional.
                 </p>
-                <app-ui-button
-                  variant="primary"
-                  size="lg"
-                  (clicked)="comenzarDiagnosticoEmpresa()"
-                  class="w-full">
+                <button
+                  type="button"
+                  (click)="comenzarDiagnosticoEmpresa()"
+                  class="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105">
                   Realizar diagnóstico como empresa
-                </app-ui-button>
+                </button>
               </div>
             </div>
           </div>
@@ -114,20 +113,17 @@ export class StepStartComponent {
   private readonly diagnosticStateService = inject(DiagnosticStateService);
 
   comenzarDiagnosticoEmpresa(): void {
-    console.log('Navegando al diagnóstico de empresa');
+    console.log('🚀 [StepStartComponent] Iniciando navegación al diagnóstico de empresa');
     
-    // Establecer el tipo de lead como empresa
-    this.diagnosticStateService.setLeadType('empresa');
-    
-    // Navegar directamente a la ruta contexto usando navegación relativa
-    this.router.navigate(['contexto'], { relativeTo: this.route.parent }).then(() => {
-      console.log('✅ Navegación completada exitosamente a contexto');
+    // Navegar al nuevo diagnóstico de empresas
+    this.router.navigate(['/es/diagnostico/empresas']).then((success) => {
+      if (success) {
+        console.log('✅ [StepStartComponent] Navegación exitosa al diagnóstico de empresas');
+      } else {
+        console.error('❌ [StepStartComponent] La navegación falló pero no lanzó error');
+      }
     }).catch(error => {
-      console.error('❌ Error en navegación relativa:', error);
-      // Fallback: navegar usando la ruta absoluta
-      this.router.navigate(['/es', 'diagnostico', 'contexto']).catch(fallbackErr => {
-        console.error('❌ Error en fallback de navegación:', fallbackErr);
-      });
+      console.error('❌ [StepStartComponent] Error en navegación:', error);
     });
   }
 

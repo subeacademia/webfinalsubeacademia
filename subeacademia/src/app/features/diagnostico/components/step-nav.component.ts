@@ -17,61 +17,64 @@ interface Step {
   imports: [CommonModule, RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-    <!-- Barra de navegación integrada -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div class="max-w-7xl mx-auto px-4 py-4">
-        <!-- Navegación de pasos -->
-        <nav class="flex flex-wrap justify-center gap-x-1 gap-y-2 mb-4">
-          @for (step of steps; track step.path) {
-            <a [routerLink]="isStepEnabled(step) ? step.path : null"
-               routerLinkActive="bg-blue-600 text-white shadow-lg transform scale-105"
-               [class.bg-blue-100]="isStepEnabled(step) && activeStep()?.order === step.order"
-               [class.text-blue-700]="isStepEnabled(step) && activeStep()?.order === step.order"
-               [class.text-gray-400]="!isStepEnabled(step)"
-               [class.pointer-events-none]="!isStepEnabled(step)"
-               [class.opacity-50]="!isStepEnabled(step)"
-               class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md">
-              {{ step.label }}
-            </a>
-          }
-        </nav>
+    <!-- Solo mostrar la barra de navegación si NO estamos en la página de inicio o en el diagnóstico de empresas -->
+    @if (shouldShowNavigation()) {
+      <!-- Barra de navegación integrada -->
+      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+          <!-- Navegación de pasos -->
+          <nav class="flex flex-wrap justify-center gap-x-1 gap-y-2 mb-4">
+            @for (step of steps; track step.path) {
+              <a [routerLink]="isStepEnabled(step) ? step.path : null"
+                 routerLinkActive="bg-blue-600 text-white shadow-lg transform scale-105"
+                 [class.bg-blue-100]="isStepEnabled(step) && activeStep()?.order === step.order"
+                 [class.text-blue-700]="isStepEnabled(step) && activeStep()?.order === step.order"
+                 [class.text-gray-400]="!isStepEnabled(step)"
+                 [class.pointer-events-none]="!isStepEnabled(step)"
+                 [class.opacity-50]="!isStepEnabled(step)"
+                 class="px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md">
+                {{ step.label }}
+              </a>
+            }
+          </nav>
 
-        <!-- Progreso de la página actual -->
-        <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() }}</h2>
-              <p class="text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() }}</p>
-            </div>
-            <div class="flex items-center space-x-4">
-              <div class="text-right">
-                <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                  {{ getCurrentProgress().answered }} / {{ getCurrentProgress().total }}
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% completado
-                </div>
+          <!-- Progreso de la página actual -->
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() }}</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() }}</p>
               </div>
-              <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
-                     [style.width.%]="(getCurrentProgress().answered / getCurrentProgress().total) * 100">
+              <div class="flex items-center space-x-4">
+                <div class="text-right">
+                  <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ getCurrentProgress().answered }} / {{ getCurrentProgress().total }}
+                  </div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% completado
+                  </div>
+                </div>
+                <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
+                       [style.width.%]="(getCurrentProgress().answered / getCurrentProgress().total) * 100">
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Mensaje cuando el diagnóstico está completado (oculto por ahora) -->
-    @if (false) {
-      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg text-center">
-            <p class="text-green-800 dark:text-green-200 font-semibold">¡Diagnóstico completado!</p>
-            <p class="text-sm text-green-700 dark:text-green-300">Puedes navegar libremente para revisar tus respuestas.</p>
-            <button (click)="startNew()" class="mt-2 text-sm text-blue-600 hover:underline">Iniciar un nuevo diagnóstico</button>
+      <!-- Mensaje cuando el diagnóstico está completado (oculto por ahora) -->
+      @if (false) {
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg text-center">
+              <p class="text-green-800 dark:text-green-200 font-semibold">¡Diagnóstico completado!</p>
+              <p class="text-sm text-green-700 dark:text-green-300">Puedes navegar libremente para revisar tus respuestas.</p>
+              <button (click)="startNew()" class="mt-2 text-sm text-blue-600 hover:underline">Iniciar un nuevo diagnóstico</button>
+          </div>
         </div>
-      </div>
+      }
     }
     `,
 })
@@ -185,5 +188,23 @@ export class StepNavComponent {
   startNew() {
       this.stateService.reset();
       this.router.navigate(['/diagnostico/contexto']);
+  }
+
+  // Método para determinar si mostrar la navegación
+  shouldShowNavigation(): boolean {
+    const currentUrl = this.router.url;
+    
+    // No mostrar en la página de inicio del diagnóstico (ruta vacía o solo /diagnostico)
+    if (currentUrl.endsWith('/diagnostico') || currentUrl.endsWith('/diagnostico/')) {
+      return false;
+    }
+    
+    // No mostrar en el nuevo diagnóstico de empresas
+    if (currentUrl.includes('/diagnostico/empresas')) {
+      return false;
+    }
+    
+    // Mostrar en todas las demás rutas del diagnóstico de personas
+    return true;
   }
 }

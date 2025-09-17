@@ -1,9 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, collectionData } from '@angular/fire/firestore';
 import { DiagnosticData, UserLead } from '../data/diagnostic.models';
 import { Report, ReportData } from '../data/report.model';
 import { BesselAiService } from '../../../core/ai/bessel-ai.service';
 import { LeadsService } from '../../../core/services/leads.service';
+import { ReporteDiagnosticoEmpresa } from '../data/empresa-diagnostic.models';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +21,8 @@ export class DiagnosticsService {
   private get diagnosticsCollection() {
     return collection(this.firestore, 'diagnostics');
   }
+
+  private empresaDiagnosticsCollection = collection(this.firestore, 'diagnostic_leads_empresas');
 
   async saveDiagnosticResult(data: DiagnosticData, report: Report): Promise<string> {
     try {
@@ -212,5 +216,16 @@ export class DiagnosticsService {
    */
   setCurrentReport(report: ReportData): void {
     this.currentReport.set(report);
+  }
+
+  // --- NUEVA LÓGICA PARA DIAGNÓSTICOS DE EMPRESAS ---
+  getSavedEmpresaDiagnostics(): Observable<ReporteDiagnosticoEmpresa[]> {
+    return collectionData(this.empresaDiagnosticsCollection, { idField: 'id' }) as Observable<ReporteDiagnosticoEmpresa[]>;
+  }
+
+  async saveEmpresaDiagnostic(report: ReporteDiagnosticoEmpresa): Promise<string> {
+    const firestoreReadyReport = JSON.parse(JSON.stringify(report));
+    const docRef = await addDoc(this.empresaDiagnosticsCollection, firestoreReadyReport);
+    return docRef.id;
   }
 }
