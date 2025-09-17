@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule, JsonPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CUESTIONARIO_EMPRESAS } from './data/empresa-questions';
 import { ReporteDiagnosticoEmpresa, MetadataEmpresa, RespuestaItem } from './data/empresa-diagnostic.models';
@@ -8,13 +8,13 @@ import { DiagnosticsService } from './services/diagnostics.service';
 import { GenerativeAiService } from '../../core/ai/generative-ai.service';
 import { PROMPT_PLAN_DE_ACCION } from './data/empresa-prompt';
 import { AiProcessingLoaderComponent } from './components/ui/ai-processing-loader/ai-processing-loader.component';
-// Temporalmente quitamos el de resultados para crearlo después
+import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa-results.component';
 // import { DiagnosticResultsComponent } from './components/ui/diagnostic-results/diagnostic-results.component';
 
 @Component({
   selector: 'app-diagnostico-empresa',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AiProcessingLoaderComponent, JsonPipe],
+  imports: [CommonModule, ReactiveFormsModule, AiProcessingLoaderComponent, EmpresaResultsComponent],
   template: `
     <div class="container mx-auto p-4 md:p-8 text-gray-800 dark:text-white">
       @if (step() === 'metadata') {
@@ -87,12 +87,7 @@ import { AiProcessingLoaderComponent } from './components/ui/ai-processing-loade
       } @else if (step() === 'processing') {
           <app-ai-processing-loader [status]="processingStatus()"></app-ai-processing-loader>
       } @else if (step() === 'results' && finalReport()) {
-          <h2 class="text-3xl font-bold mb-4">Resultados y Plan de Acción</h2>
-          <p class="mb-6">¡Hemos completado tu diagnóstico! A continuación puedes ver el resumen de tus resultados y el plan de acción generado por nuestra IA.</p>
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-             <!-- Aquí irá el componente de resultados, por ahora mostramos el JSON -->
-             <pre class="whitespace-pre-wrap text-xs">{{ finalReport() | json }}</pre>
-          </div>
+          <app-empresa-results [report]="finalReport()!" />
       }
     </div>
   `,
@@ -212,15 +207,54 @@ export class DiagnosticoEmpresaComponent {
         try {
             const docId = await this.diagnosticsService.saveEmpresaDiagnostic(reporte);
             reporte.metadata.id = docId;
-        } catch (error) { console.error("Error al guardar en Firestore:", error); this.step.set('metadata'); return; }
+            console.log('✅ Diagnóstico guardado exitosamente con ID:', docId);
+        } catch (error) { 
+            console.error("⚠️ Error al guardar en Firestore:", error); 
+            // No retornamos aquí, continuamos con el proceso para mostrar los resultados
+            console.log('🔄 Continuando con el diagnóstico sin guardar...');
+        }
 
         this.processingStatus.set('Generando plan de acción personalizado con IA...');
         try {
           const prompt = PROMPT_PLAN_DE_ACCION.replace('{{DATOS_DIAGNOSTICO}}', JSON.stringify(reporte, null, 2));
-          const planDeAccionStr = await this.aiService.generateText(prompt);
-          reporte.planDeAccion = JSON.parse(planDeAccionStr);
-        } catch(e) { console.error("Error generando plan de acción con IA:", e); }
+          console.log('🤖 Enviando prompt a IA...');
+          const planDeAccionResponse = await this.aiService.generateText(prompt);
+          console.log('📋 Respuesta de IA recibida:', planDeAccionResponse);
+          
+          // La respuesta puede venir como un objeto complejo con choices, extraer el contenido
+          let planDeAccionStr = '';
+          if (typeof planDeAccionResponse === 'string') {
+            planDeAccionStr = planDeAccionResponse;
+          } else if (planDeAccionResponse && typeof planDeAccionResponse === 'object' && 'choices' in planDeAccionResponse) {
+            const responseObj = planDeAccionResponse as any;
+            planDeAccionStr = responseObj.choices?.[0]?.message?.content || '';
+          } else {
+            throw new Error('Formato de respuesta inesperado de la IA');
+          }
+          
+          // Limpiar la respuesta de markdown si existe
+          const cleanedResponse = planDeAccionStr.replace(/```json\n?|```\n?/g, '').trim();
+          console.log('🧹 Respuesta limpia:', cleanedResponse);
+          
+          reporte.planDeAccion = JSON.parse(cleanedResponse);
+          console.log('✅ Plan de acción generado exitosamente');
+        } catch(e) { 
+            console.error("⚠️ Error generando plan de acción con IA:", e); 
+            console.log('🔄 Continuando sin plan de acción de IA...');
+            // Crear un plan básico de fallback
+            reporte.planDeAccion = {
+              resumenEjecutivo: `Su empresa presenta un nivel de madurez ${reporte.puntajes.ig_ia_nivel.toLowerCase()} en IA con un puntaje de ${reporte.puntajes.ig_ia_0a100}/100. Se recomienda continuar desarrollando las capacidades identificadas.`,
+              puntosFuertes: [],
+              areasMejora: [],
+              recomendaciones: {
+                horizonte_90_dias: [{ accion: "Evaluar resultados", detalle: "Revisar los puntajes obtenidos en cada dimensión." }],
+                horizonte_180_dias: [{ accion: "Planificar mejoras", detalle: "Desarrollar estrategias para las áreas de menor puntaje." }],
+                horizonte_365_dias: [{ accion: "Implementar cambios", detalle: "Ejecutar las mejoras planificadas." }]
+              }
+            };
+        }
 
+        console.log('🎯 Mostrando resultados finales...');
         this.finalReport.set(reporte);
         this.step.set('results');
     }
