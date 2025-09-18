@@ -41,7 +41,7 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
-          *ngFor="let member of founders"
+          *ngFor="let member of (foundersFromDB$ | async) || founders"
           class="flip-card group cursor-pointer overflow-hidden"
           [class.flipped]="member.flipped"
           (click)="toggleFlip(member)"
