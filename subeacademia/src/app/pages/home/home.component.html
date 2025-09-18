@@ -234,7 +234,7 @@
         <h3 class="text-xl font-semibold text-center mb-6 text-primary">Empresas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
-            [logos]="(companyLogos$ | async) || logosDePrueba" 
+            [logos]="getLogosToDisplay('company')" 
             direction="normal"
             class="carousel-top"
             aria-label="Logos de empresas que confían en nosotros">
@@ -247,10 +247,23 @@
         <h3 class="text-xl font-semibold text-center mb-6 text-secondary">Instituciones Educativas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
-            [logos]="(educationLogos$ | async) || logosDePrueba" 
+            [logos]="getLogosToDisplay('education')" 
             direction="reverse"
             class="carousel-bottom"
             aria-label="Logos de instituciones educativas que confían en nosotros">
+          </app-logo-carousel>
+        </div>
+      </div>
+
+      <!-- Carrusel Tercero: Alianzas Estratégicas (izquierda a derecha) -->
+      <div class="relative mt-12">
+        <h3 class="text-xl font-semibold text-center mb-6 text-accent">Alianzas Estratégicas</h3>
+        <div class="carousel-row">
+          <app-logo-carousel 
+            [logos]="getLogosToDisplay('alliance')" 
+            direction="normal"
+            class="carousel-alliance"
+            aria-label="Logos de alianzas estratégicas">
           </app-logo-carousel>
         </div>
       </div>

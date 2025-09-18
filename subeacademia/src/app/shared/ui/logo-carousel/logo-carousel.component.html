@@ -1,12 +1,52 @@
-<div class="logo-carousel-container" [attr.aria-label]="'Carrusel de logos'">
-  <div class="logo-track" [style.animation-direction]="direction">
-    <!-- Primera lista de logos -->
-    <div class="logo-slide" *ngFor="let logo of logos">
-      <img [src]="logo.imageUrl" [alt]="logo.name" />
-    </div>
-    <!-- Segunda lista de logos (para el bucle) -->
-    <div class="logo-slide" *ngFor="let logo of logos" aria-hidden="true">
-      <img [src]="logo.imageUrl" [alt]="logo.name" />
+<div class="carousel-wrapper" 
+     *ngIf="logos && logos.length > 0" 
+     (mouseenter)="onMouseEnter()" 
+     (mouseleave)="onMouseLeave()">
+  
+  <!-- Botón Izquierdo -->
+  <button class="nav-btn nav-btn-left" 
+          [class.visible]="isHovered && canScrollLeft"
+          [class.disabled]="!canScrollLeft"
+          (click)="scrollLeft()"
+          [disabled]="!canScrollLeft"
+          aria-label="Ver logos anteriores">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+    </svg>
+  </button>
+
+  <!-- Botón Derecho -->
+  <button class="nav-btn nav-btn-right" 
+          [class.visible]="isHovered && canScrollRight"
+          [class.disabled]="!canScrollRight"
+          (click)="scrollRight()"
+          [disabled]="!canScrollRight"
+          aria-label="Ver más logos">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+  </button>
+
+  <!-- Contenedor de scroll -->
+  <div class="scroll-container" 
+       #scrollContainer
+       (scroll)="onScroll()">
+    <div class="logos-track">
+      <div *ngFor="let logo of logos; trackBy: trackByLogoId" class="logo-item">
+        <a *ngIf="logo.websiteUrl; else noLink" 
+           [href]="logo.websiteUrl" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           [title]="'Visitar ' + logo.name"
+           class="logo-link">
+          <img [src]="logo.imageUrl" [alt]="logo.name" loading="lazy">
+        </a>
+        <ng-template #noLink>
+          <div class="logo-static" [title]="logo.name">
+            <img [src]="logo.imageUrl" [alt]="logo.name" loading="lazy">
+          </div>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>

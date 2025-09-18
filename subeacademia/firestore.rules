@@ -13,7 +13,10 @@ service cloud.firestore {
         // Un usuario puede leer y actualizar su propio diagnóstico
         allow read, update: if request.auth.uid == resource.data.userId;
         // Solo los admins pueden leer y eliminar cualquier diagnóstico
-        allow read, delete: if request.auth.token.admin == true;
+        allow read, delete: if request.auth != null && (
+          request.auth.token.email in ["bruno@subeia.tech"] ||
+          request.auth.token.email.matches(".*@subeia\\.tech$")
+        );
     }
 
     // Reglas para la colección de leads (original)
@@ -21,7 +24,10 @@ service cloud.firestore {
     // Solo los administradores pueden leer o interactuar con los datos.
     match /leads/{docId} {
         allow create: if true;
-        allow read, update, delete: if request.auth.token.admin == true;
+        allow read, update, delete: if request.auth != null && (
+          request.auth.token.email in ["bruno@subeia.tech"] ||
+          request.auth.token.email.matches(".*@subeia\\.tech$")
+        );
     }
 
     // Nueva regla para los Leads de Diagnóstico
@@ -29,7 +35,21 @@ service cloud.firestore {
       // Cualquiera puede crear un lead (cuando completa el diagnóstico)
       allow create: if true;
       // Solo los admins pueden leer, actualizar y eliminar leads
-      allow read, update, delete: if request.auth.token.admin == true;
+      allow read, update, delete: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
+    }
+
+    // Reglas específicas para la colección de logos
+    match /logos/{logoId} {
+      // Cualquiera puede leer logos (para mostrar en el sitio web)
+      allow read: if true;
+      // Solo los administradores pueden crear, actualizar y eliminar logos
+      allow create, update, delete: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
     }
 
     // Regla general para el resto de las colecciones
@@ -37,7 +57,10 @@ service cloud.firestore {
     // Solo los administradores autenticados pueden escribir (create, update, delete).
     match /{document=**} {
       allow get, list: if true;
-      allow write: if request.auth.token.admin == true;
+      allow write: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
     }
   }
 }

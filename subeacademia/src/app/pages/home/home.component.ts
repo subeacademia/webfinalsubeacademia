@@ -37,6 +37,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Inicializar observables de logos
     this.companyLogos$ = this.logos.listByType('Empresa');
     this.educationLogos$ = this.logos.listByType('Institución Educativa');
+    this.allianceLogos$ = this.logos.listByType('Alianza Estratégica');
   }
 
   private contentSub?: Subscription;
@@ -49,8 +50,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private timeoutId: any;
   companyLogos: Logo[] = [];
   educationLogos: Logo[] = [];
+  allianceLogos: Logo[] = [];
   companyLogos$: Observable<Logo[]>;
   educationLogos$: Observable<Logo[]>;
+  allianceLogos$: Observable<Logo[]>;
   roadmapPhases: Array<{ id: number; title: string; short: string; details: string; iconGradient: string }>= [
     {
       id: 1,
@@ -90,56 +93,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   // Estado de tarjetas volteadas
   private flippedSet = new Set<number>();
-  logosDePrueba: Logo[] = [
-    {
-      id: '1',
-      name: 'Empresa de Prueba 1',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '2',
-      name: 'Empresa de Prueba 2',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '3',
-      name: 'Empresa de Prueba 3',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '4',
-      name: 'Empresa de Prueba 4',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '5',
-      name: 'Empresa de Prueba 5',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '6',
-      name: 'Empresa de Prueba 6',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '7',
-      name: 'Empresa de Prueba 7',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    },
-    {
-      id: '8',
-      name: 'Empresa de Prueba 8',
-      imageUrl: '/assets/og-placeholder.svg',
-      type: 'Empresa'
-    }
-  ];
+  // Solo mostrar logos reales de Firestore, sin fallbacks de ejemplo
 
   ngOnInit(): void {
     console.log('🏠 HomeComponent: ngOnInit iniciado');
@@ -206,6 +160,25 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.educationLogos = v;
       console.log('HomeComponent: Logos de instituciones cargados desde Firestore:', this.educationLogos.length, this.educationLogos);
     });
+
+    this.allianceLogos$.subscribe(v => {
+      this.allianceLogos = v;
+      console.log('HomeComponent: Logos de alianzas estratégicas cargados desde Firestore:', this.allianceLogos.length, this.allianceLogos);
+    });
+  }
+
+  // Método para obtener logos a mostrar, solo logos reales de Firestore
+  getLogosToDisplay(type: 'company' | 'education' | 'alliance'): Logo[] {
+    switch (type) {
+      case 'company':
+        return this.companyLogos || [];
+      case 'education':
+        return this.educationLogos || [];
+      case 'alliance':
+        return this.allianceLogos || [];
+      default:
+        return [];
+    }
   }
 
   private resetTypewriterState() {
