@@ -52,6 +52,32 @@ service cloud.firestore {
       );
     }
 
+    // Reglas específicas para certificados
+    match /certificates/{certificateId} {
+      // Cualquiera puede leer certificados para validación pública
+      allow read: if true;
+      // Solo los administradores pueden crear, actualizar y eliminar certificados
+      allow create, update, delete: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
+      // Validaciones adicionales para la creación/actualización
+      allow write: if request.auth != null && 
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$") &&
+        // Validar que los campos requeridos están presentes
+        request.resource.data.studentName is string &&
+        request.resource.data.courseName is string &&
+        request.resource.data.certificateCode is string &&
+        request.resource.data.qrCode is string &&
+        request.resource.data.verificationHash is string &&
+        request.resource.data.issuedDate is timestamp &&
+        request.resource.data.completionDate is timestamp &&
+        request.resource.data.institutionName is string &&
+        request.resource.data.status in ['active', 'revoked', 'expired'] &&
+        request.resource.data.certificateType in ['completion', 'achievement', 'participation'];
+    }
+
     // Regla general para el resto de las colecciones
     // Cualquiera puede leer (get, list).
     // Solo los administradores autenticados pueden escribir (create, update, delete).

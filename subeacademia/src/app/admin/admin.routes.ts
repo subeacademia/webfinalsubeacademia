@@ -32,8 +32,9 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'logos', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
       { path: 'history', loadComponent: () => import('./history/history-page.component').then(m => m.HistoryPageComponent), canActivate: [AdminGuard] },
       { path: 'collaborators', loadComponent: () => import('./collaborators/collaborators-page.component').then(m => m.CollaboratorsPageComponent), canActivate: [AdminGuard] },
-      { path: 'leads', loadComponent: () => import('./leads/admin-leads.component').then(m => m.AdminLeadsComponent), canActivate: [AdminGuard] },
-      { path: 'diagnostic-leads', loadComponent: () => import('./leads/admin-diagnostic-leads.component').then(m => m.AdminDiagnosticLeadsComponent), canActivate: [AdminGuard] },
+      { path: 'leads', loadComponent: () => import('./leads/admin-diagnostic-leads.component').then(m => m.AdminDiagnosticLeadsComponent), canActivate: [AdminGuard] },
+      { path: 'leads-old', loadComponent: () => import('./leads/admin-leads.component').then(m => m.AdminLeadsComponent), canActivate: [AdminGuard] },
+      { path: 'diagnostic-leads', redirectTo: 'leads', pathMatch: 'full' },
       { path: 'diagnostic-leads-empresa', loadComponent: () => import('./leads/admin-diagnostic-leads-empresa.component').then(m => m.AdminDiagnosticLeadsEmpresaComponent), canActivate: [AdminGuard] },
       { path: 'settings', loadComponent: () => import('./settings/settings-page.component').then(m => m.SettingsPageComponent), canActivate: [AdminGuard] },
       { path: '**', redirectTo: 'posts' }

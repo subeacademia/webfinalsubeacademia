@@ -60,6 +60,8 @@ export interface LeadData {
   source: 'diagnostico_empresa' | 'diagnostico_persona';
   status: 'nuevo' | 'contactado' | 'interesado' | 'no_interesado' | 'convertido';
   notes?: string; // Notas del administrador
+  report?: any; // Reporte generado del diagnóstico
+  scores?: any; // Puntuaciones del diagnóstico
 }
 
 export interface DiagnosticData {

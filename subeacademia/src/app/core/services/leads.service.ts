@@ -155,11 +155,27 @@ export class LeadsService {
    */
   async getLeadById(id: string): Promise<LeadData | null> {
     try {
-      const docRef = doc(this.firestore, 'leads', id);
+      const docRef = doc(this.firestore, 'diagnostic-leads', id);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as LeadData;
+        const leadData = { id: docSnap.id, ...docSnap.data() } as LeadData;
+        
+        // Si el lead tiene un diagnosticId, cargar también los datos del diagnóstico
+        if ((leadData as any).diagnosticId) {
+          try {
+            const diagnosticData = await this.getDiagnosticForLead((leadData as any).diagnosticId);
+            if (diagnosticData) {
+              leadData.diagnosticData = diagnosticData;
+              leadData.report = diagnosticData.report;
+              leadData.scores = diagnosticData.scores;
+            }
+          } catch (diagnosticError) {
+            console.warn('No se pudo cargar el diagnóstico asociado:', diagnosticError);
+          }
+        }
+        
+        return leadData;
       } else {
         console.log('No se encontró el lead con ID:', id);
         return null;
@@ -175,11 +191,11 @@ export class LeadsService {
    */
   async updateLeadStatus(id: string, status: LeadData['status'], notes?: string): Promise<void> {
     try {
-      const docRef = doc(this.firestore, 'leads', id);
+      const docRef = doc(this.firestore, 'diagnostic-leads', id);
       await updateDoc(docRef, {
         status: status,
         notes: notes,
-        updatedAt: new Date()
+        updatedAt: serverTimestamp()
       });
       console.log('✅ [LeadsService] Estado del lead actualizado');
     } catch (error) {
@@ -268,10 +284,10 @@ export class LeadsService {
    */
   async updateLead(id: string, leadData: Partial<LeadData>): Promise<void> {
     try {
-      const docRef = doc(this.firestore, 'leads', id);
+      const docRef = doc(this.firestore, 'diagnostic-leads', id);
       await updateDoc(docRef, {
         ...leadData,
-        updatedAt: new Date()
+        updatedAt: serverTimestamp()
       });
       console.log('✅ [LeadsService] Lead actualizado correctamente');
     } catch (error) {
@@ -285,11 +301,46 @@ export class LeadsService {
    */
   async deleteLead(id: string): Promise<void> {
     try {
-      const docRef = doc(this.firestore, 'leads', id);
+      const docRef = doc(this.firestore, 'diagnostic-leads', id);
       await deleteDoc(docRef);
       console.log('✅ [LeadsService] Lead eliminado correctamente');
     } catch (error) {
       console.error('❌ [LeadsService] Error eliminando lead:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Resetea todos los leads antiguos (para limpieza)
+   */
+  async resetOldLeads(): Promise<{ deleted: number; errors: number }> {
+    try {
+      console.log('🧹 Iniciando limpieza de leads antiguos...');
+      
+      // Obtener todos los documentos de la colección 'leads' antigua
+      const oldLeadsCollection = collection(this.firestore, 'leads');
+      const querySnapshot = await getDocs(oldLeadsCollection);
+      
+      let deleted = 0;
+      let errors = 0;
+      
+      const deletePromises = querySnapshot.docs.map(async (docSnapshot) => {
+        try {
+          await deleteDoc(doc(this.firestore, 'leads', docSnapshot.id));
+          deleted++;
+          console.log(`🗑️ Eliminado lead antiguo: ${docSnapshot.id}`);
+        } catch (error) {
+          errors++;
+          console.error(`❌ Error eliminando lead ${docSnapshot.id}:`, error);
+        }
+      });
+      
+      await Promise.all(deletePromises);
+      
+      console.log(`✅ Limpieza completada: ${deleted} leads eliminados, ${errors} errores`);
+      return { deleted, errors };
+    } catch (error) {
+      console.error('❌ Error durante la limpieza de leads:', error);
       throw error;
     }
   }

@@ -32,6 +32,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/legal/terminos/terminos.component').then(m => m.TerminosComponent),
   },
 
+  // Validación de certificados (accesible globalmente)
+  {
+    path: 'certificados/validar',
+    loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent),
+  },
+  {
+    path: 'certificados/validar/:code',
+    loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent),
+  },
+
 
 
   // Público con idioma restringido
@@ -44,6 +54,8 @@ export const routes: Routes = [
       { path: 'diagnostico-persona', loadChildren: () => import('./features/diagnostico-persona/diagnostico-persona.routes').then(m => m.DIAGNOSTICO_PERSONA_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'productos', loadChildren: () => import('./features/productos/productos.routes').then(m => m.PRODUCTOS_ROUTES) },
+      { path: 'certificados/validar', loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent) },
+      { path: 'certificados/validar/:code', loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent) },
       { path: 'proyectos', loadChildren: () => import('./features/projects/projects.routes').then(m => m.PROJECTS_ROUTES) },
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
       { path: 'metodologia', loadChildren: () => import('./features/methodology/methodology.routes').then(m => m.METHODOLOGY_ROUTES) },

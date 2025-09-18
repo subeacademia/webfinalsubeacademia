@@ -92,7 +92,7 @@ interface DiagnosticRow {
         </div>
       </div>
 
-      <!-- Filtros -->
+      <!-- Filtros y Acciones -->
     <div class="flex items-center justify-between mb-4">
       <div class="flex gap-2">
         <button class="btn btn-sm" (click)="filterByType('all')" [class.btn-primary]="currentFilter() === 'all'">Todos</button>
@@ -100,6 +100,13 @@ interface DiagnosticRow {
         <button class="btn btn-sm" (click)="filterByType('empresa')" [class.btn-primary]="currentFilter() === 'empresa'">Empresas</button>
         </div>
         <div class="flex gap-2">
+          <button class="btn btn-sm btn-warning" (click)="resetOldLeads()" [disabled]="isResetting()">
+            <svg *ngIf="!isResetting()" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <div *ngIf="isResetting()" class="loading loading-spinner loading-xs mr-1"></div>
+            {{ isResetting() ? 'Limpiando...' : 'Limpiar Leads Antiguos' }}
+          </button>
           <input type="text" placeholder="Buscar por nombre o email..." 
                  [(ngModel)]="searchTerm" 
                  (input)="onSearchChange()"
@@ -403,11 +410,61 @@ interface DiagnosticRow {
             </div>
           </div>
 
-          <!-- Resumen ejecutivo (si existe) -->
+          <!-- Resumen ejecutivo y recomendaciones (si existe) -->
           <div *ngIf="selected()?.diagnosticData?.report?.resumen_ejecutivo as resumen">
-            <div class="text-sm text-[var(--muted)] mb-2">Resumen Ejecutivo</div>
-            <div class="prose prose-sm max-w-none text-[var(--fg)] bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-[var(--border)]">
-              {{ resumen }}
+            <div class="text-lg font-semibold mb-4">Resumen del Diagnóstico de IA</div>
+            <div class="prose prose-sm max-w-none text-[var(--fg)] bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+              <h4 class="text-blue-800 dark:text-blue-200 font-semibold mb-2">Resumen Ejecutivo</h4>
+              <p class="text-blue-700 dark:text-blue-300">{{ resumen }}</p>
+            </div>
+          </div>
+
+          <!-- Plan de Acción y Recomendaciones -->
+          <div *ngIf="selected()?.diagnosticData?.report?.plan_accion">
+            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800 mb-4">
+              <h4 class="text-green-800 dark:text-green-200 font-semibold mb-2">Plan de Acción Recomendado</h4>
+              <div class="text-green-700 dark:text-green-300 text-sm" [innerHTML]="selected()?.diagnosticData?.report?.plan_accion"></div>
+            </div>
+          </div>
+
+          <!-- Fortalezas y Oportunidades -->
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div *ngIf="selected()?.diagnosticData?.report?.fortalezas" class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+              <h4 class="text-green-800 dark:text-green-200 font-semibold mb-2">🎯 Fortalezas Identificadas</h4>
+              <div class="text-green-700 dark:text-green-300 text-sm" [innerHTML]="selected()?.diagnosticData?.report?.fortalezas"></div>
+            </div>
+            <div *ngIf="selected()?.diagnosticData?.report?.oportunidades" class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border border-orange-200 dark:border-orange-800">
+              <h4 class="text-orange-800 dark:text-orange-200 font-semibold mb-2">🚀 Oportunidades de Mejora</h4>
+              <div class="text-orange-700 dark:text-orange-300 text-sm" [innerHTML]="selected()?.diagnosticData?.report?.oportunidades"></div>
+            </div>
+          </div>
+
+          <!-- Información comercial relevante -->
+          <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+            <h4 class="text-purple-800 dark:text-purple-200 font-semibold mb-3">💼 Información Comercial</h4>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-purple-600 dark:text-purple-400 font-medium">Nivel de Madurez:</span>
+                <span class="ml-2 text-purple-800 dark:text-purple-200">{{ getMaturityLevel() }}</span>
+              </div>
+              <div>
+                <span class="text-purple-600 dark:text-purple-400 font-medium">Puntuación General:</span>
+                <span class="ml-2 text-purple-800 dark:text-purple-200">{{ getGeneralAresScore() }}/5</span>
+              </div>
+              <div *ngIf="leadTipo() === 'empresa'">
+                <span class="text-purple-600 dark:text-purple-400 font-medium">Industria:</span>
+                <span class="ml-2 text-purple-800 dark:text-purple-200">{{ leadIndustria() || 'No especificada' }}</span>
+              </div>
+              <div *ngIf="leadTipo() === 'empresa'">
+                <span class="text-purple-600 dark:text-purple-400 font-medium">Tamaño:</span>
+                <span class="ml-2 text-purple-800 dark:text-purple-200">{{ leadTamanoEmpresa() || 'No especificado' }}</span>
+              </div>
+            </div>
+            <div class="mt-3 p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+              <p class="text-yellow-800 dark:text-yellow-200 text-sm font-medium">
+                💡 <strong>Oportunidad Comercial:</strong> Basado en el nivel {{ getMaturityLevel() }} y las respuestas del diagnóstico, 
+                este lead podría estar interesado en {{ getCommercialSuggestion() }}.
+              </p>
             </div>
           </div>
         </div>
@@ -501,6 +558,9 @@ export class AdminDiagnosticLeadsComponent {
   // Estados para confirmación de eliminación
   showDeleteConfirm = signal(false);
   leadToDelete = signal<string | null>(null);
+
+  // Estado para reseteo de leads antiguos
+  isResetting = signal(false);
 
   constructor(){
     this.testFirebaseConnection();
@@ -816,6 +876,33 @@ export class AdminDiagnosticLeadsComponent {
     return 'Principiante';
   }
 
+  /**
+   * Genera sugerencias comerciales basadas en el nivel de madurez y respuestas
+   */
+  getCommercialSuggestion(): string {
+    const score = this.getGeneralAresScore();
+    const leadType = this.leadTipo();
+    const industry = this.leadIndustria();
+    
+    let suggestion = '';
+    
+    if (score >= 4) {
+      suggestion = 'servicios de optimización avanzada y consultoría estratégica en IA';
+    } else if (score >= 3) {
+      suggestion = 'soluciones de automatización y capacitación especializada';
+    } else if (score >= 2) {
+      suggestion = 'cursos de fundamentos de IA y herramientas básicas de automatización';
+    } else {
+      suggestion = 'talleres introductorios y evaluaciones de preparación para IA';
+    }
+    
+    if (leadType === 'empresa' && industry) {
+      suggestion += ` específicos para el sector ${industry.toLowerCase()}`;
+    }
+    
+    return suggestion;
+  }
+
   // Métodos para búsqueda
   onSearchChange() {
     this.page.set(1); // Reset a la primera página al buscar
@@ -936,6 +1023,41 @@ export class AdminDiagnosticLeadsComponent {
     } catch (error) {
       console.error('❌ Error obteniendo detalles del diagnóstico:', error);
       this.notificationService.error('Error', 'No se pudo acceder al diagnóstico completo.');
+    }
+  }
+
+  /**
+   * Resetea todos los leads antiguos del diagnóstico anterior
+   */
+  async resetOldLeads() {
+    if (!confirm('¿Estás seguro de que quieres eliminar todos los leads del diagnóstico anterior? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    this.isResetting.set(true);
+    try {
+      const result = await this.leadsService.resetOldLeads();
+      
+      if (result.deleted > 0) {
+        this.notificationService.success(
+          'Limpieza completada', 
+          `Se eliminaron ${result.deleted} leads antiguos. ${result.errors > 0 ? `${result.errors} errores encontrados.` : 'Sin errores.'}`
+        );
+      } else {
+        this.notificationService.info('Sin cambios', 'No se encontraron leads antiguos para eliminar.');
+      }
+
+      // Recargar datos
+      this.loadLeads();
+      this.loadStats();
+    } catch (error: any) {
+      console.error('❌ Error durante la limpieza:', error);
+      this.notificationService.error(
+        'Error en la limpieza', 
+        'No se pudieron eliminar los leads antiguos: ' + (error?.message || 'Error desconocido')
+      );
+    } finally {
+      this.isResetting.set(false);
     }
   }
 }

@@ -60,11 +60,26 @@ export class CertificateValidatorComponent implements OnInit {
 		this.isLoading = true;
 		try {
 			const result = await this.certService.getCertificateByCode(code);
-			if (result.exists) {
-				this.certificate = result.data as Certificate;
-				this.error = '';
+			if (result.exists && result.data) {
+				// Verificar integridad y estado del certificado
+				if (result.isValid && result.data.status === 'active') {
+					this.certificate = result.data as Certificate;
+					this.error = '';
+				} else if (result.data.status === 'revoked') {
+					this.error = 'Este certificado ha sido revocado y ya no es válido.';
+					this.certificate = null;
+				} else if (result.data.status === 'expired') {
+					this.error = 'Este certificado ha expirado y ya no es válido.';
+					this.certificate = null;
+				} else if (!result.isValid) {
+					this.error = 'El certificado ha sido comprometido o modificado. No es válido.';
+					this.certificate = null;
+				} else {
+					this.error = 'El certificado no está en un estado válido.';
+					this.certificate = null;
+				}
 			} else {
-				this.error = 'El código de validación no corresponde a ningún certificado emitido.';
+				this.error = 'El código de validación no corresponde a ningún certificado emitido por nuestra institución.';
 				this.certificate = null;
 			}
 		} catch (e) {
