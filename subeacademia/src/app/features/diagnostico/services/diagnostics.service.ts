@@ -66,16 +66,19 @@ export class DiagnosticsService {
         throw new Error('No se encontraron datos del lead en el diagnóstico');
       }
 
-      // Determinar el tipo de fuente basado en el tipo de lead
-      const source = data.lead.type === 'empresa' ? 'diagnostico_empresa' : 'diagnostico_persona';
-      
-      // Guardar en la colección de leads
-      const leadId = await this.leadsService.saveLead(data.lead, data, source);
-      
-      // También guardar en la colección de diagnósticos para compatibilidad
+      // PASO 1: Guardar el diagnóstico completo primero
       const diagnosticId = await this.saveDiagnosticResult(data, report);
+      console.log('✅ [DiagnosticsService] Diagnóstico guardado con ID:', diagnosticId);
       
-      console.log('✅ [DiagnosticsService] Diagnóstico guardado exitosamente');
+      // PASO 2: Crear el lead específico con referencia al diagnóstico
+      const leadId = await this.leadsService.createDiagnosticLead(data.lead, diagnosticId);
+      console.log('✅ [DiagnosticsService] Lead creado con ID:', leadId);
+      
+      // PASO 3: También guardar usando el método original para compatibilidad
+      const source = data.lead.type === 'empresa' ? 'diagnostico_empresa' : 'diagnostico_persona';
+      await this.leadsService.saveLead(data.lead, data, source);
+      
+      console.log('✅ [DiagnosticsService] Diagnóstico y lead guardados exitosamente');
       console.log('Lead ID:', leadId);
       console.log('Diagnostic ID:', diagnosticId);
       

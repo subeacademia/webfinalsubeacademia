@@ -4,19 +4,32 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Regla para la colección de diagnósticos
-    // Cualquiera puede crear y leer un diagnóstico (captura de lead).
-    // Solo los administradores autenticados pueden actualizar o borrar.
-    match /diagnostics/{docId} {
-      allow create, read: if true;
-      allow update, delete: if request.auth.token.admin == true;
+    // Cualquiera puede crear un diagnóstico (captura de lead)
+    // Un usuario puede leer su propio diagnóstico
+    // Solo los administradores pueden leer, actualizar o eliminar cualquier diagnóstico
+    match /diagnostics/{diagnosticId} {
+        // Un usuario puede crear su propio diagnóstico
+        allow create: if request.auth != null;
+        // Un usuario puede leer y actualizar su propio diagnóstico
+        allow read, update: if request.auth.uid == resource.data.userId;
+        // Solo los admins pueden leer y eliminar cualquier diagnóstico
+        allow read, delete: if request.auth.token.admin == true;
     }
 
-    // Reglas para la colección de leads
+    // Reglas para la colección de leads (original)
     // Cualquiera puede crear un lead
     // Solo los administradores pueden leer o interactuar con los datos.
     match /leads/{docId} {
         allow create: if true;
-        allow read, update, delete: if true; // Temporalmente permitir todas las operaciones para testing
+        allow read, update, delete: if request.auth.token.admin == true;
+    }
+
+    // Nueva regla para los Leads de Diagnóstico
+    match /diagnostic-leads/{leadId} {
+      // Cualquiera puede crear un lead (cuando completa el diagnóstico)
+      allow create: if true;
+      // Solo los admins pueden leer, actualizar y eliminar leads
+      allow read, update, delete: if request.auth.token.admin == true;
     }
 
     // Regla general para el resto de las colecciones

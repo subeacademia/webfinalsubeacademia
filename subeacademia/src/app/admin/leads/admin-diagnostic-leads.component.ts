@@ -10,6 +10,7 @@ import { PdfService } from '../../features/diagnostico/services/pdf.service';
 import { LeadsService } from '../../core/services/leads.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LeadData, LeadType } from '../../features/diagnostico/data/diagnostic.models';
+import { ExtendedDiagnosticLead } from '../../core/models/lead.model';
 import { Subscription } from 'rxjs';
 
 interface DiagnosticRow {
@@ -138,6 +139,7 @@ interface DiagnosticRow {
         <div class="col-span-1 text-right">
           <div class="flex gap-1">
             <button class="btn btn-xs" (click)="open(d.id)">Ver</button>
+            <button class="btn btn-xs btn-outline" (click)="viewDiagnosticDetails(d.id)">Diagnóstico</button>
             <button class="btn btn-xs btn-outline" (click)="editLead(d.id)">Editar</button>
             <button class="btn btn-xs btn-error" (click)="deleteLead(d.id)">Eliminar</button>
           </div>
@@ -915,6 +917,26 @@ export class AdminDiagnosticLeadsComponent {
   cancelDelete() {
     this.showDeleteConfirm.set(false);
     this.leadToDelete.set(null);
+  }
+
+  /**
+   * Navega a los detalles completos del diagnóstico asociado al lead
+   */
+  async viewDiagnosticDetails(leadId: string) {
+    try {
+      // Obtener el lead para conseguir el diagnosticId
+      const lead = await this.leadsService.getLeadById(leadId);
+      if (lead && (lead as ExtendedDiagnosticLead).diagnosticId) {
+        const diagnosticId = (lead as ExtendedDiagnosticLead).diagnosticId;
+        // Navegar a la vista del diagnóstico completo
+        this.router.navigate(['/admin/diagnostics', diagnosticId]);
+      } else {
+        this.notificationService.warning('Diagnóstico no encontrado', 'No se pudo encontrar el diagnóstico asociado a este lead.');
+      }
+    } catch (error) {
+      console.error('❌ Error obteniendo detalles del diagnóstico:', error);
+      this.notificationService.error('Error', 'No se pudo acceder al diagnóstico completo.');
+    }
   }
 }
 

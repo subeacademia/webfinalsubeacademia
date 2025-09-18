@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, orderBy, updateDoc, collectionData, deleteDoc, limit } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, orderBy, updateDoc, collectionData, deleteDoc, limit, serverTimestamp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { LeadData, UserLead, DiagnosticData } from '../../features/diagnostico/data/diagnostic.models';
+import { DiagnosticLead, ExtendedDiagnosticLead } from '../models/lead.model';
 
 @Injectable({
   providedIn: 'root'
@@ -10,11 +11,72 @@ export class LeadsService {
   private firestore: Firestore = inject(Firestore);
   
   private get leadsCollection() {
-    return collection(this.firestore, 'leads');
+    return collection(this.firestore, 'diagnostic-leads');
   }
 
   /**
-   * Guarda un nuevo lead en la base de datos
+   * Crea un lead de diagnóstico específico según los requerimientos
+   */
+  async createDiagnosticLead(leadData: UserLead, diagnosticId: string): Promise<string> {
+    try {
+      console.log('💾 [LeadsService] Creando lead de diagnóstico:', leadData);
+      console.log('📋 [LeadsService] ID del diagnóstico:', diagnosticId);
+      
+      // Crear el payload según la interfaz DiagnosticLead
+      const diagnosticLead: DiagnosticLead = {
+        name: leadData.name,
+        email: leadData.email,
+        phone: leadData.phone || '',
+        company: leadData.companyName || undefined, // Solo para empresas
+        type: leadData.type === 'empresa' ? 'empresa' : 'persona',
+        diagnosticId: diagnosticId,
+        createdAt: serverTimestamp()
+      };
+
+      // Agregar campos extendidos para gestión interna
+      const extendedLead: ExtendedDiagnosticLead = {
+        ...diagnosticLead,
+        position: leadData.position,
+        industry: leadData.industry,
+        companySize: leadData.companySize,
+        acceptsCommunications: leadData.acceptsCommunications,
+        updatedAt: serverTimestamp(),
+        source: leadData.type === 'empresa' ? 'diagnostico_empresa' : 'diagnostico_persona',
+        status: 'nuevo'
+      };
+
+      console.log('💾 [LeadsService] Payload final para diagnostic-leads:', extendedLead);
+
+      const docRef = await addDoc(this.leadsCollection, extendedLead);
+      console.log('✅ [LeadsService] Lead de diagnóstico creado con ID:', docRef.id);
+      
+      return docRef.id;
+    } catch (error) {
+      console.error('❌ [LeadsService] Error creando lead de diagnóstico:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene el diagnóstico completo asociado a un lead
+   */
+  async getDiagnosticForLead(diagnosticId: string): Promise<any> {
+    try {
+      const diagnosticDoc = doc(this.firestore, 'diagnostics', diagnosticId);
+      const diagnosticSnap = await getDoc(diagnosticDoc);
+      
+      if (diagnosticSnap.exists()) {
+        return { id: diagnosticSnap.id, ...diagnosticSnap.data() };
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ [LeadsService] Error obteniendo diagnóstico:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Guarda un nuevo lead en la base de datos (método original mantenido para compatibilidad)
    */
   async saveLead(leadData: UserLead, diagnosticData?: DiagnosticData, source: 'diagnostico_empresa' | 'diagnostico_persona' = 'diagnostico_empresa'): Promise<string> {
     try {

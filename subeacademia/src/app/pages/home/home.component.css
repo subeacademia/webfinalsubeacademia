@@ -28,16 +28,52 @@ section { scroll-margin-top: 80px; }
   visibility: visible !important;
 }
 
+/* Contenedor del typewriter para mantener elementos en línea */
+.typewriter-container {
+  min-height: 1.2em; /* Altura mínima para evitar saltos */
+  align-items: baseline; /* Alinear por la línea base del texto */
+  line-height: 1.2; /* Altura de línea consistente */
+}
+
+/* Texto del typewriter */
+.typewriter-text {
+  display: inline;
+  vertical-align: baseline;
+  white-space: pre-wrap; /* Permitir wrap pero mantener espacios */
+  word-break: break-word; /* Romper palabras largas si es necesario */
+}
+
 /* Typewriter cursor parpadeante */
 .cursor {
-  display: inline-block;
-  width: 1ch;
+  display: inline;
   color: #c7d2fe; /* indigo-200 */
   animation: blink 1s steps(2, start) infinite;
+  vertical-align: baseline; /* Asegurar alineación con el texto */
+  margin-left: 2px; /* Pequeño espacio entre texto y cursor */
+}
+
+/* Asegurar que el contenedor del typewriter mantenga elementos en línea */
+#typewriter {
+  display: inline;
+  vertical-align: baseline;
 }
 
 @keyframes blink {
   to { visibility: hidden; }
+}
+
+/* Responsive para el typewriter en móviles */
+@media (max-width: 640px) {
+  .typewriter-container {
+    flex-direction: row; /* Mantener en fila siempre */
+    flex-wrap: wrap; /* Permitir wrap si es necesario */
+    justify-content: center;
+    align-items: baseline;
+  }
+  
+  .typewriter-text {
+    max-width: calc(100% - 1.5ch); /* Dejar espacio para el cursor */
+  }
 }
 
 /* Carrusel infinito simple (marquee) */
