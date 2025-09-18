@@ -2,18 +2,20 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Firestore, collection, addDoc, doc, getDoc, query, where, getDocs, collectionData } from '@angular/fire/firestore';
 import { DiagnosticData, UserLead } from '../data/diagnostic.models';
 import { Report, ReportData } from '../data/report.model';
-import { BesselAiService } from '../../../core/ai/bessel-ai.service';
+import { VercelAiService } from '../../../core/ai/vercel-ai.service';
 import { LeadsService } from '../../../core/services/leads.service';
 import { ReporteDiagnosticoEmpresa } from '../data/empresa-diagnostic.models';
 import { Observable } from 'rxjs';
+import { ToastService } from '../../../core/services/ui/toast/toast.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiagnosticsService {
   private firestore: Firestore = inject(Firestore);
-  private besselAiService = inject(BesselAiService);
+  private vercelAiService = inject(VercelAiService);
   private leadsService = inject(LeadsService);
+  private toastService = inject(ToastService);
   
   // Signal para almacenar el reporte actual
   private currentReport = signal<ReportData | null>(null);
@@ -48,6 +50,7 @@ export class DiagnosticsService {
         message: e?.message,
         stack: e?.stack
       });
+      this.toastService.show('error', 'Error al Guardar: No se pudo guardar tu diagnóstico. Por favor, intenta nuevamente.');
       throw e;
     }
   }
@@ -79,6 +82,7 @@ export class DiagnosticsService {
       return leadId;
     } catch (error) {
       console.error('❌ [DiagnosticsService] Error guardando diagnóstico con lead:', error);
+      this.toastService.show('error', 'Error al Guardar: No se pudo guardar tu diagnóstico. Por favor, intenta nuevamente.');
       throw error;
     }
   }
@@ -115,7 +119,7 @@ export class DiagnosticsService {
 
     try {
       // --- LLAMADA AL CEREBRO DE IA ---
-      const reportFromAI = await this.besselAiService.generateComprehensiveReport(diagnosticData);
+      const reportFromAI = await this.vercelAiService.generateComprehensiveReport(diagnosticData);
       
       // --- LOG DE VERIFICACIÓN #2 ---
       console.log('--- DIAGNOSTICS SERVICE: REPORTE RECIBIDO DE IA ---');

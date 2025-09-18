@@ -53,7 +53,7 @@ export interface ReportData {
 
 ### 2. Servicio de IA Reingenierizado
 
-**Archivo:** `src/app/core/ai/bessel-ai.service.ts`
+**Archivo:** `src/app/core/ai/vercel-ai.service.ts`
 
 #### Nuevo Método Principal:
 

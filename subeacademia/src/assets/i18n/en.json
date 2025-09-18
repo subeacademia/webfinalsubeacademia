@@ -206,5 +206,41 @@
       "example_4": "Reduce operating costs",
       "example_5": "Accelerate product innovation"
     }
+  },
+  "diagnostic.objective.title": "Define Your Main Objective",
+  "diagnostic.objective.description": "Describe your main professional development challenge or goal at this moment. Our AI will help you define clear objectives.",
+  "diagnostic.objective.textAreaLabel": "My challenge or goal is...",
+  "diagnostic.objective.textAreaPlaceholder": "E.g.: 'I want to improve how I present my ideas in important meetings' or 'I need to learn to delegate tasks more effectively'.",
+  "diagnostic.objective.generateButton": "Generate Objectives with AI",
+  "diagnostic.objective.generatingButton": "Generating...",
+  "diagnostic.objective.selectTitle": "Select the objective that best represents you:",
+  "Mejorar mis habilidades de liderazgo": "Improve my leadership skills",
+  "Desarrollar mi inteligencia emocional": "Develop my emotional intelligence",
+  "Aumentar mi productividad y gestión del tiempo": "Increase my productivity and time management",
+  "Mejorar la comunicación con mi equipo": "Improve communication with my team",
+  "Otra": "Other (I'll describe it later)",
+  "AI_PROCESSING_TITLE": "Processing with Artificial Intelligence",
+  "AI_PROCESSING_DESCRIPTION": "Our AI is analyzing your responses to create a comprehensive diagnosis and personalized action plan",
+  "AI_STEP_1": "Analyzing diagnosis responses",
+  "AI_STEP_2": "Evaluating competencies and maturity",
+  "AI_STEP_3": "Generating personalized analysis",
+  "AI_STEP_4": "Finalizing report",
+  "AI_PROCESSING_TIME": "Estimated time",
+  "AI_PROCESSING_SECONDS": "seconds",
+  "errors": {
+    "aiGenerationFailed": "Could not generate the response. Please try again.",
+    "aiGenerationFailedTitle": "AI Error",
+    "diagnosticSaveFailed": "Could not save your diagnosis. Please try again.",
+    "diagnosticSaveFailedTitle": "Save Error",
+    "diagnosticLoadFailed": "Could not load your diagnosis. Please try again.",
+    "diagnosticLoadFailedTitle": "Load Error",
+    "reportGenerationFailed": "An error occurred while generating your report. Please try again.",
+    "reportGenerationFailedTitle": "Report Error",
+    "retryButton": "Retry"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "Sorry, the page you are looking for does not exist or has been moved.",
+    "goHome": "Go Home"
   }
 }

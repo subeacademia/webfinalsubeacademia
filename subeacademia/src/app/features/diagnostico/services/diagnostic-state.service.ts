@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ToastService, ToastKind } from '../../../core/services/ui/toast/toast.service';
 import { DiagnosticData, INITIAL_DIAGNOSTIC_DATA, Answer } from '../data/diagnostic.models';
 import { Report, ReportData } from '../data/report.model';
-import { BesselAiService } from '../../../core/ai/bessel-ai.service';
+import { VercelAiService } from '../../../core/ai/vercel-ai.service';
 import { DiagnosticsService } from './diagnostics.service';
 import { CursosService } from '../../productos/services/cursos.service';
 import { firstValueFrom, take } from 'rxjs';
@@ -16,7 +16,7 @@ import { competencias } from '../data/competencias';
 export class DiagnosticStateService {
   private router = inject(Router);
   public toastService = inject(ToastService);
-  private besselAiService = inject(BesselAiService);
+  private vercelAiService = inject(VercelAiService);
   private diagnosticsService = inject(DiagnosticsService);
   private cursosService = inject(CursosService);
 
@@ -214,7 +214,7 @@ export class DiagnosticStateService {
       console.log('🚀 Generando reporte comprehensivo con datos reales:', data);
       
       // Generar el reporte estratégico (incluye fallback automático)
-      const comprehensiveReport = await this.besselAiService.generateComprehensiveReport(data);
+      const comprehensiveReport = await this.vercelAiService.generateComprehensiveReport(data);
       console.log('📊 Reporte recibido del servicio de IA:', comprehensiveReport ? 'Sí' : 'No');
       console.log('📋 ID del reporte:', comprehensiveReport?.id);
       console.log('📋 Versión del reporte:', comprehensiveReport?.version);
@@ -368,7 +368,7 @@ export class DiagnosticStateService {
     try {
       console.log('🚀 Generando reporte comprehensivo con datos reales:', data);
       
-      const comprehensiveReport = await this.besselAiService.generateComprehensiveReport(data);
+      const comprehensiveReport = await this.vercelAiService.generateComprehensiveReport(data);
       this.generatedStrategicReport.set(comprehensiveReport);
       
       this.toastService.show('success', 'Reporte estratégico generado correctamente.');

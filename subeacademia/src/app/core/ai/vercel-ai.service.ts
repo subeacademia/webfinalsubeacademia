@@ -20,7 +20,7 @@ export interface DiagnosticData {
 @Injectable({
   providedIn: 'root'
 })
-export class BesselAiService {
+export class VercelAiService {
   private http = inject(HttpClient);
   private apiUrl = environment.gptApiUrl;
 
@@ -108,7 +108,7 @@ export class BesselAiService {
         return null; // Devuelve null explícitamente en caso de CUALQUIER error de parseo.
       }
     } catch (error) {
-      console.error('Error en la llamada a la API de Bessel:', error);
+      console.error('Error en la llamada a la API de Vercel:', error);
       throw error;
     }
   }

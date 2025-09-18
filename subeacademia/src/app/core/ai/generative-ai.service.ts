@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { BesselAiService } from './bessel-ai.service';
+import { VercelAiService } from './vercel-ai.service';
+import { ToastService } from '../services/ui/toast/toast.service';
 
 export interface DiagnosticAnalysisData {
   profile: {
@@ -15,7 +16,8 @@ export interface DiagnosticAnalysisData {
   providedIn: 'root'
 })
 export class GenerativeAiService {
-  private besselAiService = inject(BesselAiService);
+  private vercelAiService = inject(VercelAiService);
+  private toastService = inject(ToastService);
 
   /**
    * Genera texto usando IA basado en un prompt
@@ -24,7 +26,7 @@ export class GenerativeAiService {
    */
   async generateText(prompt: string): Promise<string> {
     try {
-      // Usar el método existente del BesselAiService pero adaptado para texto libre
+      // Usar el método existente del VercelAiService pero adaptado para texto libre
       const systemPrompt = `
         Eres un asistente de IA especializado en consultoría empresarial y desarrollo profesional.
         Responde de manera concisa, profesional y orientada a resultados.
@@ -42,7 +44,7 @@ export class GenerativeAiService {
         temperature: 0.7
       };
 
-      // Llamada directa a la API usando fetch (similar a como lo hace BesselAiService)
+      // Llamada directa a la API usando fetch (similar a como lo hace VercelAiService)
       const response = await fetch('https://apisube-smoky.vercel.app/api/azure/generate', {
         method: 'POST',
         headers: {
@@ -63,6 +65,7 @@ export class GenerativeAiService {
       return cleanedResponse;
     } catch (error) {
       console.error('Error en GenerativeAiService.generateText:', error);
+      this.toastService.show('error', 'Error de IA: No se pudo generar la respuesta. Por favor, intenta de nuevo.');
       throw error;
     }
   }
@@ -106,12 +109,12 @@ export class GenerativeAiService {
   }
 
   /**
-   * Genera análisis de diagnóstico usando el BesselAiService existente
+   * Genera análisis de diagnóstico usando el VercelAiService existente
    * @param data Datos del diagnóstico
    * @param contextoAdicional Contexto adicional
    * @returns Promise<any> Resultado del análisis
    */
   async generateDiagnosticAnalysis(data: DiagnosticAnalysisData, contextoAdicional: any): Promise<any> {
-    return await this.besselAiService.generateReport(data as any, contextoAdicional);
+    return await this.vercelAiService.generateReport(data as any, contextoAdicional);
   }
 }

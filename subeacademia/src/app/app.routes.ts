@@ -52,6 +52,9 @@ export const routes: Routes = [
     ],
   },
 
-  // 404
-  { path: '**', component: HomeComponent },
+  // 404 - Página no encontrada
+  {
+    path: '**',
+    loadComponent: () => import('./features/not-found/not-found.component').then(c => c.NotFoundComponent)
+  },
 ];

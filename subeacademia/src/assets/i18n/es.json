@@ -226,5 +226,21 @@
   "AI_STEP_3": "Generando análisis personalizado",
   "AI_STEP_4": "Finalizando reporte",
   "AI_PROCESSING_TIME": "Tiempo estimado",
-  "AI_PROCESSING_SECONDS": "segundos"
+  "AI_PROCESSING_SECONDS": "segundos",
+  "errors": {
+    "aiGenerationFailed": "No se pudo generar la respuesta. Por favor, intenta de nuevo.",
+    "aiGenerationFailedTitle": "Error de IA",
+    "diagnosticSaveFailed": "No se pudo guardar tu diagnóstico. Por favor, intenta nuevamente.",
+    "diagnosticSaveFailedTitle": "Error al Guardar",
+    "diagnosticLoadFailed": "No se pudo cargar tu diagnóstico. Por favor, intenta nuevamente.",
+    "diagnosticLoadFailedTitle": "Error al Cargar",
+    "reportGenerationFailed": "Ocurrió un error al generar tu reporte. Por favor, intenta nuevamente.",
+    "reportGenerationFailedTitle": "Error en Reporte",
+    "retryButton": "Reintentar"
+  },
+  "notFound": {
+    "title": "Página No Encontrada",
+    "description": "Lo sentimos, la página que buscas no existe o fue movida.",
+    "goHome": "Volver al Inicio"
+  }
 }

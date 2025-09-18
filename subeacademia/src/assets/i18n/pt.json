@@ -206,5 +206,41 @@
       "example_4": "Reduzir custos operacionais",
       "example_5": "Acelerar a inovação de produtos"
     }
+  },
+  "diagnostic.objective.title": "Defina seu Objetivo Principal",
+  "diagnostic.objective.description": "Descreva qual é seu principal desafio ou meta de desenvolvimento profissional neste momento. Nossa IA ajudará você a definir objetivos claros.",
+  "diagnostic.objective.textAreaLabel": "Meu desafio ou meta é...",
+  "diagnostic.objective.textAreaPlaceholder": "Ex.: 'Quero melhorar como apresento minhas ideias em reuniões importantes' ou 'Preciso aprender a delegar tarefas de forma mais eficaz'.",
+  "diagnostic.objective.generateButton": "Gerar Objetivos com IA",
+  "diagnostic.objective.generatingButton": "Gerando...",
+  "diagnostic.objective.selectTitle": "Selecione o objetivo que melhor representa você:",
+  "Mejorar mis habilidades de liderazgo": "Melhorar minhas habilidades de liderança",
+  "Desarrollar mi inteligencia emocional": "Desenvolver minha inteligência emocional",
+  "Aumentar mi productividad y gestión del tiempo": "Aumentar minha produtividade e gestão do tempo",
+  "Mejorar la comunicación con mi equipo": "Melhorar a comunicação com minha equipe",
+  "Otra": "Outra (descreverei mais tarde)",
+  "AI_PROCESSING_TITLE": "Processando com Inteligência Artificial",
+  "AI_PROCESSING_DESCRIPTION": "Nossa IA está analisando suas respostas para criar um diagnóstico integral e um plano de ação personalizado",
+  "AI_STEP_1": "Analisando respostas do diagnóstico",
+  "AI_STEP_2": "Avaliando competências e maturidade",
+  "AI_STEP_3": "Gerando análise personalizada",
+  "AI_STEP_4": "Finalizando relatório",
+  "AI_PROCESSING_TIME": "Tempo estimado",
+  "AI_PROCESSING_SECONDS": "segundos",
+  "errors": {
+    "aiGenerationFailed": "Não foi possível gerar a resposta. Tente novamente.",
+    "aiGenerationFailedTitle": "Erro de IA",
+    "diagnosticSaveFailed": "Não foi possível salvar seu diagnóstico. Tente novamente.",
+    "diagnosticSaveFailedTitle": "Erro ao Salvar",
+    "diagnosticLoadFailed": "Não foi possível carregar seu diagnóstico. Tente novamente.",
+    "diagnosticLoadFailedTitle": "Erro ao Carregar",
+    "reportGenerationFailed": "Ocorreu um erro ao gerar seu relatório. Tente novamente.",
+    "reportGenerationFailedTitle": "Erro no Relatório",
+    "retryButton": "Tentar Novamente"
+  },
+  "notFound": {
+    "title": "Página Não Encontrada",
+    "description": "Desculpe, a página que você está procurando não existe ou foi movida.",
+    "goHome": "Ir para o Início"
   }
 }

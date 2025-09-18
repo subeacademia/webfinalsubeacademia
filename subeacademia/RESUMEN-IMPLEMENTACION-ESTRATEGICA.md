@@ -15,7 +15,7 @@ Se ha realizado exitosamente la reingeniería del servicio de generación de dia
   - `KPI`, `ActionStep`, `RecommendedService` - Componentes de apoyo
 
 ### 2. **Servicio de IA Reingenierizado** ✅
-- **Archivo:** `src/app/core/ai/bessel-ai.service.ts`
+- **Archivo:** `src/app/core/ai/vercel-ai.service.ts`
 - **Nuevo Método:** `generateStrategicReport()`
 - **Prompt Maestro ARES-AI:** Sistema de prompts sofisticado que actúa como consultor estratégico
 - **Integración Framework:** Conecta con las 13 competencias y 4 dimensiones ARES-AI

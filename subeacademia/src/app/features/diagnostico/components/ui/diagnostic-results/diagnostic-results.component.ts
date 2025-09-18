@@ -84,7 +84,30 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
           </div>
         }
 
-        @if (isLoading()) {
+        @if (error()) {
+          <!-- Error State -->
+          <div class="text-center py-20">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
+              Ocurrió un error al generar tu reporte
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
+              {{ error() }}
+            </p>
+            <div class="flex gap-4 justify-center">
+              <button 
+                (click)="retryReport()"
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                🔄 Reintentar
+              </button>
+              <button 
+                (click)="startNewDiagnostic()"
+                class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                Nuevo Diagnóstico
+              </button>
+            </div>
+          </div>
+        } @else if (isLoading()) {
           <!-- Loading State -->
           <div class="flex justify-center items-center py-20">
             <div class="text-center">
@@ -739,37 +762,60 @@ export class DiagnosticResultsComponent implements OnInit {
   report = signal<any>(null);
   leadData = signal<any>(null);
   isLoading = signal(true);
+  error = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadReport();
   }
 
-  private loadReport(): void {
+  private async loadReport(): Promise<void> {
     this.isLoading.set(true);
+    this.error.set(null);
     
-    // Obtener el reporte real del servicio
-    const currentReport = this.diagnosticsService.getCurrentReport();
-    if (currentReport) {
-      console.log('📊 Reporte encontrado:', currentReport);
-      this.report.set(currentReport);
-    } else {
-      console.log('⚠️ No hay reporte disponible, redirigiendo al diagnóstico...');
-      // Si no hay reporte, redirigir al diagnóstico
+    try {
+      // Obtener el reporte real del servicio
+      const currentReport = this.diagnosticsService.getCurrentReport();
+      if (currentReport) {
+        console.log('📊 Reporte encontrado:', currentReport);
+        this.report.set(currentReport);
+      } else {
+        // Intentar generar el reporte si no existe
+        const diagnosticData = this.diagnosticStateService.state();
+        if (diagnosticData && this.diagnosticStateService.isComplete()) {
+          console.log('🔄 Generando reporte automáticamente...');
+          const newReport = await this.diagnosticsService.generateReport(diagnosticData);
+          if (newReport) {
+            this.report.set(newReport);
+          } else {
+            throw new Error('No se pudo generar el reporte automáticamente');
+          }
+        } else {
+          console.log('⚠️ No hay reporte disponible, redirigiendo al diagnóstico...');
+          this.isLoading.set(false);
+          this.startNewDiagnostic();
+          return;
+        }
+      }
+      
+      // Obtener los datos del lead desde el estado del diagnóstico
+      const diagnosticData = this.diagnosticStateService.state();
+      if (diagnosticData?.lead) {
+        this.leadData.set(diagnosticData.lead);
+        console.log('✅ Datos del lead cargados:', diagnosticData.lead);
+      } else {
+        console.warn('⚠️ No hay datos del lead disponibles');
+      }
+    } catch (error: any) {
+      console.error('❌ Error cargando el reporte:', error);
+      this.error.set(error.message || 'Error desconocido al cargar el reporte');
+      this.toastService.show('error', 'Error en Reporte: Ocurrió un error al generar tu reporte. Por favor, intenta nuevamente.');
+    } finally {
       this.isLoading.set(false);
-      this.startNewDiagnostic();
-      return;
     }
-    
-    // Obtener los datos del lead desde el estado del diagnóstico
-    const diagnosticData = this.diagnosticStateService.state();
-    if (diagnosticData?.lead) {
-      this.leadData.set(diagnosticData.lead);
-      console.log('✅ Datos del lead cargados:', diagnosticData.lead);
-    } else {
-      console.warn('⚠️ No hay datos del lead disponibles');
-    }
-    
-    this.isLoading.set(false);
+  }
+
+  retryReport(): void {
+    this.loadReport();
   }
 
 
