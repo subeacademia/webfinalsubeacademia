@@ -225,7 +225,7 @@ export class AboutComponent implements AfterViewInit, OnInit {
    */
   private async initializeDataIfNeeded(): Promise<void> {
     try {
-      const existingCollaborators = await this.collaboratorsService.getCollaborators().toPromise() || [];
+      const existingCollaborators = await this.collaboratorsService.getCollaboratorsAsPromise();
       
       // Si no hay datos en la DB, migrar automáticamente
       if (existingCollaborators.length === 0) {

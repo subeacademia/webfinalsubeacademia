@@ -9,15 +9,13 @@ import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
-import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { AnimationService } from '../../core/services/animation.service';
-import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
 import { SeoService } from '../../core/seo/seo.service';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, AnimateOnScrollDirective, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -54,41 +52,70 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   companyLogos$: Observable<Logo[]>;
   educationLogos$: Observable<Logo[]>;
   allianceLogos$: Observable<Logo[]>;
-  roadmapPhases: Array<{ id: number; title: string; short: string; details: string; iconGradient: string }>= [
+  // Variable para controlar la pestaña activa, inicializada en la primera fase
+  activePhase = 1;
+
+  // Array con toda la información enriquecida de las fases
+  methodologyPhases = [
     {
       id: 1,
-      title: 'Diagnóstico Inicial',
-      short: 'Identifica brechas de competencias en tu equipo con nuestro diagnóstico inteligente y personalizado.',
-      details: 'Aplicamos el Framework ARES-AI© para evaluar 13 competencias, mapeamos casos de uso y medimos preparación técnica, de datos, procesos y cultura. Entregamos un informe con oportunidades, quick wins y riesgos.',
-      iconGradient: 'from-blue-500 to-purple-600'
+      title: 'Fase 1: Preparación y Evaluación',
+      description: 'Establecemos cimientos sólidos, analizando tus necesidades y auditando tus datos para asegurar que cada paso sea estratégico y esté alineado con tus objetivos.',
+      imageUrl: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de planificación/estrategia
+      deliverables: [
+        'Diagnóstico de Madurez de IA',
+        'Auditoría de Datos y Ética',
+        'Definición de KPIs y Métricas de Éxito',
+        'Roadmap Estratégico de Implementación'
+      ]
     },
     {
       id: 2,
-      title: 'Plan de Capacitación',
-      short: 'Roadmap personalizado para desarrollar las 13 competencias clave de manera progresiva.',
-      details: 'Diseñamos un plan 50/50: base estándar + personalización a tu contexto. Incluye rutas por rol, metas trimestrales, micro‑habilidades, proyectos guiados y evaluación continua con AVE‑AI.',
-      iconGradient: 'from-green-500 to-teal-600'
+      title: 'Fase 2: Diseño y Prototipado',
+      description: 'Co-creamos y visualizamos la solución de IA. Desarrollamos prototipos funcionales rápidos para validar el enfoque y garantizar que el resultado final cumpla tus expectativas.',
+      imageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de diseño/UI/UX
+      deliverables: [
+        'Diseño de la Arquitectura de la Solución',
+        'Prototipos Interactivos y Pruebas de Concepto (PoC)',
+        'Selección de Modelos y Algoritmos',
+        'Plan de Pruebas y Validación'
+      ]
     },
     {
       id: 3,
-      title: 'Implementación Guiada',
-      short: 'Acompañamiento experto para aplicar IA de forma responsable y efectiva en tu organización.',
-      details: 'Co‑creamos pilotos y PoCs enfocados en impacto. Priorizamos seguridad, compliance, costo y mantenibilidad. Transferimos conocimiento y establecemos estándares de código y MLOps.',
-      iconGradient: 'from-orange-500 to-red-600'
+      title: 'Fase 3: Desarrollo e Implementación',
+      description: 'Construimos una solución de IA robusta, ética y escalable, integrándola de manera fluida en tus sistemas existentes para potenciar tus operaciones sin fricciones.',
+      imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de código/desarrollo
+      deliverables: [
+        'Modelos de IA Entrenados y Validados',
+        'Integración con Sistemas Actuales (vía APIs)',
+        'Despliegue en Entornos de Producción',
+        'Documentación Técnica Completa'
+      ]
     },
     {
       id: 4,
-      title: 'Mejora Continua',
-      short: 'Métricas y seguimiento continuo para asegurar impacto sostenible y crecimiento constante.',
-      details: 'Definimos KPIs de negocio y aprendizaje, ejecutamos revisiones mensuales, experimentos A/B y refactorizaciones. Usamos retroalimentación de usuarios para iterar el producto de IA.',
-      iconGradient: 'from-pink-500 to-fuchsia-600'
+      title: 'Fase 4: Monitoreo y Optimización',
+      description: 'No solo implementamos, acompañamos. Monitoreamos el rendimiento en tiempo real y optimizamos los modelos para asegurar la máxima eficiencia y un impacto continuo.',
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de dashboards/analíticas
+      deliverables: [
+        'Dashboard de Monitoreo en Tiempo Real',
+        'Informes de Rendimiento y KPIs',
+        'Ciclos de Reentrenamiento y Ajuste',
+        'Optimización Continua del Modelo'
+      ]
     },
     {
       id: 5,
-      title: 'Escalamiento y Gobierno',
-      short: 'Expansión, seguridad y gobierno de IA con prácticas responsables y escalables.',
-      details: 'Creamos playbooks de gobierno, riesgos y seguridad, habilitamos observabilidad, control de costos, gestión de modelos y cumplimiento, y desplegamos en múltiples equipos.',
-      iconGradient: 'from-indigo-500 to-blue-600'
+      title: 'Fase 5: Escalado y Sostenibilidad',
+      description: 'Miramos hacia el futuro. Te ayudamos a escalar la solución en toda tu organización, asegurando que la IA crezca contigo de manera ética, responsable y sostenible.',
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen abstracta de crecimiento/global
+      deliverables: [
+        'Estrategia de Escalado Organizacional',
+        'Marco de Gobernanza de IA',
+        'Programas de Capacitación (Upskilling)',
+        'Evaluación de Impacto a Largo Plazo'
+      ]
     }
   ];
   // Estado de tarjetas volteadas
@@ -232,6 +259,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isFlipped(phaseId: number): boolean {
     return this.flippedSet.has(phaseId);
+  }
+
+  // Función para cambiar la fase activa
+  selectPhase(phaseId: number): void {
+    this.activePhase = phaseId;
   }
 
   ngAfterViewInit(): void {

@@ -22,7 +22,7 @@
 
     <!-- Subtítulo con typewriter mejorado -->
     <div class="mt-6 text-2xl sm:text-3xl lg:text-4xl font-medium text-[color-mix(in_srgb,_var(--fg),_transparent_40%)] drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.3s;" role="status" aria-live="polite">
-      <div class="typewriter-container flex items-center justify-center flex-wrap">
+      <div class="typewriter-container flex items-center justify-center">
         <span id="typewriter" class="typewriter-text" aria-label="Texto dinámico que cambia automáticamente"></span><span class="cursor animate-pulse" aria-hidden="true">|</span>
       </div>
     </div>
@@ -72,64 +72,105 @@
   </div>
 </section>
 
-<!-- 2. SECCIÓN "HOJA DE RUTA" REDISEÑADA -->
-<section class="py-24 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 text-slate-900 dark:text-white relative overflow-hidden" role="region" aria-labelledby="roadmap-title">
+<!-- 2. SECCIÓN "NUESTRA METODOLOGÍA ARES-AI" INTERACTIVA -->
+<section id="metodologia" class="py-16 sm:py-24 bg-base-200/50 dark:bg-base-200 relative overflow-hidden" role="region" aria-labelledby="methodology-title">
   <!-- Elementos de fondo decorativos -->
   <div class="absolute inset-0" aria-hidden="true">
     <div class="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-5"></div>
+    <div class="absolute top-20 right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-20 left-20 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: -2s;"></div>
   </div>
   
-  <div class="container mx-auto px-4 text-center relative z-10">
-    <div class="max-w-4xl mx-auto mb-16">
-      <h2 id="roadmap-title" class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in-up">
-        Tu Hoja de Ruta hacia la 
-        <span class="gradient-text">Madurez en IA</span>
+  <div class="container mx-auto px-4 relative z-10">
+    <div class="text-center mb-12">
+      <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold text-base-content">
+        Nuestra Metodología 
+        <span class="gradient-text">ARES-AI</span>
       </h2>
-      <p class="text-xl text-slate-600 dark:text-slate-400 animate-fade-in-up" style="animation-delay: 0.2s;">
-        Basado en nuestro Framework ARES-AI© probado y validado
+      <p class="max-w-3xl mx-auto text-base-content/70 mt-4 text-lg">
+        Un marco de 5 fases diseñado para implementar soluciones de IA de forma ágil, responsable y sostenible, garantizando resultados tangibles en cada etapa.
       </p>
     </div>
-    
-    <!-- Pasos del proceso con tarjetas tipo flashcard (frente/reverso) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" role="list" aria-label="Pasos del proceso de madurez en IA" [appAnimateOnScroll]="'.phase-card'">
-      <div class="group" role="listitem" *ngFor="let phase of roadmapPhases">
-        <div
-          class="phase-card flip-card cursor-pointer focus:outline-none"
-          [class.is-flipped]="isFlipped(phase.id)"
-          tabindex="0"
-          role="button"
-          [attr.aria-pressed]="isFlipped(phase.id)"
-          [attr.aria-label]="(isFlipped(phase.id) ? 'Ocultar detalles de ' : 'Ver detalles de ') + phase.title"
-          (click)="toggleFlip(phase.id)"
-          (keyup.enter)="toggleFlip(phase.id)"
-        >
-          <div class="flip-inner">
-            <!-- Frente -->
-            <div class="flip-front relative card card-interactive bg-gradient-to-br from-white to-slate-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden">
-              <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 text-white text-2xl font-bold shadow-lg group-hover:scale-110 transition-transform duration-300 rounded-full bg-gradient-to-br" [ngClass]="phase.iconGradient" aria-hidden="true">
-                <div class="w-full h-full flex items-center justify-center">{{ phase.id }}</div>
-              </div>
-              <div class="flip-body pt-16 pb-5 px-4">
-                <h3 class="font-bold text-xl mb-3 text-slate-800 dark:text-white">{{ phase.title }}</h3>
-                <p class="text-slate-600 dark:text-slate-400 leading-relaxed">{{ phase.short }}</p>
-                <div class="mt-4 text-sm text-blue-600 dark:text-blue-300">Click para ver más</div>
-              </div>
-            </div>
 
-            <!-- Reverso -->
-            <div class="flip-back relative card card-interactive bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-2xl overflow-hidden">
-              <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 text-white text-2xl font-bold shadow-lg rounded-full bg-gradient-to-br" [ngClass]="phase.iconGradient" aria-hidden="true">
-                <div class="w-full h-full flex items-center justify-center">{{ phase.id }}</div>
-              </div>
-              <div class="flip-body pt-16 pb-5 px-4 back-scroll">
-                <h3 class="font-bold text-xl mb-3 text-slate-800 dark:text-white">{{ phase.title }}</h3>
-                <p class="text-slate-700 dark:text-slate-300 leading-relaxed">{{ phase.details }}</p>
-                <div class="mt-4 text-sm text-slate-500 dark:text-slate-400">Presiona nuevamente para volver</div>
+    <!-- Stepper horizontal/vertical responsivo -->
+    <div class="mb-12">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <ng-container *ngFor="let phase of methodologyPhases; let i = index; let isLast = last">
+          <div class="flex items-center" [class.w-full]="!isLast">
+            <button
+              (click)="selectPhase(phase.id)"
+              class="z-10 flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
+              [ngClass]="{
+                'bg-primary text-primary-content scale-110 shadow-lg': activePhase === phase.id,
+                'bg-base-300 text-base-content/60 hover:bg-base-300/80': activePhase !== phase.id
+              }"
+              [attr.aria-label]="'Seleccionar ' + phase.title"
+              [attr.aria-pressed]="activePhase === phase.id">
+              {{ '0' + phase.id }}
+            </button>
+            <div *ngIf="!isLast" class="flex-auto border-t-2 transition-all duration-300 mx-2"
+                 [ngClass]="{
+                   'border-primary': activePhase > phase.id,
+                   'border-base-300': activePhase <= phase.id
+                 }">
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Contenido interactivo de las fases -->
+    <div class="relative min-h-[450px]">
+      <ng-container *ngFor="let phase of methodologyPhases">
+        <div *ngIf="activePhase === phase.id" class="phase-content-card">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <!-- Contenido de texto -->
+            <div class="text-center lg:text-left order-2 lg:order-1">
+              <h3 class="text-2xl font-bold text-primary mb-3">{{ phase.title }}</h3>
+              <p class="mb-6 text-base-content/80 leading-relaxed">{{ phase.description }}</p>
+              
+              <!-- Lista de entregables -->
+              <h4 class="text-lg font-semibold mb-3 text-base-content">Entregables Clave</h4>
+              <ul class="space-y-2">
+                <li *ngFor="let deliverable of phase.deliverables" class="flex items-start">
+                  <svg class="w-5 h-5 mr-3 text-success flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                  <span class="text-base-content/70 leading-relaxed">{{ deliverable }}</span>
+                </li>
+              </ul>
+            </div>
+            
+            <!-- Imagen de la fase -->
+            <div class="flex items-center justify-center order-1 lg:order-2">
+              <div class="relative group">
+                <img 
+                  [src]="phase.imageUrl" 
+                  [alt]="phase.title" 
+                  class="rounded-lg shadow-xl object-cover w-full h-80 max-w-md transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy">
+                <!-- Overlay con gradiente -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </ng-container>
+    </div>
+
+    <!-- CTA final de la metodología -->
+    <div class="mt-16 text-center">
+      <p class="text-lg sm:text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
+        ¿Listo para transformar tu organización con nuestro framework ARES-AI probado?
+      </p>
+      <app-ui-button 
+        variant="primary" 
+        size="lg"
+        (clicked)="iniciarDiagnostico()" 
+        class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+        aria-label="Comenzar diagnóstico de madurez en IA">
+        Comenzar Diagnóstico Gratuito
+      </app-ui-button>
     </div>
   </div>
 </section>

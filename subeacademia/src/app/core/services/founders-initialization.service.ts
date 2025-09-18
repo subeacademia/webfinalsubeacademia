@@ -112,7 +112,7 @@ export class FoundersInitializationService {
   async initializeFounders(): Promise<void> {
     try {
       // Obtener colaboradores existentes
-      const existingCollaborators = await this.collaboratorsService.getCollaborators().toPromise() || [];
+      const existingCollaborators = await this.collaboratorsService.getCollaboratorsAsPromise();
       
       // Verificar qué fundadores ya existen
       const existingFounders = existingCollaborators.filter(c => c.isFounder);
@@ -205,7 +205,7 @@ export class FoundersInitializationService {
    */
   async migrateExistingCollaborators(): Promise<void> {
     try {
-      const existingCollaborators = await this.collaboratorsService.getCollaborators().toPromise() || [];
+      const existingCollaborators = await this.collaboratorsService.getCollaboratorsAsPromise();
       
       for (const collaborator of existingCollaborators) {
         if (collaborator.id) {

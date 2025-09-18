@@ -33,13 +33,16 @@ section { scroll-margin-top: 80px; }
   min-height: 1.2em; /* Altura mínima para evitar saltos */
   align-items: baseline; /* Alinear por la línea base del texto */
   line-height: 1.2; /* Altura de línea consistente */
+  display: inline-flex; /* Usar flex inline para mantener elementos juntos */
+  flex-wrap: wrap; /* Permitir wrap cuando sea necesario */
+  justify-content: center;
 }
 
 /* Texto del typewriter */
 .typewriter-text {
   display: inline;
   vertical-align: baseline;
-  white-space: pre-wrap; /* Permitir wrap pero mantener espacios */
+  white-space: pre-wrap; /* Permitir wrap natural del texto */
   word-break: break-word; /* Romper palabras largas si es necesario */
 }
 
@@ -50,6 +53,8 @@ section { scroll-margin-top: 80px; }
   animation: blink 1s steps(2, start) infinite;
   vertical-align: baseline; /* Asegurar alineación con el texto */
   margin-left: 2px; /* Pequeño espacio entre texto y cursor */
+  flex-shrink: 0; /* Evitar que el cursor se comprima */
+  line-height: inherit; /* Heredar la altura de línea del contenedor */
 }
 
 /* Asegurar que el contenedor del typewriter mantenga elementos en línea */
@@ -66,13 +71,16 @@ section { scroll-margin-top: 80px; }
 @media (max-width: 640px) {
   .typewriter-container {
     flex-direction: row; /* Mantener en fila siempre */
-    flex-wrap: wrap; /* Permitir wrap si es necesario */
+    flex-wrap: wrap; /* Permitir wrap natural en móviles */
     justify-content: center;
     align-items: baseline;
+    max-width: 100%;
   }
   
   .typewriter-text {
-    max-width: calc(100% - 1.5ch); /* Dejar espacio para el cursor */
+    max-width: calc(100vw - 2rem); /* Ajustar al ancho de pantalla menos padding */
+    white-space: pre-wrap; /* Permitir wrap natural del texto */
+    word-break: break-word; /* Romper palabras largas si es necesario */
   }
 }
 
@@ -240,5 +248,135 @@ section { scroll-margin-top: 80px; }
 
 .hero-cta-buttons app-ui-button:nth-child(2) {
   animation-delay: 0.2s;
+}
+
+/* ===== ESTILOS PARA LA NUEVA METODOLOGÍA ARES-AI INTERACTIVA ===== */
+
+/* Animación de entrada para las tarjetas de contenido */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tarjeta de contenido de fase con posicionamiento absoluto para transiciones suaves */
+.phase-content-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Adaptación responsive para móviles del stepper */
+@media (max-width: 767px) {
+  /* Contenedor principal del stepper en móvil */
+  .flex.flex-col.md\:flex-row {
+    align-items: flex-start;
+  }
+  
+  /* Cada elemento del stepper en móvil */
+  .flex.flex-col.md\:flex-row > div {
+    flex-direction: column;
+    align-items: center;
+    width: 100% !important;
+    margin-bottom: 1rem;
+  }
+  
+  .flex.flex-col.md\:flex-row > div:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+  
+  /* Línea conectora en móvil - de horizontal a vertical */
+  .flex.flex-col.md\:flex-row .flex-auto.border-t-2 {
+    margin: 1rem 0;
+    margin-left: 22px; /* Alinea con el centro del botón */
+    border-top-width: 0;
+    border-left-width: 2px;
+    min-height: 40px; /* Altura de la línea conectora vertical */
+    width: 0px;
+  }
+}
+
+/* Mejoras adicionales para la interactividad */
+.phase-content-card img {
+  transition: all 0.3s ease;
+}
+
+.phase-content-card img:hover {
+  transform: scale(1.02);
+}
+
+/* Animación sutil para los elementos de la lista de entregables */
+.phase-content-card li {
+  opacity: 0;
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.phase-content-card li:nth-child(1) { animation-delay: 0.1s; }
+.phase-content-card li:nth-child(2) { animation-delay: 0.2s; }
+.phase-content-card li:nth-child(3) { animation-delay: 0.3s; }
+.phase-content-card li:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para los botones del stepper */
+.phase-content-card button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary), 0.3);
+}
+
+/* Mejora visual para el contenedor de la imagen */
+.phase-content-card .relative.group {
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+/* Efecto de shimmer para carga de imágenes */
+.phase-content-card img[loading="lazy"] {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Responsive para el grid de contenido */
+@media (max-width: 1023px) {
+  .phase-content-card .grid.grid-cols-1.lg\:grid-cols-2 {
+    gap: 2rem;
+  }
+  
+  .phase-content-card .order-1.lg\:order-2,
+  .phase-content-card .order-2.lg\:order-1 {
+    order: unset;
+  }
+}
+
+/* Animación de pulso suave para elementos de fondo */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
 }
 

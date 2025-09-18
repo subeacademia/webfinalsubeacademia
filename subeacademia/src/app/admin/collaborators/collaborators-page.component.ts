@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CollaboratorsService } from '../../core/data/collaborators.service';
@@ -15,19 +15,7 @@ import { FoundersInitializationService } from '../../core/services/founders-init
   <div class="flex items-center justify-between">
     <h1 class="text-xl font-semibold">Equipo y Colaboradores</h1>
     <div class="flex gap-2">
-      <button class="btn btn-secondary" (click)="initializeFounders()" [disabled]="isInitializing()">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-        </svg>
-        {{ isInitializing() ? 'Procesando...' : 'Inicializar/Limpiar' }}
-      </button>
-      <button class="btn btn-warning" (click)="cleanupDuplicatesManually()" [disabled]="isInitializing()">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-        </svg>
-        Limpiar Duplicados
-      </button>
-      <button class="btn" (click)="openCreate()">Añadir Colaborador</button>
+      <button class="btn btn-primary" (click)="openCreate()">Añadir Colaborador</button>
     </div>
   </div>
 
@@ -238,6 +226,7 @@ export class CollaboratorsPageComponent {
   private svc = inject(CollaboratorsService);
   private media = inject(MediaService);
   private foundersService = inject(FoundersInitializationService);
+  private cdr = inject(ChangeDetectorRef);
 
   collaborators = signal<Collaborator[]>([]);
   isOpen = signal(false);
@@ -300,6 +289,15 @@ export class CollaboratorsPageComponent {
       this.saving.set(false);
       
       await this.loadCollaborators();
+      
+      // Si no hay datos, migrarlos automáticamente
+      const currentData = this.collaborators();
+      if (currentData.length === 0) {
+        console.log('📥 No hay datos, migrando automáticamente...');
+        await this.migrateInitialData();
+        await this.loadCollaborators();
+      }
+      
       console.log('✅ Componente inicializado correctamente');
     } catch (error) {
       console.error('❌ Error inicializando componente:', error);
@@ -311,21 +309,239 @@ export class CollaboratorsPageComponent {
 
   private async loadCollaborators() {
     try {
-      const list = await this.svc.getCollaborators().toPromise() || [];
+      console.log('🔄 Cargando colaboradores desde Firestore...');
+      const list = await this.svc.getCollaboratorsAsPromise();
       this.collaborators.set(list);
       console.log('📊 Colaboradores cargados:', list.length);
       
-      // Log detallado de fundadores con imágenes
-      const founders = list.filter(c => c.isFounder);
-      console.log('👥 Fundadores encontrados:', founders.length);
-      founders.forEach(f => {
-        console.log(`👤 ${f.name}: imageUrl=${f.imageUrl}, logoUrl=${f.logoUrl}`);
-      });
+      if (list.length > 0) {
+        // Log detallado de fundadores con imágenes
+        const founders = list.filter(c => c.isFounder);
+        const collaborators = list.filter(c => !c.isFounder);
+        
+        console.log('👥 Fundadores encontrados:', founders.length);
+        console.log('🤝 Colaboradores encontrados:', collaborators.length);
+        
+        founders.forEach(f => {
+          console.log(`👤 Fundador: ${f.name}`, {
+            role: f.role,
+            imageUrl: f.imageUrl,
+            logoUrl: f.logoUrl,
+            displayImage: this.getDisplayImage(f)
+          });
+        });
+        
+        collaborators.forEach(c => {
+          console.log(`🤝 Colaborador: ${c.name}`, {
+            type: c.type,
+            imageUrl: c.imageUrl,
+            logoUrl: c.logoUrl,
+            displayImage: this.getDisplayImage(c)
+          });
+        });
+      } else {
+        console.log('⚠️ No se encontraron colaboradores en Firestore');
+      }
       
       return list;
     } catch (error) {
       console.error('❌ Error cargando colaboradores:', error);
       return [];
+    }
+  }
+
+  /**
+   * Migra automáticamente los datos iniciales (fundadores y colaboradores)
+   */
+  private async migrateInitialData(): Promise<void> {
+    try {
+      console.log('📊 Migrando datos iniciales de fundadores y colaboradores...');
+      
+      // Datos de los 4 fundadores
+      const foundersData = [
+        {
+          name: 'Rodrigo Carrillo',
+          role: 'Cofundador y CEO',
+          logoUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=RC',
+          imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=RC',
+          website: 'https://www.linkedin.com/in/rorrocarrillo/',
+          linkedinUrl: 'https://www.linkedin.com/in/rorrocarrillo/',
+          description: 'Experto en innovación y transferencia tecnológica con más de 15 años de experiencia. Autor y Speaker internacional enfocado en IA para el desarrollo sostenible.',
+          bio: 'Experto en innovación y transferencia tecnológica con más de 15 años de experiencia. Autor y Speaker internacional enfocado en IA para el desarrollo sostenible.',
+          fullBio: [
+            'Ingeniero Civil Industrial, Mención Informática, Universidad de La Frontera.',
+            'Máster en Gestión de la Ciencia y la Innovación, Universidad Politécnica de Valencia.',
+            'Fellow del prestigioso programa Stanford Ignite, GSB Stanford University.',
+            'Autor del libro "La revolución de la Inteligencia Artificial para alcanzar los Objetivos de Desarrollo Sostenible".',
+            'Creador del ARES-AI Framework para la implementación responsable de IA.',
+            'Cofundador y Vicepresidente de la Asociación Chilena de IA para el Desarrollo Sostenible (ACHIADS).'
+          ],
+          type: 'Fundador' as const,
+          isFounder: true,
+          founderOrder: 0,
+          displayOrder: 0,
+          isActive: true,
+          joinDate: new Date('2020-01-01')
+        },
+        {
+          name: 'Bruno Villalobos',
+          role: 'Cofundador y CTO',
+          logoUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=BV',
+          imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=BV',
+          website: 'https://www.linkedin.com/in/brunovillalobosmu%C3%B1oz/',
+          linkedinUrl: 'https://www.linkedin.com/in/brunovillalobosmu%C3%B1oz/',
+          description: 'Especialista en IA y Big Data con una década de experiencia en tecnologías educativas. Creador de metodologías innovadoras para Prompt Engineering.',
+          bio: 'Especialista en IA y Big Data con una década de experiencia en tecnologías educativas. Creador de metodologías innovadoras para Prompt Engineering.',
+          fullBio: [
+            'Ingeniero Civil Industrial, Universidad Austral de Chile.',
+            'Máster en Inteligencia Artificial e Ingeniería del Conocimiento, TECH University.',
+            'Global Máster Business Administration, Universidad Isabel I.',
+            'Máster en Big Data y Business Intelligence, ENEB.',
+            'Autor del libro "Teoría y Práctica de la IA: El renacimiento del talento humano".',
+            'Creador del método RIP-RIF para prompt engineering de IA Generativa.',
+            'Fundador y Presidente de ACHIADS.'
+          ],
+          type: 'Fundador' as const,
+          isFounder: true,
+          founderOrder: 1,
+          displayOrder: 1,
+          isActive: true,
+          joinDate: new Date('2020-01-01')
+        },
+        {
+          name: 'Mario Muñoz',
+          role: 'Cofundador y COO',
+          logoUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=MM',
+          imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=MM',
+          website: 'https://www.linkedin.com/in/mariomunozvillalobos/',
+          linkedinUrl: 'https://www.linkedin.com/in/mariomunozvillalobos/',
+          description: 'Ingeniero Comercial experto en gestión de proyectos y negocios internacionales, liderando la expansión y operaciones de la academia.',
+          bio: 'Ingeniero Comercial experto en gestión de proyectos y negocios internacionales, liderando la expansión y operaciones de la academia.',
+          fullBio: [
+            'Ingeniero Comercial, Universidad de los Lagos.',
+            'Diplomado en International Business, ILSC Education Group.',
+            'Diplomado en Project Management, Greenwich Business Institute.',
+            'Experiencia en la gestión y escalamiento de proyectos tecnológicos y educativos.'
+          ],
+          type: 'Fundador' as const,
+          isFounder: true,
+          founderOrder: 2,
+          displayOrder: 2,
+          isActive: true,
+          joinDate: new Date('2020-01-01')
+        },
+        {
+          name: 'Guido Asencio',
+          role: 'Asesor Estratégico',
+          logoUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=GA',
+          imageUrl: 'https://placehold.co/500x500/1e293b/ffffff?text=GA',
+          website: '#',
+          linkedinUrl: '#',
+          description: 'Asesor con amplia trayectoria en el sector público y privado, especializado en la articulación de proyectos de alto impacto tecnológico y social.',
+          bio: 'Asesor con amplia trayectoria en el sector público y privado, especializado en la articulación de proyectos de alto impacto tecnológico y social.',
+          fullBio: [
+            'Asesor con amplia trayectoria en el sector público y privado.',
+            'Especializado en la articulación de proyectos de alto impacto tecnológico y social.',
+            'Experiencia en desarrollo de estrategias organizacionales.'
+          ],
+          type: 'Fundador' as const,
+          isFounder: true,
+          founderOrder: 3,
+          displayOrder: 3,
+          isActive: true,
+          joinDate: new Date('2020-01-01')
+        }
+      ];
+
+      // Datos de los colaboradores
+      const collaboratorsData = [
+        { 
+          name: 'Nicolás Valenzuela', 
+          role: 'Ingeniero de IA',
+          logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=NV', 
+          imageUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=NV',
+          description: 'Ingeniero de IA con foco en soluciones aplicadas y MLOps.', 
+          bio: 'Ingeniero de IA con foco en soluciones aplicadas y MLOps.',
+          website: '#', 
+          linkedinUrl: '#',
+          type: 'Partner Tecnológico' as const,
+          isFounder: false,
+          displayOrder: 10,
+          isActive: true,
+          joinDate: new Date('2021-01-01')
+        },
+        { 
+          name: 'Diego Ramírez', 
+          role: 'Especialista en RRHH',
+          logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=DR', 
+          imageUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=DR',
+          description: 'Magíster en Gestión de RRHH y experto en IA para el desarrollo del talento.', 
+          bio: 'Magíster en Gestión de RRHH y experto en IA para el desarrollo del talento.',
+          website: '#', 
+          linkedinUrl: '#',
+          type: 'Partner Académico' as const,
+          isFounder: false,
+          displayOrder: 11,
+          isActive: true,
+          joinDate: new Date('2021-06-01')
+        },
+        { 
+          name: 'Pablo Soto', 
+          role: 'Especialista en SIG',
+          logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=PS', 
+          imageUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=PS',
+          description: 'Especialista en SIG e inteligencia geoespacial con IA.', 
+          bio: 'Especialista en SIG e inteligencia geoespacial con IA.',
+          website: '#', 
+          linkedinUrl: '#',
+          type: 'Partner Académico' as const,
+          isFounder: false,
+          displayOrder: 12,
+          isActive: true,
+          joinDate: new Date('2022-01-01')
+        },
+        { 
+          name: 'Ignacio Villarroel', 
+          role: 'Investigador en Cómputo Cuántico',
+          logoUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=IV', 
+          imageUrl: 'https://placehold.co/200x200/1e293b/ffffff?text=IV',
+          description: 'Investigador en cómputo cuántico y su integración con IA.', 
+          bio: 'Investigador en cómputo cuántico y su integración con IA.',
+          website: '#', 
+          linkedinUrl: '#',
+          type: 'Partner Tecnológico' as const,
+          isFounder: false,
+          displayOrder: 13,
+          isActive: true,
+          joinDate: new Date('2022-06-01')
+        }
+      ];
+
+      // Migrar fundadores
+      for (const founder of foundersData) {
+        try {
+          await this.svc.addCollaborator(founder);
+          console.log(`✅ Fundador migrado: ${founder.name}`);
+        } catch (error) {
+          console.error(`❌ Error migrando fundador ${founder.name}:`, error);
+        }
+      }
+
+      // Migrar colaboradores
+      for (const collaborator of collaboratorsData) {
+        try {
+          await this.svc.addCollaborator(collaborator);
+          console.log(`✅ Colaborador migrado: ${collaborator.name}`);
+        } catch (error) {
+          console.error(`❌ Error migrando colaborador ${collaborator.name}:`, error);
+        }
+      }
+
+      console.log('🎉 Migración inicial completada');
+      
+    } catch (error) {
+      console.error('❌ Error en migración inicial:', error);
+      throw error;
     }
   }
 
@@ -356,17 +572,31 @@ export class CollaboratorsPageComponent {
   
   openEdit(c: Collaborator){
     this.editingId.set(c.id ?? null);
-    this.previewMainUrl.set(c.imageUrl || c.logoUrl || null);
-    this.previewLogoUrl.set(c.logoUrl || null);
+    
+    // Para fundadores, priorizar imageUrl para preview principal
+    if (c.isFounder) {
+      this.previewMainUrl.set(c.imageUrl || null);
+      this.previewLogoUrl.set(c.logoUrl || null);
+    } else {
+      this.previewMainUrl.set(c.logoUrl || c.imageUrl || null);
+      this.previewLogoUrl.set(null);
+    }
     
     // Convertir fullBio array a texto
     const fullBioText = c.fullBio ? c.fullBio.join('\n') : '';
+    
+    console.log('📝 Editando colaborador:', {
+      name: c.name,
+      imageUrl: c.imageUrl,
+      logoUrl: c.logoUrl,
+      isFounder: c.isFounder
+    });
     
     this.form.patchValue({
       name: c.name,
       role: c.role || '',
       logoUrl: c.logoUrl || '',
-      imageUrl: c.imageUrl || c.logoUrl || '',
+      imageUrl: c.imageUrl || '',
       website: c.website || '',
       linkedinUrl: c.linkedinUrl || c.website || '',
       description: c.description || '',
@@ -473,7 +703,6 @@ export class CollaboratorsPageComponent {
       const collaboratorData: any = {
         name: formValue.name || '',
         role: formValue.role || '',
-        logoUrl: formValue.logoUrl || formValue.imageUrl || '',
         website: formValue.website || '',
         description: formValue.description || '',
         type: formValue.type || 'Partner Tecnológico',
@@ -483,11 +712,35 @@ export class CollaboratorsPageComponent {
         joinDate: new Date()
       };
 
-      // Agregar campos opcionales solo si tienen valor
-      if (formValue.imageUrl) {
-        collaboratorData.imageUrl = formValue.imageUrl;
-        console.log('📸 Agregando imageUrl:', formValue.imageUrl);
+      // Manejar imágenes según el tipo de colaborador
+      if (formValue.isFounder) {
+        // Para fundadores: imageUrl es la foto personal, logoUrl es opcional
+        if (formValue.imageUrl) {
+          collaboratorData.imageUrl = formValue.imageUrl;
+          console.log('📸 Fundador - Guardando imageUrl:', formValue.imageUrl);
+        }
+        if (formValue.logoUrl) {
+          collaboratorData.logoUrl = formValue.logoUrl;
+          console.log('🏢 Fundador - Guardando logoUrl:', formValue.logoUrl);
+        }
+        // Si no hay logoUrl, usar imageUrl como fallback
+        if (!formValue.logoUrl && formValue.imageUrl) {
+          collaboratorData.logoUrl = formValue.imageUrl;
+          console.log('🔄 Fundador - Usando imageUrl como logoUrl fallback');
+        }
+      } else {
+        // Para colaboradores: logoUrl es la imagen principal
+        if (formValue.imageUrl) {
+          collaboratorData.logoUrl = formValue.imageUrl;
+          collaboratorData.imageUrl = formValue.imageUrl;
+          console.log('🤝 Colaborador - Guardando imagen como logoUrl e imageUrl:', formValue.imageUrl);
+        } else if (formValue.logoUrl) {
+          collaboratorData.logoUrl = formValue.logoUrl;
+          console.log('🤝 Colaborador - Guardando logoUrl:', formValue.logoUrl);
+        }
       }
+
+      // Agregar campos opcionales solo si tienen valor
       if (formValue.linkedinUrl) {
         collaboratorData.linkedinUrl = formValue.linkedinUrl;
       }
@@ -504,21 +757,38 @@ export class CollaboratorsPageComponent {
       console.log('💾 Datos completos a guardar:', collaboratorData);
       
       if (editingId) {
+        console.log(`🔄 Actualizando ${formValue.isFounder ? 'fundador' : 'colaborador'}: ${formValue.name}`);
+        
         if (this.isEditingFounder()) {
           await this.foundersService.updateFounderData(editingId, collaboratorData);
+          console.log('✅ Fundador actualizado en Firestore');
         } else {
           await this.svc.updateCollaborator(editingId, collaboratorData);
+          console.log('✅ Colaborador actualizado en Firestore');
         }
       } else {
+        console.log(`➕ Creando nuevo ${formValue.isFounder ? 'fundador' : 'colaborador'}: ${formValue.name}`);
         await this.svc.addCollaborator(collaboratorData);
+        console.log('✅ Nuevo colaborador creado en Firestore');
       }
       
+      console.log('⏳ Esperando a que Firestore procese la actualización...');
+      // Pequeño delay para asegurar que Firestore haya procesado la actualización
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('🔄 Recargando datos de la tabla...');
       await this.loadCollaborators();
+      
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
+      console.log('🔄 Change detection forzado');
+      
+      console.log('🚪 Cerrando modal...');
       this.close();
       
       // Mensaje de confirmación
       alert('✅ Colaborador guardado exitosamente. Los cambios se reflejarán en la sección pública.');
-      console.log('✅ Colaborador guardado exitosamente, datos sincronizados');
+      console.log('🎉 Proceso de guardado completado exitosamente');
     } finally {
       this.saving.set(false);
     }
@@ -543,7 +813,7 @@ export class CollaboratorsPageComponent {
       console.log('🚀 Iniciando proceso de inicialización/limpieza...');
       
       // Verificar si ya existen datos
-      const existingCollaborators = await this.svc.getCollaborators().toPromise() || [];
+      const existingCollaborators = await this.svc.getCollaboratorsAsPromise();
       console.log(`📊 Colaboradores existentes: ${existingCollaborators.length}`);
       
       if (existingCollaborators.length > 0) {
@@ -786,7 +1056,7 @@ export class CollaboratorsPageComponent {
     
     try {
       // Obtener todos los colaboradores existentes
-      const existingCollaborators = await this.svc.getCollaborators().toPromise() || [];
+      const existingCollaborators = await this.svc.getCollaboratorsAsPromise();
       console.log(`📊 Total de colaboradores encontrados: ${existingCollaborators.length}`);
       
       if (existingCollaborators.length === 0) {
@@ -870,7 +1140,7 @@ export class CollaboratorsPageComponent {
    * Verifica si un colaborador ya existe por nombre
    */
   private async collaboratorExists(name: string): Promise<boolean> {
-    const existingCollaborators = await this.svc.getCollaborators().toPromise() || [];
+    const existingCollaborators = await this.svc.getCollaboratorsAsPromise();
     return existingCollaborators.some(c => c.name.trim().toLowerCase() === name.trim().toLowerCase());
   }
 
@@ -903,19 +1173,8 @@ export class CollaboratorsPageComponent {
     try {
       console.log('🧹 Iniciando limpieza manual de duplicados...');
       
-      // Usar promesa directa en lugar de toPromise()
-      const existingCollaborators = await new Promise<(Collaborator & { id: string })[]>((resolve, reject) => {
-        const subscription = this.svc.getCollaborators().subscribe({
-          next: (data) => {
-            subscription.unsubscribe();
-            resolve(data.filter(c => c.id) as (Collaborator & { id: string })[]);
-          },
-          error: (error) => {
-            subscription.unsubscribe();
-            reject(error);
-          }
-        });
-      });
+      // Obtener colaboradores existentes
+      const existingCollaborators = await this.svc.getCollaboratorsAsPromise() as (Collaborator & { id: string })[];
       
       console.log(`📊 Colaboradores encontrados: ${existingCollaborators.length}`);
       
@@ -1034,10 +1293,24 @@ export class CollaboratorsPageComponent {
   getDisplayImage(collaborator: Collaborator): string {
     if (collaborator.isFounder) {
       // Para fundadores, priorizar imageUrl (foto personal)
-      return collaborator.imageUrl || collaborator.logoUrl || 'https://placehold.co/200x200/1e293b/ffffff?text=' + (collaborator.name.split(' ').map(n => n[0]).join(''));
+      const imageUrl = collaborator.imageUrl || collaborator.logoUrl || 'https://placehold.co/200x200/1e293b/ffffff?text=' + (collaborator.name.split(' ').map(n => n[0]).join(''));
+      
+      // Solo logear si no es placeholder
+      if (collaborator.imageUrl && !collaborator.imageUrl.includes('placehold.co')) {
+        console.log(`🖼️ Fundador ${collaborator.name} tiene foto real:`, collaborator.imageUrl);
+      }
+      
+      return imageUrl;
     } else {
       // Para colaboradores, usar logoUrl principalmente
-      return collaborator.logoUrl || collaborator.imageUrl || 'https://placehold.co/200x200/1e293b/ffffff?text=' + (collaborator.name.split(' ').map(n => n[0]).join(''));
+      const imageUrl = collaborator.logoUrl || collaborator.imageUrl || 'https://placehold.co/200x200/1e293b/ffffff?text=' + (collaborator.name.split(' ').map(n => n[0]).join(''));
+      
+      // Solo logear si no es placeholder
+      if (collaborator.logoUrl && !collaborator.logoUrl.includes('placehold.co')) {
+        console.log(`🖼️ Colaborador ${collaborator.name} tiene logo real:`, collaborator.logoUrl);
+      }
+      
+      return imageUrl;
     }
   }
 }
