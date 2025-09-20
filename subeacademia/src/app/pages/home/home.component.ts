@@ -5,13 +5,14 @@ import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { HomeConfigService, HomePageContent } from '../../core/data/home-config.service';
-import { Subscription, distinctUntilChanged, switchMap, Observable } from 'rxjs';
+import { Subscription, distinctUntilChanged, switchMap, Observable, combineLatest } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 import { AnimationService } from '../../core/services/animation.service';
 import { SeoService } from '../../core/seo/seo.service';
+import { SettingsService } from '../../core/data/settings.service';
 
 @Component({
   standalone: true,
@@ -28,7 +29,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     @Inject(PLATFORM_ID) private platformId: object,
     private readonly logos: LogosService,
     private readonly animationService: AnimationService,
-    private readonly seo: SeoService
+    private readonly seo: SeoService,
+    private readonly settings: SettingsService
   ) {
     // Valor por defecto para asegurar que el título se muestre
     this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
@@ -133,50 +135,69 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('🏠 HomeComponent: ngOnInit iniciado');
     console.log('🏷️ Título inicial:', this.tituloHome);
     
-    // Configurar contenido del home usando el servicio local
-    this.contentSub = this.i18n.currentLang$
-      .pipe(
-        distinctUntilChanged(),
-        switchMap((lang: any) => {
-          console.log('🌐 Cambio de idioma detectado:', lang);
-          return this.homeConfig.getHomePageContent(lang as 'es'|'en'|'pt');
-        })
-      )
-      .subscribe((c: HomePageContent) => {
-        console.log('📥 Contenido recibido del servicio:', c);
+    // Configurar contenido del home combinando ajustes y contenido dinámico
+    this.contentSub = combineLatest([
+      this.i18n.currentLang$.pipe(distinctUntilChanged()),
+      this.settings.get()
+    ]).pipe(
+      switchMap(([lang, siteSettings]) => {
+        console.log('🌐 Cambio de idioma detectado:', lang);
+        console.log('⚙️ Ajustes del sitio:', siteSettings);
         
-        // Configurar frases dinámicas
-        this.frasesDinamicas = c?.typewriterPhrases?.length ? c.typewriterPhrases : [];
-        if (!this.frasesDinamicas.length) {
-          console.log('📝 Usando frases por defecto');
-          this.frasesDinamicas = [
-            'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
-            'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
-            'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
-          ];
-        }
-        console.log('📝 Frases dinámicas configuradas:', this.frasesDinamicas);
-        
-        // Configurar título
-        this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
-        console.log('🏷️ Título del home configurado:', this.tituloHome);
+        return this.homeConfig.getHomePageContent(lang as 'es'|'en'|'pt').pipe(
+          // Combinar con los ajustes del sitio
+          switchMap(homeContent => {
+            console.log('📥 Contenido del home:', homeContent);
+            
+            // Usar título desde ajustes si está disponible, sino el del contenido, sino el por defecto
+            const finalTitle = siteSettings?.homeTitle || 
+                              homeContent?.title || 
+                              'Potencia tu Talento en la Era de la Inteligencia Artificial';
+            
+            return [{ 
+              ...homeContent, 
+              title: finalTitle,
+              siteSettings 
+            }];
+          })
+        );
+      })
+    ).subscribe((data: any) => {
+      const c = data as HomePageContent & { siteSettings?: any };
+      console.log('📥 Datos finales combinados:', c);
+      
+      // Configurar frases dinámicas
+      this.frasesDinamicas = c?.typewriterPhrases?.length ? c.typewriterPhrases : [];
+      if (!this.frasesDinamicas.length) {
+        console.log('📝 Usando frases por defecto');
+        this.frasesDinamicas = [
+          'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
+          'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
+          'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
+        ];
+      }
+      console.log('📝 Frases dinámicas configuradas:', this.frasesDinamicas);
+      
+      // Configurar título (ahora viene de los ajustes del admin)
+      this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+      console.log('🏷️ Título del home configurado desde ajustes:', this.tituloHome);
 
-        // SEO dinámico por idioma
-        this.seo.updateTags({
-          title: this.tituloHome,
-          description: 'Formación aplicada en IA con enfoque en resultados y competencias.'
-        });
-        
-        // Configurar typewriter
-        if (typeof document !== 'undefined') {
-          this.typewriterElement = document.getElementById('typewriter');
-          if (this.typewriterElement) {
-            clearTimeout(this.timeoutId);
-            this.resetTypewriterState();
-            this.type();
-          }
-        }
+      // SEO dinámico por idioma
+      this.seo.updateTags({
+        title: this.tituloHome,
+        description: 'Formación aplicada en IA con enfoque en resultados y competencias.'
       });
+      
+      // Configurar typewriter
+      if (typeof document !== 'undefined') {
+        this.typewriterElement = document.getElementById('typewriter');
+        if (this.typewriterElement) {
+          clearTimeout(this.timeoutId);
+          this.resetTypewriterState();
+          this.type();
+        }
+      }
+    });
 
     // Cargar logos desde Firestore
     this.loadLogos();

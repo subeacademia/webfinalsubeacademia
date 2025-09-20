@@ -3,11 +3,11 @@
   <!-- Fondo animado con partículas -->
   <div class="absolute inset-0 z-0" aria-hidden="true"></div>
   
-  <!-- Elementos de fondo animados -->
+  <!-- Elementos de fondo animados con mejor contraste -->
   <div class="absolute inset-0 z-0" aria-hidden="true">
-    <div class="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl animate-float" style="background: color-mix(in srgb, var(--primary) 15%, transparent);"></div>
-    <div class="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-float" style="animation-delay: -3s; background: color-mix(in srgb, var(--accent) 15%, transparent);"></div>
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse-slow" style="background: color-mix(in srgb, var(--primary) 8%, transparent);"></div>
+    <div class="hero-bg-element-1 absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl animate-float" style="background: color-mix(in srgb, var(--primary) 15%, transparent);"></div>
+    <div class="hero-bg-element-2 absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-float" style="animation-delay: -3s; background: color-mix(in srgb, var(--accent) 15%, transparent);"></div>
+    <div class="hero-bg-element-3 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl animate-pulse-slow" style="background: color-mix(in srgb, var(--primary) 8%, transparent);"></div>
   </div>
 
   <!-- Hero Scene mejorado -->
@@ -39,7 +39,7 @@
         size="lg" 
         (clicked)="iniciarDiagnostico()"
         class="hero-primary-btn"
-        style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); transition: all 0.3s ease;"
+        style="color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; transition: all 0.3s ease;"
         aria-label="Iniciar diagnóstico de madurez en IA gratuito">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -52,7 +52,7 @@
         size="lg" 
         (clicked)="contactarAsesor()"
         class="hero-ghost-btn"
-        style="background: rgba(255, 255, 255, 0.1); color: white; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; backdrop-filter: blur(10px); transition: all 0.3s ease;"
+        style="border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; backdrop-filter: blur(10px); transition: all 0.3s ease;"
         aria-label="Hablar con un asesor especializado">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>

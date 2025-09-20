@@ -36,6 +36,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'leads-old', loadComponent: () => import('./leads/admin-leads.component').then(m => m.AdminLeadsComponent), canActivate: [AdminGuard] },
       { path: 'diagnostic-leads', redirectTo: 'leads', pathMatch: 'full' },
       { path: 'diagnostic-leads-empresa', loadComponent: () => import('./leads/admin-diagnostic-leads-empresa.component').then(m => m.AdminDiagnosticLeadsEmpresaComponent), canActivate: [AdminGuard] },
+      { path: 'users', loadComponent: () => import('./users/users-management.component').then(m => m.UsersManagementComponent), canActivate: [AdminGuard] },
       { path: 'settings', loadComponent: () => import('./settings/settings-page.component').then(m => m.SettingsPageComponent), canActivate: [AdminGuard] },
       { path: '**', redirectTo: 'posts' }
     ]

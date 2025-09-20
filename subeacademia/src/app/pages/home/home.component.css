@@ -17,15 +17,25 @@ section { scroll-margin-top: 80px; }
   z-index: 10 !important;
 }
 
-/* Estilos para el texto con gradiente */
+/* Estilos para el texto con gradiente - Optimizado para ambos temas */
 .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 50%, #818cf8 100%);
+  /* Gradiente para modo claro - colores más oscuros y contrastantes */
+  background: linear-gradient(135deg, #1e40af 0%, #3730a3 30%, #581c87 70%, #7c2d12 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+/* Gradiente optimizado para modo oscuro */
+.dark .gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 30%, #818cf8 70%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Contenedor del typewriter para mantener elementos en línea */
@@ -46,15 +56,20 @@ section { scroll-margin-top: 80px; }
   word-break: break-word; /* Romper palabras largas si es necesario */
 }
 
-/* Typewriter cursor parpadeante */
+/* Typewriter cursor parpadeante - Optimizado para ambos temas */
 .cursor {
   display: inline;
-  color: #c7d2fe; /* indigo-200 */
+  color: #3730a3; /* Índigo oscuro para modo claro */
   animation: blink 1s steps(2, start) infinite;
   vertical-align: baseline; /* Asegurar alineación con el texto */
   margin-left: 2px; /* Pequeño espacio entre texto y cursor */
   flex-shrink: 0; /* Evitar que el cursor se comprima */
   line-height: inherit; /* Heredar la altura de línea del contenedor */
+}
+
+/* Cursor optimizado para modo oscuro */
+.dark .cursor {
+  color: #c7d2fe; /* indigo-200 para modo oscuro */
 }
 
 /* Asegurar que el contenedor del typewriter mantenga elementos en línea */
@@ -452,6 +467,26 @@ html {
   animation: pulse-slow 4s ease-in-out infinite;
 }
 
+/* Elementos de fondo mejorados para light mode */
+:root:not(.dark) .hero-bg-element-1 {
+  background: radial-gradient(circle, rgba(30, 64, 175, 0.25) 0%, rgba(30, 64, 175, 0.1) 50%, transparent 100%) !important;
+}
+
+:root:not(.dark) .hero-bg-element-2 {
+  background: radial-gradient(circle, rgba(55, 48, 163, 0.25) 0%, rgba(55, 48, 163, 0.1) 50%, transparent 100%) !important;
+}
+
+:root:not(.dark) .hero-bg-element-3 {
+  background: radial-gradient(circle, rgba(88, 28, 135, 0.2) 0%, rgba(88, 28, 135, 0.08) 50%, transparent 100%) !important;
+}
+
+/* Mantener los estilos originales para dark mode */
+.dark .hero-bg-element-1,
+.dark .hero-bg-element-2,
+.dark .hero-bg-element-3 {
+  /* Los estilos originales se mantienen a través de las variables CSS */
+}
+
 /* ===== SISTEMA DE BOTONES UNIFORME ===== */
 
 /* Asegurar que todos los botones tengan el mismo comportamiento base */
@@ -549,18 +584,55 @@ app-ui-button.w-full {
 
 /* ===== ESTILOS COLORIDOS ESPECÍFICOS PARA BOTONES ===== */
 
-/* Botón principal del hero */
+/* Botón principal del hero - Mejorado para ambos temas */
+.hero-primary-btn {
+  background: linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #581c87 100%) !important;
+  box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4) !important;
+}
+
 .hero-primary-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 50%, #6b21a8 100%) !important;
   transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(30, 64, 175, 0.6) !important;
+}
+
+/* Botón principal del hero en modo oscuro */
+.dark .hero-primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%) !important;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+.dark .hero-primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
   box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5) !important;
 }
 
-/* Botón ghost del hero */
+/* Botón ghost del hero - Mejorado para ambos temas */
+.hero-ghost-btn {
+  background: rgba(30, 64, 175, 0.1) !important;
+  border: 2px solid rgba(30, 64, 175, 0.3) !important;
+  color: #1e40af !important;
+}
+
 .hero-ghost-btn:hover {
+  background: rgba(30, 64, 175, 0.2) !important;
+  border-color: rgba(30, 64, 175, 0.5) !important;
+  color: #1d4ed8 !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3) !important;
+}
+
+/* Botón ghost del hero en modo oscuro */
+.dark .hero-ghost-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.dark .hero-ghost-btn:hover {
   background: rgba(255, 255, 255, 0.25) !important;
   border-color: rgba(255, 255, 255, 0.6) !important;
-  transform: translateY(-3px) scale(1.05) !important;
+  color: #ffffff !important;
   box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2) !important;
 }
 

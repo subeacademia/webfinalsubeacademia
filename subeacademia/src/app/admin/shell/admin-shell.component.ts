@@ -21,17 +21,42 @@ import { Subject, takeUntil } from 'rxjs';
     <aside class="p-4 space-y-2 border-r border-white/10 bg-[var(--panel)]/50"
            [class.hidden]="!open" [class.md:block]="true">
       <div class="text-xs text-[var(--muted)] mb-2" *ngIf="userEmail">{{ userEmail }}</div>
-      <a class="btn w-full" routerLink="/admin/posts">Posts</a>
-      <a class="btn w-full" routerLink="/admin/productos">Productos</a>
-      <a class="btn w-full" routerLink="/admin/projects">Proyectos</a>
-      <a class="btn w-full" routerLink="/admin/certificados">Certificados</a>
-      <a class="btn w-full" routerLink="/admin/media">Media</a>
-      <a class="btn w-full" routerLink="/admin/logos">Logos</a>
-      <a class="btn w-full" routerLink="/admin/history">Historia</a>
-      <a class="btn w-full" routerLink="/admin/collaborators">Colaboradores</a>
-      <a class="btn w-full" routerLink="/admin/leads">Leads</a>
-      <a class="btn w-full" routerLink="/admin/settings">Ajustes</a>
-      <button class="btn w-full" (click)="logout()">Cerrar sesión</button>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/posts">
+        <span class="text-lg flex-shrink-0">📝</span> Posts
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/productos">
+        <span class="text-lg flex-shrink-0">🛍️</span> Productos
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/projects">
+        <span class="text-lg flex-shrink-0">🚀</span> Proyectos
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/certificados">
+        <span class="text-lg flex-shrink-0">🏆</span> Certificados
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/media">
+        <span class="text-lg flex-shrink-0">📷</span> Media
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/logos">
+        <span class="text-lg flex-shrink-0">🎨</span> Logos
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/history">
+        <span class="text-lg flex-shrink-0">📚</span> Historia
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/collaborators">
+        <span class="text-lg flex-shrink-0">🤝</span> Colaboradores
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/leads">
+        <span class="text-lg flex-shrink-0">📊</span> Leads
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/users">
+        <span class="text-lg flex-shrink-0">👥</span> Usuarios
+      </a>
+      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/settings">
+        <span class="text-lg flex-shrink-0">⚙️</span> Ajustes
+      </a>
+      <button class="btn w-full flex items-center justify-start gap-3 text-left" (click)="logout()">
+        <span class="text-lg flex-shrink-0">🚪</span> Cerrar sesión
+      </button>
     </aside>
     <main class="p-4">
       <router-outlet/>

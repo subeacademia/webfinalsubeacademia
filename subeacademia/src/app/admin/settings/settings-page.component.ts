@@ -12,20 +12,39 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
   template: `
   <h1 class="text-2xl font-semibold mb-3">Ajustes</h1>
   <form [formGroup]="form" class="grid gap-4 md:grid-cols-2" (ngSubmit)="save()">
+    <!-- Configuración Principal -->
+    <div class="md:col-span-2 mb-4">
+      <h2 class="text-xl font-medium mb-3 text-blue-600">🏠 Configuración de la Página Principal</h2>
+    </div>
+    
+    <label class="block">Título de la Página de Inicio
+      <input class="w-full ui-input" formControlName="homeTitle" 
+             placeholder="Potencia tu Talento en la Era de la Inteligencia Artificial" />
+      <small class="text-gray-500">Este es el título principal que aparece en el hero de la página de inicio</small>
+    </label>
+    
     <label class="block">Nombre de marca
       <input class="w-full ui-input" formControlName="brandName" />
     </label>
+    
     <label class="block">Logo URL
       <input class="w-full ui-input" formControlName="logoUrl" />
     </label>
+    
     <label class="block">Idioma por defecto
       <select class="w-full ui-input" formControlName="defaultLang">
         <option value="es">es</option><option value="en">en</option><option value="pt">pt</option>
       </select>
     </label>
+    
     <label class="block">Email de contacto
       <input class="w-full ui-input" formControlName="contactEmail" />
     </label>
+
+    <!-- Configuración SEO -->
+    <div class="md:col-span-2 mb-4 mt-6">
+      <h2 class="text-xl font-medium mb-3 text-green-600">🔍 Configuración SEO</h2>
+    </div>
 
     <label class="block">GA4 Measurement ID
       <input class="w-full ui-input" formControlName="ga4MeasurementId" />
@@ -33,6 +52,11 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
     <label class="block">Search Console Verification
       <input class="w-full ui-input" formControlName="searchConsoleVerification" />
     </label>
+
+    <!-- Redes Sociales -->
+    <div class="md:col-span-2 mb-4 mt-6">
+      <h2 class="text-xl font-medium mb-3 text-purple-600">📱 Redes Sociales</h2>
+    </div>
 
     <label class="block">Twitter
       <input class="w-full ui-input" formControlName="twitter" />
@@ -44,13 +68,15 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
       <input class="w-full ui-input" formControlName="youtube" />
     </label>
 
-    <div class="md:col-span-2">
+    <div class="md:col-span-2 mt-6">
       <button class="btn btn-primary" type="submit">Guardar</button>
-      <span *ngIf="saved()" class="text-green-500 ml-3">Guardado</span>
+      <span *ngIf="saved()" class="text-green-500 ml-3">✅ Guardado</span>
     </div>
   </form>
 
-  <app-typewriter-manager></app-typewriter-manager>
+  <div class="mt-8">
+    <app-typewriter-manager></app-typewriter-manager>
+  </div>
   `,
 })
 export class SettingsPageComponent {
@@ -60,6 +86,7 @@ export class SettingsPageComponent {
   saved = signal(false);
 
   form = this.fb.group({
+    homeTitle: ['Potencia tu Talento en la Era de la Inteligencia Artificial'],
     brandName: ['Sube Academ-IA', Validators.required],
     logoUrl: [''],
     defaultLang: ['es', Validators.required],
@@ -75,6 +102,7 @@ export class SettingsPageComponent {
     this.settings.get().subscribe((s: SiteSettings | undefined) => {
       if (!s) return;
       this.form.patchValue({
+        homeTitle: s.homeTitle || 'Potencia tu Talento en la Era de la Inteligencia Artificial',
         brandName: s.brandName || 'Sube Academ-IA',
         logoUrl: s.logoUrl || '',
         defaultLang: s.defaultLang || 'es',
@@ -92,6 +120,7 @@ export class SettingsPageComponent {
     const v = this.form.getRawValue();
     try {
       await this.settings.save({
+        homeTitle: v.homeTitle || 'Potencia tu Talento en la Era de la Inteligencia Artificial',
         brandName: v.brandName!,
         logoUrl: v.logoUrl!,
         defaultLang: v.defaultLang as any,
@@ -100,10 +129,11 @@ export class SettingsPageComponent {
         searchConsoleVerification: v.searchConsoleVerification || undefined,
         social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined }
       });
-      this.toast.success('Ajustes guardados');
+      this.toast.success('Ajustes guardados correctamente');
       this.saved.set(true);
       setTimeout(()=> this.saved.set(false), 2000);
-    } catch {
+    } catch (error) {
+      console.error('Error guardando ajustes:', error);
       this.toast.error('No se pudieron guardar los ajustes');
     }
   }

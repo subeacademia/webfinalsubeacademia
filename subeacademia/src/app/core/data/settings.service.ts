@@ -12,6 +12,7 @@ export interface SiteSettings {
   contactEmail?: string;
   ga4MeasurementId?: string;
   searchConsoleVerification?: string;
+  homeTitle?: string; // Título principal de la página de inicio
 }
 
 export interface HomePageContent {
