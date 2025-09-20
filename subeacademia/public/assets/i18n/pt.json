@@ -31,6 +31,12 @@
       "title": "Pronto para Liderar a Transformação?",
       "subtitle": "Vamos conversar sobre como podemos capacitar sua equipe e preparar sua organização para o futuro da IA.",
       "button": "Contatar um Consultor"
+    },
+    "methodology": {
+      "cta_ready": "Pronto para transformar sua organização com nosso framework ARES-AI comprovado?",
+      "btn_start_diagnostic": "Começar Diagnóstico Gratuito",
+      "btn_view_methodology": "Ver Metodologia Completa",
+      "additional_text": "Conheça em detalhes cada fase, ferramentas e melhores práticas de implementação"
     }
   },
   "hero": {
@@ -115,6 +121,7 @@
       "vision_title": "Nossa visão",
       "vision_desc": "Democratizar o conhecimento sobre IA para transformar a sociedade, oferecendo ferramentas concretas que permitam às pessoas se reinventarem e fazerem o que realmente amam.",
       "values_title": "Nossos valores",
+      "values_desc": "Excelência, Inovação Constante, Integridade e um Compromisso real com o sucesso de cada um de nossos estudantes e parceiros.",
       "values": {
         "v1": "Impacto mensurável e sustentável",
         "v2": "Ética, segurança e privacidade por design",
@@ -172,5 +179,110 @@
     "lessons": "Lições",
     "level": "Nível",
     "enroll_button": "Inscreva-se Agora"
+  },
+  "diagnostico": {
+    "segmento": {
+      "title": "Selecione seu segmento",
+      "empresa": "Empresa / Organização",
+      "educacion_superior": "Ensino Superior",
+      "educacion_escolar": "Educação Escolar (Fundamental/Médio)",
+      "profesional_independiente": "Profissional Independente"
+    },
+    "contexto": {
+      "title": "Contexto da sua organização",
+      "startup": {
+        "industria": "Indústria",
+        "tamanoEquipo": "Tamanho da equipe",
+        "antiguedadMeses": "Idade (meses)",
+        "modeloNegocio": "Modelo de negócio"
+      },
+      "pyme": {
+        "industria": "Indústria",
+        "tamanoEmpresa": "Tamanho da empresa",
+        "facturacionAnual": "Faturamento anual (USD)",
+        "zonaOperacion": "Área de operação"
+      },
+      "corporativo": {
+        "industria": "Indústria",
+        "numEmpleados": "Número de funcionários",
+        "presupuestoInnovacion": "Orçamento anual de inovação (USD)",
+        "presenciaRegional": "Presença regional/internacional?"
+      }
+    },
+    "objetivo": {
+      "title": "Objetivo estratégico principal",
+      "eficiencia": "Eficiência operacional",
+      "crecimiento": "Crescimento",
+      "innovacion": "Inovação",
+      "experienciaCliente": "Experiência do cliente"
+    },
+    "ares": {
+      "title": "Avaliação ARES-AI",
+      "likert": {
+        "0": "N/A",
+        "1": "Muito baixo",
+        "2": "Baixo",
+        "3": "Médio",
+        "4": "Alto",
+        "5": "Muito alto"
+      },
+      "items": {
+        "adopcion_01": "Nível de adoção de ferramentas de IA em processos-chave",
+        "adopcion_02": "Existência de estratégia e roadmap de adoção de IA",
+        "riesgos_01": "Identificação e gestão de riscos de IA",
+        "etica_01": "Práticas de ética e vieses em IA",
+        "seguridad_01": "Controles de segurança e privacidade por design",
+        "capacidad_01": "Capacidades internas para operar IA",
+        "datos_01": "Qualidade e disponibilidade de dados",
+        "gobernanza_01": "Governança e papéis ARES",
+        "valor_01": "Métricas de valor de iniciativas IA",
+        "operacion_01": "Operação e monitoramento de modelos",
+        "talento_01": "Atração e desenvolvimento de talentos IA",
+        "tecnologia_01": "Arquitetura e ferramentas tecnológicas",
+        "integracion_01": "Integração de IA em sistemas e processos",
+        "cumplimiento_01": "Conformidade regulatória aplicável",
+        "transparencia_01": "Transparência e explicabilidade",
+        "sostenibilidad_01": "Sustentabilidade e eficiência de recursos"
+      },
+      "desc": {
+        "adopcion_01": "Avalia quanto se usa soluções de IA em processos críticos do negócio (não apenas testes isolados).",
+        "adopcion_02": "Avalia se existe um plano/roadmap com priorização e marcos para implantação de IA.",
+        "riesgos_01": "Avalia se são identificados, mitigados e monitorados riscos associados à IA.",
+        "etica_01": "Avalia se existem práticas para evitar vieses, danos e uso responsável.",
+        "seguridad_01": "Avalia privacidade por design, controles de acesso e proteção de dados.",
+        "capacidad_01": "Avalia a preparação da equipe para operar e manter soluções IA.",
+        "datos_01": "Avalia a qualidade, governança e acesso aos dados necessários para IA.",
+        "gobernanza_01": "Avalia se existem papéis, políticas e comitês que orientem IA.",
+        "valor_01": "Avalia se são definidos KPIs de valor e se são medidos resultados.",
+        "operacion_01": "Avalia o monitoramento, retreinamento e observabilidade de modelos.",
+        "talento_01": "Avalia a disponibilidade de talentos e planos de capacitação.",
+        "tecnologia_01": "Avalia a adequação da plataforma, ferramentas e MLOps.",
+        "integracion_01": "Avalia quão bem se integram as soluções IA ao stack e processos.",
+        "cumplimiento_01": "Avalia o cumprimento de normas e padrões relevantes.",
+        "transparencia_01": "Avalia a explicabilidade e rastreabilidade em decisões de IA.",
+        "sostenibilidad_01": "Avalia o uso eficiente de recursos e o impacto ambiental."
+      }
+    },
+    "competencias": {
+      "title": "Autoavaliação de competências",
+      "nivel": {
+        "incipiente": "Incipiente",
+        "basico": "Básico",
+        "intermedio": "Intermediário",
+        "avanzado": "Avançado",
+        "lider": "Líder"
+      }
+    },
+    "lead": {
+      "title": "Deixe seus dados para receber o relatório",
+      "nombre": "Nome",
+      "email": "Endereço de email",
+      "telefono": "Telefone",
+      "aceptaComunicaciones": "Aceito receber comunicações da Sube Academ-IA"
+    },
+    "resumen": {
+      "title": "Resumo do diagnóstico",
+      "descripcion": "Revise suas respostas antes de continuar."
+    }
   }
 }

@@ -1,5 +1,5 @@
 <div class="carousel-wrapper" 
-     *ngIf="logos && logos.length > 0" 
+     *ngIf="displayLogos && displayLogos.length > 0" 
      (mouseenter)="onMouseEnter()" 
      (mouseleave)="onMouseLeave()">
   
@@ -32,7 +32,7 @@
        #scrollContainer
        (scroll)="onScroll()">
     <div class="logos-track">
-      <div *ngFor="let logo of logos; trackBy: trackByLogoId" class="logo-item">
+      <div *ngFor="let logo of displayLogos; trackBy: trackByLogoId" class="logo-item">
         <a *ngIf="logo.websiteUrl; else noLink" 
            [href]="logo.websiteUrl" 
            target="_blank" 

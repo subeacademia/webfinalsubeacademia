@@ -144,76 +144,10 @@ section { scroll-margin-top: 80px; }
 .flip-body h3 { font-size: 1.125rem; }
 .flip-body p { font-size: 0.95rem; }
 
-/* Estilos mejorados para los botones CTA principales */
+/* Contenedor de botones CTA */
 .hero-cta-buttons {
   position: relative;
   z-index: 20;
-}
-
-/* Botón primario con efectos mejorados */
-.hero-cta-buttons app-ui-button[variant="primary"] {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  border: none;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]:hover::before {
-  left: 100%;
-}
-
-/* Botón secundario con efectos mejorados */
-.hero-cta-buttons app-ui-button[variant="ghost"] {
-  position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-cta-buttons app-ui-button[variant="ghost"]:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
-}
-
-/* Efectos de partículas para los botones */
-.hero-cta-buttons app-ui-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.hero-cta-buttons app-ui-button:active::after {
-  width: 300px;
-  height: 300px;
-  opacity: 0;
 }
 
 /* Responsive para botones en móviles */
@@ -222,90 +156,76 @@ section { scroll-margin-top: 80px; }
     flex-direction: column;
     gap: 1rem;
   }
-  
-  .hero-cta-buttons app-ui-button {
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
-  }
 }
 
-/* Animación de entrada para los botones */
-@keyframes buttonSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ===== ESTILOS PARA LA METODOLOGÍA ARES-AI FINAL CON CARD STACKING ===== */
+
+/* Estilos para el item de navegación de fase */
+.phase-nav-item {
+  background-color: transparent;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.hero-cta-buttons app-ui-button {
-  animation: buttonSlideIn 0.8s ease-out forwards;
+.phase-nav-item:hover {
+  background-color: var(--fallback-b2, oklch(var(--b2) / 0.3));
+  border-color: var(--fallback-p, oklch(var(--p) / 0.1));
+  transform: translateX(5px);
 }
 
-.hero-cta-buttons app-ui-button:nth-child(2) {
-  animation-delay: 0.2s;
+/* Estilo del item de navegación CUANDO ESTÁ ACTIVO */
+.phase-nav-item.active {
+  background-color: var(--fallback-b2, oklch(var(--b2) / 0.7));
+  border-color: var(--fallback-p, oklch(var(--p) / 0.3));
+  transform: translateX(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ===== ESTILOS PARA LA NUEVA METODOLOGÍA ARES-AI INTERACTIVA ===== */
-
-/* Animación de entrada para las tarjetas de contenido */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.phase-nav-item.active span {
+  color: var(--fallback-bc, oklch(var(--bc)));
 }
 
-/* Tarjeta de contenido de fase con posicionamiento absoluto para transiciones suaves */
+/* ===== ESTILOS CLAVE PARA EL CARD STACKING ===== */
+
+/* Estilos para las tarjetas de contenido apilables */
 .phase-content-card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  animation: fadeIn 0.6s ease-out forwards;
+  /* Ya tiene sticky top-24 desde Tailwind en el HTML */
+  transition: transform 0.4s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
+  scroll-margin-top: 6rem; /* Compensa la navegación sticky */
+  transform-origin: center top; /* Punto de origen para las transformaciones */
+  position: relative; /* Asegurar contexto de apilamiento */
 }
 
-/* Adaptación responsive para móviles del stepper */
-@media (max-width: 767px) {
-  /* Contenedor principal del stepper en móvil */
-  .flex.flex-col.md\:flex-row {
-    align-items: flex-start;
-  }
-  
-  /* Cada elemento del stepper en móvil */
-  .flex.flex-col.md\:flex-row > div {
-    flex-direction: column;
-    align-items: center;
-    width: 100% !important;
-    margin-bottom: 1rem;
-  }
-  
-  .flex.flex-col.md\:flex-row > div:not(:last-child) {
-    margin-bottom: 1rem;
-  }
-  
-  /* Línea conectora en móvil - de horizontal a vertical */
-  .flex.flex-col.md\:flex-row .flex-auto.border-t-2 {
-    margin: 1rem 0;
-    margin-left: 22px; /* Alinea con el centro del botón */
-    border-top-width: 0;
-    border-left-width: 2px;
-    min-height: 40px; /* Altura de la línea conectora vertical */
-    width: 0px;
-  }
+/*
+  Z-index para que las tarjetas posteriores aparezcan sobre las anteriores
+  y puedan "empujar" hacia arriba a las que están debajo
+*/
+#phase-card-1 { z-index: 1; }
+#phase-card-2 { z-index: 2; }
+#phase-card-3 { z-index: 3; }
+#phase-card-4 { z-index: 4; }
+#phase-card-5 { z-index: 5; }
+
+/* Clase para deslizar tarjetas hacia arriba cuando aparece la siguiente */
+.phase-content-card.slide-up {
+  transform: translateY(-150%) scale(0.8); /* Mayor separación y escala más pequeña */
+  opacity: 0;
+  pointer-events: none; /* Evita interacciones con tarjetas que se han deslizado */
+  visibility: hidden; /* Oculta completamente la tarjeta */
+  z-index: -1; /* Coloca las tarjetas deslizadas detrás de todo */
+  overflow: hidden; /* Evita que el contenido se desborde */
 }
 
-/* Mejoras adicionales para la interactividad */
+/* Ocultar específicamente el texto de las tarjetas deslizadas */
+.phase-content-card.slide-up * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Mejoras para las imágenes en las tarjetas */
 .phase-content-card img {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .phase-content-card img:hover {
@@ -314,60 +234,212 @@ section { scroll-margin-top: 80px; }
 
 /* Animación sutil para los elementos de la lista de entregables */
 .phase-content-card li {
-  opacity: 0;
-  animation: fadeInUp 0.5s ease-out forwards;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.phase-content-card li:nth-child(1) { animation-delay: 0.1s; }
-.phase-content-card li:nth-child(2) { animation-delay: 0.2s; }
-.phase-content-card li:nth-child(3) { animation-delay: 0.3s; }
-.phase-content-card li:nth-child(4) { animation-delay: 0.4s; }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.phase-content-card li:hover {
+  transform: translateX(4px);
+  opacity: 1;
 }
 
-/* Estilos para los botones del stepper */
-.phase-content-card button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(var(--primary), 0.3);
-}
-
-/* Mejora visual para el contenedor de la imagen */
-.phase-content-card .relative.group {
-  overflow: hidden;
-  border-radius: 0.5rem;
-}
-
-/* Efecto de shimmer para carga de imágenes */
-.phase-content-card img[loading="lazy"] {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* Responsive para el grid de contenido */
+/* Estilos para el acordeón en móvil */
 @media (max-width: 1023px) {
-  .phase-content-card .grid.grid-cols-1.lg\:grid-cols-2 {
-    gap: 2rem;
+  /* Asegurar que la sección de metodología sea visible en móviles */
+  #metodologia {
+    position: relative;
+    z-index: 1;
+    min-height: auto;
+    display: block;
+    background: var(--fallback-b1, oklch(var(--b1))) !important;
   }
   
-  .phase-content-card .order-1.lg\:order-2,
-  .phase-content-card .order-2.lg\:order-1 {
-    order: unset;
+  /* Asegurar que el título y descripción sean visibles */
+  #metodologia h2,
+  #metodologia p {
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative;
+    z-index: 2;
   }
+  
+  /* Estilos específicos para el título con gradiente */
+  #metodologia .gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Asegurar que el contenido del acordeón sea visible */
+  #metodologia .lg\:hidden {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Estilos mejorados para el acordeón */
+  .collapse {
+    position: relative;
+    z-index: 2;
+    background-color: var(--fallback-b2, oklch(var(--b2)));
+    border: 1px solid var(--fallback-bc, oklch(var(--bc) / 0.1));
+    overflow: visible;
+  }
+  
+  /* Asegurar que el acordeón expandido muestre todo el contenido */
+  .collapse[open] .collapse-content,
+  .collapse input[type="radio"]:checked ~ .collapse-content {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .collapse-title {
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 3;
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+  }
+  
+  .collapse-title:hover {
+    background-color: var(--fallback-b3, oklch(var(--b3) / 0.5));
+  }
+  
+  .collapse-content {
+    position: relative;
+    z-index: 3;
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+  }
+  
+  /* Asegurar que las imágenes del acordeón se vean bien */
+  .collapse-content img {
+    transition: transform 0.3s ease;
+    display: block !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 192px !important; /* h-48 = 12rem = 192px */
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative;
+    z-index: 10;
+    background-color: var(--fallback-b3, oklch(var(--b3)));
+  }
+  
+  .collapse-content img:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Fallback para imágenes que no cargan */
+  .collapse-content img[src=""],
+  .collapse-content img:not([src]) {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .collapse-content img[src=""]:before,
+  .collapse-content img:not([src]):before {
+    content: "📷";
+    font-size: 2rem;
+    color: var(--fallback-bc, oklch(var(--bc) / 0.3));
+  }
+  
+  /* Estilos específicos para las imágenes móviles */
+  .mobile-methodology-image {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 15 !important;
+    width: 100% !important;
+    height: 192px !important;
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+    background-color: #f3f4f6 !important;
+    min-height: 192px !important;
+  }
+  
+  /* Asegurar que el contenedor de la imagen sea visible */
+  .collapse-content .space-y-4 {
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Estilos específicos para texto en móvil */
+  .collapse-content h3,
+  .collapse-content h4,
+  .collapse-content p,
+  .collapse-content li {
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Asegurar que los iconos sean visibles */
+  .collapse-content svg {
+    color: var(--fallback-su, oklch(var(--su))) !important;
+  }
+  
+  /* Estilos adicionales para mejorar el contraste */
+  #metodologia .container {
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Asegurar que el CTA final sea visible */
+  #metodologia .text-center {
+    position: relative;
+    z-index: 3;
+  }
+  
+  #metodologia .text-center p {
+    color: var(--fallback-bc, oklch(var(--bc) / 0.7)) !important;
+  }
+  
+  /* Corregir gradientes en botones de metodología */
+  #metodologia .btn-primary {
+    background: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: white !important;
+  }
+  
+  #metodologia .btn-primary:hover {
+    background: #2563eb !important;
+    border-color: #2563eb !important;
+    color: white !important;
+  }
+}
+
+/* Estilos para mejorar la accesibilidad */
+.phase-nav-item:focus {
+  outline: 2px solid var(--fallback-p, oklch(var(--p)));
+  outline-offset: 2px;
+}
+
+.phase-nav-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Mejoras para el CTA final */
+app-ui-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mejorar el spacing en el acordeón */
+.collapse-content {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+/* Smooth scroll para los enlaces de navegación */
+html {
+  scroll-behavior: smooth;
 }
 
 /* Animación de pulso suave para elementos de fondo */
@@ -378,5 +450,205 @@ section { scroll-margin-top: 80px; }
 
 .animate-pulse-slow {
   animation: pulse-slow 4s ease-in-out infinite;
+}
+
+/* ===== SISTEMA DE BOTONES UNIFORME ===== */
+
+/* Asegurar que todos los botones tengan el mismo comportamiento base */
+app-ui-button {
+  display: inline-block;
+  width: auto;
+}
+
+/* Asegurar que flag-selector no sea afectado y sea visible */
+app-flag-selector {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+app-flag-selector .flag-selector {
+  display: flex !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+app-flag-selector button {
+  all: revert !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 2rem !important;
+  height: 1.5rem !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0.25rem !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+app-flag-selector button:hover {
+  transform: scale(1.1) !important;
+  border-color: #3b82f6 !important;
+}
+
+app-flag-selector .flag-image {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+app-flag-selector svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Botones con ancho completo en secciones específicas */
+.w-full app-ui-button,
+app-ui-button.w-full {
+  width: 100%;
+}
+
+/* Asegurar alineación en secciones de soluciones */
+.solutions-grid {
+  align-items: stretch;
+}
+
+.solutions-grid .group {
+  display: flex;
+  flex-direction: column;
+}
+
+.solutions-grid .group > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.solutions-grid .relative:last-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.solutions-grid app-ui-button {
+  width: 100%;
+  margin: 0 auto;
+  margin-top: auto;
+}
+
+/* ===== ESTILOS COLORIDOS ESPECÍFICOS PARA BOTONES ===== */
+
+/* Botón principal del hero */
+.hero-primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Botón ghost del hero */
+.hero-ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Botón de metodología azul */
+.methodology-primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Botón de metodología púrpura */
+.methodology-purple-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.5) !important;
+}
+
+/* Botón azul de soluciones */
+.solution-blue-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.6) !important;
+}
+
+/* Botón verde de soluciones */
+.solution-green-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Botón naranja de soluciones */
+.solution-orange-btn:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(245, 158, 11, 0.6) !important;
+}
+
+/* Botón final cyan */
+.final-cta-btn:hover {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #155e75 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(6, 182, 212, 0.6) !important;
+}
+
+/* Efectos de pulsación para todos */
+.hero-primary-btn:active,
+.hero-ghost-btn:active,
+.methodology-primary-btn:active,
+.methodology-purple-btn:active,
+.solution-blue-btn:active,
+.solution-green-btn:active,
+.solution-orange-btn:active,
+.final-cta-btn:active {
+  transform: translateY(0) scale(0.95) !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 640px) {
+  app-ui-button {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  
+  .hero-cta-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .hero-cta-buttons app-ui-button {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  /* Ajustar padding en móviles */
+  .hero-primary-btn,
+  .hero-ghost-btn,
+  .methodology-primary-btn,
+  .methodology-purple-btn,
+  .solution-blue-btn,
+  .solution-green-btn,
+  .solution-orange-btn,
+  .final-cta-btn {
+    padding: 0.875rem 1.5rem !important;
+    font-size: 0.95rem !important;
+  }
 }
 

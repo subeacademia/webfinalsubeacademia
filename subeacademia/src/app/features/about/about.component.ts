@@ -35,9 +35,9 @@ export class AboutComponent implements AfterViewInit, OnInit {
 
   activeTab = 'mision';
   philosophyTabs = [
-    { id: 'mision', title: 'Misión', content: 'Impulsar la evolución de profesionales y empresas a través de una educación en IA profundamente personalizada y práctica, transformando el paradigma de la enseñanza hacia el aprendizaje efectivo (matética).' },
-    { id: 'vision', title: 'Visión', content: 'Ser el referente en Latinoamérica en la formación de talento en Inteligencia Artificial, reconocidos por nuestra metodología innovadora que garantiza resultados tangibles y de alto impacto.' },
-    { id: 'valores', title: 'Valores', content: 'Excelencia, Innovación Constante, Integridad y un Compromiso real con el éxito de cada uno de nuestros estudiantes y socios.' }
+    { id: 'mision', titleKey: 'about.mvv.mission_title', contentKey: 'about.mvv.mission_desc' },
+    { id: 'vision', titleKey: 'about.mvv.vision_title', contentKey: 'about.mvv.vision_desc' },
+    { id: 'valores', titleKey: 'about.mvv.values_title', contentKey: 'about.mvv.values_desc' }
   ];
 
   founders: TeamMember[] = [];

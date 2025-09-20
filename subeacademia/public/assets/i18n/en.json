@@ -31,6 +31,12 @@
       "title": "Ready to Lead the Transformation?",
       "subtitle": "Let's talk about how we can empower your team and prepare your organization for the future of AI.",
       "button": "Contact an Advisor"
+    },
+    "methodology": {
+      "cta_ready": "Ready to transform your organization with our proven ARES-AI framework?",
+      "btn_start_diagnostic": "Start Free Diagnostic",
+      "btn_view_methodology": "View Complete Methodology",
+      "additional_text": "Learn in detail about each phase, tools and implementation best practices"
     }
   },
   "hero": {
@@ -115,6 +121,7 @@
       "vision_title": "Our vision",
       "vision_desc": "Democratize AI knowledge to change society, delivering concrete tools that allow people to reinvent themselves and do what they truly love.",
       "values_title": "Our values",
+      "values_desc": "Excellence, Constant Innovation, Integrity and a real Commitment to the success of each of our students and partners.",
       "values": {
         "v1": "Measurable and sustainable impact",
         "v2": "Ethics, security and privacy by design",
@@ -172,5 +179,110 @@
     "lessons": "Lessons",
     "level": "Level",
     "enroll_button": "Enroll Now"
+  },
+  "diagnostico": {
+    "segmento": {
+      "title": "Select your segment",
+      "empresa": "Company / Organization",
+      "educacion_superior": "Higher Education",
+      "educacion_escolar": "School Education (Elementary/Secondary)",
+      "profesional_independiente": "Independent Professional"
+    },
+    "contexto": {
+      "title": "Your organization context",
+      "startup": {
+        "industria": "Industry",
+        "tamanoEquipo": "Team size",
+        "antiguedadMeses": "Age (months)",
+        "modeloNegocio": "Business model"
+      },
+      "pyme": {
+        "industria": "Industry",
+        "tamanoEmpresa": "Company size",
+        "facturacionAnual": "Annual revenue (USD)",
+        "zonaOperacion": "Operating area"
+      },
+      "corporativo": {
+        "industria": "Industry",
+        "numEmpleados": "Number of employees",
+        "presupuestoInnovacion": "Annual innovation budget (USD)",
+        "presenciaRegional": "Regional/international presence?"
+      }
+    },
+    "objetivo": {
+      "title": "Main strategic objective",
+      "eficiencia": "Operational efficiency",
+      "crecimiento": "Growth",
+      "innovacion": "Innovation",
+      "experienciaCliente": "Customer experience"
+    },
+    "ares": {
+      "title": "ARES-AI Assessment",
+      "likert": {
+        "0": "N/A",
+        "1": "Very low",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "Very high"
+      },
+      "items": {
+        "adopcion_01": "Level of AI tool adoption in key processes",
+        "adopcion_02": "Existence of AI adoption strategy and roadmap",
+        "riesgos_01": "AI risk identification and management",
+        "etica_01": "AI ethics and bias practices",
+        "seguridad_01": "Security and privacy by design controls",
+        "capacidad_01": "Internal capabilities to operate AI",
+        "datos_01": "Data quality and availability",
+        "gobernanza_01": "ARES governance and roles",
+        "valor_01": "Value metrics for AI initiatives",
+        "operacion_01": "Model operation and monitoring",
+        "talento_01": "AI talent attraction and development",
+        "tecnologia_01": "Technology architecture and tools",
+        "integracion_01": "AI integration into systems and processes",
+        "cumplimiento_01": "Applicable regulatory compliance",
+        "transparencia_01": "Transparency and explainability",
+        "sostenibilidad_01": "Resource sustainability and efficiency"
+      },
+      "desc": {
+        "adopcion_01": "Evaluates how much AI solutions are used in critical business processes (not just isolated tests).",
+        "adopcion_02": "Evaluates if there is a plan/roadmap with prioritization and milestones for AI deployment.",
+        "riesgos_01": "Evaluates if AI-associated risks are identified, mitigated and monitored.",
+        "etica_01": "Evaluates if practices exist to avoid bias, harm and responsible use.",
+        "seguridad_01": "Evaluates privacy by design, access controls and data protection.",
+        "capacidad_01": "Evaluates team readiness to operate and maintain AI solutions.",
+        "datos_01": "Evaluates quality, governance and access to data needed for AI.",
+        "gobernanza_01": "Evaluates if roles, policies and committees exist to guide AI.",
+        "valor_01": "Evaluates if value KPIs are defined and results are measured.",
+        "operacion_01": "Evaluates monitoring, retraining and model observability.",
+        "talento_01": "Evaluates talent availability and upskilling plans.",
+        "tecnologia_01": "Evaluates platform, tools and MLOps suitability.",
+        "integracion_01": "Evaluates how well AI solutions integrate into the stack and processes.",
+        "cumplimiento_01": "Evaluates compliance with relevant norms and standards.",
+        "transparencia_01": "Evaluates explainability and traceability in AI decisions.",
+        "sostenibilidad_01": "Evaluates efficient resource use and environmental impact."
+      }
+    },
+    "competencias": {
+      "title": "Competency self-assessment",
+      "nivel": {
+        "incipiente": "Emerging",
+        "basico": "Basic",
+        "intermedio": "Intermediate",
+        "avanzado": "Advanced",
+        "lider": "Leader"
+      }
+    },
+    "lead": {
+      "title": "Leave your details to receive the report",
+      "nombre": "Name",
+      "email": "Email address",
+      "telefono": "Phone",
+      "aceptaComunicaciones": "I agree to receive communications from Sube Academ-IA"
+    },
+    "resumen": {
+      "title": "Diagnosis summary",
+      "descripcion": "Review your answers before continuing."
+    }
   }
 }

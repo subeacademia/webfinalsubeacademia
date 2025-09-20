@@ -6,11 +6,13 @@ import { SettingsService, SiteSettings } from '../../../data/settings.service';
 import { ThemeService } from '../../../../shared/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { User } from '@angular/fire/auth';
+import { ThemeToggleComponent } from '../../../../shared/ui/theme-toggle/theme-toggle.component';
+import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-selector.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe],
+  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe, ThemeToggleComponent, FlagSelectorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
@@ -35,22 +37,9 @@ import { User } from '@angular/fire/auth';
             <span></span>
           </button>
           
-          <button class="theme-toggle" 
-                  (click)="toggleTheme()" 
-                  [attr.aria-label]="themeDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
-                  [attr.aria-pressed]="themeDark()">
-            <span class="sr-only">{{ themeDark() ? 'Tema oscuro activo' : 'Tema claro activo' }}</span>
-            {{ themeDark() ? '🌙' : '☀️' }}
-          </button>
+          <app-theme-toggle></app-theme-toggle>
           
-          <select class="btn ml-2" 
-                  [value]="currentLang()" 
-                  (change)="onChangeLang($any($event.target).value)" 
-                  aria-label="Cambiar idioma">
-            <option value="es">ES</option>
-            <option value="en">EN</option>
-            <option value="pt">PT</option>
-          </select>
+          <app-flag-selector></app-flag-selector>
         </div>
 
         <!-- Navegación principal desktop -->
@@ -125,26 +114,9 @@ import { User } from '@angular/fire/auth';
         <div class="hidden md:flex items-center gap-2 ml-2" role="group" aria-label="Acciones del sitio">
 
 
-          <button type="button" 
-                  (click)="toggleTheme()" 
-                  class="theme-toggle" 
-                  [attr.aria-label]="themeDark() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
-                  [attr.aria-pressed]="themeDark()"
-                  title="Cambiar tema">
-            <span class="sr-only">{{ themeDark() ? 'Tema oscuro activo' : 'Tema claro activo' }}</span>
-            {{ themeDark() ? '🌙' : '☀️' }}
-          </button>
+          <app-theme-toggle></app-theme-toggle>
           
-          <label class="sr-only" for="langSelectDesktop">Cambiar idioma</label>
-           <select id="langSelectDesktop" 
-                   class="btn" 
-                   [value]="currentLang()" 
-                   (change)="onChangeLang($any($event.target).value)" 
-                   aria-label="Cambiar idioma del sitio">
-            <option value="es">ES</option>
-            <option value="en">EN</option>
-            <option value="pt">PT</option>
-          </select>
+          <app-flag-selector></app-flag-selector>
         </div>
       </nav>
 
@@ -235,15 +207,8 @@ import { User } from '@angular/fire/auth';
             </button>
           </div>
 
-          <div class="pt-2 flex gap-2">
-            <select class="btn w-full" 
-                    [value]="currentLang()" 
-                    (change)="onChangeLang($any($event.target).value)" 
-                    aria-label="Cambiar idioma desde menú móvil">
-              <option value="es">ES</option>
-              <option value="en">EN</option>
-              <option value="pt">PT</option>
-            </select>
+          <div class="pt-2">
+            <app-flag-selector></app-flag-selector>
           </div>
         </div>
       </div>
@@ -297,9 +262,7 @@ export class AppShellComponent {
 
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
-  private readonly themeService = inject(ThemeService);
   private readonly authService = inject(AuthService);
-  themeDark = signal<boolean>(this.themeService.current() === 'dark');
 
   // Observable del usuario actual para la UI
   readonly currentUser$ = this.authService.currentUser$;
@@ -313,7 +276,7 @@ export class AppShellComponent {
         this.logoUrl.set(s.logoUrl || null);
       });
     } catch {}
-    // Theme se aplica vía ThemeService en App init; mantenemos señal para UI
+    // Settings initialization
   }
 
   toggleNav() { 
@@ -324,22 +287,7 @@ export class AppShellComponent {
     this.navOpen.set(false); 
   }
 
-  toggleTheme() { 
-    this.themeService.toggle(); 
-    this.themeDark.set(this.themeService.current() === 'dark'); 
-  }
 
-  onChangeLang(lang: string) {
-    const supported = new Set(['es', 'en', 'pt']);
-    const current = this.router.url;
-    const match = current.match(/^\/(es|en|pt)(\/|$)/);
-    if (match) {
-      const next = current.replace(/^\/(es|en|pt)/, '/' + lang);
-      void this.router.navigateByUrl(next);
-    } else {
-      void this.router.navigate(['/', lang]);
-    }
-  }
 
   async loginWithGoogle(): Promise<void> {
     try {
@@ -361,6 +309,6 @@ export class AppShellComponent {
     }
   }
 
-  // Ya no gestionamos DOM aquí; lo hace ThemeService
+  // Theme management is now handled by ThemeToggleComponent
 }
 

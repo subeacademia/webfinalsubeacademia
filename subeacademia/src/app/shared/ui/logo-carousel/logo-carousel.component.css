@@ -7,7 +7,7 @@
 .scroll-container {
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-behavior: smooth;
+  scroll-behavior: auto; /* Cambiar a auto para movimiento más fluido */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
   padding: 1rem 0;
@@ -15,13 +15,13 @@
   /* Gradiente de fade en los bordes */
   -webkit-mask-image: linear-gradient(to right, 
     rgba(0,0,0,0) 0%, 
-    rgba(0,0,0,1) 5%, 
-    rgba(0,0,0,1) 95%, 
+    rgba(0,0,0,1) 8%, 
+    rgba(0,0,0,1) 92%, 
     rgba(0,0,0,0) 100%);
   mask-image: linear-gradient(to right, 
     rgba(0,0,0,0) 0%, 
-    rgba(0,0,0,1) 5%, 
-    rgba(0,0,0,1) 95%, 
+    rgba(0,0,0,1) 8%, 
+    rgba(0,0,0,1) 92%, 
     rgba(0,0,0,0) 100%);
 }
 
@@ -36,26 +36,30 @@
   padding: 0 2rem;
   width: max-content;
   min-width: 100%;
-  justify-content: center;
+  justify-content: flex-start; /* Cambiar para mejor alineación con auto-scroll */
+  will-change: transform; /* Optimización para animaciones */
 }
 
 .logo-item {
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform; /* Optimización para hover */
 }
 
 .logo-item img {
   max-height: 60px; /* 60px para Educación */
   width: auto;
-  filter: grayscale(100%);
-  opacity: 0.6;
-  transition: all 0.3s ease;
+  filter: grayscale(100%) brightness(0.8);
+  opacity: 0.7;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
 }
 
 .logo-item img:hover {
-  filter: grayscale(0%);
+  filter: grayscale(0%) brightness(1.1);
   opacity: 1;
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .logo-link {
@@ -176,6 +180,10 @@
     gap: 2rem;
     padding: 0 1rem;
   }
+  
+  .logo-item img {
+    max-height: 50px; /* Reducir tamaño en tablets */
+  }
 }
 
 @media (max-width: 480px) {
@@ -186,5 +194,44 @@
   
   .logos-track {
     gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  .logo-item img {
+    max-height: 40px; /* Reducir más en móviles */
+  }
+  
+  .logo-item img:hover {
+    transform: scale(1.1); /* Reducir efecto hover en móviles */
+  }
+  
+  .scroll-container {
+    /* Mejor gradiente para móviles */
+    -webkit-mask-image: linear-gradient(to right, 
+      rgba(0,0,0,0) 0%, 
+      rgba(0,0,0,1) 12%, 
+      rgba(0,0,0,1) 88%, 
+      rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to right, 
+      rgba(0,0,0,0) 0%, 
+      rgba(0,0,0,1) 12%, 
+      rgba(0,0,0,1) 88%, 
+      rgba(0,0,0,0) 100%);
+  }
+}
+
+/* Mejoras para touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .logo-item img:hover {
+    filter: grayscale(100%) brightness(0.8);
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .logo-item:active img {
+    filter: grayscale(0%) brightness(1.1);
+    opacity: 1;
+    transform: scale(1.05);
   }
 }

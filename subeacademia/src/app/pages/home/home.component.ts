@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, AfterViewInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.component';
 import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { HomeConfigService, HomePageContent } from '../../core/data/home-config.service';
 import { Subscription, distinctUntilChanged, switchMap, Observable } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
@@ -15,7 +16,7 @@ import { SeoService } from '../../core/seo/seo.service';
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -60,66 +61,72 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     {
       id: 1,
       title: 'Fase 1: Preparación y Evaluación',
+      shortTitle: 'Evaluación', // Título corto para la navegación
       description: 'Establecemos cimientos sólidos, analizando tus necesidades y auditando tus datos para asegurar que cada paso sea estratégico y esté alineado con tus objetivos.',
-      imageUrl: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de planificación/estrategia
+      imageUrl: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600',
       deliverables: [
         'Diagnóstico de Madurez de IA',
         'Auditoría de Datos y Ética',
-        'Definición de KPIs y Métricas de Éxito',
-        'Roadmap Estratégico de Implementación'
+        'Roadmap Estratégico'
       ]
     },
     {
       id: 2,
       title: 'Fase 2: Diseño y Prototipado',
+      shortTitle: 'Prototipado',
       description: 'Co-creamos y visualizamos la solución de IA. Desarrollamos prototipos funcionales rápidos para validar el enfoque y garantizar que el resultado final cumpla tus expectativas.',
-      imageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de diseño/UI/UX
+      imageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600',
       deliverables: [
-        'Diseño de la Arquitectura de la Solución',
-        'Prototipos Interactivos y Pruebas de Concepto (PoC)',
-        'Selección de Modelos y Algoritmos',
-        'Plan de Pruebas y Validación'
+        'Diseño de Arquitectura',
+        'Pruebas de Concepto (PoC)',
+        'Selección de Modelos y Algoritmos'
       ]
     },
     {
       id: 3,
       title: 'Fase 3: Desarrollo e Implementación',
+      shortTitle: 'Implementación',
       description: 'Construimos una solución de IA robusta, ética y escalable, integrándola de manera fluida en tus sistemas existentes para potenciar tus operaciones sin fricciones.',
-      imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de código/desarrollo
+      imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600',
       deliverables: [
-        'Modelos de IA Entrenados y Validados',
-        'Integración con Sistemas Actuales (vía APIs)',
-        'Despliegue en Entornos de Producción',
-        'Documentación Técnica Completa'
+        'Modelos de IA Entrenados',
+        'Integración vía APIs',
+        'Despliegue en Producción'
       ]
     },
     {
       id: 4,
       title: 'Fase 4: Monitoreo y Optimización',
-      description: 'No solo implementamos, acompañamos. Monitoreamos el rendimiento en tiempo real y optimizamos los modelos para asegurar la máxima eficiencia y un impacto continuo.',
-      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen de dashboards/analíticas
+      shortTitle: 'Optimización',
+      description: 'Acompañamos el proceso post-entrega. Monitoreamos el rendimiento en tiempo real y optimizamos los modelos para asegurar la máxima eficiencia y un impacto continuo.',
+      imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600',
       deliverables: [
-        'Dashboard de Monitoreo en Tiempo Real',
-        'Informes de Rendimiento y KPIs',
-        'Ciclos de Reentrenamiento y Ajuste',
-        'Optimización Continua del Modelo'
+        'Dashboard de Monitoreo',
+        'Informes de Rendimiento',
+        'Ciclos de Reentrenamiento Continuo'
       ]
     },
     {
       id: 5,
       title: 'Fase 5: Escalado y Sostenibilidad',
+      shortTitle: 'Sostenibilidad',
       description: 'Miramos hacia el futuro. Te ayudamos a escalar la solución en toda tu organización, asegurando que la IA crezca contigo de manera ética, responsable y sostenible.',
-      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600', // Imagen abstracta de crecimiento/global
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1600',
       deliverables: [
-        'Estrategia de Escalado Organizacional',
+        'Estrategia de Escalado',
         'Marco de Gobernanza de IA',
-        'Programas de Capacitación (Upskilling)',
-        'Evaluación de Impacto a Largo Plazo'
+        'Programas de Capacitación'
       ]
     }
   ];
   // Estado de tarjetas volteadas
   private flippedSet = new Set<number>();
+  
+  // Propiedades para el scroll-spying
+  @ViewChildren('phaseNavItem') navItems!: QueryList<ElementRef>;
+  @ViewChildren('phaseContentCard') contentCards!: QueryList<ElementRef>;
+  private observer!: IntersectionObserver;
+  
   // Solo mostrar logos reales de Firestore, sin fallbacks de ejemplo
 
   ngOnInit(): void {
@@ -274,15 +281,85 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       (titleEl as HTMLElement).style.visibility = 'visible';
     }
 
-    // Animaciones de entrada para la sección de fases
-    setTimeout(() => {
-      this.animationService.staggerFromBottom('.phase-card');
-    }, 200);
+    // Inicializar el scroll-spying solo en desktop y en el navegador
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setTimeout(() => {
+        this.initObserver();
+      }, 100);
+    }
+  }
+
+  private initObserver(): void {
+    const options = {
+      root: null,
+      rootMargin: '-20% 0px -50% 0px', // Activa cuando el elemento está visible en la parte superior
+      threshold: 0.3 // Se activa cuando el 30% del elemento es visible
+    };
+
+    this.observer = new IntersectionObserver(entries => {
+      // Encuentra la entrada que está más intersectando
+      let mostVisible = entries.reduce((prev, current) => {
+        return (current.intersectionRatio > prev.intersectionRatio) ? current : prev;
+      });
+
+      if (mostVisible && mostVisible.isIntersecting) {
+        const id = mostVisible.target.getAttribute('id');
+        const currentPhaseId = parseInt(id?.replace('phase-card-', '') || '1');
+        
+        const navItem = this.navItems.find(
+          item => item.nativeElement.getAttribute('fragment') === `fase-${currentPhaseId}`
+        );
+
+        // Primero, quita 'active' de todos los items de navegación
+        this.navItems.forEach(item => {
+          item.nativeElement.classList.remove('active');
+          item.nativeElement.style.backgroundColor = '';
+          item.nativeElement.style.borderColor = '';
+          item.nativeElement.style.transform = '';
+          const textSpan = item.nativeElement.querySelector('span:last-child');
+          if (textSpan) {
+            textSpan.style.color = '';
+          }
+        });
+
+        // Maneja las clases de deslizamiento para las tarjetas
+        this.contentCards.forEach((card, index) => {
+          const cardPhaseId = index + 1;
+          if (cardPhaseId < currentPhaseId) {
+            // Las tarjetas anteriores se deslizan hacia arriba
+            card.nativeElement.classList.add('slide-up');
+          } else {
+            // Las tarjetas actuales y posteriores vuelven a su posición normal
+            card.nativeElement.classList.remove('slide-up');
+          }
+        });
+        
+        // Luego, añade 'active' solo al item de navegación que corresponde
+        if (navItem) {
+          navItem.nativeElement.classList.add('active');
+          // Forzar estilos por si las clases de DaisyUI no se aplican dinámicamente
+          navItem.nativeElement.style.backgroundColor = 'var(--fallback-b2, oklch(var(--b2) / 0.7))';
+          navItem.nativeElement.style.borderColor = 'var(--fallback-p, oklch(var(--p) / 0.3))';
+          navItem.nativeElement.style.transform = 'translateX(10px)';
+          const textSpan = navItem.nativeElement.querySelector('span:last-child');
+          if (textSpan) {
+            textSpan.style.color = 'var(--fallback-bc, oklch(var(--bc)))';
+          }
+        }
+      }
+    }, options);
+
+    this.contentCards.forEach(card => {
+      this.observer.observe(card.nativeElement);
+    });
   }
 
   ngOnDestroy(): void {
     this.contentSub?.unsubscribe();
     clearTimeout(this.timeoutId);
+    if (this.observer) {
+      this.observer.disconnect();
+    }
   }
 }
 

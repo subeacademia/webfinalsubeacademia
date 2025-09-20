@@ -31,6 +31,12 @@
       "title": "¿Listo para Liderar la Transformación?",
       "subtitle": "Hablemos sobre cómo podemos potenciar a tu equipo y preparar a tu organización para el futuro de la IA.",
       "button": "Contactar a un Asesor"
+    },
+    "methodology": {
+      "cta_ready": "¿Listo para transformar tu organización con nuestro framework ARES-AI probado?",
+      "btn_start_diagnostic": "Comenzar Diagnóstico Gratuito",
+      "btn_view_methodology": "Ver Metodología Completa",
+      "additional_text": "Conoce en detalle cada fase, herramientas y mejores prácticas de implementación"
     }
   },
   "hero": {
@@ -115,6 +121,7 @@
       "vision_title": "Nuestra visión",
       "vision_desc": "Democratizar el conocimiento sobre IA para cambiar la sociedad, entregando herramientas concretas que permitan a las personas reinventarse y realizar lo que realmente les gusta.",
       "values_title": "Nuestros valores",
+      "values_desc": "Excelencia, Innovación Constante, Integridad y un Compromiso real con el éxito de cada uno de nuestros estudiantes y socios.",
       "values": {
         "v1": "Impacto medible y sostenible",
         "v2": "Ética, seguridad y privacidad por diseño",

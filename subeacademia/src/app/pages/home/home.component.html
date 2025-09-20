@@ -38,28 +38,26 @@
         variant="primary" 
         size="lg" 
         (clicked)="iniciarDiagnostico()"
-        class="group relative overflow-hidden font-bold py-5 px-10 rounded-2xl text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">
-        <span class="relative z-10 flex items-center gap-3">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-          Inicia tu diagnóstico de madurez en IA Gratis
-        </span>
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-blue-700 to-purple-700" aria-hidden="true"></div>
+        class="hero-primary-btn"
+        style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3); transition: all 0.3s ease;"
+        aria-label="Iniciar diagnóstico de madurez en IA gratuito">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Inicia tu diagnóstico de madurez en IA Gratis
       </app-ui-button>
       
       <app-ui-button 
         variant="ghost" 
         size="lg" 
         (clicked)="contactarAsesor()"
-        class="group relative overflow-hidden font-bold py-5 px-10 rounded-2xl text-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border-2 border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 text-white">
-        <span class="relative z-10 flex items-center gap-3">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-          </svg>
-          Habla con un asesor ahora
-        </span>
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/20" aria-hidden="true"></div>
+        class="hero-ghost-btn"
+        style="background: rgba(255, 255, 255, 0.1); color: white; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; backdrop-filter: blur(10px); transition: all 0.3s ease;"
+        aria-label="Hablar con un asesor especializado">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        Habla con un asesor ahora
       </app-ui-button>
     </div>
 
@@ -72,181 +70,308 @@
   </div>
 </section>
 
-<!-- 2. SECCIÓN "NUESTRA METODOLOGÍA ARES-AI" INTERACTIVA -->
-<section id="metodologia" class="py-16 sm:py-24 bg-base-200/50 dark:bg-base-200 relative overflow-hidden" role="region" aria-labelledby="methodology-title">
-  <!-- Elementos de fondo decorativos -->
-  <div class="absolute inset-0" aria-hidden="true">
-    <div class="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-5"></div>
-    <div class="absolute top-20 right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse-slow"></div>
-    <div class="absolute bottom-20 left-20 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: -2s;"></div>
-  </div>
-  
-  <div class="container mx-auto px-4 relative z-10">
-    <div class="text-center mb-12">
-      <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold text-base-content">
+<!-- 2. SECCIÓN "NUESTRA METODOLOGÍA ARES-AI" FINAL CON CARD STACKING -->
+<section id="metodologia" class="bg-base-100 dark:bg-base-900" role="region" aria-labelledby="methodology-title">
+  <div class="container mx-auto px-4 py-16 sm:py-24">
+    <div class="text-center mb-12 lg:mb-16">
+      <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
         Nuestra Metodología 
         <span class="gradient-text">ARES-AI</span>
       </h2>
       <p class="max-w-3xl mx-auto text-base-content/70 mt-4 text-lg">
-        Un marco de 5 fases diseñado para implementar soluciones de IA de forma ágil, responsable y sostenible, garantizando resultados tangibles en cada etapa.
+        Un marco de 5 fases que garantiza la implementación exitosa de IA, combinando agilidad, responsabilidad y resultados tangibles.
       </p>
     </div>
 
-    <!-- Stepper horizontal/vertical responsivo -->
-    <div class="mb-12">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <ng-container *ngFor="let phase of methodologyPhases; let i = index; let isLast = last">
-          <div class="flex items-center" [class.w-full]="!isLast">
-            <button
-              (click)="selectPhase(phase.id)"
-              class="z-10 flex items-center justify-center w-12 h-12 rounded-full font-bold text-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30"
-              [ngClass]="{
-                'bg-primary text-primary-content scale-110 shadow-lg': activePhase === phase.id,
-                'bg-base-300 text-base-content/60 hover:bg-base-300/80': activePhase !== phase.id
-              }"
-              [attr.aria-label]="'Seleccionar ' + phase.title"
-              [attr.aria-pressed]="activePhase === phase.id">
-              {{ '0' + phase.id }}
-            </button>
-            <div *ngIf="!isLast" class="flex-auto border-t-2 transition-all duration-300 mx-2"
-                 [ngClass]="{
-                   'border-primary': activePhase > phase.id,
-                   'border-base-300': activePhase <= phase.id
-                 }">
-            </div>
-          </div>
-        </ng-container>
+    <!-- Layout de card stacking para desktop -->
+    <div class="hidden lg:grid grid-cols-12 gap-8">
+      <!-- Navegación sticky en la izquierda -->
+      <div class="col-span-4">
+        <div class="sticky top-24 space-y-4">
+          <a *ngFor="let phase of methodologyPhases"
+             #phaseNavItem
+             [routerLink]="['/', i18n.currentLang(), 'metodologia']"
+             [fragment]="'fase-' + phase.id"
+             class="phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline"
+             [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
+            <span class="text-xl font-bold text-primary mr-4">{{ '0' + phase.id }}</span>
+            <span class="text-lg font-semibold text-base-content">{{ phase.shortTitle }}</span>
+          </a>
+        </div>
       </div>
-    </div>
 
-    <!-- Contenido interactivo de las fases -->
-    <div class="relative min-h-[450px]">
-      <ng-container *ngFor="let phase of methodologyPhases">
-        <div *ngIf="activePhase === phase.id" class="phase-content-card">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <!-- Contenido de texto -->
-            <div class="text-center lg:text-left order-2 lg:order-1">
+      <!-- Contenedor de tarjetas con scroll normal -->
+      <div class="col-span-8">
+        <div class="space-y-8">
+          <div *ngFor="let phase of methodologyPhases; let i = index"
+               #phaseContentCard
+               [id]="'phase-card-' + phase.id" 
+               class="phase-content-card sticky top-24 bg-base-200 dark:bg-base-800 rounded-2xl shadow-xl p-8 min-h-[80vh] flex items-center">
+            <div class="w-full max-w-2xl mx-auto">
+              <img [src]="phase.imageUrl" 
+                   [alt]="phase.title" 
+                   class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
+                   loading="lazy">
               <h3 class="text-2xl font-bold text-primary mb-3">{{ phase.title }}</h3>
               <p class="mb-6 text-base-content/80 leading-relaxed">{{ phase.description }}</p>
-              
-              <!-- Lista de entregables -->
               <h4 class="text-lg font-semibold mb-3 text-base-content">Entregables Clave</h4>
               <ul class="space-y-2">
-                <li *ngFor="let deliverable of phase.deliverables" class="flex items-start">
-                  <svg class="w-5 h-5 mr-3 text-success flex-shrink-0 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <li *ngFor="let deliverable of phase.deliverables" class="flex items-center text-base-content/70">
+                  <svg class="w-5 h-5 mr-2 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
-                  <span class="text-base-content/70 leading-relaxed">{{ deliverable }}</span>
+                  <span>{{ deliverable }}</span>
                 </li>
               </ul>
             </div>
-            
-            <!-- Imagen de la fase -->
-            <div class="flex items-center justify-center order-1 lg:order-2">
-              <div class="relative group">
-                <img 
-                  [src]="phase.imageUrl" 
-                  [alt]="phase.title" 
-                  class="rounded-lg shadow-xl object-cover w-full h-80 max-w-md transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy">
-                <!-- Overlay con gradiente -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-            </div>
           </div>
         </div>
-      </ng-container>
+      </div>
     </div>
 
-    <!-- CTA final de la metodología -->
-    <div class="mt-16 text-center">
+    <!-- Acordeón para móvil mejorado -->
+    <div class="lg:hidden space-y-4 relative z-10">
+      <div *ngFor="let phase of methodologyPhases" class="collapse collapse-plus bg-base-200 dark:bg-base-800 rounded-lg shadow-sm border border-base-300">
+        <input type="radio" name="methodology-accordion" [checked]="phase.id === 1" />
+        <div class="collapse-title text-xl font-bold flex items-center text-base-content min-h-[60px]">
+          <span class="text-primary mr-3 flex-shrink-0">{{ '0' + phase.id }}</span>
+          <span class="flex-1">{{ phase.shortTitle }}</span>
+        </div>
+        <div class="collapse-content relative z-20 p-4">
+          <div class="space-y-4">
+            <img [src]="phase.imageUrl" 
+                 [alt]="phase.title" 
+                 class="mobile-methodology-image rounded-lg object-cover w-full h-48 mb-4 border border-base-300"
+                 loading="eager"
+                 [style.display]="'block'"
+                 onerror="this.style.background='linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'; this.alt='Imagen no disponible'">
+            <h3 class="text-lg font-bold mb-2 text-base-content">{{ phase.title }}</h3>
+            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ phase.description }}</p>
+            <h4 class="font-semibold mb-2 text-base-content">Entregables Clave:</h4>
+            <ul class="space-y-2 text-sm">
+              <li *ngFor="let deliverable of phase.deliverables" class="flex items-start text-base-content/80">
+                <svg class="w-4 h-4 mr-2 mt-0.5 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span class="flex-1">{{ deliverable }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA final de la metodología -->
+  <div class="container mx-auto px-4 pb-16">
+    <div class="text-center">
       <p class="text-lg sm:text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-        ¿Listo para transformar tu organización con nuestro framework ARES-AI probado?
+        {{ 'home.methodology.cta_ready' | i18nTranslate }}
       </p>
-      <app-ui-button 
-        variant="primary" 
-        size="lg"
-        (clicked)="iniciarDiagnostico()" 
-        class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
-        aria-label="Comenzar diagnóstico de madurez en IA">
-        Comenzar Diagnóstico Gratuito
-      </app-ui-button>
+      
+      <!-- Botones de acción -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <app-ui-button 
+          variant="primary" 
+          size="lg"
+          (clicked)="iniciarDiagnostico()" 
+          class="methodology-primary-btn"
+          style="background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3); transition: all 0.3s ease;"
+          aria-label="Comenzar diagnóstico de madurez en IA">
+          {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
+        </app-ui-button>
+        
+        <app-ui-button 
+          variant="purple" 
+          size="lg"
+          class="methodology-purple-btn"
+          style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
+          aria-label="Ver detalles completos de la metodología ARES-AI">
+          <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
+            {{ 'home.methodology.btn_view_methodology' | i18nTranslate }}
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </a>
+        </app-ui-button>
+      </div>
+      
+      <!-- Texto adicional -->
+      <p class="text-sm text-base-content/60 mt-4">
+        {{ 'home.methodology.additional_text' | i18nTranslate }}
+      </p>
     </div>
   </div>
 </section>
 
 <!-- Modal eliminado: ahora las tarjetas muestran los detalles al darse vuelta (flip) -->
 
-<!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" MEJORADA -->
-<section class="py-24 bg-gradient-to-b from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 relative overflow-hidden" role="region" aria-labelledby="solutions-title">
-  <!-- Elementos de fondo -->
+<!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" REDISEÑADA -->
+<section class="py-24 bg-gradient-to-br from-neutral-50 via-white to-primary-50/30 dark:from-neutral-900 dark:via-neutral-800 dark:to-primary-950/30 relative overflow-hidden" role="region" aria-labelledby="solutions-title">
+  <!-- Elementos de fondo mejorados -->
   <div class="absolute inset-0" aria-hidden="true">
-    <div class="absolute top-20 right-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-20 left-20 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+    <div class="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-primary-200/20 to-secondary-200/20 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-20 left-20 w-80 h-80 bg-gradient-to-br from-success-200/20 to-warning-200/20 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary-100/10 to-secondary-100/10 rounded-full blur-3xl"></div>
   </div>
   
   <div class="container mx-auto px-4 text-center relative z-10">
-    <div class="max-w-4xl mx-auto mb-16">
-      <h2 id="solutions-title" class="text-4xl md:text-5xl font-bold mb-6 text-slate-900 dark:text-white">
+    <!-- Header mejorado -->
+    <div class="max-w-5xl mx-auto mb-20">
+      <div class="inline-flex items-center px-4 py-2 bg-primary-100/50 dark:bg-primary-900/30 rounded-full text-primary-700 dark:text-primary-300 text-sm font-medium mb-6 backdrop-blur-sm">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Soluciones Integrales de IA
+      </div>
+      <h2 id="solutions-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 text-neutral-900 dark:text-white leading-tight">
         Nuestras Soluciones para la 
-        <span class="gradient-text">Transformación Digital</span>
+        <span class="bg-gradient-to-r from-primary-600 via-secondary-600 to-primary-600 bg-clip-text text-transparent">Transformación Digital</span>
       </h2>
-      <p class="text-xl text-slate-600 dark:text-slate-400">
-        Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable
+      <p class="text-lg sm:text-xl md:text-2xl text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-4xl mx-auto">
+        Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable y estratégica
       </p>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8" role="list" aria-label="Soluciones disponibles">
+    <!-- Grid de soluciones rediseñado -->
+    <div class="solutions-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto" role="list" aria-label="Soluciones disponibles">
+      
+      <!-- Solución 1: Capacitación Adaptativa -->
       <div class="group" role="listitem">
-        <div class="card card-interactive bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-            </svg>
+        <div class="relative h-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border border-primary-200/50 dark:border-primary-800/50 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-soft hover:shadow-large transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+          <!-- Gradiente de fondo -->
+          <div class="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-primary-100/30 dark:from-primary-950/50 dark:to-primary-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+          
+          <!-- Icono mejorado -->
+          <div class="relative mb-8">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+            </div>
           </div>
-          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Capacitación Adaptativa (AVE-AI)</h3>
-          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.</p>
-          <app-ui-button 
-            variant="primary" 
-            (clicked)="iniciarDiagnostico()" 
-            class="btn btn-primary group-hover:scale-105 transition-transform duration-300" 
-            aria-label="Realizar diagnóstico de competencias">
-            Realizar Diagnóstico →
-          </app-ui-button>
+          
+          <!-- Contenido -->
+          <div class="relative flex flex-col h-full">
+            <div class="flex-1">
+              <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
+                Capacitación Adaptativa
+                <span class="block text-base md:text-lg font-semibold text-primary-600 dark:text-primary-400 mt-1">(AVE-AI)</span>
+              </h3>
+              <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
+                Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.
+              </p>
+            </div>
+            
+            <!-- Botón mejorado -->
+            <div class="mt-auto">
+              <app-ui-button 
+                variant="primary" 
+                size="lg"
+                (clicked)="iniciarDiagnostico()" 
+                class="w-full solution-blue-btn"
+                style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); transition: all 0.3s ease; width: 100%;"
+                aria-label="Realizar diagnóstico de competencias">
+                Realizar Diagnóstico
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+              </app-ui-button>
+            </div>
+          </div>
         </div>
       </div>
       
+      <!-- Solución 2: Consultoría Estratégica -->
       <div class="group" role="listitem">
-        <div class="card card-interactive bg-gradient-to-br from-green-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.1s;">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
+        <div class="relative h-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border border-success-200/50 dark:border-success-800/50 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-soft hover:shadow-large transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+          <!-- Gradiente de fondo -->
+          <div class="absolute inset-0 bg-gradient-to-br from-success-50/50 to-success-100/30 dark:from-success-950/50 dark:to-success-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+          
+          <!-- Icono mejorado -->
+          <div class="relative mb-8">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-success-500 to-success-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
           </div>
-          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Consultoría Estratégica (ARES-AI)</h3>
-          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.</p>
-          <app-ui-button 
-            variant="secondary" 
-            (clicked)="contactarAsesor()" 
-            class="btn btn-secondary group-hover:scale-105 transition-transform duration-300" 
-            aria-label="Contactar con un asesor especializado">
-            Contactar un Asesor →
-          </app-ui-button>
+          
+          <!-- Contenido -->
+          <div class="relative flex flex-col h-full">
+            <div class="flex-1">
+              <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
+                Consultoría Estratégica
+                <span class="block text-base md:text-lg font-semibold text-success-600 dark:text-success-400 mt-1">(ARES-AI)</span>
+              </h3>
+              <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
+                Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.
+              </p>
+            </div>
+            
+            <!-- Botón completamente verde -->
+            <div class="mt-auto">
+              <app-ui-button 
+                variant="success" 
+                size="lg"
+                (clicked)="contactarAsesor()" 
+                class="w-full solution-green-btn"
+                style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s ease; width: 100%;"
+                aria-label="Contactar con un asesor especializado">
+                Contactar un Asesor
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+              </app-ui-button>
+            </div>
+          </div>
         </div>
       </div>
       
+      <!-- Solución 3: Implementación de Proyectos -->
       <div class="group" role="listitem">
-        <div class="card card-interactive bg-gradient-to-br from-orange-50 to-white dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105 rounded-2xl overflow-hidden" style="animation-delay: 0.2s;">
-          <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-            </svg>
+        <div class="relative h-full bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm border border-warning-200/50 dark:border-warning-800/50 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-soft hover:shadow-large transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+          <!-- Gradiente de fondo -->
+          <div class="absolute inset-0 bg-gradient-to-br from-warning-50/50 to-warning-100/30 dark:from-warning-950/50 dark:to-warning-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl"></div>
+          
+          <!-- Icono mejorado -->
+          <div class="relative mb-8">
+            <div class="w-24 h-24 mx-auto bg-gradient-to-br from-warning-500 to-warning-700 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-glow transition-all duration-500">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
           </div>
-          <h3 class="font-bold text-2xl mb-4 text-slate-800 dark:text-white">Implementación de Proyectos</h3>
-          <p class="mb-6 text-slate-600 dark:text-slate-400 leading-relaxed">Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.</p>
-          <a [routerLink]="['/', i18n.currentLang(), 'proyectos']" class="btn btn-outline group-hover:scale-105 transition-transform duration-300" aria-label="Ver casos de éxito de implementación">
-            Ver Casos de Éxito →
-          </a>
+          
+          <!-- Contenido -->
+          <div class="relative flex flex-col h-full">
+            <div class="flex-1">
+              <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
+                Implementación de
+                <span class="block text-warning-600 dark:text-warning-400">Proyectos</span>
+              </h3>
+              <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
+                Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.
+              </p>
+            </div>
+            
+            <!-- Botón completamente naranja -->
+            <div class="mt-auto">
+              <app-ui-button 
+                variant="warning" 
+                size="lg"
+                class="w-full solution-orange-btn"
+                style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s ease; width: 100%;"
+                aria-label="Ver casos de éxito de implementación">
+                <a [routerLink]="['/', i18n.currentLang(), 'proyectos']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
+                  Ver Casos de Éxito
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </app-ui-button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -270,26 +395,30 @@
     <!-- Carrusel de logos con animación infinita -->
     <div class="space-y-8">
       
-      <!-- Carrusel Doble: Primera fila (izquierda a derecha) -->
+      <!-- Carrusel Doble: Primera fila (derecha a izquierda) -->
       <div class="relative">
         <h3 class="text-xl font-semibold text-center mb-6 text-primary">Empresas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('company')" 
-            direction="normal"
+            direction="reverse"
+            [autoScroll]="true"
+            [scrollSpeed]="0.5"
             class="carousel-top"
             aria-label="Logos de empresas que confían en nosotros">
           </app-logo-carousel>
         </div>
       </div>
       
-      <!-- Carrusel Doble: Segunda fila (derecha a izquierda) -->
+      <!-- Carrusel Doble: Segunda fila (izquierda a derecha) -->
       <div class="relative mt-12">
         <h3 class="text-xl font-semibold text-center mb-6 text-secondary">Instituciones Educativas</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('education')" 
-            direction="reverse"
+            direction="normal"
+            [autoScroll]="true"
+            [scrollSpeed]="0.5"
             class="carousel-bottom"
             aria-label="Logos de instituciones educativas que confían en nosotros">
           </app-logo-carousel>
@@ -303,6 +432,8 @@
           <app-logo-carousel 
             [logos]="getLogosToDisplay('alliance')" 
             direction="normal"
+            [autoScroll]="true"
+            [scrollSpeed]="0.3"
             class="carousel-alliance"
             aria-label="Logos de alianzas estratégicas">
           </app-logo-carousel>
@@ -316,12 +447,16 @@
         Únete a las organizaciones que ya están transformando su futuro con IA
       </p>
       <app-ui-button 
-        variant="primary" 
+        variant="cyan" 
         size="lg"
         (clicked)="iniciarDiagnostico()" 
-        class="btn btn-primary text-lg px-10 py-4 transform hover:scale-105 transition-all duration-300"
+        class="final-cta-btn"
+        style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%); color: white; border: none; border-radius: 1rem; padding: 1.25rem 2.5rem; font-weight: 700; box-shadow: 0 10px 25px rgba(6, 182, 212, 0.4); transition: all 0.3s ease;"
         aria-label="Comenzar el proceso de transformación con IA">
         Comenzar Ahora
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
       </app-ui-button>
     </div>
   </div>
