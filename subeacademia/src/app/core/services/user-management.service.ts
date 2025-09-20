@@ -1,7 +1,8 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
 import { 
   AppUser, 
   UserRole, 
@@ -19,6 +20,7 @@ export class UserManagementService {
   private readonly STORAGE_KEY = 'subeacademia_users';
   private usersSubject = new BehaviorSubject<AppUser[]>([]);
   public users$ = this.usersSubject.asObservable();
+  private auth = inject(Auth);
 
   constructor(@Inject(PLATFORM_ID) private platformId: object) {
     this.initializeUsers();
@@ -109,25 +111,61 @@ export class UserManagementService {
       throw new Error('Ya existe un usuario con este email');
     }
 
-    // Crear nuevo usuario
-    const newUser: AppUser = {
-      id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-      email: request.email,
-      displayName: request.displayName,
-      role: request.role,
-      status: 'active',
-      permissions: request.permissions || DEFAULT_PERMISSIONS[request.role],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy
-    };
+    try {
+      // Crear usuario en Firebase Authentication
+      console.log('🔐 Creando usuario en Firebase Auth:', request.email);
+      const userCredential = await createUserWithEmailAndPassword(
+        this.auth, 
+        request.email, 
+        request.password
+      );
 
-    const updatedUsers = [...users, newUser];
-    this.saveUsers(updatedUsers);
-    this.usersSubject.next(updatedUsers);
+      // Actualizar el perfil del usuario en Firebase
+      await updateProfile(userCredential.user, {
+        displayName: request.displayName
+      });
 
-    console.log('✅ Usuario creado:', newUser);
-    return newUser;
+      console.log('✅ Usuario creado en Firebase Auth:', userCredential.user.uid);
+
+      // Crear registro en nuestro sistema local
+      const newUser: AppUser = {
+        id: userCredential.user.uid, // Usar el UID de Firebase
+        email: request.email,
+        displayName: request.displayName,
+        photoURL: userCredential.user.photoURL || undefined,
+        role: request.role,
+        status: 'active',
+        permissions: request.permissions || DEFAULT_PERMISSIONS[request.role],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy
+      };
+
+      const updatedUsers = [...users, newUser];
+      this.saveUsers(updatedUsers);
+      this.usersSubject.next(updatedUsers);
+
+      console.log('✅ Usuario registrado en sistema local:', newUser);
+      return newUser;
+
+    } catch (firebaseError: any) {
+      console.error('❌ Error creando usuario en Firebase:', firebaseError);
+      
+      // Traducir errores de Firebase a mensajes más amigables
+      let errorMessage = 'Error al crear el usuario';
+      
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        errorMessage = 'Ya existe un usuario registrado con este email';
+      } else if (firebaseError.code === 'auth/weak-password') {
+        errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+      } else if (firebaseError.code === 'auth/invalid-email') {
+        errorMessage = 'El formato del email no es válido';
+      } else if (firebaseError.message) {
+        errorMessage = firebaseError.message;
+      }
+      
+      throw new Error(errorMessage);
+    }
   }
 
   // Actualizar usuario

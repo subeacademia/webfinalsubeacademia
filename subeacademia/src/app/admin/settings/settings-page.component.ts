@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SettingsService, SiteSettings } from '../../core/data/settings.service';
+import { LocalSettingsService, LocalSiteSettings } from '../../core/services/local-settings.service';
 import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { TypewriterManagerComponent } from './typewriter-manager.component';
 
@@ -81,7 +81,7 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
 })
 export class SettingsPageComponent {
   private fb = inject(FormBuilder);
-  private settings = inject(SettingsService);
+  private settings = inject(LocalSettingsService);
   private toast = inject(ToastService);
   saved = signal(false);
 
@@ -99,8 +99,7 @@ export class SettingsPageComponent {
   });
 
   constructor(){
-    this.settings.get().subscribe((s: SiteSettings | undefined) => {
-      if (!s) return;
+    this.settings.get().subscribe((s: LocalSiteSettings) => {
       this.form.patchValue({
         homeTitle: s.homeTitle || 'Potencia tu Talento en la Era de la Inteligencia Artificial',
         brandName: s.brandName || 'Sube Academ-IA',

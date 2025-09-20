@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { switchMap, takeUntil, tap, catchError } from 'rxjs/operators';
 import { Subject, Observable, BehaviorSubject, of } from 'rxjs';
-import { SettingsService, TypewriterPhrase } from '../../core/data/settings.service';
+import { LocalSettingsService, LocalTypewriterPhrase } from '../../core/services/local-settings.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { AuthCoreService } from '../../core/auth-core.service';
@@ -14,38 +14,6 @@ import { AuthCoreService } from '../../core/auth-core.service';
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
     <div class="space-y-6">
-      <!-- Título de la Página de Inicio -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          <span class="inline-flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2"></path>
-            </svg>
-            Título de la Página de Inicio
-          </span>
-        </h3>
-        
-        <div class="flex gap-3">
-          <input 
-            type="text" 
-            [(ngModel)]="titleValue" 
-            placeholder="Escribe el título principal aquí..."
-            class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-          >
-          <button 
-            (click)="saveTitle()" 
-            [disabled]="!titleValue.trim() || isSavingTitle"
-            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-200 flex items-center gap-2"
-          >
-            <svg *ngIf="isSavingTitle" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            {{ isSavingTitle ? 'Guardando...' : 'Guardar Título' }}
-          </button>
-        </div>
-      </div>
-
       <!-- Gestión de Frases del Typewriter -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -187,14 +155,14 @@ import { AuthCoreService } from '../../core/auth-core.service';
   `]
 })
 export class TypewriterManagerComponent implements OnInit, OnDestroy {
-  private readonly settings = inject(SettingsService);
+  private readonly settings = inject(LocalSettingsService);
   private readonly i18n = inject(I18nService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthCoreService);
   private readonly destroy$ = new Subject<void>();
 
   // Datos reactivos
-  phrases$ = new BehaviorSubject<(TypewriterPhrase & { isEditing?: boolean; editingText?: string })[]>([]);
+  phrases$ = new BehaviorSubject<LocalTypewriterPhrase[]>([]);
   titleValue = '';
   
   // Estados
@@ -216,32 +184,21 @@ export class TypewriterManagerComponent implements OnInit, OnDestroy {
   }
 
   private loadData(): void {
-    // Cargar frases
+    // Cargar frases del typewriter
     this.i18n.currentLang$.pipe(
       switchMap((lang: any) => this.settings.getTypewriterPhrases(lang)),
       tap((phrases) => {
-        console.log('🔄 Frases cargadas:', phrases);
+        console.log('🔄 Frases del typewriter cargadas:', phrases);
         const phrasesWithEditing = phrases.map(p => ({ ...p, isEditing: false, editingText: p.text }));
         this.phrases$.next(phrasesWithEditing);
       }),
       catchError((error) => {
-        console.error('❌ Error cargando frases:', error);
-        this.toast.error('❌ Error al cargar las frases');
+        console.error('❌ Error cargando frases del typewriter:', error);
+        this.toast.error('❌ Error al cargar las frases del typewriter');
         return of([]);
       }),
       takeUntil(this.destroy$)
     ).subscribe();
-
-    // Cargar título
-    this.i18n.currentLang$.pipe(
-      switchMap((lang: any) => this.settings.getHomePageContent(lang)),
-      takeUntil(this.destroy$)
-    ).subscribe((content) => {
-      if (content?.title) {
-        console.log('🔄 Título cargado:', content.title);
-        this.titleValue = content.title;
-      }
-    });
   }
 
   // Agregar nueva frase
@@ -250,7 +207,7 @@ export class TypewriterManagerComponent implements OnInit, OnDestroy {
     
     this.isAddingPhrase = true;
     try {
-      const newPhrase: Omit<TypewriterPhrase, 'id' | 'createdAt'> = {
+      const newPhrase: Omit<LocalTypewriterPhrase, 'id' | 'createdAt'> = {
         text: this.newPhraseText.trim(),
         lang: this.i18n.currentLang(),
         order: this.newPhraseOrder || this.phrases$.value.length
@@ -374,7 +331,7 @@ export class TypewriterManagerComponent implements OnInit, OnDestroy {
     try {
       console.log('🔄 Iniciando guardado de título:', this.titleValue);
       
-      await this.settings.setHomeTitle(this.i18n.currentLang(), this.titleValue.trim());
+      await this.settings.updateSetting('homeTitle', this.titleValue.trim());
       
       this.toast.success('✅ Título guardado exitosamente');
       console.log('✅ Título guardado:', this.titleValue);

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, sig
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { I18nService } from '../../../i18n/i18n.service';
-import { SettingsService, SiteSettings } from '../../../data/settings.service';
+import { LocalSettingsService, LocalSiteSettings } from '../../../services/local-settings.service';
 import { ThemeService } from '../../../../shared/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { User } from '@angular/fire/auth';
@@ -220,7 +220,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
 
     <footer class="mt-10 border-t border-white/10 bg-[var(--panel)]/40" role="contentinfo">
       <div class="container mx-auto max-w-7xl py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
-        <span>© Sube Academ-IA</span>
+        <span>© {{ brandName() }}</span>
         <nav class="flex items-center gap-4" aria-label="Enlaces del pie de página">
           <a [routerLink]="['/', currentLang(), 'contacto']" 
              class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
@@ -267,15 +267,23 @@ export class AppShellComponent {
   // Observable del usuario actual para la UI
   readonly currentUser$ = this.authService.currentUser$;
 
-  constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: SettingsService) {
+  constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: LocalSettingsService) {
     this.currentLang = this.i18n.currentLang as unknown as () => string;
     try {
-      this.settings.get().subscribe((s: SiteSettings | undefined) => {
-        if (!s) return;
-        if (s.brandName) this.brandName.set(s.brandName);
+      this.settings.get().subscribe((s: LocalSiteSettings) => {
+        console.log('🏷️ Configuraciones recibidas en AppShell:', s);
+        if (s.brandName) {
+          this.brandName.set(s.brandName);
+          console.log('✅ Nombre de marca actualizado en navegación:', s.brandName);
+        }
         this.logoUrl.set(s.logoUrl || null);
+        if (s.logoUrl) {
+          console.log('✅ Logo URL actualizado en navegación:', s.logoUrl);
+        }
       });
-    } catch {}
+    } catch (error) {
+      console.error('❌ Error cargando configuraciones en AppShell:', error);
+    }
     // Settings initialization
   }
 

@@ -26,6 +26,7 @@ export type PermissionAction = 'read' | 'create' | 'update' | 'delete' | 'manage
 export interface CreateUserRequest {
   email: string;
   displayName: string;
+  password: string;
   role: UserRole;
   permissions?: Permission[];
 }

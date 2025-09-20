@@ -5,9 +5,9 @@
        [class.left]="i % 2 === 0" 
        [class.right]="i % 2 !== 0">
     <div class="timeline-dot"></div>
-    <div class="timeline-content">
-      <h3 class="font-bold text-xl text-cyan-400">{{ event.year }} - {{ event.title }}</h3>
-      <p class="mt-2 text-gray-300">{{ event.description }}</p>
+    <div class="timeline-content bg-white/95 dark:bg-slate-800/90 border border-cyan-300/30 dark:border-cyan-400/25">
+      <h3 class="font-bold text-xl text-cyan-500 dark:text-cyan-400">{{ event.year }} - {{ event.title }}</h3>
+      <p class="mt-2 text-gray-700 dark:text-gray-300">{{ event.description }}</p>
     </div>
   </div>
 </div>

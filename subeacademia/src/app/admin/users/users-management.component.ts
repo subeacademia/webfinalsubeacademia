@@ -170,6 +170,28 @@ import {
                 </div>
               </div>
 
+              <div *ngIf="showCreateModal">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Contraseña
+                </label>
+                <input 
+                  type="password" 
+                  class="w-full ui-input"
+                  formControlName="password"
+                  placeholder="Mínimo 6 caracteres">
+                <div *ngIf="userForm.get('password')?.errors?.['required'] && userForm.get('password')?.touched" 
+                     class="text-red-500 text-xs mt-1">
+                  La contraseña es requerida
+                </div>
+                <div *ngIf="userForm.get('password')?.errors?.['minlength'] && userForm.get('password')?.touched" 
+                     class="text-red-500 text-xs mt-1">
+                  La contraseña debe tener al menos 6 caracteres
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                  💡 El usuario podrá cambiar su contraseña después de iniciar sesión
+                </div>
+              </div>
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Rol
@@ -281,6 +303,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   userForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     displayName: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     role: ['usuario' as UserRole, Validators.required],
     status: ['active' as UserStatus]
   });
@@ -427,6 +450,11 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       role: user.role,
       status: user.status
     });
+    
+    // Remover validación de contraseña para edición
+    this.userForm.get('password')?.clearValidators();
+    this.userForm.get('password')?.updateValueAndValidity();
+    
     this.showEditModal = true;
   }
 
@@ -450,6 +478,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
         const request: CreateUserRequest = {
           email: formValue.email!,
           displayName: formValue.displayName!,
+          password: formValue.password!,
           role: formValue.role as UserRole
         };
 
@@ -500,9 +529,15 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.showCreateModal = false;
     this.showEditModal = false;
     this.editingUser = null;
+    
+    // Restaurar validación de contraseña
+    this.userForm.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+    this.userForm.get('password')?.updateValueAndValidity();
+    
     this.userForm.reset({
       email: '',
       displayName: '',
+      password: '',
       role: 'usuario',
       status: 'active'
     });

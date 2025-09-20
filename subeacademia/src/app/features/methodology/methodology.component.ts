@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
@@ -22,9 +22,12 @@ import { competencias, Competency } from '../diagnostico/data/competencias';
 export class MethodologyComponent {
   competencies = competencias;
   
-  // Estado del modal
+  // Estado del modal de competencias
   isModalOpen = false;
   selectedCompetency: Competency | null = null;
+
+  // Estado de las modales de pedagogía
+  activePedagogyModal = signal<string | null>(null);
 
   openCompetencyModal(competency: Competency): void {
     console.log('Abriendo modal para:', competency.name);
@@ -60,6 +63,23 @@ export class MethodologyComponent {
       'Maestro': 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
     };
     return colors[level] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300';
+  }
+
+  // Métodos para gestionar modales de pedagogía
+  openPedagogyModal(modalType: string): void {
+    this.activePedagogyModal.set(modalType);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closePedagogyModal(): void {
+    this.activePedagogyModal.set(null);
+    document.body.style.overflow = 'auto';
+  }
+
+  onPedagogyOverlayClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closePedagogyModal();
+    }
   }
 }
 

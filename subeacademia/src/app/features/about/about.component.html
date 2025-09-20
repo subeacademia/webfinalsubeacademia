@@ -10,12 +10,12 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <h2 class="text-4xl font-bold">{{ 'about.mvv.title' | i18nTranslate }}</h2>
-        <p class="text-lg text-gray-400 mt-2">{{ 'about.mvv.subtitle' | i18nTranslate }}</p>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">{{ 'about.mvv.subtitle' | i18nTranslate }}</p>
       </div>
       <div class="max-w-4xl mx-auto">
-        <div class="flex justify-center border-b border-gray-700 mb-8">
+        <div class="flex justify-center border-b border-gray-300 dark:border-gray-700 mb-8">
           <button *ngFor="let tab of philosophyTabs" (click)="setActiveTab(tab.id)" 
-                  [ngClass]="{'border-cyan-400 text-cyan-400': activeTab === tab.id, 'border-transparent text-gray-400 hover:text-white': activeTab !== tab.id}"
+                  [ngClass]="{'border-cyan-400 text-cyan-400': activeTab === tab.id, 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white': activeTab !== tab.id}"
                   class="py-4 px-6 text-lg font-medium border-b-2 focus:outline-none transition-colors duration-300">
             {{ tab.titleKey | i18nTranslate }}
           </button>

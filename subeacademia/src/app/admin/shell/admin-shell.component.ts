@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthCoreService } from '../../core/auth-core.service';
+import { LocalSettingsService } from '../../core/services/local-settings.service';
 import { NgIf } from '@angular/common';
 import { User } from '@angular/fire/auth';
 import { Subject, takeUntil } from 'rxjs';
@@ -13,7 +14,7 @@ import { Subject, takeUntil } from 'rxjs';
   template: `
 <div class="min-h-screen">
   <header class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-    <div class="font-semibold">Sube Academ-IA</div>
+    <div class="font-semibold">{{ brandName() }}</div>
     <button class="md:hidden btn" (click)="open = !open">☰</button>
   </header>
 
@@ -21,41 +22,41 @@ import { Subject, takeUntil } from 'rxjs';
     <aside class="p-4 space-y-2 border-r border-white/10 bg-[var(--panel)]/50"
            [class.hidden]="!open" [class.md:block]="true">
       <div class="text-xs text-[var(--muted)] mb-2" *ngIf="userEmail">{{ userEmail }}</div>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/posts">
-        <span class="text-lg flex-shrink-0">📝</span> Posts
+      <a class="menu-item" routerLink="/admin/posts">
+        <span class="menu-icon">📝</span> Posts
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/productos">
-        <span class="text-lg flex-shrink-0">🛍️</span> Productos
+      <a class="menu-item" routerLink="/admin/productos">
+        <span class="menu-icon">🛍️</span> Productos
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/projects">
-        <span class="text-lg flex-shrink-0">🚀</span> Proyectos
+      <a class="menu-item" routerLink="/admin/projects">
+        <span class="menu-icon">🚀</span> Proyectos
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/certificados">
-        <span class="text-lg flex-shrink-0">🏆</span> Certificados
+      <a class="menu-item" routerLink="/admin/certificados">
+        <span class="menu-icon">🏆</span> Certificados
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/media">
-        <span class="text-lg flex-shrink-0">📷</span> Media
+      <a class="menu-item" routerLink="/admin/media">
+        <span class="menu-icon">📷</span> Media
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/logos">
-        <span class="text-lg flex-shrink-0">🎨</span> Logos
+      <a class="menu-item" routerLink="/admin/logos">
+        <span class="menu-icon">🎨</span> Logos
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/history">
-        <span class="text-lg flex-shrink-0">📚</span> Historia
+      <a class="menu-item" routerLink="/admin/history">
+        <span class="menu-icon">📚</span> Historia
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/collaborators">
-        <span class="text-lg flex-shrink-0">🤝</span> Colaboradores
+      <a class="menu-item" routerLink="/admin/collaborators">
+        <span class="menu-icon">🤝</span> Colaboradores
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/leads">
-        <span class="text-lg flex-shrink-0">📊</span> Leads
+      <a class="menu-item" routerLink="/admin/leads">
+        <span class="menu-icon">📊</span> Leads
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/users">
-        <span class="text-lg flex-shrink-0">👥</span> Usuarios
+      <a class="menu-item" routerLink="/admin/users">
+        <span class="menu-icon">👥</span> Usuarios
       </a>
-      <a class="btn w-full flex items-center justify-start gap-3 text-left" routerLink="/admin/settings">
-        <span class="text-lg flex-shrink-0">⚙️</span> Ajustes
+      <a class="menu-item" routerLink="/admin/settings">
+        <span class="menu-icon">⚙️</span> Ajustes
       </a>
-      <button class="btn w-full flex items-center justify-start gap-3 text-left" (click)="logout()">
-        <span class="text-lg flex-shrink-0">🚪</span> Cerrar sesión
+      <button class="menu-item" (click)="logout()">
+        <span class="menu-icon">🚪</span> Cerrar sesión
       </button>
     </aside>
     <main class="p-4">
@@ -63,18 +64,54 @@ import { Subject, takeUntil } from 'rxjs';
     </main>
   </div>
 </div>
-  `
+  `,
+  styles: [`
+    .menu-item {
+      @apply w-full px-3 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors;
+      @apply flex items-center gap-3;
+      text-decoration: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+    }
+    
+    .menu-icon {
+      @apply text-lg flex-shrink-0;
+      width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    
+    .menu-item:hover {
+      @apply bg-gray-100 dark:bg-gray-700;
+    }
+  `]
 })
 export class AdminShellComponent implements OnInit, OnDestroy {
   private authSvc = inject(AuthService);
   private coreAuth = inject(AuthCoreService);
   private router = inject(Router);
+  private settings = inject(LocalSettingsService);
+  
   open = true;
   userEmail: string | null = null;
+  brandName = signal<string>('Sube Academ-IA');
   private readonly unsubscribe$ = new Subject<void>();
 
   ngOnInit(){
     if (typeof window !== 'undefined') this.open = window.innerWidth >= 768;
+    
+    // Cargar configuraciones para el nombre de marca
+    this.settings.get()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(settings => {
+        this.brandName.set(settings.brandName);
+        console.log('✅ Nombre de marca cargado en admin:', settings.brandName);
+      });
+    
     this.coreAuth.authState$
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe((u: User | null) => { this.userEmail = u?.email ?? null; });

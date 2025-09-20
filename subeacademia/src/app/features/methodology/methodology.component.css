@@ -1,14 +1,4 @@
-/* Estilos para las tarjetas de competencias */
-.competency-card {
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-}
-
-.competency-card:hover {
-  transform: translateY(-4px);
-  border-color: #3b82f6;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+/* Estilos mínimos para las tarjetas de competencias */
 
 /* Utilidad para truncar texto */
 .line-clamp-3 {
@@ -18,30 +8,11 @@
   overflow: hidden;
 }
 
-/* Efectos de hover para las tarjetas */
-.competency-card:hover .competency-icon {
-  transform: scale(1.1);
-}
-
+/* Efectos de hover para iconos */
 .competency-icon {
   transition: transform 0.3s ease;
 }
 
-/* Responsive para las tarjetas */
-@media (max-width: 768px) {
-  .competency-card {
-    margin-bottom: 1rem;
-  }
-}
-
-/* Modo oscuro para las tarjetas */
-@media (prefers-color-scheme: dark) {
-  .competency-card {
-    background: #1f2937;
-    border-color: #374151;
-  }
-  
-  .competency-card:hover {
-    border-color: #60a5fa;
-  }
+.competency-card:hover .competency-icon {
+  transform: scale(1.1);
 }

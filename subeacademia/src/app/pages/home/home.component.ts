@@ -12,7 +12,7 @@ import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carous
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 import { AnimationService } from '../../core/services/animation.service';
 import { SeoService } from '../../core/seo/seo.service';
-import { SettingsService } from '../../core/data/settings.service';
+import { LocalSettingsService } from '../../core/services/local-settings.service';
 
 @Component({
   standalone: true,
@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly logos: LogosService,
     private readonly animationService: AnimationService,
     private readonly seo: SeoService,
-    private readonly settings: SettingsService
+    private readonly settings: LocalSettingsService
   ) {
     // Valor por defecto para asegurar que el título se muestre
     this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
@@ -135,35 +135,34 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('🏠 HomeComponent: ngOnInit iniciado');
     console.log('🏷️ Título inicial:', this.tituloHome);
     
-    // Configurar contenido del home combinando ajustes y contenido dinámico
+    // Configurar contenido del home combinando ajustes locales y contenido dinámico
     this.contentSub = combineLatest([
       this.i18n.currentLang$.pipe(distinctUntilChanged()),
       this.settings.get()
     ]).pipe(
-      switchMap(([lang, siteSettings]) => {
+      switchMap(([lang, localSettings]) => {
         console.log('🌐 Cambio de idioma detectado:', lang);
-        console.log('⚙️ Ajustes del sitio:', siteSettings);
+        console.log('⚙️ Ajustes locales del sitio:', localSettings);
         
-        return this.homeConfig.getHomePageContent(lang as 'es'|'en'|'pt').pipe(
-          // Combinar con los ajustes del sitio
-          switchMap(homeContent => {
-            console.log('📥 Contenido del home:', homeContent);
+        // Obtener frases del typewriter desde ajustes locales
+        return this.settings.getTypewriterPhrasesAsArray(lang as 'es'|'en'|'pt').pipe(
+          switchMap(typewriterPhrases => {
+            console.log('📝 Frases del typewriter desde ajustes locales:', typewriterPhrases);
             
-            // Usar título desde ajustes si está disponible, sino el del contenido, sino el por defecto
-            const finalTitle = siteSettings?.homeTitle || 
-                              homeContent?.title || 
+            // Usar título desde ajustes locales
+            const finalTitle = localSettings?.homeTitle || 
                               'Potencia tu Talento en la Era de la Inteligencia Artificial';
             
             return [{ 
-              ...homeContent, 
+              typewriterPhrases,
               title: finalTitle,
-              siteSettings 
+              localSettings 
             }];
           })
         );
       })
     ).subscribe((data: any) => {
-      const c = data as HomePageContent & { siteSettings?: any };
+      const c = data as HomePageContent & { localSettings?: any };
       console.log('📥 Datos finales combinados:', c);
       
       // Configurar frases dinámicas
@@ -178,9 +177,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       console.log('📝 Frases dinámicas configuradas:', this.frasesDinamicas);
       
-      // Configurar título (ahora viene de los ajustes del admin)
+      // Configurar título (ahora viene de los ajustes locales del admin)
       this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
-      console.log('🏷️ Título del home configurado desde ajustes:', this.tituloHome);
+      console.log('🏷️ Título del home configurado desde ajustes locales:', this.tituloHome);
 
       // SEO dinámico por idioma
       this.seo.updateTags({
@@ -275,6 +274,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   contactarAsesor(): void {
     const lang = this.i18n.currentLang();
     this.router.navigate(['/', lang, 'contacto']);
+  }
+
+  navegarACasosDeExito(): void {
+    const lang = this.i18n.currentLang();
+    this.router.navigate(['/', lang, 'proyectos']);
   }
 
   toggleFlip(phaseId: number): void {

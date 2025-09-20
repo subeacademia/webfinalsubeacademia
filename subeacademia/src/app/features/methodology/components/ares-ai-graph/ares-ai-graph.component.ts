@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface FrameworkElement {
@@ -22,6 +22,8 @@ export interface FrameworkElement {
 })
 export class AresAiGraphComponent implements OnInit {
   activeElement: FrameworkElement | null = null;
+  showModal = signal<boolean>(false);
+  modalContent = signal<FrameworkElement | null>(null);
   
   frameworkElements: FrameworkElement[] = [
     // --- FASES ---
@@ -171,10 +173,6 @@ export class AresAiGraphComponent implements OnInit {
     // Estado inicial: mostrar el logo ARES AI
   }
 
-  selectElement(element: FrameworkElement): void {
-    this.activeElement = element;
-  }
-
   clearSelection(): void {
     this.activeElement = null;
   }
@@ -254,5 +252,201 @@ export class AresAiGraphComponent implements OnInit {
 
   isActive(element: FrameworkElement): boolean {
     return this.activeElement?.id === element.id;
+  }
+
+  // Métodos para gestionar modales
+  openModal(element: FrameworkElement): void {
+    this.modalContent.set(element);
+    this.showModal.set(true);
+    // Prevenir scroll del body cuando el modal está abierto
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeModal(): void {
+    this.showModal.set(false);
+    this.modalContent.set(null);
+    // Restaurar scroll del body
+    document.body.style.overflow = 'auto';
+  }
+
+  // Método para manejar click en el overlay
+  onOverlayClick(event: Event): void {
+    // Solo cerrar si el click fue en el overlay, no en el contenido
+    if (event.target === event.currentTarget) {
+      this.closeModal();
+    }
+  }
+
+  // Modificar selectElement para abrir modal además de mostrar en el centro
+  selectElement(element: FrameworkElement): void {
+    this.activeElement = element;
+    // Abrir modal con información detallada
+    this.openModal(element);
+  }
+
+  // Métodos auxiliares para contenido detallado de modales
+  getPhaseTimeline(phase: FrameworkElement): string {
+    const timelines: Record<string, string> = {
+      'phase1': '2-4 semanas',
+      'phase2': '3-6 semanas', 
+      'phase3': '6-12 semanas',
+      'phase4': '2-4 semanas',
+      'phase5': 'Continuo'
+    };
+    return timelines[phase.id] || 'Variable según proyecto';
+  }
+
+  getPhaseDeliverables(phase: FrameworkElement): string {
+    const deliverables: Record<string, string> = {
+      'phase1': 'Business Case, Risk Assessment, Team Charter',
+      'phase2': 'MVP, PoC, Technical Architecture',
+      'phase3': 'Production Model, CI/CD Pipeline, Integration Tests',
+      'phase4': 'Monitoring Dashboard, Performance Reports, User Training',
+      'phase5': 'Optimization Reports, Continuous Improvement Plan'
+    };
+    return deliverables[phase.id] || 'Documentación específica del proyecto';
+  }
+
+  getPhaseStakeholders(phase: FrameworkElement): string {
+    const stakeholders: Record<string, string> = {
+      'phase1': 'C-Level, Product Managers, Data Scientists',
+      'phase2': 'UX/UI Designers, Frontend/Backend Developers',
+      'phase3': 'DevOps Engineers, QA Testers, Security Team',
+      'phase4': 'End Users, Training Team, Support Team',
+      'phase5': 'Analytics Team, Business Analysts, Stakeholders'
+    };
+    return stakeholders[phase.id] || 'Equipo multidisciplinario';
+  }
+
+  getPrincipleApplication(principle: FrameworkElement): string {
+    const applications: Record<string, string> = {
+      'principle1': 'Metodologías ágiles, sprints iterativos, feedback continuo',
+      'principle2': 'Auditorías éticas, compliance frameworks, bias detection',
+      'principle3': 'Green computing, efficient algorithms, carbon footprint reduction',
+      'principle4': 'ROI measurement, KPI tracking, business impact assessment'
+    };
+    return applications[principle.id] || 'Aplicación transversal en todo el proyecto';
+  }
+
+  getPrincipleBenefits(principle: FrameworkElement): string {
+    const benefits: Record<string, string> = {
+      'principle1': 'Reducción de time-to-market, mayor adaptabilidad, menor riesgo',
+      'principle2': 'Cumplimiento legal, confianza del usuario, reputación corporativa',
+      'principle3': 'Reducción de costos operativos, sostenibilidad ambiental',
+      'principle4': 'Justificación de inversión, escalabilidad demostrable'
+    };
+    return benefits[principle.id] || 'Beneficios específicos del principio';
+  }
+
+  getPrincipleMetrics(principle: FrameworkElement): string {
+    const metrics: Record<string, string> = {
+      'principle1': 'Velocity, Lead Time, Deployment Frequency',
+      'principle2': 'Fairness Score, Bias Metrics, Compliance Rate',
+      'principle3': 'Energy Efficiency, Carbon Footprint, Resource Utilization',
+      'principle4': 'ROI, NPV, Payback Period, User Adoption Rate'
+    };
+    return metrics[principle.id] || 'Métricas específicas del principio';
+  }
+
+  getAcademicReferences(element: FrameworkElement): string[] {
+    const references: Record<string, string[]> = {
+      'phase1': [
+        'Brynjolfsson & McAfee (2017) - The Business of Artificial Intelligence',
+        'Davenport & Ronanki (2018) - Artificial Intelligence for the Real World',
+        'Chen et al. (2019) - AI Strategy and Leadership'
+      ],
+      'phase2': [
+        'Brown & Katz (2011) - Change by Design',
+        'Ries (2011) - The Lean Startup Methodology',
+        'Norman (2013) - The Design of Everyday Things'
+      ],
+      'phase3': [
+        'Fowler & Highsmith (2001) - The Agile Manifesto',
+        'Humble et al. (2010) - Continuous Delivery',
+        'Kim et al. (2016) - The DevOps Handbook'
+      ],
+      'phase4': [
+        'Provost & Fawcett (2013) - Data Science for Business',
+        'Sculley et al. (2015) - Hidden Technical Debt in ML Systems',
+        'Amershi et al. (2019) - Software Engineering for ML'
+      ],
+      'phase5': [
+        'Kaplan & Norton (1996) - The Balanced Scorecard',
+        'Deming (1986) - Out of the Crisis - PDCA Cycle',
+        'Kotter (2012) - Leading Change'
+      ],
+      'principle1': [
+        'Beck et al. (2001) - Manifesto for Agile Software Development',
+        'Schwaber & Sutherland (2020) - The Scrum Guide',
+        'Anderson (2010) - Kanban: Successful Evolutionary Change'
+      ],
+      'principle2': [
+        'Floridi et al. (2018) - AI4People—An Ethical Framework for AI',
+        'Jobin et al. (2019) - The Global Landscape of AI Ethics Guidelines',
+        'IEEE (2019) - Ethically Aligned Design'
+      ],
+      'principle3': [
+        'Strubell et al. (2019) - Energy and Policy Considerations for DL',
+        'Henderson et al. (2020) - Towards the Systematic Reporting of Energy',
+        'Schwartz et al. (2020) - Green AI'
+      ],
+      'principle4': [
+        'Brynjolfsson et al. (2017) - Artificial Intelligence and the Modern Productivity',
+        'McKinsey (2018) - The Age of AI: Artificial Intelligence and the Future of Work',
+        'PwC (2019) - AI and Workforce Evolution'
+      ]
+    };
+    return references[element.id] || ['Referencias académicas específicas'];
+  }
+
+  getSuccessCases(element: FrameworkElement): string[] {
+    const cases: Record<string, string[]> = {
+      'phase1': [
+        'Netflix - Algoritmo de recomendación personalizada',
+        'Amazon - Sistema de predicción de demanda',
+        'Tesla - Autopilot development strategy'
+      ],
+      'phase2': [
+        'Google - PageRank algorithm prototyping',
+        'Spotify - Music recommendation MVP',
+        'Uber - Dynamic pricing proof of concept'
+      ],
+      'phase3': [
+        'Facebook - News Feed algorithm deployment',
+        'Microsoft - Azure ML platform development',
+        'Airbnb - Smart pricing system implementation'
+      ],
+      'phase4': [
+        'LinkedIn - Professional network optimization',
+        'Salesforce - Einstein AI monitoring',
+        'Adobe - Creative Cloud AI performance tracking'
+      ],
+      'phase5': [
+        'IBM Watson - Continuous learning optimization',
+        'Apple Siri - Natural language improvement',
+        'OpenAI GPT - Model evolution and scaling'
+      ],
+      'principle1': [
+        'Spotify - Squad model for AI development',
+        'ING Bank - Agile transformation with AI',
+        'Haier - RenDanHeYi model with AI integration'
+      ],
+      'principle2': [
+        'Microsoft - Responsible AI framework',
+        'Google - AI Principles implementation',
+        'IBM - AI Ethics Board establishment'
+      ],
+      'principle3': [
+        'Google - Carbon-neutral AI operations',
+        'Microsoft - Carbon negative by 2030',
+        'Facebook - 100% renewable energy for data centers'
+      ],
+      'principle4': [
+        'McKinsey - AI ROI measurement framework',
+        'Deloitte - AI business value quantification',
+        'BCG - AI transformation impact assessment'
+      ]
+    };
+    return cases[element.id] || ['Casos de éxito específicos'];
   }
 }

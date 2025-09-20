@@ -357,19 +357,15 @@
             
             <!-- Botón completamente naranja -->
             <div class="mt-auto">
-              <app-ui-button 
-                variant="warning" 
-                size="lg"
-                class="w-full solution-orange-btn"
-                style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s ease; width: 100%;"
+              <button 
+                (click)="navegarACasosDeExito()"
+                class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/30 flex items-center justify-center gap-2"
                 aria-label="Ver casos de éxito de implementación">
-                <a [routerLink]="['/', i18n.currentLang(), 'proyectos']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
-                  Ver Casos de Éxito
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </a>
-              </app-ui-button>
+                Ver Casos de Éxito
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
