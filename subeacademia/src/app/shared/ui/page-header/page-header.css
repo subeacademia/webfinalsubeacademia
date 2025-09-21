@@ -1,0 +1,30 @@
+/* Gradiente naranja - NUEVO COLOR PRIMARIO */
+.orange-gradient-text {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
+}
+
+/* Modo oscuro */
+:global(.dark) .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
+}
+
+/* Mejorar la sombra del texto para el header 3D */
+.orange-gradient-text {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+:global(.dark) .orange-gradient-text {
+  filter: drop-shadow(0 4px 8px rgba(251, 146, 60, 0.2));
+}

@@ -46,11 +46,11 @@ export class HeroSceneComponent implements OnInit, OnDestroy {
   
   private lightThemeColors = {
     bg: 0xffffff,
-    neuron: 0x1e40af,     // Azul más oscuro y contrastante
-    connection: 0x3730a3,  // Índigo oscuro para conexiones
-    particle: 0x1d4ed8,    // Azul vibrante pero oscuro
-    energy: 0x581c87,      // Púrpura oscuro
-    orb: 0x0f766e         // Teal oscuro para mejor contraste
+    neuron: 0xdc2626,     // Rojo vibrante para máximo impacto
+    connection: 0xea580c,  // Naranja intenso para conexiones
+    particle: 0xd97706,    // Ámbar brillante
+    energy: 0xca8a04,      // Amarillo dorado
+    orb: 0x059669         // Verde esmeralda para contraste
   };
 
   constructor(

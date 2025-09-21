@@ -17,59 +17,72 @@ section { scroll-margin-top: 80px; }
   z-index: 10 !important;
 }
 
-/* Estilos para el texto con gradiente - Optimizado para ambos temas */
-.gradient-text {
-  /* Gradiente para modo claro - colores más oscuros y contrastantes */
-  background: linear-gradient(135deg, #1e40af 0%, #3730a3 30%, #581c87 70%, #7c2d12 100%);
+/* Estilos para el texto con gradiente - NUEVO COLOR PRIMARIO NARANJA */
+.gradient-text, .orange-gradient-text {
+  /* Gradiente naranja vibrante - NUEVO COLOR PRIMARIO */
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
   opacity: 1 !important;
   visibility: visible !important;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
 }
 
-/* Gradiente optimizado para modo oscuro */
-.dark .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 30%, #818cf8 70%, #fbbf24 100%);
+/* Gradiente naranja brillante para modo oscuro */
+.dark .gradient-text, .dark .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
 }
 
 /* Contenedor del typewriter para mantener elementos en línea */
 .typewriter-container {
   min-height: 1.2em; /* Altura mínima para evitar saltos */
-  align-items: baseline; /* Alinear por la línea base del texto */
+  align-items: center; /* Centrar verticalmente */
   line-height: 1.2; /* Altura de línea consistente */
-  display: inline-flex; /* Usar flex inline para mantener elementos juntos */
-  flex-wrap: wrap; /* Permitir wrap cuando sea necesario */
+  display: flex; /* Usar flex para mantener elementos juntos */
+  flex-wrap: nowrap; /* Mantener cursor inline */
   justify-content: center;
+  max-width: 100%; /* Respetar el ancho máximo */
+  overflow: hidden; /* Ocultar desbordamiento si es necesario */
 }
 
 /* Texto del typewriter */
 .typewriter-text {
-  display: inline;
+  display: inline-block;
   vertical-align: baseline;
-  white-space: pre-wrap; /* Permitir wrap natural del texto */
-  word-break: break-word; /* Romper palabras largas si es necesario */
+  max-width: calc(100% - 20px); /* Dejar espacio para el cursor */
+  overflow: hidden; /* Ocultar texto que se desborde */
+  text-overflow: ellipsis; /* Mostrar ... si es muy largo */
+  white-space: nowrap; /* Mantener en una línea para el efecto typewriter */
 }
 
-/* Typewriter cursor parpadeante - Optimizado para ambos temas */
+/* Typewriter cursor parpadeante - SIEMPRE INLINE */
 .cursor {
   display: inline;
-  color: #3730a3; /* Índigo oscuro para modo claro */
+  color: #dc2626; /* Rojo vibrante para modo claro */
   animation: blink 1s steps(2, start) infinite;
-  vertical-align: baseline; /* Asegurar alineación con el texto */
-  margin-left: 2px; /* Pequeño espacio entre texto y cursor */
-  flex-shrink: 0; /* Evitar que el cursor se comprima */
-  line-height: inherit; /* Heredar la altura de línea del contenedor */
+  vertical-align: baseline;
+  margin-left: 0px; /* Sin margen para estar pegado al texto */
+  flex-shrink: 0;
+  line-height: inherit;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+  position: relative; /* Asegurar posicionamiento inline */
+  white-space: nowrap; /* Nunca permitir wrap */
 }
 
-/* Cursor optimizado para modo oscuro */
+/* Cursor brillante para modo oscuro */
 .dark .cursor {
-  color: #c7d2fe; /* indigo-200 para modo oscuro */
+  color: #fbbf24; /* Amarillo brillante para modo oscuro */
+  text-shadow: 0 1px 6px rgba(251, 191, 36, 0.4);
 }
 
 /* Asegurar que el contenedor del typewriter mantenga elementos en línea */
@@ -82,20 +95,31 @@ section { scroll-margin-top: 80px; }
   to { visibility: hidden; }
 }
 
-/* Responsive para el typewriter en móviles */
+/* Responsive para el typewriter en móviles - EQUILIBRIO PERFECTO */
 @media (max-width: 640px) {
   .typewriter-container {
     flex-direction: row; /* Mantener en fila siempre */
-    flex-wrap: wrap; /* Permitir wrap natural en móviles */
+    flex-wrap: nowrap; /* Mantener cursor inline */
     justify-content: center;
-    align-items: baseline;
+    align-items: center;
     max-width: 100%;
+    padding: 0 1rem; /* Padding lateral para evitar desbordamiento */
   }
   
   .typewriter-text {
-    max-width: calc(100vw - 2rem); /* Ajustar al ancho de pantalla menos padding */
-    white-space: pre-wrap; /* Permitir wrap natural del texto */
-    word-break: break-word; /* Romper palabras largas si es necesario */
+    max-width: calc(100vw - 6rem); /* Más espacio para el cursor y padding */
+    overflow: hidden; /* Ocultar desbordamiento */
+    text-overflow: ellipsis; /* Mostrar ... si es muy largo */
+    white-space: nowrap; /* Mantener en una línea */
+    font-size: 0.9em; /* Reducir ligeramente el tamaño en móvil */
+  }
+  
+  /* Asegurar que el cursor esté siempre visible en móvil */
+  .cursor {
+    margin-left: 2px;
+    flex-shrink: 0;
+    width: auto;
+    min-width: 1ch; /* Ancho mínimo del cursor */
   }
 }
 
@@ -457,27 +481,55 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Animación de pulso suave para elementos de fondo */
+/* Animaciones dinámicas para elementos de fondo */
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(1deg); }
+  66% { transform: translateY(10px) rotate(-1deg); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    filter: blur(60px) brightness(1); 
+    opacity: 0.4; 
+  }
+  50% { 
+    filter: blur(80px) brightness(1.3); 
+    opacity: 0.7; 
+  }
 }
 
 .animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
+  animation: pulse-slow 6s ease-in-out infinite;
 }
 
-/* Elementos de fondo mejorados para light mode */
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+/* Elementos de fondo mejorados para light mode - MÁXIMO IMPACTO */
 :root:not(.dark) .hero-bg-element-1 {
-  background: radial-gradient(circle, rgba(30, 64, 175, 0.25) 0%, rgba(30, 64, 175, 0.1) 50%, transparent 100%) !important;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.35) 0%, rgba(239, 68, 68, 0.2) 30%, rgba(234, 88, 12, 0.15) 60%, transparent 100%) !important;
+  filter: blur(60px) !important;
 }
 
 :root:not(.dark) .hero-bg-element-2 {
-  background: radial-gradient(circle, rgba(55, 48, 163, 0.25) 0%, rgba(55, 48, 163, 0.1) 50%, transparent 100%) !important;
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.4) 0%, rgba(217, 119, 6, 0.25) 30%, rgba(202, 138, 4, 0.15) 60%, transparent 100%) !important;
+  filter: blur(80px) !important;
 }
 
 :root:not(.dark) .hero-bg-element-3 {
-  background: radial-gradient(circle, rgba(88, 28, 135, 0.2) 0%, rgba(88, 28, 135, 0.08) 50%, transparent 100%) !important;
+  background: radial-gradient(circle, rgba(202, 138, 4, 0.3) 0%, rgba(234, 179, 8, 0.2) 30%, rgba(250, 204, 21, 0.1) 60%, transparent 100%) !important;
+  filter: blur(100px) !important;
 }
 
 /* Mantener los estilos originales para dark mode */
@@ -584,56 +636,82 @@ app-ui-button.w-full {
 
 /* ===== ESTILOS COLORIDOS ESPECÍFICOS PARA BOTONES ===== */
 
-/* Botón principal del hero - Mejorado para ambos temas */
+/* Botón principal del hero - MÁXIMO IMPACTO VISUAL */
 .hero-primary-btn {
-  background: linear-gradient(135deg, #1e40af 0%, #3730a3 50%, #581c87 100%) !important;
-  box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4) !important;
+  background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #eab308 100%) !important;
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.5), 0 4px 15px rgba(234, 88, 12, 0.3) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .hero-primary-btn:hover {
-  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 50%, #6b21a8 100%) !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 15px 35px rgba(30, 64, 175, 0.6) !important;
+  background: linear-gradient(135deg, #b91c1c 0%, #c2410c 25%, #b45309 50%, #a16207 75%, #ca8a04 100%) !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 20px 40px rgba(220, 38, 38, 0.7), 0 8px 25px rgba(234, 88, 12, 0.5) !important;
+}
+
+/* Efecto de brillo en el botón principal */
+.hero-primary-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
 }
 
 /* Botón principal del hero en modo oscuro */
 .dark .hero-primary-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%) !important;
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3) !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #c084fc 100%) !important;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5), 0 4px 15px rgba(139, 92, 246, 0.4) !important;
 }
 
 .dark .hero-primary-btn:hover {
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%) !important;
-  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 25%, #7c3aed 50%, #9333ea 75%, #a855f7 100%) !important;
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.7), 0 8px 25px rgba(139, 92, 246, 0.6) !important;
 }
 
-/* Botón ghost del hero - Mejorado para ambos temas */
+/* Botón ghost del hero - CONTRASTE MEJORADO */
 .hero-ghost-btn {
-  background: rgba(30, 64, 175, 0.1) !important;
-  border: 2px solid rgba(30, 64, 175, 0.3) !important;
-  color: #1e40af !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+  border: 3px solid #1e3a8a !important;
+  color: #1e3a8a !important;
+  backdrop-filter: blur(10px) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(30, 58, 138, 0.1) !important;
 }
 
 .hero-ghost-btn:hover {
-  background: rgba(30, 64, 175, 0.2) !important;
-  border-color: rgba(30, 64, 175, 0.5) !important;
-  color: #1d4ed8 !important;
-  transform: translateY(-3px) scale(1.05) !important;
-  box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3) !important;
+  background: rgba(30, 58, 138, 0.15) !important;
+  border-color: #1e40af !important;
+  color: #1e40af !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 15px 35px rgba(30, 58, 138, 0.4) !important;
 }
 
 /* Botón ghost del hero en modo oscuro */
 .dark .hero-ghost-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 3px solid #60a5fa !important;
+  color: #60a5fa !important;
+  text-shadow: 0 1px 4px rgba(96, 165, 250, 0.3) !important;
 }
 
 .dark .hero-ghost-btn:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: #3b82f6 !important;
   color: #ffffff !important;
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 15px 35px rgba(96, 165, 250, 0.4) !important;
 }
 
 /* Botón de metodología azul */

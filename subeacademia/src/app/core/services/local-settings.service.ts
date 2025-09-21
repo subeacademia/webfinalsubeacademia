@@ -32,7 +32,7 @@ export class LocalSettingsService {
   private readonly TYPEWRITER_STORAGE_KEY = 'subeacademia_typewriter_phrases';
   
   private settingsSubject = new BehaviorSubject<LocalSiteSettings>({
-    brandName: 'Sube Academ-IA',
+    brandName: 'Sube Academ-I',
     defaultLang: 'es',
     homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial'
   });

@@ -32,7 +32,7 @@ import { AnimationService } from '../../core/services/animation.service';
           <!-- Título principal optimizado para ambos temas -->
           <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight text-white dark:text-white">
             Nuestros 
-            <span class="bg-gradient-to-r from-cyan-300 to-purple-300 bg-clip-text text-transparent">Productos</span>
+            <span class="orange-gradient-text">Productos</span>
           </h1>
           
           <!-- Descripción mejorada -->
@@ -201,7 +201,7 @@ import { AnimationService } from '../../core/services/animation.service';
             </div>
             <h2 class="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-white mb-8 leading-tight">
               El Enfoque 
-              <span class="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">Sube-Academia</span>
+              <span class="orange-gradient-text">Sube-Academia</span>
             </h2>
             <p class="text-lg md:text-xl text-gray-700 dark:text-neutral-300 leading-relaxed max-w-3xl mx-auto">
               Nuestra metodología única combina lo mejor de la educación personalizada con tecnología de vanguardia
@@ -610,7 +610,29 @@ import { AnimationService } from '../../core/services/animation.service';
       </div>
     </div>
   `,
-  styles: []
+  styles: [`
+    /* Gradiente naranja - NUEVO COLOR PRIMARIO */
+    .orange-gradient-text {
+      background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+      font-weight: 900 !important;
+    }
+    
+    /* Modo oscuro */
+    :global(.dark) .orange-gradient-text {
+      background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+      font-weight: 900 !important;
+    }
+  `]
 })
 export class ProductosComponent implements AfterViewInit {
   // Estado de los modales

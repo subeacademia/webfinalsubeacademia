@@ -87,7 +87,7 @@ export class SettingsPageComponent {
 
   form = this.fb.group({
     homeTitle: ['Potencia tu Talento en la Era de la Inteligencia Artificial'],
-    brandName: ['Sube Academ-IA', Validators.required],
+    brandName: ['Sube Academ-I', Validators.required],
     logoUrl: [''],
     defaultLang: ['es', Validators.required],
     contactEmail: [''],
