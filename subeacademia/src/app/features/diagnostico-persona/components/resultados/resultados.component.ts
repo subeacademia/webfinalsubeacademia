@@ -27,6 +27,25 @@ import { ScoringService, ScoreResult } from '../../services/scoring.service';
         <div class="text-6xl font-bold mb-4">{{ Math.round(scoreResult?.ip_ia || 0) }}</div>
         <div class="text-xl mb-2">de 5.0</div>
         <div class="text-lg opacity-90">{{ getIPIADescription(scoreResult?.ip_ia || 0) }}</div>
+
+        <!-- Share actions -->
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <button (click)="share()" class="px-4 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+            Compartir resultados
+          </button>
+          <button (click)="shareFacebook()" class="px-3 py-2 bg-[#1877F2] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en Facebook">
+            Facebook
+          </button>
+          <button (click)="shareLinkedIn()" class="px-3 py-2 bg-[#0A66C2] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en LinkedIn">
+            LinkedIn
+          </button>
+          <button (click)="shareInstagram()" class="px-3 py-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en Instagram">
+            Instagram
+          </button>
+          <button (click)="downloadShareImage()" class="px-3 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-colors" aria-label="Descargar imagen de resultados">
+            Descargar imagen
+          </button>
+        </div>
       </div>
 
       <!-- Subescalas -->
@@ -221,6 +240,136 @@ export class ResultadosComponent implements OnInit {
 
   // Exponer Math para el template
   Math = Math;
+
+  // --- Compartir resultados (persona) ---
+  private getShareLandingUrl(): string {
+    return 'https://www.subeia.tech';
+  }
+
+  private getShareText(): string {
+    const nombre = this.sessionData?.nombre || 'Yo';
+    const ipia = Math.round((this.scoreResult?.ip_ia || 0) * 20) / 20; // 0-5 con 0.05 pasos
+    return `${nombre} obtuvo un IP-IA de ${ipia}/5 en su diagnóstico de competencias en IA. Conoce tu nivel y haz el test en ${this.getShareLandingUrl()}`;
+  }
+
+  async share(): Promise<void> {
+    const url = this.getShareLandingUrl();
+    const text = this.getShareText();
+    if (navigator && (navigator as any).share) {
+      try {
+        const file = await this.createShareImageFile(`mi-diagnostico-ia-${(this.sessionData?.nombre || 'persona').toString().replace(/\s+/g,'-')}.png`);
+        if (file && (navigator as any).canShare?.({ files: [file] })) {
+          await (navigator as any).share({ title: 'Mi Diagnóstico en IA', text, url, files: [file] });
+        } else {
+          await (navigator as any).share({ title: 'Mi Diagnóstico en IA', text, url });
+        }
+        return;
+      } catch {}
+    }
+    const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    this.openCenteredPopup(shareUrl);
+  }
+
+  shareFacebook(): void {
+    const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(this.getShareLandingUrl())}&quote=${encodeURIComponent(this.getShareText())}`;
+    this.openCenteredPopup(fb);
+  }
+
+  shareLinkedIn(): void {
+    try { navigator.clipboard?.writeText(this.getShareText()); } catch {}
+    const li = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(this.getShareLandingUrl())}`;
+    this.openCenteredPopup(li);
+    alert('El texto con tus resultados fue copiado al portapapeles. Pégalo en la publicación de LinkedIn.');
+  }
+
+  async shareInstagram(): Promise<void> {
+    // Intento Web Share con archivo para permitir enviar a Historias desde móviles
+    try {
+      const file = await this.createShareImageFile(`mi-diagnostico-ia-${(this.sessionData?.nombre || 'persona').toString().replace(/\s+/g,'-')}.png`);
+      const text = this.getShareText();
+      if (file && (navigator as any).share && (navigator as any).canShare?.({ files: [file] })) {
+        await (navigator as any).share({ files: [file], text, title: 'Mi Diagnóstico en IA' });
+        return;
+      }
+    } catch {}
+
+    // Fallback: compositor de historias + descarga + copiar texto
+    try { await navigator.clipboard?.writeText(this.getShareText()); } catch {}
+    await this.downloadShareImage();
+    window.open('https://www.instagram.com/create/story', '_blank');
+    alert('Abrimos Historias de Instagram. La imagen se descargó y el texto fue copiado al portapapeles. Súbela como historia y pega el texto.');
+  }
+
+  private openCenteredPopup(url: string): void {
+    const width = 900; const height = 650;
+    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+    window.open(url, '_blank', `toolbar=0,status=0,width=${width},height=${height},left=${left},top=${top}`);
+  }
+
+  async downloadShareImage(): Promise<void> {
+    const dataUrl = await this.generateShareImageDataUrl();
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    const nombre = (this.sessionData?.nombre || 'diagnostico').replace(/\s+/g, '-');
+    link.download = `mi-diagnostico-ia-${nombre}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  private async createShareImageFile(filename: string): Promise<File | null> {
+    const dataUrl = await this.generateShareImageDataUrl();
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: 'image/png' });
+    } catch {
+      return null;
+    }
+  }
+
+  private async generateShareImageDataUrl(): Promise<string> {
+    const width = 1200; const height = 630;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    // Fondo
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#2563eb');
+    gradient.addColorStop(1, '#9333ea');
+    ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
+
+    // Contenedor
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(40, 40, width - 80, height - 80);
+
+    // Título
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 54px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText('Índice de Preparación en IA (IP-IA)', 80, 150);
+
+    // Puntaje
+    const ipia = Math.round((this.scoreResult?.ip_ia || 0) * 100) / 100; // 2 decimales
+    ctx.font = 'bold 180px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(String(ipia), 80, 400);
+    ctx.font = 'bold 48px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText('de 5.0', 80, 460);
+
+    // Descripción
+    const desc = this.getIPIADescription(this.scoreResult?.ip_ia || 0);
+    ctx.font = 'normal 36px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(desc, 80, 520);
+
+    // URL
+    const url = this.getShareLandingUrl();
+    ctx.font = 'bold 34px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(url.replace(/^https?:\/\//, ''), 80, height - 80);
+
+    return canvas.toDataURL('image/png');
+  }
 
   ngOnInit(): void {
     this.loadSessionData();

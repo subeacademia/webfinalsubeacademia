@@ -180,8 +180,35 @@ export class SettingsPageComponent {
             twitter: v.twitter || undefined,
             linkedin: v.linkedin || undefined,
             youtube: v.youtube || undefined
-          }
+          },
+          // Publicamos también el fondo del Home en Firestore para que se propague a todos los dispositivos
+          homeBackgroundKey: v.homeBackgroundKey || 'neural-3d-v1',
+          homeBackgroundName: ((): string | undefined => {
+            switch(v.homeBackgroundKey){
+              case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
+              case 'tech-lines-3d-v1': return 'Líneas Tecnológicas 3D - Versión 1';
+              case 'elegant-network-v1': return 'Red Elegante 3D - Versión 1';
+              case 'ai-neural-flow-v1': return 'Redes de Neuronas Artificiales - Versión 1';
+              case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
+              case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
+              case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+              default: return undefined;
+            }
+          })()
         } as any);
+        // Además, publica el fondo por idioma actual (es) para que Home lo lea directamente
+        await this.dataSettings.setHomeBackgroundKey('es', v.homeBackgroundKey || 'neural-3d-v1', ((): string | undefined => {
+          switch(v.homeBackgroundKey){
+            case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
+            case 'tech-lines-3d-v1': return 'Líneas Tecnológicas 3D - Versión 1';
+            case 'elegant-network-v1': return 'Red Elegante 3D - Versión 1';
+            case 'ai-neural-flow-v1': return 'Redes de Neuronas Artificiales - Versión 1';
+            case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
+            case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
+            case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+            default: return undefined;
+          }
+        })());
       } catch (err) {
         console.warn('No se pudo guardar en Firestore (continuamos con local):', err);
       }

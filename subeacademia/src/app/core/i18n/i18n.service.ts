@@ -43,7 +43,8 @@ export class I18nService {
     const target: Language = this.supportedLanguages.has(lang) ? lang : 'es';
     this.currentLanguageSignal.set(target);
     this.setDocumentLangAndDir(target);
-    await this.ensureLoaded(target);
+    // Forzar recarga del diccionario en cada cambio de idioma para evitar caché obsoleta durante desarrollo
+    await this.ensureLoaded(target, true);
     this.currentDictionarySignal.set(this.languageDictionariesCache.get(target) ?? {});
   }
 

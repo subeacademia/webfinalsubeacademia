@@ -10,6 +10,7 @@ import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { HomeConfigService, HomePageContent } from '../../core/data/home-config.service';
+import { SettingsService as DataSettingsService, SiteSettings } from '../../core/data/settings.service';
 import { Subscription, distinctUntilChanged, switchMap, Observable, combineLatest } from 'rxjs';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
@@ -36,6 +37,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly animationService: AnimationService,
     private readonly seo: SeoService,
     private readonly settings: LocalSettingsService,
+    private readonly dataSettings: DataSettingsService,
     private readonly cdr: ChangeDetectorRef
   ) {
     // Valor por defecto para asegurar que el título se muestre
@@ -109,86 +111,44 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Asegurar que el servicio i18n esté inicializado
     this.initializeI18n();
     
-    // Configurar contenido del home combinando ajustes locales y contenido dinámico
-    this.contentSub = combineLatest([
-      this.i18n.currentLang$.pipe(distinctUntilChanged()),
-      this.settings.get()
-    ]).pipe(
-      switchMap(([lang, localSettings]) => {
-        console.log('🌐 Cambio de idioma detectado:', lang);
-        console.log('⚙️ Ajustes locales del sitio:', localSettings);
-        
-        // Obtener frases del typewriter desde ajustes locales
-        return this.settings.getTypewriterPhrasesAsArray(lang as 'es'|'en'|'pt').pipe(
-          switchMap(typewriterPhrases => {
-            console.log('📝 Frases del typewriter desde ajustes locales:', typewriterPhrases);
-            
-            // Usar título desde ajustes locales
-            const finalTitle = localSettings?.homeTitle || 
-                              'Potencia tu Talento en la Era de la Inteligencia Artificial';
-            
-            return [{ 
-              typewriterPhrases,
-              title: finalTitle,
-              localSettings 
-            }];
-          })
-        );
-      })
-    ).subscribe((data: any) => {
-      const c = data as HomePageContent & { localSettings?: any };
-      console.log('📥 Datos finales combinados:', c);
-      
-      // Configurar frases dinámicas desde traducciones
-      const currentDict = this.i18n.currentDictionary();
-      let translatedPhrases: string[] = [];
-      
-      try {
-        const homeSection = (currentDict as any)?.['home'];
-        const heroSection = homeSection?.['hero'];
-        translatedPhrases = heroSection?.['typewriter_phrases'] || [];
-      } catch (e) {
-        console.log('📝 Error accediendo a traducciones del typewriter:', e);
-      }
-      
-      this.frasesDinamicas = c?.typewriterPhrases?.length ? c.typewriterPhrases : [];
-      if (!this.frasesDinamicas.length) {
-        console.log('📝 Usando frases traducidas');
-        this.frasesDinamicas = translatedPhrases.length ? translatedPhrases : [
-          'Implementa IA de forma Ágil, Responsable y Sostenible con nuestro Framework ARES-AI©.',
-          'Desarrolla las 13 competencias clave que tu equipo necesita para liderar la transformación digital.',
-          'Transforma tu organización con nuestra plataforma de aprendizaje adaptativo AVE-AI.'
-        ];
-      }
-      console.log('📝 Frases dinámicas configuradas:', this.frasesDinamicas);
-      
-      // Configurar título (ahora viene de los ajustes locales del admin)
-      this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
-      console.log('🏷️ Título del home configurado desde ajustes locales:', this.tituloHome);
+    // Configurar contenido del home combinando ajustes locales y remotos por idioma
+    this.contentSub = this.i18n.currentLang$
+      .pipe(distinctUntilChanged(), switchMap((lang) =>
+        combineLatest([
+          this.settings.get(),
+          this.dataSettings.get(),
+          this.dataSettings.getHomePageContent(lang as 'es'|'en'|'pt'),
+          this.settings.getTypewriterPhrasesAsArray(lang as 'es'|'en'|'pt')
+        ])
+      ))
+      .subscribe(([localSettings, remoteSettings, homeDoc, typewriterPhrases]) => {
+        // Título prioriza doc público -> settings remotos -> locales
+        const finalTitle = (homeDoc as any)?.title || (remoteSettings as any)?.homeTitle || (localSettings as any)?.homeTitle || this.tituloHome;
+        this.tituloHome = finalTitle;
 
-      // Fondo del home seleccionado desde Admin
-      this.selectedHomeBgKey = c?.localSettings?.homeBackgroundKey || 'neural-3d-v1';
-      console.log('🎨 Fondo del Home seleccionado:', this.selectedHomeBgKey);
+        // Fondo prioriza doc público -> settings remotos -> locales -> default
+        this.selectedHomeBgKey = (homeDoc as any)?.homeBackgroundKey
+          || (remoteSettings as any)?.homeBackgroundKey
+          || (localSettings as any)?.homeBackgroundKey
+          || 'neural-3d-v1';
+        console.log('🎨 Fondo del Home seleccionado:', this.selectedHomeBgKey);
 
-      // SEO dinámico por idioma
-      this.seo.updateTags({
-        title: this.tituloHome,
-        description: 'Formación aplicada en IA con enfoque en resultados y competencias.'
-      });
-      
-      // Configurar fases de metodología con traducciones
-      this.loadMethodologyPhases();
-      
-      // Configurar typewriter
-      if (typeof document !== 'undefined') {
-        this.typewriterElement = document.getElementById('typewriter');
-        if (this.typewriterElement) {
-          clearTimeout(this.timeoutId);
-          this.resetTypewriterState();
-          this.type();
+        // Frases del typewriter
+        this.frasesDinamicas = Array.isArray(typewriterPhrases) && typewriterPhrases.length ? typewriterPhrases : this.frasesDinamicas;
+
+        // SEO dinámico por idioma
+        this.seo.updateTags({ title: this.tituloHome, description: 'Formación aplicada en IA con enfoque en resultados y competencias.' });
+
+        // Inicializar typewriter
+        if (typeof document !== 'undefined') {
+          this.typewriterElement = document.getElementById('typewriter');
+          if (this.typewriterElement) {
+            clearTimeout(this.timeoutId);
+            this.resetTypewriterState();
+            this.type();
+          }
         }
-      }
-    });
+      });
 
     // Cargar logos desde Firestore
     this.loadLogos();

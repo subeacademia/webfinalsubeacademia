@@ -10,14 +10,54 @@ import { AuthService } from '../../../services/auth.service';
 import { User } from '@angular/fire/auth';
 import { ThemeToggleComponent } from '../../../../shared/ui/theme-toggle/theme-toggle.component';
 import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-selector.component';
+// Fondos 3D globales
+import { HeroSceneComponent } from '../../../../features/home/hero-scene/hero-scene.component';
+import { TechLinesSceneComponent } from '../../../../features/home/tech-lines-scene/tech-lines-scene.component';
+import { ElegantNetworkSceneComponent } from '../../../../features/home/elegant-network-scene/elegant-network-scene.component';
+import { AiNeuralFlowSceneComponent } from '../../../../features/home/ai-neural-flow-scene/ai-neural-flow-scene.component';
+import { NeuralNetworkBackgroundV2Component } from '../../../../features/home/circuit-neural-background/neural-network-background-v2.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe, ThemeToggleComponent, FlagSelectorComponent, I18nTranslatePipe],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    NgIf,
+    AsyncPipe,
+    ThemeToggleComponent,
+    FlagSelectorComponent,
+    I18nTranslatePipe,
+    // Componentes de fondo 3D
+    HeroSceneComponent,
+    TechLinesSceneComponent,
+    ElegantNetworkSceneComponent,
+    AiNeuralFlowSceneComponent,
+    NeuralNetworkBackgroundV2Component,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- Fondo global removido: ahora se controla desde cada página -->
+    <!-- Fondo 3D GLOBAL controlado por settings -->
+    <div class="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+      <app-hero-scene *ngIf="selectedBg() === 'neural-3d-v1'"
+                      class="absolute inset-0 w-full h-full"></app-hero-scene>
+      <app-tech-lines-scene *ngIf="selectedBg() === 'tech-lines-3d-v1'"
+                            class="absolute inset-0 w-full h-full"></app-tech-lines-scene>
+      <app-elegant-network-scene *ngIf="selectedBg() === 'elegant-network-v1'"
+                                 class="absolute inset-0 w-full h-full"></app-elegant-network-scene>
+      <app-ai-neural-flow-scene *ngIf="selectedBg() === 'ai-neural-flow-v1'"
+                                class="absolute inset-0 w-full h-full"></app-ai-neural-flow-scene>
+      <app-neural-network-background-v2 *ngIf="selectedBg() === 'circuit-tech-v2' || selectedBg() === 'circuit-tech-v2-light'"
+                                        class="absolute inset-0 w-full h-full"
+                                        [animationDurationCreate]="1800"
+                                        [animationDurationDestroy]="900"
+                                        [nodeColor]="'#00FFFF'"
+                                        [lineColor]="'#00BFFF'"
+                                        [backgroundColor]="selectedBg() === 'circuit-tech-v2' ? '#1A1A2E' : '#FFFFFF'"
+                                        [density]="'medium'"
+                                        [glowEffect]="true"
+                                        [flowSpeed]="1.0"></app-neural-network-background-v2>
+    </div>
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
         <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16 px-4 md:px-6" role="navigation" aria-label="Navegación principal">
            <a [routerLink]="['/', currentLang()]" 
@@ -217,7 +257,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
       </div>
     </header>
 
-    <main class="container mx-auto max-w-7xl pt-20 md:pt-24 pb-8 px-4 md:px-6" id="main-content" role="main">
+    <main class="relative z-10 container mx-auto max-w-7xl pt-20 md:pt-24 pb-8 px-4 md:px-6" id="main-content" role="main">
       <ng-content />
     </main>
 
@@ -265,6 +305,8 @@ export class AppShellComponent {
 
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
+  // Fondo global seleccionado desde Settings
+  selectedBg: WritableSignal<string> = signal('neural-3d-v1');
   private readonly authService = inject(AuthService);
 
   // Observable del usuario actual para la UI
@@ -289,6 +331,7 @@ export class AppShellComponent {
         this.localSettings.get().subscribe((s: LocalSiteSettings) => {
           if (typeof s.brandName === 'string') this.brandName.set(s.brandName.trim());
           this.logoUrl.set(s.logoUrl || null);
+          if (s.homeBackgroundKey) this.selectedBg.set(s.homeBackgroundKey);
         });
       });
     } catch (error) {

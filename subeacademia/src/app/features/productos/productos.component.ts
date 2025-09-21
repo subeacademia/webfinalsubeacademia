@@ -76,7 +76,7 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
               
               <!-- Mensaje final optimizado -->
               <div class="bg-white/10 dark:bg-white/5 rounded-2xl p-6 border border-white/20 dark:border-white/10">
-                <p class="text-xl md:text-2xl text-white dark:text-white font-medium">
+                <p class="text-xl md:text-2xl text-blue-700 dark:text-white font-semibold">
                   {{ 'productos.competitive_formula' | i18nTranslate }}
                 </p>
               </div>

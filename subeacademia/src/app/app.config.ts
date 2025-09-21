@@ -7,6 +7,7 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getApp } from 'firebase/app';
 
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
@@ -29,14 +30,10 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
     provideStorage(() => getStorage()),
-    provideFirestore(() => {
-      // AÑADIMOS LA INICIALIZACIÓN CON LA NUEVA CONFIGURACIÓN
-      return initializeFirestore(getApp(), {
-          // ESTA LÍNEA ES LA SOLUCIÓN:
-          experimentalForceLongPolling: true, 
-          localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-      });
-    }),
+    provideFirestore(() => initializeFirestore(getApp(), {
+      experimentalForceLongPolling: true,
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    })),
     // --- FIN DE LA MODIFICACIÓN DE FIREBASE ---
     {
       provide: 'APP_INIT_LIGHT_MODE',
@@ -51,8 +48,3 @@ export const appConfig: ApplicationConfig = {
     }
   ],
 };
-
-// Función helper para obtener la instancia de la app, necesaria para initializeFirestore
-function getApp() {
-    return initializeApp(environment.firebase);
-}

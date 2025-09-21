@@ -98,7 +98,22 @@
   "home": {
     "cta_primary": "Inicia tu diagnóstico de madurez en IA Gratis",
     "cta_secondary": "Habla con un asesor ahora",
-    "hero_title": "Desarrolla las 13 competencias clave",
+    "hero": {
+      "title": "Potencia tu Talento en la Era de la Inteligencia Artificial"
+    },
+    "solution": {
+      "title": "Soluciones Integrales de IA",
+      "feature1_title": "AVE-AI",
+      "feature1_desc": "Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave.",
+      "feature2_title": "ARES-AI",
+      "feature2_desc": "Consultoría y metodología para implementar IA de forma ágil, responsable y sostenible.",
+      "feature3_title": "Casos de Éxito",
+      "feature3_desc": "Proyectos reales de alto impacto implementados junto a nuestros clientes."
+    },
+    "cta_final": {
+      "title": "¿Listo para impulsar tu proyecto con IA?",
+      "button": "Habla con un asesor"
+    },
     "hero_subtitle": "Descubre tu nivel de madurez en IA y transforma tu organización con nuestro diagnóstico inteligente basado en el Framework ARES-AI©",
     "roadmap_title": "Tu Hoja de Ruta hacia la Madurez en IA",
     "roadmap_subtitle": "Basado en nuestro Framework ARES-AI© probado y validado",
@@ -106,7 +121,6 @@
     "solutions_subtitle": "Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable",
     "trust_title": "Han confiado en nosotros",
     "trust_subtitle": "Únete a las organizaciones que ya están transformando su futuro con IA",
-    "cta_final": "Comenzar Ahora",
     "methodology": {
       "title": "Nuestra Metodología ARES-AI",
       "subtitle": "Un marco de 5 fases que garantiza la implementación exitosa de IA, combinando agilidad, responsabilidad y resultados tangibles.",
@@ -194,6 +208,42 @@
       "education": "Instituciones Educativas",
       "alliances": "Alianzas Estratégicas",
       "final_cta": "Únete a las organizaciones que ya están transformando su futuro con IA"
+    }
+  },
+  "trust": {
+    "title": "Han confiado en nosotros",
+    "companies": "Empresas",
+    "education": "Instituciones Educativas",
+    "alliances": "Alianzas Estratégicas",
+    "final_cta": "¿Quieres un diagnóstico para tu organización?"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "productos": "Productos",
+    "nosotros": "Nosotros",
+    "metodologia": "Metodología",
+    "blog": "Blog",
+    "contacto": "Contacto",
+    "admin": "Admin",
+    "login_google": "Iniciar sesión con Google",
+    "dashboard": "Mi panel",
+    "logout": "Cerrar sesión",
+    "privacy_policy": "Política de privacidad"
+  },
+  "admin": {
+    "menu": {
+      "posts": "Publicaciones",
+      "productos": "Productos",
+      "projects": "Proyectos",
+      "certificados": "Certificados",
+      "media": "Medios",
+      "logos": "Logos",
+      "history": "Historial",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuarios",
+      "settings": "Ajustes",
+      "logout": "Cerrar sesión"
     }
   },
   "shared": {
@@ -389,7 +439,7 @@
     "subtitle": "Descubre nuestro catálogo completo de productos diseñados para acelerar tu transformación digital con Inteligencia Artificial",
     "model_title": "Modelo 50/50: La Fórmula Perfecta",
     "standard_content": "Contenido Estándar",
-    "total_personalization": "Personalización Total",
+    "total_personalization": "Personalización Matética",
     "competitive_formula": "La fórmula que nos hace únicos en el mercado de la educación en IA",
     "categories": {
       "consulting": { "title": "Asesorías", "description": "Consultoría especializada en IA para empresas que buscan implementar soluciones inteligentes de manera estratégica y eficiente.", "btn": "Ver Asesorías" },

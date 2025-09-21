@@ -1,5 +1,6 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ReporteDiagnosticoEmpresa } from '../../../data/empresa-diagnostic.models';
 
 @Component({
@@ -87,6 +88,25 @@ import { ReporteDiagnosticoEmpresa } from '../../../data/empresa-diagnostic.mode
                 <span>60-79</span>
                 <span>80-100</span>
               </div>
+            </div>
+
+            <!-- Share actions -->
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button (click)="share()" class="px-4 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
+                Compartir resultados
+              </button>
+              <button (click)="shareFacebook()" class="px-3 py-2 bg-[#1877F2] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en Facebook">
+                Facebook
+              </button>
+              <button (click)="shareLinkedIn()" class="px-3 py-2 bg-[#0A66C2] text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en LinkedIn">
+                LinkedIn
+              </button>
+              <button (click)="shareInstagram()" class="px-3 py-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity" aria-label="Compartir en Instagram">
+                Instagram
+              </button>
+              <button (click)="downloadShareImage()" class="px-3 py-2 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-colors" aria-label="Descargar imagen de resultados">
+                Descargar imagen
+              </button>
             </div>
           </div>
         </div>
@@ -486,7 +506,7 @@ import { ReporteDiagnosticoEmpresa } from '../../../data/empresa-diagnostic.mode
               <div class="text-4xl mb-4">📚</div>
               <h3 class="text-xl font-semibold mb-2">Explora Nuestros Cursos</h3>
               <p class="text-blue-100 mb-4">Formación especializada en IA y transformación digital</p>
-              <button class="px-6 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
+              <button (click)="goToCursos()" class="px-6 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
                 Ver Cursos
               </button>
             </div>
@@ -494,7 +514,7 @@ import { ReporteDiagnosticoEmpresa } from '../../../data/empresa-diagnostic.mode
               <div class="text-4xl mb-4">🤝</div>
               <h3 class="text-xl font-semibold mb-2">Consultoría Personalizada</h3>
               <p class="text-blue-100 mb-4">Asesoramiento estratégico para tu organización</p>
-              <button class="px-6 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
+              <button (click)="goToContacto()" class="px-6 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-semibold">
                 Contactar
               </button>
             </div>
@@ -510,6 +530,162 @@ export class EmpresaResultsComponent {
   
   activeTimeline = signal('90');
   selectedDimension = signal<string | null>(null);
+  private router = inject(Router);
+
+  // --- Compartir resultados ---
+  private getShareLandingUrl(): string {
+    return 'https://www.subeia.tech';
+  }
+
+  private getShareText(): string {
+    const empresa = this.report?.metadata?.razonSocial ?? 'mi empresa';
+    const score100 = this.report?.puntajes?.ig_ia_0a100 ?? 0;
+    const nivel = this.report?.puntajes?.ig_ia_nivel ?? '';
+    return `Diagnóstico de Madurez en IA de ${empresa}: ${score100}/100 (${nivel}). Te invito a conocer tu nivel y a hacer el test en ${this.getShareLandingUrl()}`;
+  }
+
+  async share(): Promise<void> {
+    const url = this.getShareLandingUrl();
+    const text = this.getShareText();
+    // Si está disponible la Web Share API intentamos compartir (con imagen si el navegador soporta archivos)
+    if (navigator && (navigator as any).share) {
+      try {
+        const file = await this.createShareImageFile(`diagnostico-empresa-${(this.report?.metadata?.razonSocial || 'empresa').toString().replace(/\s+/g,'-')}.png`);
+        if (file && (navigator as any).canShare?.({ files: [file] })) {
+          await (navigator as any).share({ title: 'Resultados de Diagnóstico en IA', text, url, files: [file] });
+        } else {
+          await (navigator as any).share({ title: 'Resultados de Diagnóstico en IA', text, url });
+        }
+        return;
+      } catch {
+        // silencio: caemos al fallback en popup
+      }
+    }
+    // Fallback: abrir ventana de LinkedIn como genérico
+    const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    this.openCenteredPopup(shareUrl);
+  }
+
+  shareFacebook(): void {
+    const url = this.getShareLandingUrl();
+    const text = this.getShareText();
+    const fb = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+    this.openCenteredPopup(fb);
+  }
+
+  shareLinkedIn(): void {
+    const url = this.getShareLandingUrl();
+    // Copiamos el texto para que el usuario lo pegue, ya que LinkedIn no acepta texto prefijado
+    try { navigator.clipboard?.writeText(this.getShareText()); } catch {}
+    const li = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    this.openCenteredPopup(li);
+    alert('El texto con tus resultados fue copiado al portapapeles. Pégalo en la publicación de LinkedIn.');
+  }
+
+  async shareInstagram(): Promise<void> {
+    // Intento 1: Web Share API con archivo (abre hoja de compartir y permite elegir "Historias de Instagram" en móviles)
+    try {
+      const file = await this.createShareImageFile(`diagnostico-empresa-${(this.report?.metadata?.razonSocial || 'empresa').toString().replace(/\s+/g,'-')}.png`);
+      const text = this.getShareText();
+      if (file && (navigator as any).share && (navigator as any).canShare?.({ files: [file] })) {
+        await (navigator as any).share({ files: [file], text, title: 'Resultados de Diagnóstico en IA' });
+        return;
+      }
+    } catch {}
+
+    // Fallback: abrir compositor de historias en web, descargar imagen y copiar texto
+    try { await navigator.clipboard?.writeText(this.getShareText()); } catch {}
+    await this.downloadShareImage();
+    window.open('https://www.instagram.com/create/story', '_blank');
+    alert('Abrimos Historias de Instagram en una nueva pestaña. La imagen se descargó y el texto fue copiado al portapapeles. Súbela como historia y pega el texto si corresponde.');
+  }
+
+  private openCenteredPopup(url: string): void {
+    const width = 900; const height = 650;
+    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+    window.open(url, '_blank', `toolbar=0,status=0,width=${width},height=${height},left=${left},top=${top}`);
+  }
+
+  async downloadShareImage(): Promise<void> {
+    const dataUrl = await this.generateShareImageDataUrl();
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    const empresa = (this.report?.metadata?.razonSocial ?? 'empresa').replace(/\s+/g, '-');
+    link.download = `diagnostico-ia-${empresa}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  private async createShareImageFile(filename: string): Promise<File | null> {
+    const dataUrl = await this.generateShareImageDataUrl();
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: 'image/png' });
+    } catch {
+      return null;
+    }
+  }
+
+  private async generateShareImageDataUrl(): Promise<string> {
+    const width = 1200; const height = 630; // tamaño social (Open Graph)
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    // Fondo degradado
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#1d4ed8'); // blue-700
+    gradient.addColorStop(1, '#7c3aed'); // purple-700
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Panel central
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(40, 40, width - 80, height - 80);
+
+    // Texto título
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 54px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText('Diagnóstico de Madurez en IA', 80, 150);
+
+    // Empresa
+    const empresa = this.report?.metadata?.razonSocial ?? '';
+    ctx.font = 'normal 32px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(empresa, 80, 200);
+
+    // Puntaje grande
+    const score = Math.round(this.report?.puntajes?.ig_ia_0a100 ?? 0);
+    const nivel = this.report?.puntajes?.ig_ia_nivel ?? '';
+    ctx.font = 'bold 200px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(String(score), 80, 430);
+
+    // Nivel y nota
+    ctx.font = 'bold 48px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(nivel, 350, 300);
+    const nota17 = this.report?.puntajes?.ig_ia_1a7 ?? 0;
+    ctx.font = 'normal 28px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(`Puntuación sobre 100  |  Nota ${nota17}/7`, 350, 340);
+
+    // URL
+    const url = this.getShareLandingUrl();
+    ctx.font = 'bold 34px Inter, system-ui, -apple-system, Segoe UI, Roboto';
+    ctx.fillText(url.replace(/^https?:\/\//, ''), 80, height - 80);
+
+    return canvas.toDataURL('image/png');
+  }
+
+  // Navegación Próximos Pasos
+  goToCursos(): void {
+    this.router.navigate(['/productos']);
+  }
+
+  goToContacto(): void {
+    this.router.navigate(['/contacto']);
+  }
 
   // Información detallada de cada dimensión
   dimensionDetails: { [key: string]: any } = {
