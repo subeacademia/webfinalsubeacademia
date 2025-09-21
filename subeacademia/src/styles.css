@@ -370,9 +370,16 @@ a:hover {
   font-weight: 900 !important;
 }
 
-/* Botón primario actualizado con nuevo color */
+/* Botón primario actualizado con gradiente naranja */
 .btn-primary {
-  @apply bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  @apply text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #c2410c 0%, #b91c1c 25%, #ea580c 50%, #f97316 75%, #fb923c 100%);
+  box-shadow: 0 12px 25px rgba(234, 88, 12, 0.5);
 }
 
 .btn-secondary {

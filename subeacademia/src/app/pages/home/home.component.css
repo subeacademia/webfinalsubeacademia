@@ -17,7 +17,7 @@ section { scroll-margin-top: 80px; }
   z-index: 10 !important;
 }
 
-/* Estilos para el texto con gradiente - NUEVO COLOR PRIMARIO NARANJA */
+/* Estilos para el texto con gradiente - NUEVO COLOR PRIMARIO NARANJA CON MEJOR CONTRASTE */
 .gradient-text, .orange-gradient-text {
   /* Gradiente naranja vibrante - NUEVO COLOR PRIMARIO */
   background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
@@ -29,6 +29,8 @@ section { scroll-margin-top: 80px; }
   visibility: visible !important;
   text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
   font-weight: 900 !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.9));
+  position: relative;
 }
 
 /* Gradiente naranja brillante para modo oscuro */
@@ -636,19 +638,19 @@ app-ui-button.w-full {
 
 /* ===== ESTILOS COLORIDOS ESPECÍFICOS PARA BOTONES ===== */
 
-/* Botón principal del hero - MÁXIMO IMPACTO VISUAL */
+/* Botón principal del hero - GRADIENTE NARANJA VIBRANTE */
 .hero-primary-btn {
-  background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #eab308 100%) !important;
-  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.5), 0 4px 15px rgba(234, 88, 12, 0.3) !important;
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%) !important;
+  box-shadow: 0 10px 25px rgba(234, 88, 12, 0.5), 0 4px 15px rgba(249, 115, 22, 0.3) !important;
   border: 2px solid rgba(255, 255, 255, 0.2) !important;
   position: relative !important;
   overflow: hidden !important;
 }
 
 .hero-primary-btn:hover {
-  background: linear-gradient(135deg, #b91c1c 0%, #c2410c 25%, #b45309 50%, #a16207 75%, #ca8a04 100%) !important;
+  background: linear-gradient(135deg, #c2410c 0%, #b91c1c 25%, #ea580c 50%, #f97316 75%, #fb923c 100%) !important;
   transform: translateY(-4px) scale(1.08) !important;
-  box-shadow: 0 20px 40px rgba(220, 38, 38, 0.7), 0 8px 25px rgba(234, 88, 12, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(234, 88, 12, 0.7), 0 8px 25px rgba(249, 115, 22, 0.5) !important;
 }
 
 /* Efecto de brillo en el botón principal */

@@ -106,13 +106,51 @@
     "solutions_subtitle": "Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable",
     "trust_title": "Han confiado en nosotros",
     "trust_subtitle": "Únete a las organizaciones que ya están transformando su futuro con IA",
-    "cta_final": "Comenzar Ahora"
+    "cta_final": "Comenzar Ahora",
+    "methodology": {
+      "title": "Nuestra Metodología ARES-AI",
+      "subtitle": "Un marco de 5 fases que garantiza la implementación exitosa de IA, combinando agilidad, responsabilidad y resultados tangibles.",
+      "cta_ready": "¿Listo para comenzar tu transformación con IA?",
+      "btn_start_diagnostic": "Comenzar Diagnóstico",
+      "btn_view_methodology": "Ver Metodología Completa",
+      "additional_text": "Framework probado y validado por más de 100 organizaciones"
+    },
+    "solutions": {
+      "badge": "Soluciones Integrales de IA",
+      "title": "Nuestras Soluciones para la Transformación Digital",
+      "subtitle": "Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable y estratégica",
+      "training": {
+        "title": "Capacitación Adaptativa",
+        "subtitle": "(AVE-AI)",
+        "description": "Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.",
+        "btn": "Realizar Diagnóstico"
+      },
+      "consulting": {
+        "title": "Consultoría Estratégica",
+        "subtitle": "(ARES-AI)",
+        "description": "Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.",
+        "btn": "Contactar un Asesor"
+      },
+      "implementation": {
+        "title": "Implementación de Proyectos",
+        "description": "Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.",
+        "btn": "Ver Casos de Éxito"
+      }
+    },
+    "trust": {
+      "companies": "Empresas",
+      "education": "Instituciones Educativas",
+      "alliances": "Alianzas Estratégicas",
+      "final_cta": "Únete a las organizaciones que ya están transformando su futuro con IA"
+    }
   },
   "shared": {
     "back": "Volver",
     "more_about": "Más sobre",
     "next": "Siguiente",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "deliverables": "Entregables Clave",
+    "scroll_indicator": "Desplázate para ver más"
   },
   "diagnostico": {
     "results": {
