@@ -9,13 +9,13 @@ import { DiagnosticStateService } from './services/diagnostic-state.service';
   standalone: true,
   imports: [CommonModule, RouterOutlet, StepNavComponent],
   template: `
-    <div class="bg-white min-h-screen">
+    <div class="bg-white dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
       <!-- Barra de navegación integrada -->
       <app-step-nav></app-step-nav>
       
       <main>
         <div class="max-w-7xl mx-auto py-6 md:py-10 px-4 md:px-6">
-          <div class="bg-white shadow-xl rounded-2xl ring-1 ring-black/5">
+          <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl ring-1 ring-black/5 dark:ring-white/10">
             <div class="p-6 md:p-8">
               <!-- El router-outlet ahora siempre está visible -->
               <router-outlet (diagnosticFinished)="generateFinalReport()"></router-outlet>

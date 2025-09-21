@@ -11,8 +11,9 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
   standalone: true,
   imports: [CommonModule, RouterLink, AnimateOnScrollDirective, I18nTranslatePipe],
   template: `
-    <!-- Header rediseñado con más vida y color - TEMA ADAPTATIVO MEJORADO -->
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 via-blue-500 to-purple-600 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950 relative overflow-hidden">
+    <!-- Header más armónico con el resto del sitio -->
+    <div class="min-h-screen relative overflow-hidden"
+         style="background: radial-gradient(1200px 800px at 50% -10%, color-mix(in oklab, var(--panel) 30%, transparent), transparent 60%), linear-gradient(to bottom, color-mix(in oklab, var(--bg) 94%, #ffffff), var(--bg));">
       <!-- Elementos de fondo animados -->
       <div class="absolute inset-0" aria-hidden="true">
         <div class="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -24,7 +25,7 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
       <div class="container mx-auto px-6 py-20 relative z-10 flex items-center min-h-screen">
         <div class="text-center w-full">
           <!-- Badge superior optimizado para ambos temas -->
-          <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 backdrop-blur-sm border bg-white/20 dark:bg-black/20 text-white dark:text-white border-white/30 dark:border-white/30">
+          <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 backdrop-blur-sm border bg-[var(--panel)]/50 text-[var(--fg)] border-white/20 dark:border-white/10">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
@@ -38,35 +39,35 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
           
           <!-- Descripción mejorada -->
           <div class="max-w-6xl mx-auto mb-12">
-            <p class="text-xl md:text-2xl lg:text-3xl text-white dark:text-gray-200 leading-relaxed mb-8">
+            <p class="text-xl md:text-2xl lg:text-3xl text-[var(--fg)]/80 dark:text-gray-200 leading-relaxed mb-8">
               {{ 'productos.subtitle' | i18nTranslate }}
             </p>
             
             <!-- Texto central destacado optimizado para ambos temas -->
-            <div class="bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-white/20 dark:border-white/10 shadow-2xl">
-              <p class="text-2xl md:text-3xl text-white mb-6 font-medium">
+            <div class="bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-white/40 dark:border-white/10 shadow-2xl">
+              <p class="text-2xl md:text-3xl text-[var(--fg)] dark:text-white mb-6 font-medium">
                 {{ 'productos.model_title' | i18nTranslate }}
               </p>
               
               <!-- Estadísticas destacadas con animación -->
               <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 mb-8">
                 <div class="text-center group">
-                  <div class="text-6xl md:text-8xl font-black bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div class="text-6xl md:text-8xl font-black bg-gradient-to-r from-cyan-500 to-sky-400 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">
                     50%
                   </div>
-                  <div class="text-xl md:text-2xl text-white dark:text-gray-300 font-semibold">
+                  <div class="text-xl md:text-2xl text-[var(--fg)] dark:text-gray-300 font-semibold">
                     {{ 'productos.standard_content' | i18nTranslate }}
                   </div>
                   <div class="w-16 h-1 bg-gradient-to-r from-cyan-400 to-cyan-300 mx-auto mt-3 rounded-full"></div>
                 </div>
                 
-                <div class="text-4xl md:text-6xl text-white font-light">+</div>
+                <div class="text-4xl md:text-6xl text-[var(--fg)] dark:text-white font-light">+</div>
                 
                 <div class="text-center group">
-                  <div class="text-6xl md:text-8xl font-black bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div class="text-6xl md:text-8xl font-black bg-gradient-to-r from-fuchsia-600 to-pink-400 bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-transform duration-300">
                     50%
                   </div>
-                  <div class="text-xl md:text-2xl text-white dark:text-gray-300 font-semibold">
+                  <div class="text-xl md:text-2xl text-[var(--fg)] dark:text-gray-300 font-semibold">
                     {{ 'productos.total_personalization' | i18nTranslate }}
                   </div>
                   <div class="w-16 h-1 bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 mx-auto mt-3 rounded-full"></div>

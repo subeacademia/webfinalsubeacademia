@@ -12,6 +12,9 @@ export interface LocalSiteSettings {
   ga4MeasurementId?: string;
   searchConsoleVerification?: string;
   homeTitle?: string; // Título principal de la página de inicio
+  // Fondo del Home seleccionable desde Admin
+  homeBackgroundKey?: string; // e.g. 'neural-3d-v1'
+  homeBackgroundName?: string; // e.g. 'Red Neuronal 3D - Versión 1'
 }
 
 export interface LocalTypewriterPhrase {
@@ -34,7 +37,9 @@ export class LocalSettingsService {
   private settingsSubject = new BehaviorSubject<LocalSiteSettings>({
     brandName: 'Sube Academ-I',
     defaultLang: 'es',
-    homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial'
+    homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial',
+    homeBackgroundKey: 'neural-3d-v1',
+    homeBackgroundName: 'Red Neuronal 3D - Versión 1'
   });
 
   private typewriterPhrasesSubject = new BehaviorSubject<LocalTypewriterPhrase[]>([]);
@@ -91,9 +96,9 @@ export class LocalSettingsService {
   // Guardar configuraciones
   async save(settings: LocalSiteSettings): Promise<void> {
     try {
-      // Validar datos requeridos
-      if (!settings.brandName || !settings.defaultLang) {
-        throw new Error('Nombre de marca e idioma son requeridos');
+      // Validar datos requeridos (permitimos brandName vacío para usar solo logo)
+      if (!settings || !settings.defaultLang) {
+        throw new Error('Idioma por defecto es requerido');
       }
 
       // Actualizar configuraciones
@@ -121,7 +126,9 @@ export class LocalSettingsService {
     const defaultSettings: LocalSiteSettings = {
       brandName: 'Sube Academ-IA',
       defaultLang: 'es',
-      homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial'
+      homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial',
+      homeBackgroundKey: 'neural-3d-v1',
+      homeBackgroundName: 'Red Neuronal 3D - Versión 1'
     };
     await this.save(defaultSettings);
   }

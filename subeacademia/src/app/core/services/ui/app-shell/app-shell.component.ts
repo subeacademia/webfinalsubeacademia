@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, ViewChild, ElementRef, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { I18nService } from '../../../i18n/i18n.service';
 import { I18nTranslatePipe } from '../../../i18n/i18n.pipe';
 import { LocalSettingsService, LocalSiteSettings } from '../../../services/local-settings.service';
+import { SettingsService as DataSettingsService, SiteSettings } from '../../../data/settings.service';
 import { ThemeService } from '../../../../shared/theme.service';
 import { AuthService } from '../../../services/auth.service';
 import { User } from '@angular/fire/auth';
@@ -16,13 +17,14 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
   imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe, ThemeToggleComponent, FlagSelectorComponent, I18nTranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <!-- Fondo global removido: ahora se controla desde cada página -->
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
         <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16 px-4 md:px-6" role="navigation" aria-label="Navegación principal">
            <a [routerLink]="['/', currentLang()]" 
               class="font-grotesk text-lg tracking-tight flex items-center gap-2 mr-4 md:mr-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent)]"
                [attr.aria-label]="'Ir a página de inicio - ' + brandName()">
-          <img *ngIf="logoUrl()" [src]="logoUrl()!" [alt]="'Logo de ' + brandName()" class="h-7 w-7 md:h-8 md:w-8 rounded"/>
-          <span>{{ brandName() }}</span>
+          <img *ngIf="logoUrl()" [src]="logoUrl()!" [alt]="'Logo de ' + (brandName() || 'Sitio')" class="h-7 w-7 md:h-8 md:w-8 rounded"/>
+          <span *ngIf="brandName()">{{ brandName() }}</span>
         </a>
 
         <!-- Botones móviles con mejor accesibilidad -->
@@ -221,7 +223,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
 
     <footer class="mt-10 border-t border-white/10 bg-[var(--panel)]/40" role="contentinfo">
       <div class="container mx-auto max-w-7xl py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-[var(--muted)]">
-        <span>© {{ brandName() }}</span>
+        <span>© {{ brandName() || ' ' }}</span>
         <nav class="flex items-center gap-4" aria-label="Enlaces del pie de página">
           <a [routerLink]="['/', currentLang(), 'contacto']" 
              class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
@@ -268,19 +270,26 @@ export class AppShellComponent {
   // Observable del usuario actual para la UI
   readonly currentUser$ = this.authService.currentUser$;
 
-  constructor(readonly router: Router, public readonly i18n: I18nService, private readonly settings: LocalSettingsService) {
+  constructor(
+    readonly router: Router,
+    public readonly i18n: I18nService,
+    private readonly localSettings: LocalSettingsService,
+    private readonly dataSettings: DataSettingsService,
+  ) {
     this.currentLang = this.i18n.currentLang as unknown as () => string;
     try {
-      this.settings.get().subscribe((s: LocalSiteSettings) => {
-        console.log('🏷️ Configuraciones recibidas en AppShell:', s);
-        if (s.brandName) {
-          this.brandName.set(s.brandName);
-          console.log('✅ Nombre de marca actualizado en navegación:', s.brandName);
+      // Primero intentamos cargar desde Firestore (global). Si no hay datos (SSR o vacío), caemos a local.
+      this.dataSettings.get().subscribe((remote: SiteSettings | undefined) => {
+        if (remote) {
+          if (typeof remote.brandName === 'string') this.brandName.set(remote.brandName.trim());
+          this.logoUrl.set((remote.logoUrl || null) as string | null);
+          return;
         }
-        this.logoUrl.set(s.logoUrl || null);
-        if (s.logoUrl) {
-          console.log('✅ Logo URL actualizado en navegación:', s.logoUrl);
-        }
+        // Fallback a configuración local
+        this.localSettings.get().subscribe((s: LocalSiteSettings) => {
+          if (typeof s.brandName === 'string') this.brandName.set(s.brandName.trim());
+          this.logoUrl.set(s.logoUrl || null);
+        });
       });
     } catch (error) {
       console.error('❌ Error cargando configuraciones en AppShell:', error);

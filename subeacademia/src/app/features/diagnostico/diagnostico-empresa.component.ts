@@ -11,6 +11,7 @@ import { ScrollService } from '../../core/services/scroll/scroll.service';
 import { PROMPT_PLAN_DE_ACCION } from './data/empresa-prompt';
 import { AiProcessingLoaderComponent } from './components/ui/ai-processing-loader/ai-processing-loader.component';
 import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa-results.component';
+import { LeadsService } from '../../core/services/leads.service';
 // import { DiagnosticResultsComponent } from './components/ui/diagnostic-results/diagnostic-results.component';
 
 @Component({
@@ -18,15 +19,18 @@ import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, AiProcessingLoaderComponent, EmpresaResultsComponent],
   template: `
-    <div class="container mx-auto p-6 md:p-10 text-gray-900">
+    <div class="container mx-auto p-6 md:p-10 text-gray-900 dark:text-slate-100">
       @if (step() === 'metadata') {
         <div class="max-w-2xl mx-auto">
-          <h1 class="text-3xl md:text-4xl font-extrabold mb-4 md:mb-6 text-slate-900">Diagnóstico de Madurez en IA para Empresas</h1>
-          <p class="mb-6 md:mb-8 text-slate-700 text-base md:text-lg leading-relaxed">Comencemos con algunos datos sobre tu empresa para contextualizar el resultado. Esta información es clave para generar un análisis preciso.</p>
+          <h1 class="text-3xl md:text-4xl font-extrabold mb-4 md:mb-6 text-slate-900 dark:text-white">Diagnóstico de Madurez en IA para Empresas</h1>
+          <p class="mb-6 md:mb-8 text-slate-700 dark:text-slate-300 text-base md:text-lg leading-relaxed">Comencemos con algunos datos sobre tu empresa para contextualizar el resultado. Esta información es clave para generar un análisis preciso.</p>
           <form [formGroup]="metadataForm" (ngSubmit)="startSurvey()" class="space-y-3 md:space-y-4">
-            <input formControlName="razonSocial" placeholder="Razón Social" class="w-full p-3 rounded-xl bg-white border border-slate-300 focus:border-blue-600 focus:ring-blue-600 text-base shadow-sm">
+            <input formControlName="razonSocial" placeholder="Razón Social" class="w-full p-3 rounded-xl bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 focus:border-blue-600 focus:ring-blue-600 text-base shadow-sm">
             <input formControlName="nombreContacto" placeholder="Tu Nombre Completo" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
-            <input formControlName="emailContacto" type="email" placeholder="Tu Email de Contacto" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
+            <input formControlName="emailContacto" type="email" placeholder="Tu Email de Contacto" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base" [ngClass]="{ 'border-red-500 ring-1 ring-red-500 bg-red-50 dark:bg-red-900/20 placeholder-red-400': metadataForm.get('emailContacto')?.invalid && (metadataForm.get('emailContacto')?.dirty || metadataForm.get('emailContacto')?.touched) }">
+            <div *ngIf="metadataForm.get('emailContacto')?.invalid && (metadataForm.get('emailContacto')?.dirty || metadataForm.get('emailContacto')?.touched)" class="text-red-600 text-sm mt-1" role="alert" aria-live="polite">
+              Por favor ingresa un email válido (ej: nombre@empresa.com).
+            </div>
             <select formControlName="ventasUFAnual" class="w-full p-3 rounded-md bg-gray-100 dark:bg-gray-700 border-transparent focus:border-blue-500 focus:ring-blue-500 text-base">
               <option value="" disabled>Ventas Anuales en UF (año anterior)</option>
               <option value="0-2400">Hasta 2.400 UF (Micro empresa)</option>
@@ -40,16 +44,16 @@ import { EmpresaResultsComponent } from './components/ui/empresa-results/empresa
       } @else if (isStepNumber() && getCurrentStepNumber() >= 0 && getCurrentStepNumber() < CUESTIONARIO_EMPRESAS.length) {
         <div class="max-w-3xl mx-auto">
           <div class="mb-4 md:mb-6">
-            <p class="text-sm md:text-base text-slate-700 font-medium">Dimensión {{ getCurrentStepNumber() + 1 }} de {{ CUESTIONARIO_EMPRESAS.length }}</p>
-            <div class="w-full bg-slate-200 rounded-full h-2 md:h-2.5 mt-1">
+            <p class="text-sm md:text-base text-slate-700 dark:text-slate-300 font-medium">Dimensión {{ getCurrentStepNumber() + 1 }} de {{ CUESTIONARIO_EMPRESAS.length }}</p>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 md:h-2.5 mt-1">
               <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 md:h-2.5 rounded-full" [style.width.%]="((getCurrentStepNumber() + 1) / CUESTIONARIO_EMPRESAS.length) * 100"></div>
             </div>
           </div>
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-slate-900">{{ getCurrentDimension().nombre }}</h2>
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-slate-900 dark:text-white">{{ getCurrentDimension().nombre }}</h2>
           <form [formGroup]="getCurrentForm()" class="space-y-4 md:space-y-6">
               @for(item of getCurrentDimension().items; track item.n) {
-                  <div class="p-4 md:p-5 border rounded-xl shadow-sm bg-white ring-1 ring-slate-200">
-                      <label class="block mb-2 md:mb-3 font-semibold text-base md:text-lg text-slate-900">{{ item.texto }}</label>
+                  <div class="p-4 md:p-5 border rounded-xl shadow-sm bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700">
+                      <label class="block mb-2 md:mb-3 font-semibold text-base md:text-lg text-slate-900 dark:text-slate-100">{{ item.texto }}</label>
                       @if (item.tipo === 'Likert') {
                           <div class="flex justify-center gap-1 md:gap-2 overflow-x-auto pb-2">
                               @for(option of getLikertOptions(); track option.value) {
@@ -100,6 +104,7 @@ export class DiagnosticoEmpresaComponent {
     private diagnosticsService = inject(DiagnosticsService);
     private aiService = inject(GenerativeAiService);
     private scrollService = inject(ScrollService);
+    private leadsService = inject(LeadsService);
 
     CUESTIONARIO_EMPRESAS = CUESTIONARIO_EMPRESAS;
     step = signal<'metadata' | number | 'processing' | 'results'>('metadata');
@@ -223,6 +228,25 @@ export class DiagnosticoEmpresaComponent {
             const docId = await this.diagnosticsService.saveEmpresaDiagnostic(reporte);
             reporte.metadata.id = docId;
             console.log('✅ Diagnóstico guardado exitosamente con ID:', docId);
+
+            // Crear/registrar LEAD en la colección unificada usada por el ADMIN
+            try {
+              const leadPayload = {
+                name: this.metadataForm.value.nombreContacto || 'Contacto',
+                email: this.metadataForm.value.emailContacto || 'sin-email@empresa.com',
+                phone: '',
+                type: 'empresa' as const,
+                companyName: this.metadataForm.value.razonSocial || 'Empresa',
+                position: '',
+                industry: '',
+                companySize: metadata.categoriaTamano || '',
+                acceptsCommunications: true
+              };
+              const leadId = await this.leadsService.createDiagnosticLead(leadPayload as any, docId);
+              console.log('✅ Lead creado/registrado con ID:', leadId);
+            } catch (leadErr) {
+              console.error('❌ Error creando lead asociado:', leadErr);
+            }
         } catch (error) { 
             console.error("⚠️ Error al guardar en Firestore:", error); 
             // No retornamos aquí, continuamos con el proceso para mostrar los resultados

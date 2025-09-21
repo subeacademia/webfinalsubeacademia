@@ -1,6 +1,11 @@
 import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, AfterViewInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeroSceneComponent } from '../../features/home/hero-scene/hero-scene.component';
+import { TechLinesSceneComponent } from '../../features/home/tech-lines-scene/tech-lines-scene.component';
+import { ElegantNetworkSceneComponent } from '../../features/home/elegant-network-scene/elegant-network-scene.component';
+import { AiNeuralFlowSceneComponent } from '../../features/home/ai-neural-flow-scene/ai-neural-flow-scene.component';
+import { NeuralNetworkBackgroundComponent } from '../../features/home/circuit-neural-background/neural-network-background.component';
+import { NeuralNetworkBackgroundV2Component } from '../../features/home/circuit-neural-background/neural-network-background-v2.component';
 import { Router, RouterModule } from '@angular/router';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
@@ -17,7 +22,7 @@ import { LocalSettingsService } from '../../core/services/local-settings.service
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -45,6 +50,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private contentSub?: Subscription;
   frasesDinamicas: string[] = [];
   tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
+  selectedHomeBgKey: string | undefined;
   
   // Propiedades simplificadas para el componente
   
@@ -159,6 +165,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       // Configurar título (ahora viene de los ajustes locales del admin)
       this.tituloHome = c?.title || 'Potencia tu Talento en la Era de la Inteligencia Artificial';
       console.log('🏷️ Título del home configurado desde ajustes locales:', this.tituloHome);
+
+      // Fondo del home seleccionado desde Admin
+      this.selectedHomeBgKey = c?.localSettings?.homeBackgroundKey || 'neural-3d-v1';
+      console.log('🎨 Fondo del Home seleccionado:', this.selectedHomeBgKey);
 
       // SEO dinámico por idioma
       this.seo.updateTags({

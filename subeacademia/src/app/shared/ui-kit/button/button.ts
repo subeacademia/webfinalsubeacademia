@@ -16,7 +16,7 @@ export class UiButtonComponent {
   @Output() clicked = new EventEmitter<void>();
 
   get buttonClasses(): string {
-    const baseClasses = 'colorful-button inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl whitespace-nowrap gap-2';
+    const baseClasses = 'colorful-button inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl whitespace-normal break-words text-center gap-2';
     
     const variantClasses = {
       primary: 'bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white border-0 shadow-blue-500/30 hover:shadow-blue-600/40',
