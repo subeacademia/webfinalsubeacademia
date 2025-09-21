@@ -3,6 +3,11 @@
     "hero": {
       "title": "Empower Your Talent in the Age of Artificial Intelligence",
       "subtitle": "We develop the 13 key competencies that companies and professionals need to lead the digital transformation. Learn with our unique adaptive AI methodology: Agile, Responsible, Ethical, and Sustainable.",
+    "typewriter_phrases": [
+      "Implement AI in an Agile, Responsible and Sustainable way with our ARES-AI Framework©.",
+      "Develop the 13 key competencies your team needs to lead digital transformation.",
+      "Transform your organization with our AVE-AI adaptive learning platform."
+    ],
       "cta": "Discover Your Potential",
       "secondaryLink": "Explore Our Courses"
     },
@@ -169,6 +174,58 @@
       "c12_desc": "Update skills and working frameworks. Build improvement habits and evidence portfolios.",
       "c13_title": "AI leadership",
       "c13_desc": "Guide teams and strategies with vision and governance. Prioritize initiatives, KPIs and responsible adoption at scale."
+    },
+    "phases": {
+      "1": {
+        "shortTitle": "Analysis and Assessment",
+        "title": "Initial Analysis and Assessment",
+        "description": "We assess your organization's current AI state, identifying strengths, weaknesses and improvement opportunities.",
+        "deliverables": {
+          "0": "Complete AI maturity diagnostic",
+          "1": "Current capabilities analysis",
+          "2": "Gap and opportunity identification"
+        }
+      },
+      "2": {
+        "shortTitle": "Strategy and Planning",
+        "title": "Strategic Strategy and Planning",
+        "description": "We develop your personalized AI adoption roadmap, defining objectives, resources and timelines.",
+        "deliverables": {
+          "0": "Personalized AI strategic plan",
+          "1": "Objectives and KPIs definition",
+          "2": "Detailed implementation timeline"
+        }
+      },
+      "3": {
+        "shortTitle": "Implementation and Development",
+        "title": "Solution Implementation and Development",
+        "description": "We bring your strategy to practice with personalized AI solutions, complete integration and continuous support.",
+        "deliverables": {
+          "0": "AI solutions implemented",
+          "1": "Integration with existing systems",
+          "2": "Technical team training"
+        }
+      },
+      "4": {
+        "shortTitle": "Deployment and Monitoring",
+        "title": "Continuous Deployment and Monitoring",
+        "description": "We implement monitoring and control systems to ensure optimal performance of AI solutions.",
+        "deliverables": {
+          "0": "Monitoring system implemented",
+          "1": "Performance dashboards",
+          "2": "Maintenance protocols"
+        }
+      },
+      "5": {
+        "shortTitle": "Optimization and Scalability",
+        "title": "Optimization and Scalability",
+        "description": "We continuously optimize solutions and prepare your organization to scale AI adoption.",
+        "deliverables": {
+          "0": "Performance optimization",
+          "1": "Scalability plan",
+          "2": "Continuous growth strategy"
+        }
+      }
     }
   },
   "course": {
@@ -181,6 +238,17 @@
     "enroll_button": "Enroll Now"
   },
   "diagnostico": {
+    "title": "ARES-AI Maturity Diagnostic",
+    "subtitle": "Assess your Artificial Intelligence maturity and get a personalized plan to accelerate your digital transformation",
+    "estimated_time": "Estimated time: 15-20 minutes",
+    "select_type": "How would you like to conduct your diagnostic?",
+    "company_option": "As a Company",
+    "company_description": "Evaluate your organization's AI maturity. Includes analysis of competencies, processes, culture and organizational strategy.",
+    "company_button": "Take diagnostic as company",
+    "person_option": "As a Person",
+    "person_description": "Evaluate your personal AI competencies. Adapted for children (8-17) and adults (18+). Includes personalized educational recommendations.",
+    "person_button": "Take diagnostic as person",
+    "privacy_notice": "Your information is secure and only used to generate your personalized diagnostic",
     "segmento": {
       "title": "Select your segment",
       "empresa": "Company / Organization",
@@ -284,5 +352,115 @@
       "title": "Diagnosis summary",
       "descripcion": "Review your answers before continuing."
     }
+  },
+  "shared": {
+    "deliverables": "Deliverables"
+  },
+  "trust": {
+    "title": "They have trusted us",
+    "companies": "Companies That Already Trust Us",
+    "education": "Educational Institutions",
+    "alliances": "Strategic Alliances",
+    "final_cta": "Join the companies that are already transforming their future with AI"
+  },
+  "produtos": {
+    "badge": "Our Products",
+    "title": "Comprehensive AI Solutions",
+    "subtitle": "Discover our complete catalog of products designed to accelerate your digital transformation with Artificial Intelligence",
+    "model_title": "50/50 Model: The Perfect Formula",
+    "standard_content": "Standard Content",
+    "total_personalization": "Total Personalization",
+    "competitive_formula": "The formula that makes us unique in the AI education market",
+    "categories": {
+      "consulting": {
+        "title": "Consulting",
+        "description": "Specialized AI consulting for companies looking to implement intelligent solutions strategically and efficiently.",
+        "btn": "View Consulting"
+      },
+      "courses": {
+        "title": "Courses",
+        "description": "Practical and applied training in Artificial Intelligence, designed for professionals who want to master future technologies.",
+        "btn": "View Courses"
+      },
+      "certifications": {
+        "title": "Certifications",
+        "description": "Professional AI certifications that validate your knowledge and position you as an expert in the job market.",
+        "btn": "View Certifications"
+      }
+    },
+    "approach": {
+      "badge": "Our Approach",
+      "title": "The Methodology",
+      "subtitle": "We combine academic rigor with practical experience to offer you the most complete and effective training in the market",
+      "personalization": {
+        "title": "Mathetic Personalization",
+        "subtitle": "Academic and Technical Foundations",
+        "description": "We adapt each learning experience to your unique cognitive style, using principles from learning science.",
+        "details": "Methodology based on MIT research",
+        "click_more": "Click for more details"
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "posts": "Posts",
+      "productos": "Products",
+      "projects": "Projects",
+      "certificados": "Certificates",
+      "media": "Media",
+      "logos": "Logos",
+      "history": "History",
+      "collaborators": "Collaborators",
+      "leads": "Leads",
+      "users": "Users",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "productos": {
+      "dashboard": {
+        "title": "Products Dashboard",
+        "download_structure": "Download JSON Structure",
+        "bulk_upload": "Bulk JSON Upload",
+        "manage_asesorias": "Manage Consulting",
+        "manage_cursos": "Manage Courses",
+        "manage_certificaciones": "Manage Certifications",
+        "total_asesorias": "Total Consulting",
+        "total_cursos": "Total Courses",
+        "total_certificaciones": "Total Certifications",
+        "active": "active",
+        "recent_products": "Recent Products",
+        "recent_asesorias": "Recent Consulting",
+        "recent_cursos": "Recent Courses",
+        "recent_certificaciones": "Recent Certifications",
+        "no_products": "No products created yet.",
+        "status_active": "Active",
+        "status_inactive": "Inactive"
+      },
+      "bulk_upload": {
+        "title": "Bulk Products JSON Upload",
+        "select_file": "Select JSON file:",
+        "file_selected": "Selected file:",
+        "size": "Size:",
+        "progress": "Upload progress",
+        "expected_format": "Expected JSON Format:",
+        "cancel": "Cancel",
+        "process_file": "Process File",
+        "processing": "Processing..."
+      }
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "productos": "Products",
+    "nosotros": "About Us",
+    "metodologia": "Methodology",
+    "blog": "Blog",
+    "contacto": "Contact",
+    "admin": "Admin",
+    "menu": "Menu",
+    "login_google": "Sign In with Google",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out",
+    "privacy_policy": "Privacy Policy"
   }
 }

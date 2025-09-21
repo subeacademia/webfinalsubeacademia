@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { AsesoriasService } from '../../features/productos/services/asesorias.service';
 import { CertificacionesService } from '../../features/productos/services/certificaciones.service';
 import { CursosService } from '../../features/productos/services/cursos.service';
@@ -12,11 +13,11 @@ import { Curso } from '../../features/productos/data/producto.model';
 @Component({
   selector: 'app-productos-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, I18nTranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard de Productos</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'admin.productos.dashboard.title' | i18nTranslate }}</h1>
         <div class="flex gap-2">
           <!-- Botones de carga masiva -->
           <button (click)="descargarEstructuraJSON()" 
@@ -24,26 +25,26 @@ import { Curso } from '../../features/productos/data/producto.model';
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            Descargar Estructura JSON
+            {{ 'admin.productos.dashboard.download_structure' | i18nTranslate }}
           </button>
           <button (click)="mostrarModalCargaMasiva = true" 
                   class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
             </svg>
-            Carga Masiva JSON
+            {{ 'admin.productos.dashboard.bulk_upload' | i18nTranslate }}
           </button>
           <a routerLink="/admin/productos/asesorias" 
              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Gestionar Asesorías
+            {{ 'admin.productos.dashboard.manage_asesorias' | i18nTranslate }}
           </a>
           <a routerLink="/admin/productos/cursos" 
              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            Gestionar Cursos
+            {{ 'admin.productos.dashboard.manage_cursos' | i18nTranslate }}
           </a>
           <a routerLink="/admin/productos/certificaciones" 
              class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-            Gestionar Certificaciones
+            {{ 'admin.productos.dashboard.manage_certificaciones' | i18nTranslate }}
           </a>
         </div>
       </div>
@@ -56,13 +57,13 @@ import { Curso } from '../../features/productos/data/producto.model';
               <span class="text-2xl">💡</span>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Asesorías</p>
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_asesorias' | i18nTranslate }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ asesorias.length }}</p>
             </div>
           </div>
           <div class="mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ asesoriasActivas }} activas
+              {{ asesoriasActivas }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
             </span>
           </div>
         </div>
@@ -73,13 +74,13 @@ import { Curso } from '../../features/productos/data/producto.model';
               <span class="text-2xl">📚</span>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Cursos</p>
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_cursos' | i18nTranslate }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ cursos.length }}</p>
             </div>
           </div>
           <div class="mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ cursosActivos }} activos
+              {{ cursosActivos }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
             </span>
           </div>
         </div>
@@ -90,13 +91,13 @@ import { Curso } from '../../features/productos/data/producto.model';
               <span class="text-2xl">🏆</span>
             </div>
             <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Total Certificaciones</p>
+              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_certificaciones' | i18nTranslate }}</p>
               <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ certificaciones.length }}</p>
             </div>
           </div>
           <div class="mt-4">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ certificacionesActivas }} activas
+              {{ certificacionesActivas }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
             </span>
           </div>
         </div>
@@ -105,7 +106,7 @@ import { Curso } from '../../features/productos/data/producto.model';
       <!-- Productos recientes -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Productos Recientes</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'admin.productos.dashboard.recent_products' | i18nTranslate }}</h3>
         </div>
         
         <div class="p-6">

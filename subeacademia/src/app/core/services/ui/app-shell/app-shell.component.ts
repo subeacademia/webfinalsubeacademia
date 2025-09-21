@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, sig
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { I18nService } from '../../../i18n/i18n.service';
+import { I18nTranslatePipe } from '../../../i18n/i18n.pipe';
 import { LocalSettingsService, LocalSiteSettings } from '../../../services/local-settings.service';
 import { ThemeService } from '../../../../shared/theme.service';
 import { AuthService } from '../../../services/auth.service';
@@ -12,7 +13,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe, ThemeToggleComponent, FlagSelectorComponent],
+  imports: [RouterLink, RouterLinkActive, NgIf, AsyncPipe, ThemeToggleComponent, FlagSelectorComponent, I18nTranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
@@ -51,7 +52,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Inicio">
-              Home
+              {{ 'navigation.home' | i18nTranslate }}
             </a>
           </li>
           <li role="none">
@@ -60,7 +61,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Productos">
-              Productos
+              {{ 'navigation.productos' | i18nTranslate }}
             </a>
           </li>
           <li role="none">
@@ -69,7 +70,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Nosotros">
-              Nosotros
+              {{ 'navigation.nosotros' | i18nTranslate }}
             </a>
           </li>
           <li role="none">
@@ -78,7 +79,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Metodología">
-              Metodología
+              {{ 'navigation.metodologia' | i18nTranslate }}
             </a>
           </li>
           <li role="none">
@@ -87,7 +88,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Blog">
-              Blog
+              {{ 'navigation.blog' | i18nTranslate }}
             </a>
           </li>
           
@@ -97,7 +98,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                role="menuitem"
                aria-label="Ir a Contacto">
-              Contacto
+              {{ 'navigation.contacto' | i18nTranslate }}
             </a>
           </li>
           <li role="none">
@@ -105,7 +106,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="btn focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
                role="menuitem"
                aria-label="Ir a Panel de Administración">
-              Admin
+              {{ 'navigation.admin' | i18nTranslate }}
             </a>
           </li>
         </ul>
@@ -133,35 +134,35 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Inicio">
-             Home
+             {{ 'navigation.home' | i18nTranslate }}
           </a>
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang(), 'productos']" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Productos">
-             Productos
+             {{ 'navigation.productos' | i18nTranslate }}
           </a>
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang(), 'nosotros']" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Nosotros">
-             Nosotros
+             {{ 'navigation.nosotros' | i18nTranslate }}
           </a>
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang(), 'metodologia']" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Metodología">
-             Metodología
+             {{ 'navigation.metodologia' | i18nTranslate }}
           </a>
           <a (click)="closeNav()" 
              [routerLink]="['/', currentLang(), 'blog']" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Blog">
-             Blog
+             {{ 'navigation.blog' | i18nTranslate }}
           </a>
           
           <a (click)="closeNav()" 
@@ -169,14 +170,14 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Contacto">
-             Contacto
+             {{ 'navigation.contacto' | i18nTranslate }}
           </a>
           <a (click)="closeNav()" 
              routerLink="/admin" 
              class="block btn w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              role="menuitem"
              aria-label="Ir a Panel de Administración">
-             Admin
+             {{ 'navigation.admin' | i18nTranslate }}
           </a>
 
           <!-- Botones de autenticación móviles -->
@@ -186,7 +187,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                     class="w-full btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                     aria-label="Iniciar sesión con Google">
               <span class="mr-2">🔐</span>
-              Iniciar Sesión con Google
+              {{ 'navigation.login_google' | i18nTranslate }}
             </button>
           </div>
           
@@ -196,14 +197,14 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
                class="block w-full btn bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-center"
                aria-label="Ir al dashboard">
               <span class="mr-2">👤</span>
-              {{ user.displayName || 'Dashboard' }}
+              {{ user.displayName || ('navigation.dashboard' | i18nTranslate) }}
             </a>
             <button type="button" 
                     (click)="logout(); closeNav()" 
                     class="w-full btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
                     aria-label="Cerrar sesión">
               <span class="mr-1">🚪</span>
-              Cerrar Sesión
+              {{ 'navigation.logout' | i18nTranslate }}
             </button>
           </div>
 
@@ -225,7 +226,7 @@ import { FlagSelectorComponent } from '../../../../shared/ui/flag-selector/flag-
           <a [routerLink]="['/', currentLang(), 'contacto']" 
              class="hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]" 
              aria-label="Ir a página de contacto">
-             Política de Privacidad
+             {{ 'navigation.privacy_policy' | i18nTranslate }}
           </a>
           <a href="https://twitter.com" 
              target="_blank" 

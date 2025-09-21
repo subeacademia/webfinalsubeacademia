@@ -3,6 +3,11 @@
     "hero": {
       "title": "Capacite seu Talento na Era da Inteligência Artificial",
       "subtitle": "Desenvolvemos as 13 competências essenciais que empresas e profissionais precisam para liderar a transformação digital. Aprenda com nossa metodologia única de IA adaptativa: Ágil, Responsável, Ética e Sustentável.",
+    "typewriter_phrases": [
+      "Implemente IA de forma Ágil, Responsável e Sustentável com nosso Framework ARES-AI©.",
+      "Desenvolva as 13 competências-chave que sua equipe precisa para liderar a transformação digital.",
+      "Transforme sua organização com nossa plataforma de aprendizagem adaptativa AVE-AI."
+    ],
       "cta": "Descubra seu Potencial",
       "secondaryLink": "Explore Nossos Cursos"
     },
@@ -169,6 +174,58 @@
       "c12_desc": "Atualizar habilidades e frameworks de trabalho. Criar hábitos de melhoria e portfólios de evidências.",
       "c13_title": "Liderança com IA",
       "c13_desc": "Guiar equipes e estratégias com visão e governança. Priorizar iniciativas, KPIs e adoção responsável em escala."
+    },
+    "phases": {
+      "1": {
+        "shortTitle": "Análise e Avaliação",
+        "title": "Análise e Avaliação Inicial",
+        "description": "Avaliamos o estado atual de sua organização em IA, identificando forças, fraquezas e oportunidades de melhoria.",
+        "deliverables": {
+          "0": "Diagnóstico completo de maturidade em IA",
+          "1": "Análise de capacidades atuais",
+          "2": "Identificação de lacunas e oportunidades"
+        }
+      },
+      "2": {
+        "shortTitle": "Estratégia e Planejamento",
+        "title": "Estratégia e Planejamento Estratégico",
+        "description": "Desenvolvemos seu roteiro personalizado para adoção de IA, definindo objetivos, recursos e cronogramas.",
+        "deliverables": {
+          "0": "Plano estratégico de IA personalizado",
+          "1": "Definição de objetivos e KPIs",
+          "2": "Cronograma de implementação detalhado"
+        }
+      },
+      "3": {
+        "shortTitle": "Implementação e Desenvolvimento",
+        "title": "Implementação e Desenvolvimento de Soluções",
+        "description": "Colocamos sua estratégia em prática com soluções de IA personalizadas, integração completa e suporte contínuo.",
+        "deliverables": {
+          "0": "Soluções de IA implementadas",
+          "1": "Integração com sistemas existentes",
+          "2": "Treinamento da equipe técnica"
+        }
+      },
+      "4": {
+        "shortTitle": "Implantação e Monitoramento",
+        "title": "Implantação e Monitoramento Contínuo",
+        "description": "Implementamos sistemas de monitoramento e controle para garantir o desempenho ideal das soluções de IA.",
+        "deliverables": {
+          "0": "Sistema de monitoramento implementado",
+          "1": "Painéis de desempenho",
+          "2": "Protocolos de manutenção"
+        }
+      },
+      "5": {
+        "shortTitle": "Otimização e Escalabilidade",
+        "title": "Otimização e Escalabilidade",
+        "description": "Otimizamos continuamente as soluções e preparamos sua organização para escalar a adoção de IA.",
+        "deliverables": {
+          "0": "Otimização de desempenho",
+          "1": "Plano de escalabilidade",
+          "2": "Estratégia de crescimento contínuo"
+        }
+      }
     }
   },
   "course": {
@@ -181,6 +238,17 @@
     "enroll_button": "Inscreva-se Agora"
   },
   "diagnostico": {
+    "title": "Diagnóstico de Maturidade ARES-AI",
+    "subtitle": "Avalie a maturidade em Inteligência Artificial e obtenha um plano personalizado para acelerar sua transformação digital",
+    "estimated_time": "Tempo estimado: 15-20 minutos",
+    "select_type": "Como você gostaria de realizar seu diagnóstico?",
+    "company_option": "Como Empresa",
+    "company_description": "Avalie a maturidade de sua organização em IA. Inclui análise de competências, processos, cultura e estratégia organizacional.",
+    "company_button": "Realizar diagnóstico como empresa",
+    "person_option": "Como Pessoa",
+    "person_description": "Avalie suas competências pessoais em IA. Adaptado para crianças (8-17) e adultos (18+). Inclui recomendações educacionais personalizadas.",
+    "person_button": "Realizar diagnóstico como pessoa",
+    "privacy_notice": "Sua informação está segura e é usada apenas para gerar seu diagnóstico personalizado",
     "segmento": {
       "title": "Selecione seu segmento",
       "empresa": "Empresa / Organização",
@@ -284,5 +352,115 @@
       "title": "Resumo do diagnóstico",
       "descripcion": "Revise suas respostas antes de continuar."
     }
+  },
+  "shared": {
+    "deliverables": "Entregáveis"
+  },
+  "trust": {
+    "title": "Eles confiaram em nós",
+    "companies": "Empresas que já Confiam em Nós",
+    "education": "Instituições Educacionais",
+    "alliances": "Alianças Estratégicas",
+    "final_cta": "Junte-se às empresas que já estão transformando seu futuro com IA"
+  },
+  "produtos": {
+    "badge": "Nossos Produtos",
+    "title": "Soluções Abrangentes de IA",
+    "subtitle": "Descubra nosso catálogo completo de produtos projetados para acelerar sua transformação digital com Inteligência Artificial",
+    "model_title": "Modelo 50/50: A Fórmula Perfeita",
+    "standard_content": "Conteúdo Padrão",
+    "total_personalization": "Personalização Total",
+    "competitive_formula": "A fórmula que nos torna únicos no mercado de educação em IA",
+    "categories": {
+      "consulting": {
+        "title": "Consultoria",
+        "description": "Consultoria especializada em IA para empresas que buscam implementar soluções inteligentes de forma estratégica e eficiente.",
+        "btn": "Ver Consultoria"
+      },
+      "courses": {
+        "title": "Cursos",
+        "description": "Formação prática e aplicada em Inteligência Artificial, projetada para profissionais que querem dominar as tecnologias do futuro.",
+        "btn": "Ver Cursos"
+      },
+      "certifications": {
+        "title": "Certificações",
+        "description": "Certificações profissionais em IA que validam seu conhecimento e o posicionam como especialista no mercado de trabalho.",
+        "btn": "Ver Certificações"
+      }
+    },
+    "approach": {
+      "badge": "Nossa Abordagem",
+      "title": "A Metodologia",
+      "subtitle": "Combinamos rigor acadêmico com experiência prática para oferecer o treinamento mais completo e eficaz do mercado",
+      "personalization": {
+        "title": "Personalização Matética",
+        "subtitle": "Fundamentos Acadêmicos e Técnicos",
+        "description": "Adaptamos cada experiência de aprendizagem ao seu estilo cognitivo único, usando princípios da ciência da aprendizagem.",
+        "details": "Metodologia baseada em pesquisa do MIT",
+        "click_more": "Clique para mais detalhes"
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "posts": "Publicações",
+      "productos": "Produtos",
+      "projects": "Projetos",
+      "certificados": "Certificados",
+      "media": "Mídia",
+      "logos": "Logos",
+      "history": "História",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuários",
+      "settings": "Configurações",
+      "logout": "Sair"
+    },
+    "produtos": {
+      "dashboard": {
+        "title": "Painel de Produtos",
+        "download_structure": "Baixar Estrutura JSON",
+        "bulk_upload": "Upload em Massa JSON",
+        "manage_asesorias": "Gerenciar Consultoria",
+        "manage_cursos": "Gerenciar Cursos",
+        "manage_certificaciones": "Gerenciar Certificações",
+        "total_asesorias": "Total Consultoria",
+        "total_cursos": "Total Cursos",
+        "total_certificaciones": "Total Certificações",
+        "active": "ativas",
+        "recent_products": "Produtos Recentes",
+        "recent_asesorias": "Consultorias Recentes",
+        "recent_cursos": "Cursos Recentes",
+        "recent_certificaciones": "Certificações Recentes",
+        "no_products": "Nenhum produto criado ainda.",
+        "status_active": "Ativo",
+        "status_inactive": "Inativo"
+      },
+      "bulk_upload": {
+        "title": "Upload em Massa de Produtos JSON",
+        "select_file": "Selecionar arquivo JSON:",
+        "file_selected": "Arquivo selecionado:",
+        "size": "Tamanho:",
+        "progress": "Progresso do upload",
+        "expected_format": "Formato JSON Esperado:",
+        "cancel": "Cancelar",
+        "process_file": "Processar Arquivo",
+        "processing": "Processando..."
+      }
+    }
+  },
+  "navigation": {
+    "home": "Início",
+    "produtos": "Produtos",
+    "nosotros": "Sobre Nós",
+    "metodologia": "Metodologia",
+    "blog": "Blog",
+    "contacto": "Contato",
+    "admin": "Admin",
+    "menu": "Menu",
+    "login_google": "Entrar com Google",
+    "dashboard": "Painel",
+    "logout": "Sair",
+    "privacy_policy": "Política de Privacidade"
   }
 }

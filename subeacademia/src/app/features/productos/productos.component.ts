@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
 import { AnimationService } from '../../core/services/animation.service';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, RouterLink, AnimateOnScrollDirective],
+  imports: [CommonModule, RouterLink, AnimateOnScrollDirective, I18nTranslatePipe],
   template: `
     <!-- Header rediseñado con más vida y color - TEMA ADAPTATIVO MEJORADO -->
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-blue-500 to-purple-600 dark:from-slate-900 dark:via-blue-950 dark:to-purple-950 relative overflow-hidden">
@@ -27,24 +28,24 @@ import { I18nService } from '../../core/i18n/i18n.service';
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
             </svg>
-            {{ getTranslation('productos.badge') }}
+            {{ 'productos.badge' | i18nTranslate }}
           </div>
           
           <!-- Título principal optimizado para ambos temas -->
           <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-            <span class="orange-gradient-text">{{ getTranslation('productos.title') }}</span>
+            <span class="orange-gradient-text">{{ 'productos.title' | i18nTranslate }}</span>
           </h1>
           
           <!-- Descripción mejorada -->
           <div class="max-w-6xl mx-auto mb-12">
             <p class="text-xl md:text-2xl lg:text-3xl text-white dark:text-gray-200 leading-relaxed mb-8">
-              {{ getTranslation('productos.subtitle') }}
+              {{ 'productos.subtitle' | i18nTranslate }}
             </p>
             
             <!-- Texto central destacado optimizado para ambos temas -->
             <div class="bg-white/10 dark:bg-slate-800/50 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-white/20 dark:border-white/10 shadow-2xl">
               <p class="text-2xl md:text-3xl text-white mb-6 font-medium">
-                {{ getTranslation('productos.model_title') }}
+                {{ 'productos.model_title' | i18nTranslate }}
               </p>
               
               <!-- Estadísticas destacadas con animación -->
@@ -54,7 +55,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
                     50%
                   </div>
                   <div class="text-xl md:text-2xl text-white dark:text-gray-300 font-semibold">
-                    {{ getTranslation('productos.standard_content') }}
+                    {{ 'productos.standard_content' | i18nTranslate }}
                   </div>
                   <div class="w-16 h-1 bg-gradient-to-r from-cyan-400 to-cyan-300 mx-auto mt-3 rounded-full"></div>
                 </div>
@@ -66,7 +67,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
                     50%
                   </div>
                   <div class="text-xl md:text-2xl text-white dark:text-gray-300 font-semibold">
-                    {{ getTranslation('productos.total_personalization') }}
+                    {{ 'productos.total_personalization' | i18nTranslate }}
                   </div>
                   <div class="w-16 h-1 bg-gradient-to-r from-fuchsia-500 to-fuchsia-400 mx-auto mt-3 rounded-full"></div>
                 </div>
@@ -75,7 +76,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
               <!-- Mensaje final optimizado -->
               <div class="bg-white/10 dark:bg-white/5 rounded-2xl p-6 border border-white/20 dark:border-white/10">
                 <p class="text-xl md:text-2xl text-white dark:text-white font-medium">
-                  {{ getTranslation('productos.competitive_formula') }}
+                  {{ 'productos.competitive_formula' | i18nTranslate }}
                 </p>
               </div>
             </div>
@@ -107,14 +108,14 @@ import { I18nService } from '../../core/i18n/i18n.service';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ getTranslation('productos.categories.consulting.title') }}</h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ 'productos.categories.consulting.title' | i18nTranslate }}</h3>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {{ getTranslation('productos.categories.consulting.description') }}
+              {{ 'productos.categories.consulting.description' | i18nTranslate }}
             </p>
             <a [routerLink]="['asesorias']" 
                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 group-hover:scale-105 shadow-md hover:shadow-lg">
               <span class="flex items-center">
-                {{ getTranslation('productos.categories.consulting.btn') }}
+                {{ 'productos.categories.consulting.btn' | i18nTranslate }}
                 <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -134,14 +135,14 @@ import { I18nService } from '../../core/i18n/i18n.service';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ getTranslation('productos.categories.courses.title') }}</h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ 'productos.categories.courses.title' | i18nTranslate }}</h3>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {{ getTranslation('productos.categories.courses.description') }}
+              {{ 'productos.categories.courses.description' | i18nTranslate }}
             </p>
             <a [routerLink]="['cursos']" 
                class="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 group-hover:scale-105 shadow-md hover:shadow-lg">
               <span class="flex items-center">
-                {{ getTranslation('productos.categories.courses.btn') }}
+                {{ 'productos.categories.courses.btn' | i18nTranslate }}
                 <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -161,14 +162,14 @@ import { I18nService } from '../../core/i18n/i18n.service';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.563.563 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ getTranslation('productos.categories.certifications.title') }}</h3>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ 'productos.categories.certifications.title' | i18nTranslate }}</h3>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-              {{ getTranslation('productos.categories.certifications.description') }}
+              {{ 'productos.categories.certifications.description' | i18nTranslate }}
             </p>
             <a [routerLink]="['certificaciones']" 
                class="inline-flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 group-hover:scale-105 shadow-md hover:shadow-lg">
               <span class="flex items-center">
-                {{ getTranslation('productos.categories.certifications.btn') }}
+                {{ 'productos.categories.certifications.btn' | i18nTranslate }}
                 <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -194,14 +195,14 @@ import { I18nService } from '../../core/i18n/i18n.service';
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
               </svg>
-              {{ getTranslation('productos.approach.badge') }}
+              {{ 'productos.approach.badge' | i18nTranslate }}
             </div>
             <h2 class="text-3xl md:text-5xl lg:text-6xl font-bold text-gray-800 dark:text-white mb-8 leading-tight">
-              {{ getTranslation('productos.approach.title') }}
+              {{ 'productos.approach.title' | i18nTranslate }}
               <span class="orange-gradient-text">Sube-Academia</span>
             </h2>
             <p class="text-lg md:text-xl text-gray-700 dark:text-neutral-300 leading-relaxed max-w-3xl mx-auto">
-              {{ getTranslation('productos.approach.subtitle') }}
+              {{ 'productos.approach.subtitle' | i18nTranslate }}
             </p>
           </div>
 
@@ -226,20 +227,20 @@ import { I18nService } from '../../core/i18n/i18n.service';
                 <!-- Contenido con flex-grow para ocupar espacio disponible -->
                 <div class="relative text-center flex-grow flex flex-col">
                   <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white leading-tight">
-                    {{ getTranslation('productos.approach.personalization.title') }}
-                    <span class="block text-lg font-semibold text-blue-600 dark:text-primary-400 mt-2">{{ getTranslation('productos.approach.personalization.subtitle') }}</span>
+                    {{ 'productos.approach.personalization.title' | i18nTranslate }}
+                    <span class="block text-lg font-semibold text-blue-600 dark:text-primary-400 mt-2">{{ 'productos.approach.personalization.subtitle' | i18nTranslate }}</span>
                   </h3>
                   <p class="text-base text-gray-700 dark:text-neutral-300 leading-relaxed mb-6 flex-grow">
-                    {{ getTranslation('productos.approach.personalization.description') }}
+                    {{ 'productos.approach.personalization.description' | i18nTranslate }}
                   </p>
                   
                   <!-- Detalles expandibles siempre al final -->
                   <div class="mt-auto p-4 bg-blue-50 dark:bg-primary-950/30 rounded-xl border border-blue-200 dark:border-primary-400/10">
                     <p class="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed mb-2">
-                      <strong class="text-blue-700 dark:text-primary-300">{{ getTranslation('productos.approach.personalization.details') }}</strong>
+                      <strong class="text-blue-700 dark:text-primary-300">{{ 'productos.approach.personalization.details' | i18nTranslate }}</strong>
                     </p>
                     <div class="flex items-center justify-center mt-3 text-blue-600 dark:text-blue-400">
-                      <span class="text-xs font-medium mr-2">{{ getTranslation('productos.approach.personalization.click_more') }}</span>
+                      <span class="text-xs font-medium mr-2">{{ 'productos.approach.personalization.click_more' | i18nTranslate }}</span>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
@@ -280,7 +281,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
                       <strong class="text-green-700 dark:text-success-300">Proyectos reales:</strong> Cada módulo culmina en un proyecto tangible que simula entornos profesionales reales.
                     </p>
                     <div class="flex items-center justify-center mt-3 text-green-600 dark:text-green-400">
-                      <span class="text-xs font-medium mr-2">{{ getTranslation('productos.approach.personalization.click_more') }}</span>
+                      <span class="text-xs font-medium mr-2">{{ 'productos.approach.personalization.click_more' | i18nTranslate }}</span>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
@@ -321,7 +322,7 @@ import { I18nService } from '../../core/i18n/i18n.service';
                       <strong class="text-orange-700 dark:text-warning-300">Conocimiento validado:</strong> Contenido actualizado en tiempo real, probado en proyectos de alto impacto empresarial.
                     </p>
                     <div class="flex items-center justify-center mt-3 text-orange-600 dark:text-orange-400">
-                      <span class="text-xs font-medium mr-2">{{ getTranslation('productos.approach.personalization.click_more') }}</span>
+                      <span class="text-xs font-medium mr-2">{{ 'productos.approach.personalization.click_more' | i18nTranslate }}</span>
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                       </svg>
@@ -635,39 +636,7 @@ export class ProductosComponent implements AfterViewInit {
   // Estado de los modales
   activeModal = signal<string | null>(null);
 
-  // Traducciones hardcodeadas como fallback
-  productosBadge = 'Nuestros Productos';
-  productosTitle = 'Soluciones Integrales de IA';
-  productosSubtitle = 'Descubre nuestro catálogo completo de productos diseñados para acelerar tu transformación digital con Inteligencia Artificial';
-  productosModelTitle = 'Modelo 50/50: La Fórmula Perfecta';
-  productosStandardContent = 'Contenido Estándar';
-  productosTotalPersonalization = 'Personalización Total';
-  productosCompetitiveFormula = 'La fórmula que nos hace únicos en el mercado de la educación en IA';
-
-  // Traducciones para categorías
-  consultingTitle = 'Asesorías';
-  consultingDescription = 'Consultoría especializada en IA para empresas que buscan implementar soluciones inteligentes de manera estratégica y eficiente.';
-  consultingBtn = 'Ver Asesorías';
-
-  coursesTitle = 'Cursos';
-  coursesDescription = 'Formación práctica y aplicada en Inteligencia Artificial, diseñada para profesionales que quieren dominar las tecnologías del futuro.';
-  coursesBtn = 'Ver Cursos';
-
-  certificationsTitle = 'Certificaciones';
-  certificationsDescription = 'Certificaciones profesionales en IA que validan tu conocimiento y te posicionan como experto en el mercado laboral.';
-  certificationsBtn = 'Ver Certificaciones';
-
-  // Traducciones para enfoque
-  approachBadge = 'Nuestro Enfoque';
-  approachTitle = 'La Metodología';
-  approachSubtitle = 'Combinamos rigor académico con experiencia práctica para ofrecerte la formación más completa y efectiva del mercado';
-
-  // Traducciones para personalización
-  personalizationTitle = 'Personalización Matética';
-  personalizationSubtitle = 'Fundamentos Académicos y Técnicos';
-  personalizationDescription = 'Adaptamos cada experiencia de aprendizaje a tu estilo cognitivo único, utilizando principios de la ciencia del aprendizaje.';
-  personalizationDetails = 'Modelo 50/50: 50% contenido estándar + 50% personalización total';
-  personalizationClickMore = 'Haz clic para conocer más';
+  // Traducciones eliminadas - ahora usa el pipe i18nTranslate
 
   constructor(
     private readonly animationService: AnimationService,
@@ -675,61 +644,7 @@ export class ProductosComponent implements AfterViewInit {
     public readonly i18n: I18nService
   ) {}
 
-  // Método auxiliar para obtener traducciones con fallback
-  getTranslation(key: string): string {
-    console.log('🔍 getTranslation llamado para:', key);
-    
-    // Primero intentar con el servicio i18n
-    const serviceTranslation = this.i18n.translate(key);
-    console.log('📚 Traducción del servicio:', serviceTranslation);
-    
-    if (serviceTranslation !== key) {
-      console.log('✅ Usando traducción del servicio');
-      return serviceTranslation;
-    }
-    
-    // Fallback: usar traducciones hardcodeadas
-    const hardcodedTranslation = this.getHardcodedTranslation(key);
-    if (hardcodedTranslation) {
-      console.log('🔧 Usando traducción hardcodeada:', hardcodedTranslation);
-      return hardcodedTranslation;
-    }
-    
-    console.log('⚠️ No se encontró traducción, devolviendo clave');
-    // Fallback final: devolver la clave
-    return key;
-  }
-  
-  private getHardcodedTranslation(key: string): string | null {
-    const translations: { [key: string]: string } = {
-      'productos.badge': this.productosBadge,
-      'productos.title': this.productosTitle,
-      'productos.subtitle': this.productosSubtitle,
-      'productos.model_title': this.productosModelTitle,
-      'productos.standard_content': this.productosStandardContent,
-      'productos.total_personalization': this.productosTotalPersonalization,
-      'productos.competitive_formula': this.productosCompetitiveFormula,
-      'productos.categories.consulting.title': this.consultingTitle,
-      'productos.categories.consulting.description': this.consultingDescription,
-      'productos.categories.consulting.btn': this.consultingBtn,
-      'productos.categories.courses.title': this.coursesTitle,
-      'productos.categories.courses.description': this.coursesDescription,
-      'productos.categories.courses.btn': this.coursesBtn,
-      'productos.categories.certifications.title': this.certificationsTitle,
-      'productos.categories.certifications.description': this.certificationsDescription,
-      'productos.categories.certifications.btn': this.certificationsBtn,
-      'productos.approach.badge': this.approachBadge,
-      'productos.approach.title': this.approachTitle,
-      'productos.approach.subtitle': this.approachSubtitle,
-      'productos.approach.personalization.title': this.personalizationTitle,
-      'productos.approach.personalization.subtitle': this.personalizationSubtitle,
-      'productos.approach.personalization.description': this.personalizationDescription,
-      'productos.approach.personalization.details': this.personalizationDetails,
-      'productos.approach.personalization.click_more': this.personalizationClickMore
-    };
-    
-    return translations[key] || null;
-  }
+  // Eliminado fallback propio: el template usa i18nTranslate
 
   // Métodos para gestionar modales
   openModal(modalType: string): void {

@@ -3,6 +3,8 @@ import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthCoreService } from '../../core/auth-core.service';
 import { LocalSettingsService } from '../../core/services/local-settings.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { NgIf } from '@angular/common';
 import { User } from '@angular/fire/auth';
 import { Subject, takeUntil } from 'rxjs';
@@ -10,7 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-admin-shell',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, NgIf],
+  imports: [RouterLink, RouterOutlet, NgIf, I18nTranslatePipe],
   template: `
 <div class="min-h-screen">
   <header class="flex items-center justify-between px-4 py-3 border-b border-white/10">
@@ -23,40 +25,40 @@ import { Subject, takeUntil } from 'rxjs';
            [class.hidden]="!open" [class.md:block]="true">
       <div class="text-xs text-[var(--muted)] mb-2" *ngIf="userEmail">{{ userEmail }}</div>
       <a class="menu-item" routerLink="/admin/posts">
-        <span class="menu-icon">📝</span> Posts
+        <span class="menu-icon">📝</span> {{ 'admin.menu.posts' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/productos">
-        <span class="menu-icon">🛍️</span> Productos
+        <span class="menu-icon">🛍️</span> {{ 'admin.menu.productos' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/projects">
-        <span class="menu-icon">🚀</span> Proyectos
+        <span class="menu-icon">🚀</span> {{ 'admin.menu.projects' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/certificados">
-        <span class="menu-icon">🏆</span> Certificados
+        <span class="menu-icon">🏆</span> {{ 'admin.menu.certificados' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/media">
-        <span class="menu-icon">📷</span> Media
+        <span class="menu-icon">📷</span> {{ 'admin.menu.media' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/logos">
-        <span class="menu-icon">🎨</span> Logos
+        <span class="menu-icon">🎨</span> {{ 'admin.menu.logos' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/history">
-        <span class="menu-icon">📚</span> Historia
+        <span class="menu-icon">📚</span> {{ 'admin.menu.history' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/collaborators">
-        <span class="menu-icon">🤝</span> Colaboradores
+        <span class="menu-icon">🤝</span> {{ 'admin.menu.collaborators' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/leads">
-        <span class="menu-icon">📊</span> Leads
+        <span class="menu-icon">📊</span> {{ 'admin.menu.leads' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/users">
-        <span class="menu-icon">👥</span> Usuarios
+        <span class="menu-icon">👥</span> {{ 'admin.menu.users' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/settings">
-        <span class="menu-icon">⚙️</span> Ajustes
+        <span class="menu-icon">⚙️</span> {{ 'admin.menu.settings' | i18nTranslate }}
       </a>
       <button class="menu-item" (click)="logout()">
-        <span class="menu-icon">🚪</span> Cerrar sesión
+        <span class="menu-icon">🚪</span> {{ 'admin.menu.logout' | i18nTranslate }}
       </button>
     </aside>
     <main class="p-4">
@@ -95,6 +97,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   private coreAuth = inject(AuthCoreService);
   private router = inject(Router);
   private settings = inject(LocalSettingsService);
+  private i18n = inject(I18nService);
   
   open = true;
   userEmail: string | null = null;

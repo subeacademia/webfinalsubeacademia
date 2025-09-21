@@ -20,7 +20,7 @@
   <div class="relative z-10 p-4 max-w-6xl mx-auto">
     <!-- Título principal con efecto de aparición -->
     <h1 id="hero-title" class="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up text-balance">
-      <span class="gradient-text">{{ tituloHome }}</span>
+      <span class="gradient-text">{{ 'home.hero.title' | i18nTranslate }}</span>
     </h1>
 
     <!-- Subtítulo con typewriter mejorado -->
@@ -31,8 +31,8 @@
     </div>
 
     <!-- Descripción con animación -->
-    <p class="mt-8 text-lg md:text-xl text-[var(--muted)] max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.6s;">
-      {{ getTranslation('home.hero_subtitle') }}
+    <p class="hero-description mt-8 text-lg md:text-xl text-[var(--muted)] max-w-4xl mx-auto animate-fade-in-up leading-relaxed text-center" style="animation-delay: 0.6s;">
+      {{ 'home.hero.subtitle' | i18nTranslate }}
     </p>
 
     <!-- Botones de acción con efectos -->
@@ -47,7 +47,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
-        {{ getTranslation('home.cta_primary') }}
+        {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
       </app-ui-button>
       
       <app-ui-button 
@@ -60,7 +60,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
         </svg>
-        {{ getTranslation('home.cta_secondary') }}
+        {{ 'home.cta_final.button' | i18nTranslate }}
       </app-ui-button>
     </div>
 
@@ -78,10 +78,10 @@
   <div class="container mx-auto px-4 py-16 sm:py-24">
     <div class="text-center mb-12 lg:mb-16">
       <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
-        {{ getTranslation('home.methodology.title') }}
+        {{ 'methodology.header.title' | i18nTranslate }}
       </h2>
       <p class="max-w-3xl mx-auto text-base-content/70 mt-4 text-lg">
-        {{ getTranslation('home.methodology.subtitle') }}
+        {{ 'methodology.header.subtitle' | i18nTranslate }}
       </p>
     </div>
 
@@ -97,7 +97,7 @@
              class="phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline"
              [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
             <span class="text-xl font-bold text-primary mr-4">{{ '0' + phase.id }}</span>
-            <span class="text-lg font-semibold text-base-content">{{ getTranslation('home.methodology.phases.' + phase.id + '.shortTitle') }}</span>
+            <span class="text-lg font-semibold text-base-content">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
           </a>
         </div>
       </div>
@@ -114,15 +114,15 @@
                    [alt]="phase.title" 
                    class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
                    loading="lazy">
-              <h3 class="text-2xl font-bold text-primary mb-3">{{ getTranslation('home.methodology.phases.' + phase.id + '.title') }}</h3>
-              <p class="mb-6 text-base-content/80 leading-relaxed">{{ getTranslation('home.methodology.phases.' + phase.id + '.description') }}</p>
-              <h4 class="text-lg font-semibold mb-3 text-base-content">{{ getTranslation('shared.deliverables') }}</h4>
+              <h3 class="text-2xl font-bold text-primary mb-3">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+              <p class="mb-6 text-base-content/80 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+              <h4 class="text-lg font-semibold mb-3 text-base-content">{{ 'shared.deliverables' | i18nTranslate }}</h4>
               <ul class="space-y-2">
                 <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-center text-base-content/70">
                   <svg class="w-5 h-5 mr-2 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
-                  <span>{{ getTranslation('home.methodology.phases.' + phase.id + '.deliverables.' + i) }}</span>
+                  <span>{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
                 </li>
               </ul>
             </div>
@@ -137,7 +137,7 @@
         <input type="radio" name="methodology-accordion" [checked]="phase.id === 1" />
         <div class="collapse-title text-xl font-bold flex items-center text-base-content min-h-[60px]">
           <span class="text-primary mr-3 flex-shrink-0">{{ '0' + phase.id }}</span>
-          <span class="flex-1">{{ phase.shortTitle }}</span>
+          <span class="flex-1">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
         </div>
         <div class="collapse-content relative z-20 p-4">
           <div class="space-y-4">
@@ -147,15 +147,15 @@
                  loading="eager"
                  [style.display]="'block'"
                  onerror="this.style.background='linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'; this.alt='Imagen no disponible'">
-            <h3 class="text-lg font-bold mb-2 text-base-content">{{ getTranslation('home.methodology.phases.' + phase.id + '.title') }}</h3>
-            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ getTranslation('home.methodology.phases.' + phase.id + '.description') }}</p>
-            <h4 class="font-semibold mb-2 text-base-content">{{ getTranslation('shared.deliverables') }}:</h4>
+            <h3 class="text-lg font-bold mb-2 text-base-content">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+            <h4 class="font-semibold mb-2 text-base-content">{{ 'shared.deliverables' | i18nTranslate }}:</h4>
             <ul class="space-y-2 text-sm">
               <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-base-content/80">
                 <svg class="w-4 h-4 mr-2 mt-0.5 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                <span class="flex-1">{{ getTranslation('home.methodology.phases.' + phase.id + '.deliverables.' + i) }}</span>
+                <span class="flex-1">{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
               </li>
             </ul>
           </div>
@@ -168,7 +168,7 @@
   <div class="container mx-auto px-4 pb-16">
     <div class="text-center">
       <p class="text-lg sm:text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-        {{ getTranslation('home.methodology.cta_ready') }}
+        {{ 'home.methodology.cta_ready' | i18nTranslate }}
       </p>
       
       <!-- Botones de acción -->
@@ -180,7 +180,7 @@
           class="methodology-primary-btn"
           style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;"
           aria-label="Comenzar diagnóstico de madurez en IA">
-          {{ getTranslation('home.methodology.btn_start_diagnostic') }}
+          {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
         </app-ui-button>
         
         <app-ui-button 
@@ -190,7 +190,7 @@
           style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
           aria-label="Ver detalles completos de la metodología ARES-AI">
           <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
-            {{ getTranslation('home.methodology.btn_view_methodology') }}
+            {{ 'home.methodology.btn_view_methodology' | i18nTranslate }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -200,7 +200,7 @@
       
       <!-- Texto adicional -->
       <p class="text-sm text-base-content/60 mt-4">
-        {{ getTranslation('home.methodology.additional_text') }}
+        {{ 'home.methodology.additional_text' | i18nTranslate }}
       </p>
     </div>
   </div>
@@ -224,13 +224,13 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
-        {{ getTranslation('home.solutions.badge') }}
+        Soluciones Integrales de IA
       </div>
       <h2 id="solutions-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 text-neutral-900 dark:text-white leading-tight">
-        {{ getTranslation('home.solutions.title') }}
+        {{ 'home.solution.title' | i18nTranslate }}
       </h2>
       <p class="text-lg sm:text-xl md:text-2xl text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-4xl mx-auto">
-        {{ getTranslation('home.solutions.subtitle') }}
+        {{ 'home.solution.feature1_desc' | i18nTranslate }}
       </p>
     </div>
     
@@ -256,11 +256,11 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                {{ getTranslation('home.solutions.training.title') }}
-                <span class="block text-base md:text-lg font-semibold text-primary-600 dark:text-primary-400 mt-1">{{ getTranslation('home.solutions.training.subtitle') }}</span>
+                {{ 'home.solution.feature1_title' | i18nTranslate }}
+                <span class="block text-base md:text-lg font-semibold text-primary-600 dark:text-primary-400 mt-1">AVE-AI</span>
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                {{ getTranslation('home.solutions.training.description') }}
+                {{ 'home.solution.feature1_desc' | i18nTranslate }}
               </p>
             </div>
             
@@ -273,7 +273,7 @@
                 class="w-full solution-blue-btn"
                 style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease; width: 100%;"
                 aria-label="Realizar diagnóstico de competencias">
-                {{ getTranslation('home.solutions.training.btn') }}
+                {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -302,11 +302,11 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                {{ getTranslation('home.solutions.consulting.title') }}
-                <span class="block text-base md:text-lg font-semibold text-success-600 dark:text-success-400 mt-1">{{ getTranslation('home.solutions.consulting.subtitle') }}</span>
+                {{ 'home.solution.feature2_title' | i18nTranslate }}
+                <span class="block text-base md:text-lg font-semibold text-success-600 dark:text-success-400 mt-1">ARES-AI</span>
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                {{ getTranslation('home.solutions.consulting.description') }}
+                {{ 'home.solution.feature2_desc' | i18nTranslate }}
               </p>
             </div>
             
@@ -319,7 +319,7 @@
                 class="w-full solution-green-btn"
                 style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s ease; width: 100%;"
                 aria-label="Contactar con un asesor especializado">
-                {{ getTranslation('home.solutions.consulting.btn') }}
+                {{ 'home.cta_final.button' | i18nTranslate }}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
@@ -348,10 +348,10 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                {{ getTranslation('home.solutions.implementation.title') }}
+                {{ 'home.solution.feature3_title' | i18nTranslate }}
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                {{ getTranslation('home.solutions.implementation.description') }}
+                {{ 'home.solution.feature3_desc' | i18nTranslate }}
               </p>
             </div>
             
@@ -361,7 +361,7 @@
                 (click)="navegarACasosDeExito()"
                 class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/30 flex items-center justify-center gap-2"
                 aria-label="Ver casos de éxito de implementación">
-                {{ getTranslation('home.solutions.implementation.btn') }}
+                Ver Casos de Éxito
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -384,8 +384,7 @@
   
   <div class="container mx-auto px-4 text-center relative z-10">
     <h2 id="trust-title" class="text-4xl md:text-5xl font-bold mb-16 text-slate-900 dark:text-white">
-      Han confiado en 
-      <span class="gradient-text">nosotros</span>
+      {{ 'trust.title' | i18nTranslate }}
     </h2>
     
     <!-- Carrusel de logos con animación infinita -->
@@ -393,7 +392,7 @@
       
       <!-- Carrusel Doble: Primera fila (derecha a izquierda) -->
       <div class="relative">
-        <h3 class="text-xl font-semibold text-center mb-6 text-primary">{{ getTranslation('home.trust.companies') }}</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-primary">{{ 'trust.companies' | i18nTranslate }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('company')" 
@@ -408,7 +407,7 @@
       
       <!-- Carrusel Doble: Segunda fila (izquierda a derecha) -->
       <div class="relative mt-12">
-        <h3 class="text-xl font-semibold text-center mb-6 text-secondary">{{ getTranslation('home.trust.education') }}</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-secondary">{{ 'trust.education' | i18nTranslate }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('education')" 
@@ -423,7 +422,7 @@
 
       <!-- Carrusel Tercero: Alianzas Estratégicas (izquierda a derecha) -->
       <div class="relative mt-12">
-        <h3 class="text-xl font-semibold text-center mb-6 text-accent">{{ getTranslation('home.trust.alliances') }}</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-accent">{{ 'trust.alliances' | i18nTranslate }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('alliance')" 
@@ -440,7 +439,7 @@
     <!-- CTA final -->
     <div class="mt-16 text-center">
       <p class="text-xl text-slate-600 dark:text-slate-400 mb-8">
-        {{ getTranslation('home.trust.final_cta') }}
+        {{ 'trust.final_cta' | i18nTranslate }}
       </p>
       <app-ui-button 
         variant="cyan" 
@@ -449,7 +448,7 @@
         class="final-cta-btn"
         style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1.25rem 2.5rem; font-weight: 700; box-shadow: 0 10px 25px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;"
         aria-label="Comenzar el proceso de transformación con IA">
-        {{ getTranslation('home.cta_final') }}
+        {{ 'home.cta_final.title' | i18nTranslate }}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>

@@ -4,20 +4,20 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ScrollService } from '../../../../../core/services/scroll/scroll.service';
 import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
+import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-step-start',
   standalone: true,
-  imports: [CommonModule, UiButtonComponent],
+  imports: [CommonModule, UiButtonComponent, I18nTranslatePipe],
   template: `
     <div class="text-center animate-fade-in">
       <div class="mb-6 md:mb-8">
-        <h1 class="text-2xl md:text-4xl font-bold text-white mb-3 md:mb-4 px-4">
-          Diagnóstico de Madurez ARES-AI
+        <h1 class="text-2xl md:text-4xl font-bold mb-3 md:mb-4 px-4">
+          <span class="orange-gradient-text">{{ 'diagnostico.title' | i18nTranslate }}</span>
         </h1>
         <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed px-4">
-          Evalúa la madurez en Inteligencia Artificial y obtén un plan personalizado 
-          para acelerar tu transformación digital
+          {{ 'diagnostico.subtitle' | i18nTranslate }}
         </p>
       </div>
       
@@ -26,14 +26,14 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
           <svg class="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
           </svg>
-          <span class="font-medium text-sm md:text-base">Tiempo estimado: 15-20 minutos</span>
+          <span class="font-medium text-sm md:text-base">{{ 'diagnostico.estimated_time' | i18nTranslate }}</span>
         </div>
       </div>
 
       <!-- Selección de tipo de diagnóstico -->
       <div class="mb-6 md:mb-8">
         <h2 class="text-xl md:text-2xl font-semibold text-white mb-4 md:mb-6 px-4">
-          ¿Cómo quieres realizar tu diagnóstico?
+          {{ 'diagnostico.select_type' | i18nTranslate }}
         </h2>
         
         <div class="flex flex-col md:flex-row gap-4 md:gap-6 justify-center max-w-4xl mx-auto px-4">
@@ -46,17 +46,18 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                   </svg>
                 </div>
-                <h3 class="text-lg md:text-xl font-bold text-white mb-2 md:mb-3">Como Empresa</h3>
+                <h3 class="text-lg md:text-xl font-bold text-white mb-2 md:mb-3">{{ 'diagnostico.company_option' | i18nTranslate }}</h3>
                 <p class="text-gray-300 mb-4 md:mb-6 text-xs md:text-sm leading-relaxed">
-                  Evalúa la madurez de tu organización en IA. Incluye análisis de competencias, 
-                  procesos, cultura y estrategia organizacional.
+                  {{ 'diagnostico.company_description' | i18nTranslate }}
                 </p>
-                <button
-                  type="button"
-                  (click)="comenzarDiagnosticoEmpresa()"
-                  class="w-full px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-lg transition-all duration-200 hover:scale-105 text-sm md:text-base">
-                  Realizar diagnóstico como empresa
-                </button>
+                <app-ui-button
+                  variant="primary"
+                  size="md"
+                  (clicked)="comenzarDiagnosticoEmpresa()"
+                  class="w-full text-sm md:text-base"
+                  style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 700; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;">
+                  {{ 'diagnostico.company_button' | i18nTranslate }}
+                </app-ui-button>
               </div>
             </div>
           </div>
@@ -70,17 +71,17 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                   </svg>
                 </div>
-                <h3 class="text-lg md:text-xl font-bold text-white mb-2 md:mb-3">Como Persona</h3>
+                <h3 class="text-lg md:text-xl font-bold text-white mb-2 md:mb-3">{{ 'diagnostico.person_option' | i18nTranslate }}</h3>
                 <p class="text-gray-300 mb-4 md:mb-6 text-xs md:text-sm leading-relaxed">
-                  Evalúa tus competencias personales en IA. Adaptado para niños (8-17) y adultos (18+). 
-                  Incluye recomendaciones educativas personalizadas.
+                  {{ 'diagnostico.person_description' | i18nTranslate }}
                 </p>
                 <app-ui-button
-                  variant="secondary"
+                  variant="primary"
                   size="md"
                   (clicked)="comenzarDiagnosticoPersona()"
-                  class="w-full text-sm md:text-base">
-                  Realizar diagnóstico como persona
+                  class="w-full text-sm md:text-base"
+                  style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 700; box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;">
+                  {{ 'diagnostico.person_button' | i18nTranslate }}
                 </app-ui-button>
               </div>
             </div>
@@ -89,7 +90,7 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
       </div>
 
       <div class="mt-6 md:mt-8 text-gray-400 text-xs md:text-sm px-4">
-        <p>Tu información está segura y solo se utiliza para generar tu diagnóstico personalizado</p>
+        <p>{{ 'diagnostico.privacy_notice' | i18nTranslate }}</p>
       </div>
     </div>
   `,
@@ -105,6 +106,28 @@ import { UiButtonComponent } from '../../../../../shared/ui-kit/button/button';
     
     .btn-primary {
       @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg;
+    }
+    
+    /* Gradiente naranja - NUEVO COLOR PRIMARIO */
+    .orange-gradient-text {
+      background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+      font-weight: 900 !important;
+    }
+    
+    /* Modo oscuro */
+    :global(.dark) .orange-gradient-text {
+      background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+      font-weight: 900 !important;
     }
   `]
 })
