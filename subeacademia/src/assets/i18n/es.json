@@ -113,7 +113,59 @@
       "cta_ready": "¿Listo para comenzar tu transformación con IA?",
       "btn_start_diagnostic": "Comenzar Diagnóstico",
       "btn_view_methodology": "Ver Metodología Completa",
-      "additional_text": "Framework probado y validado por más de 100 organizaciones"
+      "additional_text": "Framework probado y validado por más de 100 organizaciones",
+      "phases": {
+        "1": {
+          "title": "Fase 1: Preparación y Evaluación",
+          "shortTitle": "Evaluación",
+          "description": "Establecemos cimientos sólidos, analizando tus necesidades y auditando tus datos para asegurar que cada paso sea estratégico y esté alineado con tus objetivos.",
+          "deliverables": [
+            "Diagnóstico de Madurez de IA",
+            "Auditoría de Datos y Ética",
+            "Roadmap Estratégico"
+          ]
+        },
+        "2": {
+          "title": "Fase 2: Diseño y Prototipado",
+          "shortTitle": "Prototipado",
+          "description": "Co-creamos y visualizamos la solución de IA. Desarrollamos prototipos funcionales rápidos para validar el enfoque y garantizar que el resultado final cumpla tus expectativas.",
+          "deliverables": [
+            "Diseño de Arquitectura",
+            "Pruebas de Concepto (PoC)",
+            "Selección de Modelos y Algoritmos"
+          ]
+        },
+        "3": {
+          "title": "Fase 3: Desarrollo e Implementación",
+          "shortTitle": "Implementación",
+          "description": "Construimos una solución de IA robusta, ética y escalable, integrándola de manera fluida en tus sistemas existentes para potenciar tus operaciones sin fricciones.",
+          "deliverables": [
+            "Modelos de IA Entrenados",
+            "Integración vía APIs",
+            "Despliegue en Producción"
+          ]
+        },
+        "4": {
+          "title": "Fase 4: Monitoreo y Optimización",
+          "shortTitle": "Optimización",
+          "description": "Acompañamos el proceso post-entrega. Monitoreamos el rendimiento en tiempo real y optimizamos los modelos para asegurar la máxima eficiencia y un impacto continuo.",
+          "deliverables": [
+            "Dashboard de Monitoreo",
+            "Informes de Rendimiento",
+            "Ciclos de Reentrenamiento Continuo"
+          ]
+        },
+        "5": {
+          "title": "Fase 5: Escalado y Sostenibilidad",
+          "shortTitle": "Sostenibilidad",
+          "description": "Miramos hacia el futuro. Te ayudamos a escalar la solución en toda tu organización, asegurando que la IA crezca contigo de manera ética, responsable y sostenible.",
+          "deliverables": [
+            "Estrategia de Escalado",
+            "Marco de Gobernanza de IA",
+            "Programas de Capacitación"
+          ]
+        }
+      }
     },
     "solutions": {
       "badge": "Soluciones Integrales de IA",
@@ -275,6 +327,143 @@
     "reportGenerationFailed": "Ocurrió un error al generar tu reporte. Por favor, intenta nuevamente.",
     "reportGenerationFailedTitle": "Error en Reporte",
     "retryButton": "Reintentar"
+  },
+  "certificate_validation": {
+    "title": "Validación de Certificados",
+    "subtitle": "Verifica la autenticidad de certificados emitidos por Sube Academia",
+    "back_home": "Volver al inicio",
+    "form_title": "Validar Certificado",
+    "form_subtitle": "Ingresa el código del certificado para verificar su autenticidad",
+    "code_label": "Código del Certificado",
+    "code_placeholder": "Ej: INTIA-1K2M3N4P-ABC123",
+    "code_error": "Por favor ingresa un código de certificado válido",
+    "validating": "Validando...",
+    "validate_btn": "Validar Certificado",
+    "valid_title": "Certificado Válido",
+    "valid_subtitle": "Este certificado es auténtico y ha sido verificado exitosamente.",
+    "invalid_title": "Certificado No Válido",
+    "student_info": "Información del Estudiante",
+    "grade": "Calificación",
+    "program": "Programa de Estudios",
+    "duration": "Duración",
+    "type": "Tipo",
+    "dates": "Fechas",
+    "completion": "Finalización",
+    "issued": "Emisión",
+    "institution": "Institución",
+    "instructor": "Instructor",
+    "qr_code": "Código QR",
+    "scan_to_validate": "Escanea para validar",
+    "security": "Seguridad",
+    "verification_code": "Código de Verificación",
+    "invalid_reasons": "Posibles razones:",
+    "invalid_reason_1": "El código de certificado no existe en nuestros registros",
+    "invalid_reason_2": "El certificado ha sido revocado",
+    "invalid_reason_3": "El código fue ingresado incorrectamente",
+    "invalid_reason_4": "El certificado ha expirado",
+    "need_help": "¿Necesitas ayuda?",
+    "contact_support": "Si crees que esto es un error, contacta con nuestro equipo de soporte.",
+    "how_it_works": "¿Cómo funciona la validación?",
+    "step_1": "Verificación de Identidad",
+    "step_1_desc": "Cada certificado incluye información única del estudiante y el programa completado.",
+    "step_2": "Seguridad Criptográfica",
+    "step_2_desc": "Utilizamos hashing SHA-256 y múltiples capas de verificación para garantizar la autenticidad.",
+    "step_3": "Validación Instantánea",
+    "step_3_desc": "Los resultados se obtienen en tiempo real consultando nuestra base de datos segura.",
+    "type_completion": "Certificado de Completación",
+    "type_achievement": "Certificado de Logro",
+    "type_participation": "Certificado de Participación",
+    "type_default": "Certificado",
+    "status_active": "Activo",
+    "status_revoked": "Revocado",
+    "status_expired": "Expirado",
+    "status_unknown": "Desconocido",
+    "security_sha256": "Verificación Hash SHA-256",
+    "security_qr": "Validación por Código QR",
+    "security_timestamp": "Verificación de Marca Temporal",
+    "security_unique": "Código Único de Certificado"
+  },
+  "productos": {
+    "badge": "Metodología Revolucionaria",
+    "title": "Nuestros Productos",
+    "subtitle": "Nuestros servicios son premium porque fusionamos la matética con la IA, enfocándonos en cómo aprendes, no solo en cómo enseñamos.",
+    "model_title": "Nuestro modelo es un balance perfecto:",
+    "standard_content": "Contenido Estándar",
+    "total_personalization": "Personalización Total",
+    "competitive_formula": "Es la fórmula que la competencia no puede replicar",
+    "categories": {
+      "consulting": {
+        "title": "Asesorías",
+        "description": "Consultoría personalizada para implementar IA en tu empresa",
+        "btn": "Ver Asesorías"
+      },
+      "courses": {
+        "title": "Cursos",
+        "description": "Formación especializada en Inteligencia Artificial",
+        "btn": "Ver Cursos"
+      },
+      "certifications": {
+        "title": "Certificaciones",
+        "description": "Certificaciones oficiales en tecnologías de IA",
+        "btn": "Ver Certificaciones"
+      }
+    },
+    "approach": {
+      "badge": "Metodología Diferenciadora",
+      "title": "El Enfoque Sube-Academia",
+      "subtitle": "Nuestra metodología única combina lo mejor de la educación personalizada con tecnología de vanguardia",
+      "personalization": {
+        "title": "Personalización Matética",
+        "subtitle": "Matética",
+        "description": "Dejamos atrás la didáctica tradicional. Creamos una ruta de aprendizaje única para ti, optimizando cómo aprendes y aplicas el conocimiento.",
+        "details": "Modelo 50/50 revolucionario: Combina conocimiento estándar con contenido totalmente adaptado a tus metas y contexto real.",
+        "click_more": "Haz clic para saber más"
+      },
+      "experience": {
+        "title": "Experiencia Práctica",
+        "subtitle": "Acelerada",
+        "description": "Te enfrentarás a desafíos empresariales reales y complejos desde el primer día. Aquí no hay espacio para la teoría abstracta.",
+        "details": "Proyectos reales: Cada módulo culmina en un proyecto tangible que simula entornos profesionales reales.",
+        "click_more": "Haz clic para saber más"
+      },
+      "quality": {
+        "title": "Calidad Premium",
+        "subtitle": "y Vanguardia",
+        "description": "Accede a contenido de élite, desarrollado por un equipo senior con experiencia probada en transformación digital.",
+        "details": "Conocimiento validado: Contenido actualizado en tiempo real, probado en proyectos de alto impacto empresarial.",
+        "click_more": "Haz clic para saber más"
+      }
+    }
+  },
+  "about": {
+    "title": "Sobre Nosotros",
+    "subtitle": "Conoce al equipo que está transformando la educación en IA",
+    "mvv": {
+      "title": "Misión, Visión y Valores",
+      "subtitle": "Los pilares que guían nuestro trabajo",
+      "mission_title": "Misión",
+      "mission_desc": "Democratizar el acceso a la educación de calidad en Inteligencia Artificial, preparando a profesionales y equipos para liderar la transformación digital de sus organizaciones.",
+      "vision_title": "Visión",
+      "vision_desc": "Ser la plataforma de referencia en Latinoamérica para la formación práctica en IA, creando una comunidad de profesionales que transforman el futuro del trabajo.",
+      "values_title": "Valores",
+      "values_desc": "Excelencia académica, innovación constante, aprendizaje práctico, colaboración y responsabilidad ética en el desarrollo y aplicación de tecnologías de IA."
+    }
+  },
+  "methodology": {
+    "header": {
+      "title": "Nuestra Metodología",
+      "subtitle": "Un enfoque probado para la transformación digital con IA"
+    },
+    "ares": {
+      "title": "Framework ARES-AI",
+      "description": "Nuestro marco metodológico integral que combina Agilidad, Responsabilidad y Sostenibilidad en la implementación de soluciones de IA."
+    }
+  },
+  "blog": {
+    "header": {
+      "title": "Nuestro Blog",
+      "subtitle": "Ideas, tutoriales y noticias sobre Inteligencia Artificial y tecnología"
+    }
   },
   "notFound": {
     "title": "Página No Encontrada",

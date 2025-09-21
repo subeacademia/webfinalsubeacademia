@@ -106,13 +106,103 @@
     "solutions_subtitle": "Tools and services designed to accelerate your AI adoption responsibly",
     "trust_title": "They Trust Us",
     "trust_subtitle": "Join the organizations already transforming their future with AI",
-    "cta_final": "Start Now"
+    "cta_final": "Start Now",
+    "methodology": {
+      "title": "Our ARES-AI Methodology",
+      "subtitle": "A 5-phase framework that guarantees successful AI implementation, combining agility, responsibility, and tangible results.",
+      "cta_ready": "Ready to start your AI transformation?",
+      "btn_start_diagnostic": "Start Diagnosis",
+      "btn_view_methodology": "View Complete Methodology",
+      "additional_text": "Framework tested and validated by more than 100 organizations",
+      "phases": {
+        "1": {
+          "title": "Phase 1: Preparation and Assessment",
+          "shortTitle": "Assessment",
+          "description": "We establish solid foundations, analyzing your needs and auditing your data to ensure that each step is strategic and aligned with your objectives.",
+          "deliverables": [
+            "AI Maturity Diagnosis",
+            "Data and Ethics Audit",
+            "Strategic Roadmap"
+          ]
+        },
+        "2": {
+          "title": "Phase 2: Design and Prototyping",
+          "shortTitle": "Prototyping",
+          "description": "We co-create and visualize the AI solution. We develop fast functional prototypes to validate the approach and ensure the final result meets your expectations.",
+          "deliverables": [
+            "Architecture Design",
+            "Proof of Concept (PoC)",
+            "Model and Algorithm Selection"
+          ]
+        },
+        "3": {
+          "title": "Phase 3: Development and Implementation",
+          "shortTitle": "Implementation",
+          "description": "We build a robust, ethical and scalable AI solution, integrating it seamlessly into your existing systems to enhance your operations without friction.",
+          "deliverables": [
+            "Trained AI Models",
+            "API Integration",
+            "Production Deployment"
+          ]
+        },
+        "4": {
+          "title": "Phase 4: Monitoring and Optimization",
+          "shortTitle": "Optimization",
+          "description": "We accompany the post-delivery process. We monitor performance in real-time and optimize models to ensure maximum efficiency and continuous impact.",
+          "deliverables": [
+            "Monitoring Dashboard",
+            "Performance Reports",
+            "Continuous Retraining Cycles"
+          ]
+        },
+        "5": {
+          "title": "Phase 5: Scaling and Sustainability",
+          "shortTitle": "Sustainability",
+          "description": "We look to the future. We help you scale the solution throughout your organization, ensuring that AI grows with you ethically, responsibly and sustainably.",
+          "deliverables": [
+            "Scaling Strategy",
+            "AI Governance Framework",
+            "Training Programs"
+          ]
+        }
+      }
+    },
+    "solutions": {
+      "badge": "Comprehensive AI Solutions",
+      "title": "Our Solutions for Digital Transformation",
+      "subtitle": "Tools and services designed to accelerate your AI adoption responsibly and strategically",
+      "training": {
+        "title": "Adaptive Training",
+        "subtitle": "(AVE-AI)",
+        "description": "Our Evolving Virtual Classroom that personalizes learning and intelligently develops the 13 key competencies.",
+        "btn": "Take Assessment"
+      },
+      "consulting": {
+        "title": "Strategic Consulting",
+        "subtitle": "(ARES-AI)",
+        "description": "We guide you in AI adoption responsibly and aligned with your business strategy and organizational objectives.",
+        "btn": "Contact an Advisor"
+      },
+      "implementation": {
+        "title": "Project Implementation",
+        "description": "We accompany you in creating high-impact AI projects, from idea to deployment and maintenance.",
+        "btn": "View Success Cases"
+      }
+    },
+    "trust": {
+      "companies": "Companies",
+      "education": "Educational Institutions",
+      "alliances": "Strategic Alliances",
+      "final_cta": "Join the organizations already transforming their future with AI"
+    }
   },
   "shared": {
     "back": "Back",
     "more_about": "More about",
     "next": "Next",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "deliverables": "Key Deliverables",
+    "scroll_indicator": "Scroll to see more"
   },
   "diagnostico": {
     "results": {
@@ -237,6 +327,143 @@
     "reportGenerationFailed": "An error occurred while generating your report. Please try again.",
     "reportGenerationFailedTitle": "Report Error",
     "retryButton": "Retry"
+  },
+  "certificate_validation": {
+    "title": "Certificate Validation",
+    "subtitle": "Verify the authenticity of certificates issued by Sube Academia",
+    "back_home": "Back to home",
+    "form_title": "Validate Certificate",
+    "form_subtitle": "Enter the certificate code to verify its authenticity",
+    "code_label": "Certificate Code",
+    "code_placeholder": "E.g.: INTIA-1K2M3N4P-ABC123",
+    "code_error": "Please enter a valid certificate code",
+    "validating": "Validating...",
+    "validate_btn": "Validate Certificate",
+    "valid_title": "Valid Certificate",
+    "valid_subtitle": "This certificate is authentic and has been successfully verified.",
+    "invalid_title": "Invalid Certificate",
+    "student_info": "Student Information",
+    "grade": "Grade",
+    "program": "Study Program",
+    "duration": "Duration",
+    "type": "Type",
+    "dates": "Dates",
+    "completion": "Completion",
+    "issued": "Issued",
+    "institution": "Institution",
+    "instructor": "Instructor",
+    "qr_code": "QR Code",
+    "scan_to_validate": "Scan to validate",
+    "security": "Security",
+    "verification_code": "Verification Code",
+    "invalid_reasons": "Possible reasons:",
+    "invalid_reason_1": "The certificate code does not exist in our records",
+    "invalid_reason_2": "The certificate has been revoked",
+    "invalid_reason_3": "The code was entered incorrectly",
+    "invalid_reason_4": "The certificate has expired",
+    "need_help": "Need help?",
+    "contact_support": "If you think this is an error, contact our support team.",
+    "how_it_works": "How does validation work?",
+    "step_1": "Identity Verification",
+    "step_1_desc": "Each certificate includes unique information about the student and the completed program.",
+    "step_2": "Cryptographic Security",
+    "step_2_desc": "We use SHA-256 hashing and multiple verification layers to ensure authenticity.",
+    "step_3": "Instant Validation",
+    "step_3_desc": "Results are obtained in real-time by consulting our secure database.",
+    "type_completion": "Completion Certificate",
+    "type_achievement": "Achievement Certificate",
+    "type_participation": "Participation Certificate",
+    "type_default": "Certificate",
+    "status_active": "Active",
+    "status_revoked": "Revoked",
+    "status_expired": "Expired",
+    "status_unknown": "Unknown",
+    "security_sha256": "SHA-256 Hash Verification",
+    "security_qr": "QR Code Validation",
+    "security_timestamp": "Timestamp Verification",
+    "security_unique": "Unique Certificate Code"
+  },
+  "productos": {
+    "badge": "Revolutionary Methodology",
+    "title": "Our Products",
+    "subtitle": "Our services are premium because we fuse mathetics with AI, focusing on how you learn, not just how we teach.",
+    "model_title": "Our model is a perfect balance:",
+    "standard_content": "Standard Content",
+    "total_personalization": "Total Personalization",
+    "competitive_formula": "It's the formula that the competition cannot replicate",
+    "categories": {
+      "consulting": {
+        "title": "Consulting",
+        "description": "Personalized consulting to implement AI in your company",
+        "btn": "View Consulting"
+      },
+      "courses": {
+        "title": "Courses",
+        "description": "Specialized training in Artificial Intelligence",
+        "btn": "View Courses"
+      },
+      "certifications": {
+        "title": "Certifications",
+        "description": "Official certifications in AI technologies",
+        "btn": "View Certifications"
+      }
+    },
+    "approach": {
+      "badge": "Differentiating Methodology",
+      "title": "The Sube-Academia Approach",
+      "subtitle": "Our unique methodology combines the best of personalized education with cutting-edge technology",
+      "personalization": {
+        "title": "Mathetic Personalization",
+        "subtitle": "Mathetics",
+        "description": "We leave behind traditional didactics. We create a unique learning path for you, optimizing how you learn and apply knowledge.",
+        "details": "Revolutionary 50/50 model: Combines standard knowledge with content totally adapted to your goals and real context.",
+        "click_more": "Click to learn more"
+      },
+      "experience": {
+        "title": "Practical Experience",
+        "subtitle": "Accelerated",
+        "description": "You will face real and complex business challenges from day one. There is no room for abstract theory here.",
+        "details": "Real projects: Each module culminates in a tangible project that simulates real professional environments.",
+        "click_more": "Click to learn more"
+      },
+      "quality": {
+        "title": "Premium Quality",
+        "subtitle": "and Cutting-edge",
+        "description": "Access elite content, developed by a senior team with proven experience in digital transformation.",
+        "details": "Validated knowledge: Content updated in real-time, tested in high-impact business projects.",
+        "click_more": "Click to learn more"
+      }
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Meet the team that's transforming AI education",
+    "mvv": {
+      "title": "Mission, Vision and Values",
+      "subtitle": "The pillars that guide our work",
+      "mission_title": "Mission",
+      "mission_desc": "Democratize access to quality education in Artificial Intelligence, preparing professionals and teams to lead the digital transformation of their organizations.",
+      "vision_title": "Vision",
+      "vision_desc": "To be the reference platform in Latin America for practical AI training, creating a community of professionals who transform the future of work.",
+      "values_title": "Values",
+      "values_desc": "Academic excellence, constant innovation, practical learning, collaboration and ethical responsibility in the development and application of AI technologies."
+    }
+  },
+  "methodology": {
+    "header": {
+      "title": "Our Methodology",
+      "subtitle": "A proven approach for digital transformation with AI"
+    },
+    "ares": {
+      "title": "ARES-AI Framework",
+      "description": "Our comprehensive methodological framework that combines Agility, Responsibility and Sustainability in the implementation of AI solutions."
+    }
+  },
+  "blog": {
+    "header": {
+      "title": "Our Blog",
+      "subtitle": "Ideas, tutorials and news about Artificial Intelligence and technology"
+    }
   },
   "notFound": {
     "title": "Page Not Found",

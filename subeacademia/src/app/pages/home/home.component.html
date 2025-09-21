@@ -32,7 +32,7 @@
 
     <!-- Descripción con animación -->
     <p class="mt-8 text-lg md:text-xl text-[var(--muted)] max-w-3xl mx-auto animate-fade-in-up" style="animation-delay: 0.6s;">
-      Descubre tu nivel de madurez en IA y transforma tu organización con nuestro diagnóstico inteligente basado en el Framework ARES-AI©
+      {{ getTranslation('home.hero_subtitle') }}
     </p>
 
     <!-- Botones de acción con efectos -->
@@ -47,7 +47,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
-        Inicia tu diagnóstico de madurez<br>en IA Gratis
+        {{ getTranslation('home.cta_primary') }}
       </app-ui-button>
       
       <app-ui-button 
@@ -60,7 +60,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
         </svg>
-        Habla con un asesor ahora
+        {{ getTranslation('home.cta_secondary') }}
       </app-ui-button>
     </div>
 
@@ -78,11 +78,10 @@
   <div class="container mx-auto px-4 py-16 sm:py-24">
     <div class="text-center mb-12 lg:mb-16">
       <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
-        Nuestra Metodología 
-        <span class="gradient-text">ARES-AI</span>
+        {{ getTranslation('home.methodology.title') }}
       </h2>
       <p class="max-w-3xl mx-auto text-base-content/70 mt-4 text-lg">
-        Un marco de 5 fases que garantiza la implementación exitosa de IA, combinando agilidad, responsabilidad y resultados tangibles.
+        {{ getTranslation('home.methodology.subtitle') }}
       </p>
     </div>
 
@@ -98,7 +97,7 @@
              class="phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline"
              [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
             <span class="text-xl font-bold text-primary mr-4">{{ '0' + phase.id }}</span>
-            <span class="text-lg font-semibold text-base-content">{{ phase.shortTitle }}</span>
+            <span class="text-lg font-semibold text-base-content">{{ getTranslation('home.methodology.phases.' + phase.id + '.shortTitle') }}</span>
           </a>
         </div>
       </div>
@@ -115,15 +114,15 @@
                    [alt]="phase.title" 
                    class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
                    loading="lazy">
-              <h3 class="text-2xl font-bold text-primary mb-3">{{ phase.title }}</h3>
-              <p class="mb-6 text-base-content/80 leading-relaxed">{{ phase.description }}</p>
-              <h4 class="text-lg font-semibold mb-3 text-base-content">Entregables Clave</h4>
+              <h3 class="text-2xl font-bold text-primary mb-3">{{ getTranslation('home.methodology.phases.' + phase.id + '.title') }}</h3>
+              <p class="mb-6 text-base-content/80 leading-relaxed">{{ getTranslation('home.methodology.phases.' + phase.id + '.description') }}</p>
+              <h4 class="text-lg font-semibold mb-3 text-base-content">{{ getTranslation('shared.deliverables') }}</h4>
               <ul class="space-y-2">
-                <li *ngFor="let deliverable of phase.deliverables" class="flex items-center text-base-content/70">
+                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-center text-base-content/70">
                   <svg class="w-5 h-5 mr-2 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
-                  <span>{{ deliverable }}</span>
+                  <span>{{ getTranslation('home.methodology.phases.' + phase.id + '.deliverables.' + i) }}</span>
                 </li>
               </ul>
             </div>
@@ -148,15 +147,15 @@
                  loading="eager"
                  [style.display]="'block'"
                  onerror="this.style.background='linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'; this.alt='Imagen no disponible'">
-            <h3 class="text-lg font-bold mb-2 text-base-content">{{ phase.title }}</h3>
-            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ phase.description }}</p>
-            <h4 class="font-semibold mb-2 text-base-content">Entregables Clave:</h4>
+            <h3 class="text-lg font-bold mb-2 text-base-content">{{ getTranslation('home.methodology.phases.' + phase.id + '.title') }}</h3>
+            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ getTranslation('home.methodology.phases.' + phase.id + '.description') }}</p>
+            <h4 class="font-semibold mb-2 text-base-content">{{ getTranslation('shared.deliverables') }}:</h4>
             <ul class="space-y-2 text-sm">
-              <li *ngFor="let deliverable of phase.deliverables" class="flex items-start text-base-content/80">
+              <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-base-content/80">
                 <svg class="w-4 h-4 mr-2 mt-0.5 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
-                <span class="flex-1">{{ deliverable }}</span>
+                <span class="flex-1">{{ getTranslation('home.methodology.phases.' + phase.id + '.deliverables.' + i) }}</span>
               </li>
             </ul>
           </div>
@@ -169,7 +168,7 @@
   <div class="container mx-auto px-4 pb-16">
     <div class="text-center">
       <p class="text-lg sm:text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-        {{ 'home.methodology.cta_ready' | i18nTranslate }}
+        {{ getTranslation('home.methodology.cta_ready') }}
       </p>
       
       <!-- Botones de acción -->
@@ -181,7 +180,7 @@
           class="methodology-primary-btn"
           style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;"
           aria-label="Comenzar diagnóstico de madurez en IA">
-          {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
+          {{ getTranslation('home.methodology.btn_start_diagnostic') }}
         </app-ui-button>
         
         <app-ui-button 
@@ -191,7 +190,7 @@
           style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
           aria-label="Ver detalles completos de la metodología ARES-AI">
           <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
-            {{ 'home.methodology.btn_view_methodology' | i18nTranslate }}
+            {{ getTranslation('home.methodology.btn_view_methodology') }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
@@ -201,7 +200,7 @@
       
       <!-- Texto adicional -->
       <p class="text-sm text-base-content/60 mt-4">
-        {{ 'home.methodology.additional_text' | i18nTranslate }}
+        {{ getTranslation('home.methodology.additional_text') }}
       </p>
     </div>
   </div>
@@ -225,14 +224,13 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>
-        Soluciones Integrales de IA
+        {{ getTranslation('home.solutions.badge') }}
       </div>
       <h2 id="solutions-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 md:mb-8 text-neutral-900 dark:text-white leading-tight">
-        Nuestras Soluciones para la 
-        <span class="orange-gradient-text">Transformación Digital</span>
+        {{ getTranslation('home.solutions.title') }}
       </h2>
       <p class="text-lg sm:text-xl md:text-2xl text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-4xl mx-auto">
-        Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable y estratégica
+        {{ getTranslation('home.solutions.subtitle') }}
       </p>
     </div>
     
@@ -258,11 +256,11 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                Capacitación Adaptativa
-                <span class="block text-base md:text-lg font-semibold text-primary-600 dark:text-primary-400 mt-1">(AVE-AI)</span>
+                {{ getTranslation('home.solutions.training.title') }}
+                <span class="block text-base md:text-lg font-semibold text-primary-600 dark:text-primary-400 mt-1">{{ getTranslation('home.solutions.training.subtitle') }}</span>
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                Nuestra Aula Virtual Evolutiva que personaliza el aprendizaje y desarrolla las 13 competencias clave de manera inteligente.
+                {{ getTranslation('home.solutions.training.description') }}
               </p>
             </div>
             
@@ -275,7 +273,7 @@
                 class="w-full solution-blue-btn"
                 style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease; width: 100%;"
                 aria-label="Realizar diagnóstico de competencias">
-                Realizar Diagnóstico
+                {{ getTranslation('home.solutions.training.btn') }}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -304,11 +302,11 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                Consultoría Estratégica
-                <span class="block text-base md:text-lg font-semibold text-success-600 dark:text-success-400 mt-1">(ARES-AI)</span>
+                {{ getTranslation('home.solutions.consulting.title') }}
+                <span class="block text-base md:text-lg font-semibold text-success-600 dark:text-success-400 mt-1">{{ getTranslation('home.solutions.consulting.subtitle') }}</span>
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                Te guiamos en la adopción de IA de forma responsable y alineada a tu estrategia de negocio y objetivos organizacionales.
+                {{ getTranslation('home.solutions.consulting.description') }}
               </p>
             </div>
             
@@ -321,7 +319,7 @@
                 class="w-full solution-green-btn"
                 style="background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s ease; width: 100%;"
                 aria-label="Contactar con un asesor especializado">
-                Contactar un Asesor
+                {{ getTranslation('home.solutions.consulting.btn') }}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 9a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
@@ -350,11 +348,10 @@
           <div class="relative flex flex-col h-full">
             <div class="flex-1">
               <h3 class="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-6 text-neutral-900 dark:text-white leading-tight">
-                Implementación de
-                <span class="block text-warning-600 dark:text-warning-400">Proyectos</span>
+                {{ getTranslation('home.solutions.implementation.title') }}
               </h3>
               <p class="text-base md:text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 md:mb-8">
-                Te acompañamos en la creación de proyectos de IA de alto impacto, desde la idea hasta el despliegue y mantenimiento.
+                {{ getTranslation('home.solutions.implementation.description') }}
               </p>
             </div>
             
@@ -364,7 +361,7 @@
                 (click)="navegarACasosDeExito()"
                 class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-orange-500/30 flex items-center justify-center gap-2"
                 aria-label="Ver casos de éxito de implementación">
-                Ver Casos de Éxito
+                {{ getTranslation('home.solutions.implementation.btn') }}
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                 </svg>
@@ -396,7 +393,7 @@
       
       <!-- Carrusel Doble: Primera fila (derecha a izquierda) -->
       <div class="relative">
-        <h3 class="text-xl font-semibold text-center mb-6 text-primary">Empresas</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-primary">{{ getTranslation('home.trust.companies') }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('company')" 
@@ -411,7 +408,7 @@
       
       <!-- Carrusel Doble: Segunda fila (izquierda a derecha) -->
       <div class="relative mt-12">
-        <h3 class="text-xl font-semibold text-center mb-6 text-secondary">Instituciones Educativas</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-secondary">{{ getTranslation('home.trust.education') }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('education')" 
@@ -426,7 +423,7 @@
 
       <!-- Carrusel Tercero: Alianzas Estratégicas (izquierda a derecha) -->
       <div class="relative mt-12">
-        <h3 class="text-xl font-semibold text-center mb-6 text-accent">Alianzas Estratégicas</h3>
+        <h3 class="text-xl font-semibold text-center mb-6 text-accent">{{ getTranslation('home.trust.alliances') }}</h3>
         <div class="carousel-row">
           <app-logo-carousel 
             [logos]="getLogosToDisplay('alliance')" 
@@ -443,7 +440,7 @@
     <!-- CTA final -->
     <div class="mt-16 text-center">
       <p class="text-xl text-slate-600 dark:text-slate-400 mb-8">
-        Únete a las organizaciones que ya están transformando su futuro con IA
+        {{ getTranslation('home.trust.final_cta') }}
       </p>
       <app-ui-button 
         variant="cyan" 
@@ -452,7 +449,7 @@
         class="final-cta-btn"
         style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1.25rem 2.5rem; font-weight: 700; box-shadow: 0 10px 25px rgba(234, 88, 12, 0.4); transition: all 0.3s ease;"
         aria-label="Comenzar el proceso de transformación con IA">
-        Comenzar Ahora
+        {{ getTranslation('home.cta_final') }}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
         </svg>

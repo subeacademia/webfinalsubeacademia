@@ -5,11 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Certificate } from '../../core/models';
 import { CertificateService } from '../../features/productos/services/certificate.service';
 import { CertificateGeneratorService } from '../../core/services/certificate-generator.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-certificate-validation',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, I18nTranslatePipe],
   template: `
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <!-- Header -->
@@ -23,12 +25,12 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                 </svg>
               </div>
               <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Validación de Certificados</h1>
-                <p class="text-gray-600 dark:text-gray-300">Verifica la autenticidad de certificados emitidos por Sube Academia</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'certificate_validation.title' | i18nTranslate }}</h1>
+                <p class="text-gray-600 dark:text-gray-300">{{ 'certificate_validation.subtitle' | i18nTranslate }}</p>
               </div>
             </div>
             <button (click)="goHome()" class="px-4 py-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 font-medium">
-              ← Volver al inicio
+              ← {{ 'certificate_validation.back_home' | i18nTranslate }}
             </button>
           </div>
         </div>
@@ -39,20 +41,20 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
         <div class="max-w-2xl mx-auto mb-12">
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
             <div class="text-center mb-8">
-              <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Validar Certificado</h2>
-              <p class="text-gray-600 dark:text-gray-300">Ingresa el código del certificado para verificar su autenticidad</p>
+              <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.form_title' | i18nTranslate }}</h2>
+              <p class="text-gray-600 dark:text-gray-300">{{ 'certificate_validation.form_subtitle' | i18nTranslate }}</p>
             </div>
 
             <form [formGroup]="validationForm" (ngSubmit)="validateCertificate()" class="space-y-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Código del Certificado
+                  {{ 'certificate_validation.code_label' | i18nTranslate }}
                 </label>
                 <div class="relative">
                   <input 
                     formControlName="certificateCode"
                     class="w-full px-4 py-4 text-lg font-mono border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Ej: INTIA-1K2M3N4P-ABC123"
+                    [placeholder]="'certificate_validation.code_placeholder' | i18nTranslate"
                     [class.border-red-500]="validationForm.get('certificateCode')?.invalid && validationForm.get('certificateCode')?.touched"
                   />
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -62,7 +64,7 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                   </div>
                 </div>
                 <div *ngIf="validationForm.get('certificateCode')?.invalid && validationForm.get('certificateCode')?.touched" class="text-red-500 text-sm mt-1">
-                  Por favor ingresa un código de certificado válido
+                  {{ 'certificate_validation.code_error' | i18nTranslate }}
                 </div>
               </div>
 
@@ -75,7 +77,7 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                {{ isValidating ? 'Validando...' : 'Validar Certificado' }}
+                {{ isValidating ? ('certificate_validation.validating' | i18nTranslate) : ('certificate_validation.validate_btn' | i18nTranslate) }}
               </button>
             </form>
           </div>
@@ -94,46 +96,46 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                 </div>
               </div>
               <div class="flex-grow">
-                <h3 class="text-2xl font-bold text-green-800 dark:text-green-200 mb-2">✅ Certificado Válido</h3>
-                <p class="text-green-700 dark:text-green-300 mb-6">Este certificado es auténtico y ha sido verificado exitosamente.</p>
+                <h3 class="text-2xl font-bold text-green-800 dark:text-green-200 mb-2">✅ {{ 'certificate_validation.valid_title' | i18nTranslate }}</h3>
+                <p class="text-green-700 dark:text-green-300 mb-6">{{ 'certificate_validation.valid_subtitle' | i18nTranslate }}</p>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                   <div class="space-y-4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Información del Estudiante</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.student_info' | i18nTranslate }}</h4>
                       <p class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ validationResult.certificate?.studentName }}</p>
-                      <p *ngIf="validationResult.certificate?.grade" class="text-sm text-gray-600 dark:text-gray-400">Calificación: {{ validationResult.certificate?.grade }}/100</p>
+                      <p *ngIf="validationResult.certificate?.grade" class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.grade' | i18nTranslate }}: {{ validationResult.certificate?.grade }}/100</p>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Programa de Estudios</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.program' | i18nTranslate }}</h4>
                       <p class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ validationResult.certificate?.courseName }}</p>
-                      <p *ngIf="validationResult.certificate?.courseDuration" class="text-sm text-gray-600 dark:text-gray-400">Duración: {{ validationResult.certificate?.courseDuration }}</p>
-                      <p class="text-sm text-gray-600 dark:text-gray-400">Tipo: {{ getCertificateTypeText(validationResult.certificate?.certificateType) }}</p>
+                      <p *ngIf="validationResult.certificate?.courseDuration" class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.duration' | i18nTranslate }}: {{ validationResult.certificate?.courseDuration }}</p>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.type' | i18nTranslate }}: {{ getCertificateTypeText(validationResult.certificate?.certificateType) }}</p>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fechas</h4>
-                      <p class="text-sm text-gray-600 dark:text-gray-400">Finalización: {{ validationResult.certificate?.completionDate?.toDate() | date:'fullDate' }}</p>
-                      <p class="text-sm text-gray-600 dark:text-gray-400">Emisión: {{ validationResult.certificate?.issuedDate?.toDate() | date:'fullDate' }}</p>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.dates' | i18nTranslate }}</h4>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.completion' | i18nTranslate }}: {{ validationResult.certificate?.completionDate?.toDate() | date:'fullDate' }}</p>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.issued' | i18nTranslate }}: {{ validationResult.certificate?.issuedDate?.toDate() | date:'fullDate' }}</p>
                     </div>
                   </div>
                   
                   <div class="space-y-4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Institución</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.institution' | i18nTranslate }}</h4>
                       <p class="text-lg font-medium text-gray-800 dark:text-gray-200">{{ validationResult.certificate?.institutionName }}</p>
-                      <p *ngIf="validationResult.certificate?.instructorName" class="text-sm text-gray-600 dark:text-gray-400">Instructor: {{ validationResult.certificate?.instructorName }}</p>
+                      <p *ngIf="validationResult.certificate?.instructorName" class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.instructor' | i18nTranslate }}: {{ validationResult.certificate?.instructorName }}</p>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Código QR</h4>
-                      <img *ngIf="validationResult.certificate?.qrCode" [src]="validationResult.certificate?.qrCode" alt="Código QR" class="w-24 h-24 rounded-lg border" />
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Escanea para validar</p>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.qr_code' | i18nTranslate }}</h4>
+                      <img *ngIf="validationResult.certificate?.qrCode" [src]="validationResult.certificate?.qrCode" [alt]="'certificate_validation.qr_code' | i18nTranslate" class="w-24 h-24 rounded-lg border" />
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ 'certificate_validation.scan_to_validate' | i18nTranslate }}</p>
                     </div>
                     
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
-                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Seguridad</h4>
+                      <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.security' | i18nTranslate }}</h4>
                       <div class="space-y-1">
                         <div *ngFor="let feature of validationResult.certificate?.metadata?.securityFeatures || []" class="flex items-center text-xs text-green-600 dark:text-green-400">
                           <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -148,7 +150,7 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                 
                 <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-xl">
                   <p class="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Código de Verificación:</strong> 
+                    <strong>{{ 'certificate_validation.verification_code' | i18nTranslate }}:</strong> 
                     <code class="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded font-mono text-xs">{{ validationResult.certificate?.certificateCode }}</code>
                   </p>
                 </div>
@@ -167,22 +169,22 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                 </div>
               </div>
               <div class="flex-grow">
-                <h3 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">❌ Certificado No Válido</h3>
+                <h3 class="text-2xl font-bold text-red-800 dark:text-red-200 mb-2">❌ {{ 'certificate_validation.invalid_title' | i18nTranslate }}</h3>
                 <p class="text-red-700 dark:text-red-300 mb-4">{{ validationResult.error }}</p>
                 
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-4">
-                  <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Posibles razones:</h4>
+                  <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.invalid_reasons' | i18nTranslate }}</h4>
                   <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <li>• El código de certificado no existe en nuestros registros</li>
-                    <li>• El certificado ha sido revocado</li>
-                    <li>• El código fue ingresado incorrectamente</li>
-                    <li>• El certificado ha expirado</li>
+                    <li>• {{ 'certificate_validation.invalid_reason_1' | i18nTranslate }}</li>
+                    <li>• {{ 'certificate_validation.invalid_reason_2' | i18nTranslate }}</li>
+                    <li>• {{ 'certificate_validation.invalid_reason_3' | i18nTranslate }}</li>
+                    <li>• {{ 'certificate_validation.invalid_reason_4' | i18nTranslate }}</li>
                   </ul>
                 </div>
                 
                 <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900 rounded-xl">
                   <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>¿Necesitas ayuda?</strong> Si crees que esto es un error, contacta con nuestro equipo de soporte.
+                    <strong>{{ 'certificate_validation.need_help' | i18nTranslate }}</strong> {{ 'certificate_validation.contact_support' | i18nTranslate }}
                   </p>
                 </div>
               </div>
@@ -193,7 +195,7 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
         <!-- Información adicional -->
         <div class="max-w-4xl mx-auto mt-12">
           <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">¿Cómo funciona la validación?</h3>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ 'certificate_validation.how_it_works' | i18nTranslate }}</h3>
             <div class="grid md:grid-cols-3 gap-6">
               <div class="text-center">
                 <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -201,8 +203,8 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                   </svg>
                 </div>
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Verificación de Identidad</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Cada certificado incluye información única del estudiante y el programa completado.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.step_1' | i18nTranslate }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.step_1_desc' | i18nTranslate }}</p>
               </div>
               <div class="text-center">
                 <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -210,8 +212,8 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                   </svg>
                 </div>
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Seguridad Criptográfica</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Utilizamos hashing SHA-256 y múltiples capas de verificación para garantizar la autenticidad.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.step_2' | i18nTranslate }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.step_2_desc' | i18nTranslate }}</p>
               </div>
               <div class="text-center">
                 <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mx-auto mb-3">
@@ -219,8 +221,8 @@ import { CertificateGeneratorService } from '../../core/services/certificate-gen
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                   </svg>
                 </div>
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Validación Instantánea</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Los resultados se obtienen en tiempo real consultando nuestra base de datos segura.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">{{ 'certificate_validation.step_3' | i18nTranslate }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ 'certificate_validation.step_3_desc' | i18nTranslate }}</p>
               </div>
             </div>
           </div>
@@ -243,7 +245,8 @@ export class CertificateValidationComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private certificateService: CertificateService,
-    private certificateGenerator: CertificateGeneratorService
+    private certificateGenerator: CertificateGeneratorService,
+    public readonly i18n: I18nService
   ) {
     this.validationForm = this.fb.group({
       certificateCode: ['', [Validators.required, Validators.minLength(5)]]
@@ -302,28 +305,28 @@ export class CertificateValidationComponent implements OnInit {
 
   getCertificateTypeText(type?: string): string {
     switch (type) {
-      case 'completion': return 'Certificado de Completación';
-      case 'achievement': return 'Certificado de Logro';
-      case 'participation': return 'Certificado de Participación';
-      default: return 'Certificado';
+      case 'completion': return this.i18n.translate('certificate_validation.type_completion') || 'Certificado de Completación';
+      case 'achievement': return this.i18n.translate('certificate_validation.type_achievement') || 'Certificado de Logro';
+      case 'participation': return this.i18n.translate('certificate_validation.type_participation') || 'Certificado de Participación';
+      default: return this.i18n.translate('certificate_validation.type_default') || 'Certificado';
     }
   }
 
   getStatusText(status: string): string {
     switch (status) {
-      case 'active': return 'Activo';
-      case 'revoked': return 'Revocado';
-      case 'expired': return 'Expirado';
-      default: return 'Desconocido';
+      case 'active': return this.i18n.translate('certificate_validation.status_active') || 'Activo';
+      case 'revoked': return this.i18n.translate('certificate_validation.status_revoked') || 'Revocado';
+      case 'expired': return this.i18n.translate('certificate_validation.status_expired') || 'Expirado';
+      default: return this.i18n.translate('certificate_validation.status_unknown') || 'Desconocido';
     }
   }
 
   getSecurityFeatureText(feature: string): string {
     switch (feature) {
-      case 'SHA256_HASH_VERIFICATION': return 'Verificación Hash SHA-256';
-      case 'QR_CODE_VALIDATION': return 'Validación por Código QR';
-      case 'TIMESTAMP_VERIFICATION': return 'Verificación de Marca Temporal';
-      case 'UNIQUE_CERTIFICATE_CODE': return 'Código Único de Certificado';
+      case 'SHA256_HASH_VERIFICATION': return this.i18n.translate('certificate_validation.security_sha256') || 'Verificación Hash SHA-256';
+      case 'QR_CODE_VALIDATION': return this.i18n.translate('certificate_validation.security_qr') || 'Validación por Código QR';
+      case 'TIMESTAMP_VERIFICATION': return this.i18n.translate('certificate_validation.security_timestamp') || 'Verificación de Marca Temporal';
+      case 'UNIQUE_CERTIFICATE_CODE': return this.i18n.translate('certificate_validation.security_unique') || 'Código Único de Certificado';
       default: return feature;
     }
   }
