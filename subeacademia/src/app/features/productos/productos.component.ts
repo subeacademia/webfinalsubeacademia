@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Inject, PLATFORM_ID, signal } from '@angular/core';
+import { Component, AfterViewInit, Inject, PLATFORM_ID, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AnimateOnScrollDirective } from '../../shared/ui/animate-on-scroll.directive';
@@ -268,17 +268,17 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
                 <!-- Contenido con flex-grow para ocupar espacio disponible -->
                 <div class="relative text-center flex-grow flex flex-col">
                   <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white leading-tight">
-                    Experiencia Práctica
-                    <span class="block text-lg font-semibold text-green-600 dark:text-success-400 mt-2">Acelerada</span>
+                    {{ 'productos.approach.experience.title' | i18nTranslate }}
+                    <span class="block text-lg font-semibold text-green-600 dark:text-success-400 mt-2">{{ 'productos.approach.experience.subtitle' | i18nTranslate }}</span>
                   </h3>
                   <p class="text-base text-gray-700 dark:text-neutral-300 leading-relaxed mb-6 flex-grow">
-                    Te enfrentarás a desafíos empresariales reales y complejos desde el primer día. Aquí no hay espacio para la teoría abstracta.
+                    {{ 'productos.approach.experience.description' | i18nTranslate }}
                   </p>
                   
                   <!-- Detalles expandibles siempre al final -->
                   <div class="mt-auto p-4 bg-green-50 dark:bg-success-950/30 rounded-xl border border-green-200 dark:border-success-400/10">
                     <p class="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed mb-2">
-                      <strong class="text-green-700 dark:text-success-300">Proyectos reales:</strong> Cada módulo culmina en un proyecto tangible que simula entornos profesionales reales.
+                      <strong class="text-green-700 dark:text-success-300">{{ 'productos.approach.experience.detail_label' | i18nTranslate }}</strong> {{ 'productos.approach.experience.detail_text' | i18nTranslate }}
                     </p>
                     <div class="flex items-center justify-center mt-3 text-green-600 dark:text-green-400">
                       <span class="text-xs font-medium mr-2">{{ 'productos.approach.personalization.click_more' | i18nTranslate }}</span>
@@ -309,17 +309,17 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
                 <!-- Contenido con flex-grow para ocupar espacio disponible -->
                 <div class="relative text-center flex-grow flex flex-col">
                   <h3 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white leading-tight">
-                    Calidad Premium
-                    <span class="block text-lg font-semibold text-orange-600 dark:text-warning-400 mt-2">y Vanguardia</span>
+                    {{ 'productos.approach.quality.title' | i18nTranslate }}
+                    <span class="block text-lg font-semibold text-orange-600 dark:text-warning-400 mt-2">{{ 'productos.approach.quality.subtitle' | i18nTranslate }}</span>
                   </h3>
                   <p class="text-base text-gray-700 dark:text-neutral-300 leading-relaxed mb-6 flex-grow">
-                    Accede a contenido de élite, desarrollado por un equipo senior con experiencia probada en transformación digital.
+                    {{ 'productos.approach.quality.description' | i18nTranslate }}
                   </p>
                   
                   <!-- Detalles expandibles siempre al final -->
                   <div class="mt-auto p-4 bg-orange-50 dark:bg-warning-950/30 rounded-xl border border-orange-200 dark:border-warning-400/10">
                     <p class="text-sm text-gray-600 dark:text-neutral-400 leading-relaxed mb-2">
-                      <strong class="text-orange-700 dark:text-warning-300">Conocimiento validado:</strong> Contenido actualizado en tiempo real, probado en proyectos de alto impacto empresarial.
+                      <strong class="text-orange-700 dark:text-warning-300">{{ 'productos.approach.quality.detail_label' | i18nTranslate }}</strong> {{ 'productos.approach.quality.detail_text' | i18nTranslate }}
                     </p>
                     <div class="flex items-center justify-center mt-3 text-orange-600 dark:text-orange-400">
                       <span class="text-xs font-medium mr-2">{{ 'productos.approach.personalization.click_more' | i18nTranslate }}</span>
@@ -641,7 +641,8 @@ export class ProductosComponent implements AfterViewInit {
   constructor(
     private readonly animationService: AnimationService,
     @Inject(PLATFORM_ID) private readonly platformId: object,
-    public readonly i18n: I18nService
+    public readonly i18n: I18nService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   // Eliminado fallback propio: el template usa i18nTranslate
@@ -668,6 +669,9 @@ export class ProductosComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Asegurar que el diccionario actual esté cargado cuando se entra a Productos
+    // y forzar detección de cambios para reflejar el idioma activo
+    void this.initializeI18n();
     const w = (globalThis as any);
     const anime = w && w.anime ? w.anime : null;
     if (anime) {
@@ -689,5 +693,14 @@ export class ProductosComponent implements AfterViewInit {
       // Fallback suave si anime.js no está disponible
       this.animationService.fadeInScale('.balance', 500);
     }
+  }
+
+  private async initializeI18n(): Promise<void> {
+    try {
+      const lang = this.i18n.currentLang();
+      await this.i18n.ensureLoaded(lang, true);
+      await this.i18n.setLang(lang);
+      this.cdr.detectChanges();
+    } catch {}
   }
 }

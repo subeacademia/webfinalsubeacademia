@@ -17,6 +17,8 @@ export const languageGuard: CanMatchFn = (
     return false;
   }
   // Establecer idioma al entrar en una sección con :lang
+  // Forzar recarga del diccionario para evitar caché obsoleto
+  void i18n.ensureLoaded(first as 'es' | 'en' | 'pt', true);
   void i18n.setLang(first as 'es' | 'en' | 'pt');
   return true;
 };

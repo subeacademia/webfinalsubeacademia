@@ -184,13 +184,14 @@ export class FlagSelectorComponent {
     return classes.join(' ');
   }
   
-  selectLanguage(langCode: 'es' | 'en' | 'pt'): void {
+  async selectLanguage(langCode: 'es' | 'en' | 'pt'): Promise<void> {
     if (langCode === this.currentLanguage()) {
       return; // Ya está seleccionado
     }
     
     // Cambiar idioma en el servicio
-    this.i18nService.setLang(langCode);
+    await this.i18nService.ensureLoaded(langCode, true);
+    await this.i18nService.setLang(langCode);
     
     // Actualizar la URL
     this.updateRoute(langCode);

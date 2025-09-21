@@ -446,6 +446,108 @@
         "description": "Adaptamos cada experiencia de aprendizaje a tu estilo cognitivo único, utilizando principios de la ciencia del aprendizaje.",
         "details": "Metodología basada en investigación del MIT",
         "click_more": "Clic para más detalles"
+      },
+      "experience": {
+        "title": "Experiencia Práctica",
+        "subtitle": "Acelerada",
+        "description": "Te enfrentarás a desafíos empresariales reales y complejos desde el primer día. Aquí no hay espacio para la teoría abstracta.",
+        "detail_label": "Proyectos reales:",
+        "detail_text": "Cada módulo culmina en un proyecto tangible que simula entornos profesionales reales."
+      },
+      "quality": {
+        "title": "Calidad Premium",
+        "subtitle": "y Vanguardia",
+        "description": "Accede a contenido de élite, desarrollado por un equipo senior con experiencia probada en transformación digital.",
+        "detail_label": "Conocimiento validado:",
+        "detail_text": "Contenido actualizado en tiempo real, probado en proyectos de alto impacto empresarial."
+      }
+    },
+    "lists": {
+      "asesorias": {
+        "title": "Asesorías en IA",
+        "subtitle": "Consultoría personalizada para implementar soluciones de Inteligencia Artificial en tu empresa. Nuestros expertos te guiarán en cada paso del proceso.",
+        "filters": {
+          "search_placeholder": "Buscar por título o descripción",
+          "all_categories": "Todas las categorías",
+          "any_price": "Cualquier precio",
+          "lt500": "Menos de €500",
+          "500-1500": "€500 - €1500",
+          "gt1500": "Más de €1500"
+        },
+        "loading": "Cargando asesorías...",
+        "cta_view_details": "Ver Detalles",
+        "empty": {
+          "coming_soon": "🚧 Próximamente...",
+          "p1": "Estamos preparando nuestra sección de asesorías personalizadas en Inteligencia Artificial.",
+          "p2": "Muy pronto podrás acceder a consultoría especializada para implementar IA en tu empresa."
+        }
+      },
+      "cursos": {
+        "title": "Cursos en IA",
+        "subtitle": "Formación especializada en Inteligencia Artificial con metodología práctica y casos reales. Aprende de expertos y desarrolla proyectos que marquen la diferencia.",
+        "filters": {
+          "search_placeholder": "Buscar por título o descripción",
+          "all_levels": "Todos los niveles",
+          "any_price": "Cualquier precio",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Más de €600"
+        },
+        "loading": "Cargando cursos...",
+        "labels": {
+          "duration": "Duración:",
+          "level": "Nivel:",
+          "instructor": "Instructor:"
+        },
+        "cta_view_details": "Ver Detalles",
+        "empty": {
+          "coming_soon": "🚧 Próximamente...",
+          "p1": "Estamos preparando nuestra sección de cursos en Inteligencia Artificial.",
+          "p2": "Muy pronto podrás acceder a formación especializada con metodología práctica."
+        }
+      },
+      "certificaciones": {
+        "title": "Certificaciones en IA",
+        "subtitle": "Certificaciones oficiales reconocidas por la industria en tecnologías de Inteligencia Artificial. Valida tus conocimientos y mejora tu perfil profesional.",
+        "filters": {
+          "search_placeholder": "Buscar por título o descripción",
+          "all_levels": "Todos los niveles",
+          "any_price": "Cualquier precio",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Más de €600"
+        },
+        "loading": "Cargando certificaciones...",
+        "labels": {
+          "entity": "Entidad:",
+          "level": "Nivel:"
+        },
+        "validator": {
+          "placeholder": "Pega tu código de certificado",
+          "btn": "Validar certificado"
+        },
+        "cta_view_details": "Ver Detalles",
+        "empty": {
+          "coming_soon": "🚧 Próximamente...",
+          "p1": "Estamos preparando nuestra sección de certificaciones en Inteligencia Artificial.",
+          "p2": "Muy pronto podrás acceder a certificaciones oficiales reconocidas por la industria."
+        }
+      },
+      "common": {
+        "price_symbol": "€",
+        "btn_back_to_products": "Volver a Productos",
+        "loading_product": "Cargando producto...",
+        "learn_title": "Qué aprenderás",
+        "buy_now": "Comprar Ahora",
+        "modal": {
+          "title": "Pago próximamente",
+          "desc": "Muy pronto podrás completar tu compra desde aquí.",
+          "close": "Cerrar"
+        },
+        "errors": {
+          "not_found": "Producto no encontrado.",
+          "load_error": "Error al cargar el producto."
+        }
       }
     }
   },

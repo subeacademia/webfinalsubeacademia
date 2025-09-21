@@ -384,54 +384,130 @@
     "security_unique": "Unique Certificate Code"
   },
   "productos": {
-    "badge": "Revolutionary Methodology",
-    "title": "Our Products",
-    "subtitle": "Our services are premium because we fuse mathetics with AI, focusing on how you learn, not just how we teach.",
-    "model_title": "Our model is a perfect balance:",
+    "badge": "Our Products",
+    "title": "Comprehensive AI Solutions",
+    "subtitle": "Discover our complete catalog of products designed to accelerate your digital transformation with Artificial Intelligence",
+    "model_title": "50/50 Model: The Perfect Formula",
     "standard_content": "Standard Content",
     "total_personalization": "Total Personalization",
-    "competitive_formula": "It's the formula that the competition cannot replicate",
+    "competitive_formula": "The formula that makes us unique in the AI education market",
     "categories": {
-      "consulting": {
-        "title": "Consulting",
-        "description": "Personalized consulting to implement AI in your company",
-        "btn": "View Consulting"
-      },
-      "courses": {
-        "title": "Courses",
-        "description": "Specialized training in Artificial Intelligence",
-        "btn": "View Courses"
-      },
-      "certifications": {
-        "title": "Certifications",
-        "description": "Official certifications in AI technologies",
-        "btn": "View Certifications"
-      }
+      "consulting": { "title": "Consulting", "description": "Specialized AI consulting for companies looking to implement intelligent solutions strategically and efficiently.", "btn": "View Consulting" },
+      "courses": { "title": "Courses", "description": "Practical and applied training in Artificial Intelligence, designed for professionals who want to master future technologies.", "btn": "View Courses" },
+      "certifications": { "title": "Certifications", "description": "Professional AI certifications that validate your knowledge and position you as an expert in the job market.", "btn": "View Certifications" }
     },
     "approach": {
-      "badge": "Differentiating Methodology",
-      "title": "The Sube-Academia Approach",
-      "subtitle": "Our unique methodology combines the best of personalized education with cutting-edge technology",
+      "badge": "Our Approach",
+      "title": "The Methodology",
+      "subtitle": "We combine academic rigor with practical experience to offer you the most complete and effective training on the market",
       "personalization": {
         "title": "Mathetic Personalization",
-        "subtitle": "Mathetics",
-        "description": "We leave behind traditional didactics. We create a unique learning path for you, optimizing how you learn and apply knowledge.",
-        "details": "Revolutionary 50/50 model: Combines standard knowledge with content totally adapted to your goals and real context.",
-        "click_more": "Click to learn more"
+        "subtitle": "Academic and Technical Foundations",
+        "description": "We adapt each learning experience to your unique cognitive style, using principles from learning science.",
+        "details": "Methodology based on MIT research",
+        "click_more": "Click for more details"
       },
       "experience": {
-        "title": "Practical Experience",
+        "title": "Hands-on Experience",
         "subtitle": "Accelerated",
-        "description": "You will face real and complex business challenges from day one. There is no room for abstract theory here.",
-        "details": "Real projects: Each module culminates in a tangible project that simulates real professional environments.",
-        "click_more": "Click to learn more"
+        "description": "You will face real and complex business challenges from day one. There's no room for abstract theory here.",
+        "detail_label": "Real projects:",
+        "detail_text": "Each module culminates in a tangible project that simulates real professional environments."
       },
       "quality": {
         "title": "Premium Quality",
         "subtitle": "and Cutting-edge",
         "description": "Access elite content, developed by a senior team with proven experience in digital transformation.",
-        "details": "Validated knowledge: Content updated in real-time, tested in high-impact business projects.",
-        "click_more": "Click to learn more"
+        "detail_label": "Validated knowledge:",
+        "detail_text": "Content updated in real time, tested in high-impact business projects."
+      }
+    },
+    "lists": {
+      "asesorias": {
+        "title": "AI Consulting",
+        "subtitle": "Personalized consulting to implement Artificial Intelligence solutions in your company. Our experts will guide you every step of the way.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_categories": "All categories",
+          "any_price": "Any price",
+          "lt500": "Under €500",
+          "500-1500": "€500 - €1500",
+          "gt1500": "Over €1500"
+        },
+        "loading": "Loading consulting...",
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our section of personalized AI consulting.",
+          "p2": "Soon you will be able to access specialized consulting to implement AI in your company."
+        }
+      },
+      "cursos": {
+        "title": "AI Courses",
+        "subtitle": "Specialized training in Artificial Intelligence with practical methodology and real-world cases. Learn from experts and develop projects that make a difference.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_levels": "All levels",
+          "any_price": "Any price",
+          "lt200": "Under €200",
+          "200-600": "€200 - €600",
+          "gt600": "Over €600"
+        },
+        "loading": "Loading courses...",
+        "labels": {
+          "duration": "Duration:",
+          "level": "Level:",
+          "instructor": "Instructor:"
+        },
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our Artificial Intelligence courses section.",
+          "p2": "Soon you will be able to access specialized training with a practical methodology."
+        }
+      },
+      "certificaciones": {
+        "title": "AI Certifications",
+        "subtitle": "Official certifications recognized by the industry in Artificial Intelligence technologies. Validate your knowledge and improve your professional profile.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_levels": "All levels",
+          "any_price": "Any price",
+          "lt200": "Under €200",
+          "200-600": "€200 - €600",
+          "gt600": "Over €600"
+        },
+        "loading": "Loading certifications...",
+        "labels": {
+          "entity": "Entity:",
+          "level": "Level:"
+        },
+        "validator": {
+          "placeholder": "Paste your certificate code",
+          "btn": "Validate certificate"
+        },
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our Artificial Intelligence certifications section.",
+          "p2": "Soon you will be able to access official certifications recognized by the industry."
+        }
+      },
+      "common": {
+        "price_symbol": "€",
+        "btn_back_to_products": "Back to Products",
+        "loading_product": "Loading product...",
+        "learn_title": "What you will learn",
+        "buy_now": "Buy Now",
+        "modal": {
+          "title": "Payment coming soon",
+          "desc": "Very soon you will be able to complete your purchase from here.",
+          "close": "Close"
+        },
+        "errors": {
+          "not_found": "Product not found.",
+          "load_error": "Error loading product."
+        }
       }
     }
   },
