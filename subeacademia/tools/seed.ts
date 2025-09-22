@@ -57,6 +57,30 @@ async function main() {
     if (exists.empty) await db.collection('collaborators').add(c);
   }
   console.log('Seed colaboradores listo');
+
+  // Seed de logos (idempotente por name y type)
+  const logos = [
+    // Empresas
+    { name: 'BCI', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/logos%2Flogo_bci.svg?alt=media', type: 'Empresa', createdAt: now },
+    { name: 'Banco Santander', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fsantander.png?alt=media', type: 'Empresa', createdAt: now },
+    { name: 'Falabella', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Ffalabella.png?alt=media', type: 'Empresa', createdAt: now },
+    { name: 'Ripley', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fripley.png?alt=media', type: 'Empresa', createdAt: now },
+    { name: 'Microsoft', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fmicrosoft.png?alt=media', type: 'Empresa', createdAt: now },
+    { name: 'Google', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fgoogle.png?alt=media', type: 'Empresa', createdAt: now },
+    
+    // Instituciones Educativas
+    { name: 'Universidad de Chile', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fuchile.png?alt=media', type: 'Institución Educativa', createdAt: now },
+    { name: 'Pontificia Universidad Católica', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fpuc.png?alt=media', type: 'Institución Educativa', createdAt: now },
+    { name: 'Universidad de Santiago', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fusach.png?alt=media', type: 'Institución Educativa', createdAt: now },
+    { name: 'Universidad Técnica Federico Santa María', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Futfsm.png?alt=media', type: 'Institución Educativa', createdAt: now },
+    { name: 'Universidad de Concepción', imageUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.appspot.com/o/public%2Flogos%2Fudec.png?alt=media', type: 'Institución Educativa', createdAt: now },
+  ];
+
+  for (const logo of logos) {
+    const exists = await db.collection('logos').where('name','==',logo.name).where('type','==',logo.type).limit(1).get();
+    if (exists.empty) await db.collection('logos').add(logo);
+  }
+  console.log('Seed logos listo');
 }
 
 main().catch((e) => {

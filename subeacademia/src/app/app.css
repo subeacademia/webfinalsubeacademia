@@ -3,48 +3,51 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Variables CSS para el tema */
+/* Variables CSS para el tema - SINCRONIZADAS CON STYLES.CSS */
 :root {
-  /* Paleta semántica base (modo claro) */
+  /* Paleta semántica base (modo claro) - MEJORADO CONTRASTE */
   --bg: #ffffff;
-  --fg: #0f172a; /* slate-900 */
-  --muted: #64748b; /* slate-500 */
-  --card: #ffffff;
-  --panel: #f8fafc; /* slate-50 */
-  --border: #e2e8f0; /* slate-200 */
+  --fg: #1a202c; /* Más oscuro para mejor legibilidad */
+  --muted: #4a5568; /* Más oscuro que antes */
+  --card: #f7fafc;
+  --panel: #ffffff;
+  --border: #cbd5e0; /* Borde más visible */
 
-  /* Primarios/Accentos */
-  --primary: #3b82f6; /* primary-500 */
+  /* Primarios/Accentos mejorados */
+  --primary: #2b6cb0; /* Azul más oscuro para mejor contraste */
   --primary-contrast: #ffffff;
-  --accent: #6366f1;
+  --accent: #2b6cb0;
 
-  /* Utilidades existentes */
-  --color-primary: #6366f1;
-  --color-primary-light: rgba(99, 102, 241, 0.1);
-  --color-primary-light-dark: rgba(99, 102, 241, 0.2);
-  --color-accent: #6366f1;
-  --color-accent-light: rgba(99, 102, 241, 0.15);
-  --color-accent-light-dark: rgba(99, 102, 241, 0.25);
+  /* Utilidades existentes actualizadas */
+  --color-primary: #2b6cb0;
+  --color-primary-light: rgba(43, 108, 176, 0.1);
+  --color-primary-light-dark: rgba(43, 108, 176, 0.2);
+  --color-accent: #2b6cb0;
+  --color-accent-light: rgba(43, 108, 176, 0.15);
+  --color-accent-light-dark: rgba(43, 108, 176, 0.25);
 }
 
 .dark {
-  /* Paleta semántica base (modo oscuro) */
-  --bg: #0b1220;
-  --fg: #e8eef7;
-  --muted: #a6b0c3;
-  --card: #121a2a;
-  --panel: #0f172a; /* slate-900 aprox */
-  --border: #1f2937; /* slate-800 aprox */
+  /* Paleta semántica base (modo oscuro) - MEJORADO CONTRASTE */
+  --bg: #0f172a; /* Fondo principal más suave */
+  --fg: #f8fafc; /* Texto principal más claro */
+  --muted: #cbd5e0; /* Texto secundario más legible */
+  --card: #1e293b;
+  --panel: #0f172a;
+  --border: #475569; /* Borde más visible */
 
-  /* Primarios/Accentos */
-  --primary: #60a5fa; /* primary-400 para mejor contraste en dark */
-  --primary-contrast: #0b1220;
+  /* Primarios/Accentos optimizados para oscuro */
+  --primary: #60a5fa; /* Azul más claro para mejor contraste */
+  --primary-contrast: #0f172a;
+  --accent: #60a5fa;
 
-  /* Utilidades existentes */
-  --color-primary-light: rgba(99, 102, 241, 0.2);
-  --color-primary-light-dark: rgba(99, 102, 241, 0.3);
-  --color-accent-light: rgba(99, 102, 241, 0.25);
-  --color-accent-light-dark: rgba(99, 102, 241, 0.35);
+  /* Utilidades existentes actualizadas */
+  --color-primary: #60a5fa;
+  --color-primary-light: rgba(96, 165, 250, 0.2);
+  --color-primary-light-dark: rgba(96, 165, 250, 0.3);
+  --color-accent: #60a5fa;
+  --color-accent-light: rgba(96, 165, 250, 0.25);
+  --color-accent-light-dark: rgba(96, 165, 250, 0.35);
 }
 
 /* Estilos mínimos para el diagnóstico - Presupuesto 16KB */

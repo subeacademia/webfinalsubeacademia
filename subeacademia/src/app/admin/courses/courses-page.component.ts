@@ -3,7 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
 import { CoursesService } from '../../core/data/courses.service';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 
 @Component({
   standalone: true,

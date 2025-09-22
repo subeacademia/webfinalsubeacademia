@@ -3,6 +3,11 @@
     "hero": {
       "title": "Capacite seu Talento na Era da Inteligência Artificial",
       "subtitle": "Desenvolvemos as 13 competências essenciais que empresas e profissionais precisam para liderar a transformação digital. Aprenda com nossa metodologia única de IA adaptativa: Ágil, Responsável, Ética e Sustentável.",
+    "typewriter_phrases": [
+      "Implemente IA de forma Ágil, Responsável e Sustentável com nosso Framework ARES-AI©.",
+      "Desenvolva as 13 competências-chave que sua equipe precisa para liderar a transformação digital.",
+      "Transforme sua organização com nossa plataforma de aprendizagem adaptativa AVE-AI."
+    ],
       "cta": "Descubra seu Potencial",
       "secondaryLink": "Explore Nossos Cursos"
     },
@@ -31,6 +36,12 @@
       "title": "Pronto para Liderar a Transformação?",
       "subtitle": "Vamos conversar sobre como podemos capacitar sua equipe e preparar sua organização para o futuro da IA.",
       "button": "Contatar um Consultor"
+    },
+    "methodology": {
+      "cta_ready": "Pronto para transformar sua organização com nosso framework ARES-AI comprovado?",
+      "btn_start_diagnostic": "Começar Diagnóstico Gratuito",
+      "btn_view_methodology": "Ver Metodologia Completa",
+      "additional_text": "Conheça em detalhes cada fase, ferramentas e melhores práticas de implementação"
     }
   },
   "hero": {
@@ -115,6 +126,7 @@
       "vision_title": "Nossa visão",
       "vision_desc": "Democratizar o conhecimento sobre IA para transformar a sociedade, oferecendo ferramentas concretas que permitam às pessoas se reinventarem e fazerem o que realmente amam.",
       "values_title": "Nossos valores",
+      "values_desc": "Excelência, Inovação Constante, Integridade e um Compromisso real com o sucesso de cada um de nossos estudantes e parceiros.",
       "values": {
         "v1": "Impacto mensurável e sustentável",
         "v2": "Ética, segurança e privacidade por design",
@@ -162,6 +174,58 @@
       "c12_desc": "Atualizar habilidades e frameworks de trabalho. Criar hábitos de melhoria e portfólios de evidências.",
       "c13_title": "Liderança com IA",
       "c13_desc": "Guiar equipes e estratégias com visão e governança. Priorizar iniciativas, KPIs e adoção responsável em escala."
+    },
+    "phases": {
+      "1": {
+        "shortTitle": "Análise e Avaliação",
+        "title": "Análise e Avaliação Inicial",
+        "description": "Avaliamos o estado atual de sua organização em IA, identificando forças, fraquezas e oportunidades de melhoria.",
+        "deliverables": {
+          "0": "Diagnóstico completo de maturidade em IA",
+          "1": "Análise de capacidades atuais",
+          "2": "Identificação de lacunas e oportunidades"
+        }
+      },
+      "2": {
+        "shortTitle": "Estratégia e Planejamento",
+        "title": "Estratégia e Planejamento Estratégico",
+        "description": "Desenvolvemos seu roteiro personalizado para adoção de IA, definindo objetivos, recursos e cronogramas.",
+        "deliverables": {
+          "0": "Plano estratégico de IA personalizado",
+          "1": "Definição de objetivos e KPIs",
+          "2": "Cronograma de implementação detalhado"
+        }
+      },
+      "3": {
+        "shortTitle": "Implementação e Desenvolvimento",
+        "title": "Implementação e Desenvolvimento de Soluções",
+        "description": "Colocamos sua estratégia em prática com soluções de IA personalizadas, integração completa e suporte contínuo.",
+        "deliverables": {
+          "0": "Soluções de IA implementadas",
+          "1": "Integração com sistemas existentes",
+          "2": "Treinamento da equipe técnica"
+        }
+      },
+      "4": {
+        "shortTitle": "Implantação e Monitoramento",
+        "title": "Implantação e Monitoramento Contínuo",
+        "description": "Implementamos sistemas de monitoramento e controle para garantir o desempenho ideal das soluções de IA.",
+        "deliverables": {
+          "0": "Sistema de monitoramento implementado",
+          "1": "Painéis de desempenho",
+          "2": "Protocolos de manutenção"
+        }
+      },
+      "5": {
+        "shortTitle": "Otimização e Escalabilidade",
+        "title": "Otimização e Escalabilidade",
+        "description": "Otimizamos continuamente as soluções e preparamos sua organização para escalar a adoção de IA.",
+        "deliverables": {
+          "0": "Otimização de desempenho",
+          "1": "Plano de escalabilidade",
+          "2": "Estratégia de crescimento contínuo"
+        }
+      }
     }
   },
   "course": {
@@ -172,5 +236,375 @@
     "lessons": "Lições",
     "level": "Nível",
     "enroll_button": "Inscreva-se Agora"
+  },
+  "diagnostico": {
+    "title": "Diagnóstico de Maturidade ARES-AI",
+    "subtitle": "Avalie a maturidade em Inteligência Artificial e obtenha um plano personalizado para acelerar sua transformação digital",
+    "estimated_time": "Tempo estimado: 15-20 minutos",
+    "select_type": "Como você gostaria de realizar seu diagnóstico?",
+    "company_option": "Como Empresa",
+    "company_description": "Avalie a maturidade de sua organização em IA. Inclui análise de competências, processos, cultura e estratégia organizacional.",
+    "company_button": "Realizar diagnóstico como empresa",
+    "person_option": "Como Pessoa",
+    "person_description": "Avalie suas competências pessoais em IA. Adaptado para crianças (8-17) e adultos (18+). Inclui recomendações educacionais personalizadas.",
+    "person_button": "Realizar diagnóstico como pessoa",
+    "privacy_notice": "Sua informação está segura e é usada apenas para gerar seu diagnóstico personalizado",
+    "segmento": {
+      "title": "Selecione seu segmento",
+      "empresa": "Empresa / Organização",
+      "educacion_superior": "Ensino Superior",
+      "educacion_escolar": "Educação Escolar (Fundamental/Médio)",
+      "profesional_independiente": "Profissional Independente"
+    },
+    "contexto": {
+      "title": "Contexto da sua organização",
+      "startup": {
+        "industria": "Indústria",
+        "tamanoEquipo": "Tamanho da equipe",
+        "antiguedadMeses": "Idade (meses)",
+        "modeloNegocio": "Modelo de negócio"
+      },
+      "pyme": {
+        "industria": "Indústria",
+        "tamanoEmpresa": "Tamanho da empresa",
+        "facturacionAnual": "Faturamento anual (USD)",
+        "zonaOperacion": "Área de operação"
+      },
+      "corporativo": {
+        "industria": "Indústria",
+        "numEmpleados": "Número de funcionários",
+        "presupuestoInnovacion": "Orçamento anual de inovação (USD)",
+        "presenciaRegional": "Presença regional/internacional?"
+      }
+    },
+    "objetivo": {
+      "title": "Objetivo estratégico principal",
+      "eficiencia": "Eficiência operacional",
+      "crecimiento": "Crescimento",
+      "innovacion": "Inovação",
+      "experienciaCliente": "Experiência do cliente"
+    },
+    "ares": {
+      "title": "Avaliação ARES-AI",
+      "likert": {
+        "0": "N/A",
+        "1": "Muito baixo",
+        "2": "Baixo",
+        "3": "Médio",
+        "4": "Alto",
+        "5": "Muito alto"
+      },
+      "items": {
+        "adopcion_01": "Nível de adoção de ferramentas de IA em processos-chave",
+        "adopcion_02": "Existência de estratégia e roadmap de adoção de IA",
+        "riesgos_01": "Identificação e gestão de riscos de IA",
+        "etica_01": "Práticas de ética e vieses em IA",
+        "seguridad_01": "Controles de segurança e privacidade por design",
+        "capacidad_01": "Capacidades internas para operar IA",
+        "datos_01": "Qualidade e disponibilidade de dados",
+        "gobernanza_01": "Governança e papéis ARES",
+        "valor_01": "Métricas de valor de iniciativas IA",
+        "operacion_01": "Operação e monitoramento de modelos",
+        "talento_01": "Atração e desenvolvimento de talentos IA",
+        "tecnologia_01": "Arquitetura e ferramentas tecnológicas",
+        "integracion_01": "Integração de IA em sistemas e processos",
+        "cumplimiento_01": "Conformidade regulatória aplicável",
+        "transparencia_01": "Transparência e explicabilidade",
+        "sostenibilidad_01": "Sustentabilidade e eficiência de recursos"
+      },
+      "desc": {
+        "adopcion_01": "Avalia quanto se usa soluções de IA em processos críticos do negócio (não apenas testes isolados).",
+        "adopcion_02": "Avalia se existe um plano/roadmap com priorização e marcos para implantação de IA.",
+        "riesgos_01": "Avalia se são identificados, mitigados e monitorados riscos associados à IA.",
+        "etica_01": "Avalia se existem práticas para evitar vieses, danos e uso responsável.",
+        "seguridad_01": "Avalia privacidade por design, controles de acesso e proteção de dados.",
+        "capacidad_01": "Avalia a preparação da equipe para operar e manter soluções IA.",
+        "datos_01": "Avalia a qualidade, governança e acesso aos dados necessários para IA.",
+        "gobernanza_01": "Avalia se existem papéis, políticas e comitês que orientem IA.",
+        "valor_01": "Avalia se são definidos KPIs de valor e se são medidos resultados.",
+        "operacion_01": "Avalia o monitoramento, retreinamento e observabilidade de modelos.",
+        "talento_01": "Avalia a disponibilidade de talentos e planos de capacitação.",
+        "tecnologia_01": "Avalia a adequação da plataforma, ferramentas e MLOps.",
+        "integracion_01": "Avalia quão bem se integram as soluções IA ao stack e processos.",
+        "cumplimiento_01": "Avalia o cumprimento de normas e padrões relevantes.",
+        "transparencia_01": "Avalia a explicabilidade e rastreabilidade em decisões de IA.",
+        "sostenibilidad_01": "Avalia o uso eficiente de recursos e o impacto ambiental."
+      }
+    },
+    "competencias": {
+      "title": "Autoavaliação de competências",
+      "nivel": {
+        "incipiente": "Incipiente",
+        "basico": "Básico",
+        "intermedio": "Intermediário",
+        "avanzado": "Avançado",
+        "lider": "Líder"
+      }
+    },
+    "lead": {
+      "title": "Deixe seus dados para receber o relatório",
+      "nombre": "Nome",
+      "email": "Endereço de email",
+      "telefono": "Telefone",
+      "aceptaComunicaciones": "Aceito receber comunicações da Sube Academ-IA"
+    },
+    "resumen": {
+      "title": "Resumo do diagnóstico",
+      "descripcion": "Revise suas respostas antes de continuar."
+    }
+  },
+  "shared": {
+    "deliverables": "Entregáveis"
+  },
+  "trust": {
+    "title": "Eles confiaram em nós",
+    "companies": "Empresas que já Confiam em Nós",
+    "education": "Instituições Educacionais",
+    "alliances": "Alianças Estratégicas",
+    "final_cta": "Junte-se às empresas que já estão transformando seu futuro com IA"
+  },
+  "produtos": {
+    "badge": "Nossos Produtos",
+    "title": "Soluções Abrangentes de IA",
+    "subtitle": "Descubra nosso catálogo completo de produtos projetados para acelerar sua transformação digital com Inteligência Artificial",
+    "model_title": "Modelo 50/50: A Fórmula Perfeita",
+    "standard_content": "Conteúdo Padrão",
+    "total_personalization": "Personalização Total",
+    "competitive_formula": "A fórmula que nos torna únicos no mercado de educação em IA",
+    "categories": {
+      "consulting": { "title": "Consultoria", "description": "Consultoria especializada em IA para empresas que buscam implementar soluções inteligentes de forma estratégica e eficiente.", "btn": "Ver Consultoria" },
+      "courses": { "title": "Cursos", "description": "Formação prática e aplicada em Inteligência Artificial, projetada para profissionais que desejam dominar as tecnologias do futuro.", "btn": "Ver Cursos" },
+      "certifications": { "title": "Certificações", "description": "Certificações profissionais em IA que validam seu conhecimento e o posicionam como especialista no mercado de trabalho.", "btn": "Ver Certificações" }
+    },
+    "approach": {
+      "badge": "Nossa Abordagem",
+      "title": "A Metodologia",
+      "subtitle": "Combinamos rigor acadêmico com experiência prática para oferecer o treinamento mais completo e eficaz do mercado",
+      "personalization": {
+        "title": "Personalização Matética",
+        "subtitle": "Fundamentos Acadêmicos e Técnicos",
+        "description": "Adaptamos cada experiência de aprendizagem ao seu estilo cognitivo único, usando princípios da ciência da aprendizagem.",
+        "details": "Metodologia baseada em pesquisa do MIT",
+        "click_more": "Clique para mais detalhes"
+      },
+      "experience": {
+        "title": "Experiência Prática",
+        "subtitle": "Acelerada",
+        "description": "Você enfrentará desafios empresariais reais e complexos desde o primeiro dia. Aqui não há espaço para teoria abstrata.",
+        "detail_label": "Projetos reais:",
+        "detail_text": "Cada módulo culmina em um projeto tangível que simula ambientes profissionais reais."
+      },
+      "quality": {
+        "title": "Qualidade Premium",
+        "subtitle": "e Vanguarda",
+        "description": "Acesse conteúdo de elite, desenvolvido por uma equipe sênior com experiência comprovada em transformação digital.",
+        "detail_label": "Conhecimento validado:",
+        "detail_text": "Conteúdo atualizado em tempo real, testado em projetos empresariais de alto impacto."
+      }
+    },
+    "lists": {
+      "asesorias": {
+        "title": "Consultoria em IA",
+        "subtitle": "Consultoria personalizada para implementar soluções de Inteligência Artificial na sua empresa. Nossos especialistas o guiarão em cada etapa do processo.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_categories": "Todas as categorias",
+          "any_price": "Qualquer preço",
+          "lt500": "Menos de €500",
+          "500-1500": "€500 - €1500",
+          "gt1500": "Mais de €1500"
+        },
+        "loading": "Carregando consultorias...",
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de consultorias personalizadas em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar consultoria especializada para implementar IA na sua empresa."
+        }
+      },
+      "cursos": {
+        "title": "Cursos de IA",
+        "subtitle": "Formação especializada em Inteligência Artificial com metodologia prática e casos reais. Aprenda com especialistas e desenvolva projetos que façam a diferença.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_levels": "Todos os níveis",
+          "any_price": "Qualquer preço",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Mais de €600"
+        },
+        "loading": "Carregando cursos...",
+        "labels": {
+          "duration": "Duração:",
+          "level": "Nível:",
+          "instructor": "Instrutor:"
+        },
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de cursos em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar formação especializada com metodologia prática."
+        }
+      },
+      "certificaciones": {
+        "title": "Certificações em IA",
+        "subtitle": "Certificações oficiais reconhecidas pela indústria em tecnologias de Inteligência Artificial. Valide seus conhecimentos e melhore seu perfil profissional.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_levels": "Todos os níveis",
+          "any_price": "Qualquer preço",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Mais de €600"
+        },
+        "loading": "Carregando certificações...",
+        "labels": {
+          "entity": "Entidade:",
+          "level": "Nível:"
+        },
+        "validator": {
+          "placeholder": "Cole seu código de certificado",
+          "btn": "Validar certificado"
+        },
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de certificações em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar certificações oficiais reconhecidas pela indústria."
+        }
+      },
+      "common": {
+        "price_symbol": "€",
+        "btn_back_to_products": "Voltar a Produtos",
+        "loading_product": "Carregando produto...",
+        "learn_title": "O que você aprenderá",
+        "buy_now": "Comprar Agora",
+        "modal": {
+          "title": "Pagamento em breve",
+          "desc": "Muito em breve você poderá concluir sua compra por aqui.",
+          "close": "Fechar"
+        },
+        "errors": {
+          "not_found": "Produto não encontrado.",
+          "load_error": "Erro ao carregar o produto."
+        }
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "posts": "Publicações",
+      "productos": "Produtos",
+      "projects": "Projetos",
+      "certificados": "Certificados",
+      "media": "Mídia",
+      "logos": "Logos",
+      "history": "História",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuários",
+      "settings": "Configurações",
+      "logout": "Sair"
+    },
+    "produtos": {
+      "dashboard": {
+        "title": "Painel de Produtos",
+        "download_structure": "Baixar Estrutura JSON",
+        "bulk_upload": "Upload em Massa JSON",
+        "manage_asesorias": "Gerenciar Consultoria",
+        "manage_cursos": "Gerenciar Cursos",
+        "manage_certificaciones": "Gerenciar Certificações",
+        "total_asesorias": "Total Consultoria",
+        "total_cursos": "Total Cursos",
+        "total_certificaciones": "Total Certificações",
+        "active": "ativas",
+        "recent_products": "Produtos Recentes",
+        "recent_asesorias": "Consultorias Recentes",
+        "recent_cursos": "Cursos Recentes",
+        "recent_certificaciones": "Certificações Recentes",
+        "no_products": "Nenhum produto criado ainda.",
+        "status_active": "Ativo",
+        "status_inactive": "Inativo"
+      },
+      "bulk_upload": {
+        "title": "Upload em Massa de Produtos JSON",
+        "select_file": "Selecionar arquivo JSON:",
+        "file_selected": "Arquivo selecionado:",
+        "size": "Tamanho:",
+        "progress": "Progresso do upload",
+        "expected_format": "Formato JSON Esperado:",
+        "cancel": "Cancelar",
+        "process_file": "Processar Arquivo",
+        "processing": "Processando..."
+      }
+    }
+  },
+  "navigation": {
+    "home": "Início",
+    "produtos": "Produtos",
+    "nosotros": "Sobre Nós",
+    "metodologia": "Metodologia",
+    "blog": "Blog",
+    "contacto": "Contato",
+    "admin": "Admin",
+    "menu": "Menu",
+    "login_google": "Entrar com Google",
+    "dashboard": "Painel",
+    "logout": "Sair",
+    "privacy_policy": "Política de Privacidade"
+  },
+  "diagnostic": {
+    "company": {
+      "title": "Diagnóstico de Maturidade em IA - Empresa",
+      "subtitle": "Avalie o nível de maturidade da sua organização em Inteligência Artificial e obtenha um plano personalizado",
+      "steps": {
+        "profile": "1. Perfil",
+        "ares": "2. ARES-AI",
+        "competencies": "3. Competências",
+        "objectives": "4. Objetivos",
+        "finish": "5. Finalizar",
+        "results": "Resultados"
+      },
+      "progress": {
+        "completed": "completado",
+        "answered": "respondidas",
+        "total": "total"
+      },
+      "messages": {
+        "completed": "Diagnóstico concluído!",
+        "completed_desc": "Você pode navegar livremente para revisar suas respostas.",
+        "start_new": "Iniciar um novo diagnóstico"
+      },
+      "pages": {
+        "profile_title": "Perfil da Organização",
+        "profile_desc": "Forneça informações básicas sobre sua organização",
+        "ares_title": "Autoavaliação ARES",
+        "ares_desc": "Avalie suas habilidades em Aprendizagem, Resiliência, Ética e Sociabilidade",
+        "competencies_title": "Autoavaliação de Competências",
+        "competencies_desc": "Avalie seu nível nas competências-chave para transformação digital",
+        "objectives_title": "Objetivos Estratégicos",
+        "objectives_desc": "Defina os objetivos estratégicos para sua organização",
+        "finish_title": "Finalizar Diagnóstico",
+        "finish_desc": "Revise e complete seu diagnóstico",
+        "results_title": "Resultados do Diagnóstico",
+        "results_desc": "Explore os resultados e recomendações do seu diagnóstico",
+        "default_title": "Diagnóstico de Maturidade em IA",
+        "default_desc": "Sistema de autoavaliação abrangente"
+      },
+      "loader": {
+        "title": "🤖 Inteligência Artificial",
+        "subtitle": "A IA está analisando suas respostas e criando um relatório personalizado...",
+        "steps": {
+          "diagnostic": "Criando diagnóstico personalizado...",
+          "action_plan": "Projetando plano de ação estratégico...",
+          "recommendations": "Gerando recomendações específicas..."
+        },
+        "estimated_time": "⏱️ Tempo estimado: 30-60 segundos"
+      }
+    },
+    "person": {
+      "title": "Diagnóstico de Maturidade em IA - Pessoa",
+      "subtitle": "Avalie seu nível de competências em Inteligência Artificial e obtenha um plano personalizado"
+    }
   }
 }

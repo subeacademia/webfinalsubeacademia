@@ -1,3 +1,90 @@
+/* ===== DASHBOARD DE MANDO ESTRATÉGICO ===== */
+
+/* CSS Grid Layout para Dashboard de Mando */
+.grid-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-areas:
+    "header header header"
+    "summary summary cta"
+    "ares competency cta"
+    "plan plan plan";
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+/* Estilos para los items del grid */
+.grid-header { 
+  grid-area: header; 
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl p-6 shadow-lg;
+}
+
+.grid-summary { 
+  grid-area: summary; 
+  @apply card-style;
+}
+
+.grid-ares { 
+  grid-area: ares; 
+  @apply card-style;
+}
+
+.grid-competency { 
+  grid-area: competency; 
+  @apply card-style;
+}
+
+.grid-plan { 
+  grid-area: plan; 
+  @apply card-style;
+}
+
+.grid-cta { 
+  grid-area: cta; 
+  @apply h-full;
+}
+
+/* Estilo unificado para tarjetas */
+.card-style {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-style:hover {
+  @apply shadow-xl transform -translate-y-1;
+}
+
+/* Media query para tablets */
+@media (max-width: 1024px) {
+  .grid-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "header header"
+      "summary cta"
+      "ares competency"
+      "plan plan";
+  }
+}
+
+/* Media query para móviles */
+@media (max-width: 768px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "summary"
+      "cta"
+      "competency"
+      "ares"
+      "plan";
+    padding: 1rem;
+    gap: 1rem;
+  }
+}
+
+/* ===== ESTILOS LEGACY (MANTENIDOS PARA COMPATIBILIDAD) ===== */
+
 /* Estilos personalizados para la página de resultados del diagnóstico */
 
 /* Animaciones de entrada */
@@ -391,4 +478,471 @@ section:nth-child(4) { animation-delay: 0.7s; }
   .animate-fade-in-delayed {
     animation: fadeIn 1s ease-out 0.2s both;
   }
+}
+
+/* Estilos específicos para contenido generado por IA */
+.ia-content-section {
+  margin-bottom: 2rem;
+}
+
+/* Estilos para el estado de carga */
+.loading-state {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px dashed #cbd5e1;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.loading-state:hover {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+/* Estilos para el estado de error */
+.error-state {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 2px solid #fca5a5;
+  border-radius: 1rem;
+  padding: 2rem;
+  color: #991b1b;
+}
+
+/* Estilos para el contenido Markdown renderizado */
+.prose {
+  max-width: none;
+  color: inherit;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #1e40af;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.prose h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  border-bottom: 3px solid #3b82f6;
+  padding-bottom: 0.5rem;
+}
+
+.prose h2 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  border-bottom: 2px solid #60a5fa;
+  padding-bottom: 0.25rem;
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  color: #2563eb;
+}
+
+.prose p {
+  margin-bottom: 1.25rem;
+  line-height: 1.75;
+  color: #374151;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.prose strong {
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.prose em {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Estilos para tablas */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.prose th {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border: none;
+}
+
+.prose td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+.prose tr:nth-child(even) td {
+  background: #f9fafb;
+}
+
+.prose tr:hover td {
+  background: #f3f4f6;
+}
+
+/* Estilos para listas */
+.prose ul li::marker {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.prose ol li::marker {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+/* Estilos para enlaces */
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-color: #dbeafe;
+  transition: all 0.2s ease;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+  text-decoration-color: #3b82f6;
+}
+
+/* Estilos para blockquotes */
+.prose blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 2rem 0;
+  font-style: italic;
+  color: #6b7280;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* Estilos para código */
+.prose code {
+  background: #f1f5f9;
+  color: #dc2626;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+}
+
+.prose pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Modo oscuro para el contenido Markdown */
+.dark .prose {
+  color: #e5e7eb;
+}
+
+.dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4, .dark .prose h5, .dark .prose h6 {
+  color: #60a5fa;
+}
+
+.dark .prose p {
+  color: #d1d5db;
+}
+
+.dark .prose strong {
+  color: #f9fafb;
+}
+
+.dark .prose em {
+  color: #9ca3af;
+}
+
+.dark .prose td {
+  background: #374151;
+  border-bottom-color: #4b5563;
+}
+
+.dark .prose tr:nth-child(even) td {
+  background: #4b5563;
+}
+
+.dark .prose tr:hover td {
+  background: #6b7280;
+}
+
+.dark .prose blockquote {
+  background: #374151;
+  color: #9ca3af;
+}
+
+.dark .prose code {
+  background: #1f2937;
+  color: #fca5a5;
+}
+
+.dark .prose pre {
+  background: #111827;
+  color: #d1d5db;
+}
+
+/* Animaciones para el contenido Markdown */
+.prose > * {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.prose > *:nth-child(1) { animation-delay: 0.1s; }
+.prose > *:nth-child(2) { animation-delay: 0.2s; }
+.prose > *:nth-child(3) { animation-delay: 0.3s; }
+.prose > *:nth-child(4) { animation-delay: 0.4s; }
+.prose > *:nth-child(5) { animation-delay: 0.5s; }
+
+/* Estilos para el botón de descarga */
+.download-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+}
+
+.download-btn:active {
+  transform: translateY(0);
+}
+
+.download-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Estilos para la sección de verificación oculta */
+#verification-data {
+  display: none;
+}
+
+/* Estilos para impresión */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .prose {
+    color: black !important;
+  }
+  
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: black !important;
+    border-bottom-color: black !important;
+  }
+  
+  .prose table {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .prose th {
+    background: #f0f0f0 !important;
+    color: black !important;
+  }
+  
+  .prose td {
+    background: white !important;
+    border: 1px solid #ccc;
+  }
+}
+
+/* Estilos adicionales para el contenido generado por IA */
+.ia-content-section {
+  margin-bottom: 2rem;
+}
+
+.ia-content-section .prose {
+  max-width: none;
+  color: inherit;
+}
+
+.ia-content-section .prose h3 {
+  color: #3b82f6;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.ia-content-section .prose h4 {
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.ia-content-section .prose p {
+  margin-bottom: 1rem;
+  line-height: 1.7;
+  color: #374151;
+}
+
+.ia-content-section .prose ul {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.ia-content-section .prose li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.ia-content-section .prose strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.ia-content-section .prose em {
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Estilos mejorados para tablas de Markdown */
+.ia-content-section .prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.ia-content-section .prose th {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+  text-align: left;
+  padding: 1rem;
+  border: none;
+}
+
+.ia-content-section .prose td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+  transition: background-color 0.2s ease;
+}
+
+.ia-content-section .prose tr:hover td {
+  background: #f9fafb;
+}
+
+.ia-content-section .prose tr:last-child td {
+  border-bottom: none;
+}
+
+/* Estilos para el estado de carga */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 1rem;
+  text-align: center;
+  background: #f9fafb;
+}
+
+.loading-state .spinner {
+  width: 4rem;
+  height: 4rem;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos para el estado de error */
+.error-state {
+  padding: 1.5rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #991b1b;
+}
+
+.error-state h3 {
+  color: #dc2626;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos para el contenido de verificación */
+#verification-data {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  padding: 2rem;
+  overflow: auto;
+}
+
+#verification-data:target {
+  display: block;
+}
+
+#verification-data pre {
+  background: #1f2937;
+  color: #d1d5db;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

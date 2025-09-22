@@ -1,127 +1,94 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup } from '@angular/forms';
-import { I18nTranslatePipe } from '../../../../../core/i18n/i18n.pipe';
-import { InfoModalComponent } from '../info-modal/info-modal.component';
-
-export interface Question {
-    id: string;
-    type: 'likert' | 'select' | 'text';
-    label: string;
-    tooltip?: string;
-    controlName: string;
-    options?: any[];
-    required?: boolean;
-}
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { Question, Answer } from '../../../data/diagnostic.models';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-question-card',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, I18nTranslatePipe, InfoModalComponent],
-    template: `
-        <div class="bg-slate-800 rounded-lg p-8 shadow-xl">
-            <!-- Header de la pregunta -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="text-2xl font-semibold text-center flex-1 text-white">
-                    {{ question.label | i18nTranslate }}
-                </div>
-                <button 
-                    *ngIf="question.tooltip"
-                    type="button" 
-                    class="ml-4 p-2 text-blue-400 hover:text-blue-300 rounded-full hover:bg-slate-700 transition-colors duration-200" 
-                    (click)="openInfo(question.tooltip)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </button>
-            </div>
+  selector: 'app-question-card',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  template: `
+    <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-start mb-3">
+        <p class="text-base font-medium text-gray-800 dark:text-gray-100 flex-1">{{ question.text }}</p>
+        @if (question.critical) {
+          <span class="ml-4 px-2 py-1 text-xs font-bold text-red-800 bg-red-200 dark:text-red-200 dark:bg-red-800 rounded-full flex-shrink-0">CRÍTICO</span>
+        }
+      </div>
 
-            <!-- Contenido de la pregunta según el tipo -->
-            <ng-container [ngSwitch]="question.type">
-                
-                <!-- Pregunta Likert -->
-                <div *ngSwitchCase="'likert'" class="space-y-6">
-                    <!-- Escala Likert -->
-                    <div class="flex flex-wrap gap-3 justify-center">
-                        <button 
-                            *ngFor="let value of [0,1,2,3,4,5]" 
-                            class="px-6 py-3 rounded-lg font-medium transition-all duration-200 min-w-[80px] text-lg border-2"
-                            [ngClass]="getLikertButtonClass(value)"
-                            (click)="setLikertValue(value)">
-                            {{ ('diagnostico.ares.likert.' + value) | i18nTranslate }}
-                        </button>
-                    </div>
-
-                    <!-- Etiquetas de la escala -->
-                    <div class="flex justify-between mt-4 text-sm text-gray-400">
-                        <span>Nada</span>
-                        <span>Completamente</span>
-                    </div>
-                </div>
-
-                <!-- Pregunta de selección -->
-                <div *ngSwitchCase="'select'" class="space-y-4">
-                    <select 
-                        class="w-full p-4 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                        [formControlName]="question.controlName">
-                        <option value="" disabled selected class="text-gray-400">
-                            {{ 'Selecciona una opción' | i18nTranslate }}
-                        </option>
-                        <ng-container *ngFor="let group of question.options">
-                            <optgroup [label]="group.category" class="text-gray-300">
-                                <option *ngFor="let option of group.options" [ngValue]="option" class="text-white bg-slate-700">
-                                    {{ option }}
-                                </option>
-                            </optgroup>
-                        </ng-container>
-                    </select>
-                </div>
-
-                <!-- Pregunta de texto -->
-                <div *ngSwitchCase="'text'" class="space-y-4">
-                    <input 
-                        class="w-full p-4 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
-                        [formControlName]="question.controlName"
-                        [placeholder]="'Escribe tu respuesta aquí...'"
-                        type="text" />
-                </div>
-
-            </ng-container>
+      <form [formGroup]="answerForm">
+        <div class="mb-4">
+          <input type="range" min="1" max="5" step="1" formControlName="value"
+                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+          <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+            <span>Inexistente</span>
+            <span>En Desarrollo</span>
+            <span>Definido</span>
+            <span>Gestionado</span>
+            <span>Optimizado</span>
+          </div>
         </div>
 
-        <!-- Modal de información -->
-        <app-info-modal [open]="modalOpen" [content]="modalText" (close)="modalOpen=false"></app-info-modal>
-    `,
-    changeDetection: ChangeDetectionStrategy.OnPush,
+        <div class="text-right mb-2">
+            <button type="button" (click)="showOptional.set(!showOptional())" class="text-sm text-blue-600 hover:underline">
+                {{ showOptional() ? 'Ocultar notas' : 'Añadir notas (Opcional)' }}
+            </button>
+        </div>
+
+        @if (showOptional()) {
+            <div class="border-t pt-4 animate-fade-in">
+                <label for="evidence-{{question.id}}" class="block text-sm text-gray-600 dark:text-gray-300">
+                    Notas Personales
+                </label>
+                <textarea id="evidence-{{question.id}}" formControlName="evidence" rows="2"
+                       class="mt-1 w-full px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+            </div>
+        }
+      </form>
+    </div>
+  `,
+  styles: [`
+    .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+  `]
 })
-export class QuestionCardComponent {
-    @Input({ required: true }) question!: Question;
-    @Input({ required: true }) form!: FormGroup;
+export class QuestionCardComponent implements OnInit {
+  @Input({ required: true }) question!: Question;
+  @Input() initialAnswer: Answer = { value: 0, isCritical: false };
+  @Output() answerChange = new EventEmitter<Answer>();
 
-    modalOpen = false;
-    modalText = '';
+  answerForm!: FormGroup;
+  showOptional = signal(false);
 
-    setLikertValue(value: number): void {
-        const control = this.form.get(this.question.controlName);
-        if (control) {
-            control.setValue(value);
-        }
-    }
+  constructor(private fb: FormBuilder) {}
 
-    getLikertButtonClass(value: number): string {
-        const control = this.form.get(this.question.controlName);
-        const isSelected = control?.value === value;
-        
-        if (isSelected) {
-            return 'bg-blue-600 text-white border-blue-400 shadow-lg scale-105';
-        }
-        
-        return 'bg-slate-700 text-gray-300 hover:bg-slate-600 hover:text-white border-slate-600';
-    }
+  ngOnInit() {
+    this.answerForm = this.fb.group({
+      value: [this.initialAnswer.value || 0],
+      evidence: [this.initialAnswer.evidence || ''],
+    });
 
-    openInfo(text?: string): void {
-        if (!text) return;
-        this.modalText = text;
-        this.modalOpen = true;
-    }
+    // Emitir el valor inicial inmediatamente para que se registre como respuesta
+    const initialValue = this.initialAnswer.value || 0;
+    this.answerChange.emit({ 
+      value: initialValue, 
+      isCritical: this.question.critical,
+      evidence: this.initialAnswer.evidence || ''
+    });
+
+    this.answerForm.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)))
+      .subscribe(value => {
+        const answerValue = value.value ? Number(value.value) : 0;
+        this.answerChange.emit({ 
+          value: answerValue, 
+          isCritical: this.question.critical,
+          evidence: value.evidence || ''
+        });
+      });
+  }
 }

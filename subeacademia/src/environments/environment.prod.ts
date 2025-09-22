@@ -4,10 +4,15 @@ export const environment = {
     apiKey: "AIzaSyAZZ4wdOfqdnB1X-vhd-pwsTMPvxpf2his",
     authDomain: "web-subeacademia.firebaseapp.com",
     projectId: "web-subeacademia",
-    storageBucket: "web-subeacademia.appspot.com",
+    // storageBucket eliminado: usamos bucket explícito en app.config.ts
     messagingSenderId: "933308887042",
     appId: "1:933308887042:web:a12c5128629eea99a1771b",
     measurementId: "G-KC1T2FD7JB"
+  },
+  storage: {
+    defaultPublicFolder: 'public/media',
+    publicBaseUrl: 'https://firebasestorage.googleapis.com/v0/b/web-subeacademia.firebasestorage.app/o',
+    consoleBaseUrl: 'https://web-subeacademia.firebasestorage.app'
   },
   // Lista de administradores de la app
   adminEmails: ["bruno@subeia.tech"],
@@ -20,9 +25,11 @@ export const environment = {
   // Endpoint alternativo para Azure Function generate
   azureGenerateEndpoint: "https://apisube-smoky.vercel.app/api/azure/generate",
   apiUrl: 'https://apisube-smoky.vercel.app/api/azure/generate',
+  // URL de la API de GPT para producción
+  gptApiUrl: 'https://apisube-smoky.vercel.app/api/azure/generate',
   // API Key de Google Gemini (NUNCA hardcodear en repositorio público)
-  // Se espera en runtime vía window.__env.geminiApiKey o usar backendIaUrl
-  geminiApiKey: 'TU_API_KEY_AQUI',
+  // Se espera en runtime vía window.__env.geminiApiKey o usar backendIaUrl (deshabilitado)
+  // geminiApiKey: 'TU_API_KEY_AQUI',
   // No se usan emuladores en prod
   useEmulators: false,
   settings: {} as { searchConsoleVerification?: string },

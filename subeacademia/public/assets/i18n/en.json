@@ -3,6 +3,11 @@
     "hero": {
       "title": "Empower Your Talent in the Age of Artificial Intelligence",
       "subtitle": "We develop the 13 key competencies that companies and professionals need to lead the digital transformation. Learn with our unique adaptive AI methodology: Agile, Responsible, Ethical, and Sustainable.",
+    "typewriter_phrases": [
+      "Implement AI in an Agile, Responsible and Sustainable way with our ARES-AI Framework©.",
+      "Develop the 13 key competencies your team needs to lead digital transformation.",
+      "Transform your organization with our AVE-AI adaptive learning platform."
+    ],
       "cta": "Discover Your Potential",
       "secondaryLink": "Explore Our Courses"
     },
@@ -31,6 +36,12 @@
       "title": "Ready to Lead the Transformation?",
       "subtitle": "Let's talk about how we can empower your team and prepare your organization for the future of AI.",
       "button": "Contact an Advisor"
+    },
+    "methodology": {
+      "cta_ready": "Ready to transform your organization with our proven ARES-AI framework?",
+      "btn_start_diagnostic": "Start Free Diagnostic",
+      "btn_view_methodology": "View Complete Methodology",
+      "additional_text": "Learn in detail about each phase, tools and implementation best practices"
     }
   },
   "hero": {
@@ -115,6 +126,7 @@
       "vision_title": "Our vision",
       "vision_desc": "Democratize AI knowledge to change society, delivering concrete tools that allow people to reinvent themselves and do what they truly love.",
       "values_title": "Our values",
+      "values_desc": "Excellence, Constant Innovation, Integrity and a real Commitment to the success of each of our students and partners.",
       "values": {
         "v1": "Measurable and sustainable impact",
         "v2": "Ethics, security and privacy by design",
@@ -162,6 +174,58 @@
       "c12_desc": "Update skills and working frameworks. Build improvement habits and evidence portfolios.",
       "c13_title": "AI leadership",
       "c13_desc": "Guide teams and strategies with vision and governance. Prioritize initiatives, KPIs and responsible adoption at scale."
+    },
+    "phases": {
+      "1": {
+        "shortTitle": "Analysis and Assessment",
+        "title": "Initial Analysis and Assessment",
+        "description": "We assess your organization's current AI state, identifying strengths, weaknesses and improvement opportunities.",
+        "deliverables": {
+          "0": "Complete AI maturity diagnostic",
+          "1": "Current capabilities analysis",
+          "2": "Gap and opportunity identification"
+        }
+      },
+      "2": {
+        "shortTitle": "Strategy and Planning",
+        "title": "Strategic Strategy and Planning",
+        "description": "We develop your personalized AI adoption roadmap, defining objectives, resources and timelines.",
+        "deliverables": {
+          "0": "Personalized AI strategic plan",
+          "1": "Objectives and KPIs definition",
+          "2": "Detailed implementation timeline"
+        }
+      },
+      "3": {
+        "shortTitle": "Implementation and Development",
+        "title": "Solution Implementation and Development",
+        "description": "We bring your strategy to practice with personalized AI solutions, complete integration and continuous support.",
+        "deliverables": {
+          "0": "AI solutions implemented",
+          "1": "Integration with existing systems",
+          "2": "Technical team training"
+        }
+      },
+      "4": {
+        "shortTitle": "Deployment and Monitoring",
+        "title": "Continuous Deployment and Monitoring",
+        "description": "We implement monitoring and control systems to ensure optimal performance of AI solutions.",
+        "deliverables": {
+          "0": "Monitoring system implemented",
+          "1": "Performance dashboards",
+          "2": "Maintenance protocols"
+        }
+      },
+      "5": {
+        "shortTitle": "Optimization and Scalability",
+        "title": "Optimization and Scalability",
+        "description": "We continuously optimize solutions and prepare your organization to scale AI adoption.",
+        "deliverables": {
+          "0": "Performance optimization",
+          "1": "Scalability plan",
+          "2": "Continuous growth strategy"
+        }
+      }
     }
   },
   "course": {
@@ -172,5 +236,375 @@
     "lessons": "Lessons",
     "level": "Level",
     "enroll_button": "Enroll Now"
+  },
+  "diagnostico": {
+    "title": "ARES-AI Maturity Diagnostic",
+    "subtitle": "Assess your Artificial Intelligence maturity and get a personalized plan to accelerate your digital transformation",
+    "estimated_time": "Estimated time: 15-20 minutes",
+    "select_type": "How would you like to conduct your diagnostic?",
+    "company_option": "As a Company",
+    "company_description": "Evaluate your organization's AI maturity. Includes analysis of competencies, processes, culture and organizational strategy.",
+    "company_button": "Take diagnostic as company",
+    "person_option": "As a Person",
+    "person_description": "Evaluate your personal AI competencies. Adapted for children (8-17) and adults (18+). Includes personalized educational recommendations.",
+    "person_button": "Take diagnostic as person",
+    "privacy_notice": "Your information is secure and only used to generate your personalized diagnostic",
+    "segmento": {
+      "title": "Select your segment",
+      "empresa": "Company / Organization",
+      "educacion_superior": "Higher Education",
+      "educacion_escolar": "School Education (Elementary/Secondary)",
+      "profesional_independiente": "Independent Professional"
+    },
+    "contexto": {
+      "title": "Your organization context",
+      "startup": {
+        "industria": "Industry",
+        "tamanoEquipo": "Team size",
+        "antiguedadMeses": "Age (months)",
+        "modeloNegocio": "Business model"
+      },
+      "pyme": {
+        "industria": "Industry",
+        "tamanoEmpresa": "Company size",
+        "facturacionAnual": "Annual revenue (USD)",
+        "zonaOperacion": "Operating area"
+      },
+      "corporativo": {
+        "industria": "Industry",
+        "numEmpleados": "Number of employees",
+        "presupuestoInnovacion": "Annual innovation budget (USD)",
+        "presenciaRegional": "Regional/international presence?"
+      }
+    },
+    "objetivo": {
+      "title": "Main strategic objective",
+      "eficiencia": "Operational efficiency",
+      "crecimiento": "Growth",
+      "innovacion": "Innovation",
+      "experienciaCliente": "Customer experience"
+    },
+    "ares": {
+      "title": "ARES-AI Assessment",
+      "likert": {
+        "0": "N/A",
+        "1": "Very low",
+        "2": "Low",
+        "3": "Medium",
+        "4": "High",
+        "5": "Very high"
+      },
+      "items": {
+        "adopcion_01": "Level of AI tool adoption in key processes",
+        "adopcion_02": "Existence of AI adoption strategy and roadmap",
+        "riesgos_01": "AI risk identification and management",
+        "etica_01": "AI ethics and bias practices",
+        "seguridad_01": "Security and privacy by design controls",
+        "capacidad_01": "Internal capabilities to operate AI",
+        "datos_01": "Data quality and availability",
+        "gobernanza_01": "ARES governance and roles",
+        "valor_01": "Value metrics for AI initiatives",
+        "operacion_01": "Model operation and monitoring",
+        "talento_01": "AI talent attraction and development",
+        "tecnologia_01": "Technology architecture and tools",
+        "integracion_01": "AI integration into systems and processes",
+        "cumplimiento_01": "Applicable regulatory compliance",
+        "transparencia_01": "Transparency and explainability",
+        "sostenibilidad_01": "Resource sustainability and efficiency"
+      },
+      "desc": {
+        "adopcion_01": "Evaluates how much AI solutions are used in critical business processes (not just isolated tests).",
+        "adopcion_02": "Evaluates if there is a plan/roadmap with prioritization and milestones for AI deployment.",
+        "riesgos_01": "Evaluates if AI-associated risks are identified, mitigated and monitored.",
+        "etica_01": "Evaluates if practices exist to avoid bias, harm and responsible use.",
+        "seguridad_01": "Evaluates privacy by design, access controls and data protection.",
+        "capacidad_01": "Evaluates team readiness to operate and maintain AI solutions.",
+        "datos_01": "Evaluates quality, governance and access to data needed for AI.",
+        "gobernanza_01": "Evaluates if roles, policies and committees exist to guide AI.",
+        "valor_01": "Evaluates if value KPIs are defined and results are measured.",
+        "operacion_01": "Evaluates monitoring, retraining and model observability.",
+        "talento_01": "Evaluates talent availability and upskilling plans.",
+        "tecnologia_01": "Evaluates platform, tools and MLOps suitability.",
+        "integracion_01": "Evaluates how well AI solutions integrate into the stack and processes.",
+        "cumplimiento_01": "Evaluates compliance with relevant norms and standards.",
+        "transparencia_01": "Evaluates explainability and traceability in AI decisions.",
+        "sostenibilidad_01": "Evaluates efficient resource use and environmental impact."
+      }
+    },
+    "competencias": {
+      "title": "Competency self-assessment",
+      "nivel": {
+        "incipiente": "Emerging",
+        "basico": "Basic",
+        "intermedio": "Intermediate",
+        "avanzado": "Advanced",
+        "lider": "Leader"
+      }
+    },
+    "lead": {
+      "title": "Leave your details to receive the report",
+      "nombre": "Name",
+      "email": "Email address",
+      "telefono": "Phone",
+      "aceptaComunicaciones": "I agree to receive communications from Sube Academ-IA"
+    },
+    "resumen": {
+      "title": "Diagnosis summary",
+      "descripcion": "Review your answers before continuing."
+    }
+  },
+  "shared": {
+    "deliverables": "Deliverables"
+  },
+  "trust": {
+    "title": "They have trusted us",
+    "companies": "Companies That Already Trust Us",
+    "education": "Educational Institutions",
+    "alliances": "Strategic Alliances",
+    "final_cta": "Join the companies that are already transforming their future with AI"
+  },
+  "produtos": {
+    "badge": "Our Products",
+    "title": "Comprehensive AI Solutions",
+    "subtitle": "Discover our complete catalog of products designed to accelerate your digital transformation with Artificial Intelligence",
+    "model_title": "50/50 Model: The Perfect Formula",
+    "standard_content": "Standard Content",
+    "total_personalization": "Total Personalization",
+    "competitive_formula": "The formula that makes us unique in the AI education market",
+    "categories": {
+      "consulting": { "title": "Consulting", "description": "Specialized AI consulting for companies looking to implement intelligent solutions strategically and efficiently.", "btn": "View Consulting" },
+      "courses": { "title": "Courses", "description": "Practical and applied training in Artificial Intelligence, designed for professionals who want to master future technologies.", "btn": "View Courses" },
+      "certifications": { "title": "Certifications", "description": "Professional AI certifications that validate your knowledge and position you as an expert in the job market.", "btn": "View Certifications" }
+    },
+    "approach": {
+      "badge": "Our Approach",
+      "title": "The Methodology",
+      "subtitle": "We combine academic rigor with practical experience to offer you the most complete and effective training on the market",
+      "personalization": {
+        "title": "Mathetic Personalization",
+        "subtitle": "Academic and Technical Foundations",
+        "description": "We adapt each learning experience to your unique cognitive style, using principles from learning science.",
+        "details": "Methodology based on MIT research",
+        "click_more": "Click for more details"
+      },
+      "experience": {
+        "title": "Hands-on Experience",
+        "subtitle": "Accelerated",
+        "description": "You will face real and complex business challenges from day one. There's no room for abstract theory here.",
+        "detail_label": "Real projects:",
+        "detail_text": "Each module culminates in a tangible project that simulates real professional environments."
+      },
+      "quality": {
+        "title": "Premium Quality",
+        "subtitle": "and Cutting-edge",
+        "description": "Access elite content, developed by a senior team with proven experience in digital transformation.",
+        "detail_label": "Validated knowledge:",
+        "detail_text": "Content updated in real time, tested in high-impact business projects."
+      }
+    },
+    "lists": {
+      "asesorias": {
+        "title": "AI Consulting",
+        "subtitle": "Personalized consulting to implement Artificial Intelligence solutions in your company. Our experts will guide you every step of the way.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_categories": "All categories",
+          "any_price": "Any price",
+          "lt500": "Under €500",
+          "500-1500": "€500 - €1500",
+          "gt1500": "Over €1500"
+        },
+        "loading": "Loading consulting...",
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our section of personalized AI consulting.",
+          "p2": "Soon you will be able to access specialized consulting to implement AI in your company."
+        }
+      },
+      "cursos": {
+        "title": "AI Courses",
+        "subtitle": "Specialized training in Artificial Intelligence with practical methodology and real-world cases. Learn from experts and develop projects that make a difference.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_levels": "All levels",
+          "any_price": "Any price",
+          "lt200": "Under €200",
+          "200-600": "€200 - €600",
+          "gt600": "Over €600"
+        },
+        "loading": "Loading courses...",
+        "labels": {
+          "duration": "Duration:",
+          "level": "Level:",
+          "instructor": "Instructor:"
+        },
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our Artificial Intelligence courses section.",
+          "p2": "Soon you will be able to access specialized training with a practical methodology."
+        }
+      },
+      "certificaciones": {
+        "title": "AI Certifications",
+        "subtitle": "Official certifications recognized by the industry in Artificial Intelligence technologies. Validate your knowledge and improve your professional profile.",
+        "filters": {
+          "search_placeholder": "Search by title or description",
+          "all_levels": "All levels",
+          "any_price": "Any price",
+          "lt200": "Under €200",
+          "200-600": "€200 - €600",
+          "gt600": "Over €600"
+        },
+        "loading": "Loading certifications...",
+        "labels": {
+          "entity": "Entity:",
+          "level": "Level:"
+        },
+        "validator": {
+          "placeholder": "Paste your certificate code",
+          "btn": "Validate certificate"
+        },
+        "cta_view_details": "View Details",
+        "empty": {
+          "coming_soon": "🚧 Coming soon...",
+          "p1": "We are preparing our Artificial Intelligence certifications section.",
+          "p2": "Soon you will be able to access official certifications recognized by the industry."
+        }
+      },
+      "common": {
+        "price_symbol": "€",
+        "btn_back_to_products": "Back to Products",
+        "loading_product": "Loading product...",
+        "learn_title": "What you will learn",
+        "buy_now": "Buy Now",
+        "modal": {
+          "title": "Payment coming soon",
+          "desc": "Very soon you will be able to complete your purchase from here.",
+          "close": "Close"
+        },
+        "errors": {
+          "not_found": "Product not found.",
+          "load_error": "Error loading product."
+        }
+      }
+    }
+  },
+  "admin": {
+    "menu": {
+      "posts": "Posts",
+      "productos": "Products",
+      "projects": "Projects",
+      "certificados": "Certificates",
+      "media": "Media",
+      "logos": "Logos",
+      "history": "History",
+      "collaborators": "Collaborators",
+      "leads": "Leads",
+      "users": "Users",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "productos": {
+      "dashboard": {
+        "title": "Products Dashboard",
+        "download_structure": "Download JSON Structure",
+        "bulk_upload": "Bulk JSON Upload",
+        "manage_asesorias": "Manage Consulting",
+        "manage_cursos": "Manage Courses",
+        "manage_certificaciones": "Manage Certifications",
+        "total_asesorias": "Total Consulting",
+        "total_cursos": "Total Courses",
+        "total_certificaciones": "Total Certifications",
+        "active": "active",
+        "recent_products": "Recent Products",
+        "recent_asesorias": "Recent Consulting",
+        "recent_cursos": "Recent Courses",
+        "recent_certificaciones": "Recent Certifications",
+        "no_products": "No products created yet.",
+        "status_active": "Active",
+        "status_inactive": "Inactive"
+      },
+      "bulk_upload": {
+        "title": "Bulk Products JSON Upload",
+        "select_file": "Select JSON file:",
+        "file_selected": "Selected file:",
+        "size": "Size:",
+        "progress": "Upload progress",
+        "expected_format": "Expected JSON Format:",
+        "cancel": "Cancel",
+        "process_file": "Process File",
+        "processing": "Processing..."
+      }
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "productos": "Products",
+    "nosotros": "About Us",
+    "metodologia": "Methodology",
+    "blog": "Blog",
+    "contacto": "Contact",
+    "admin": "Admin",
+    "menu": "Menu",
+    "login_google": "Sign In with Google",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out",
+    "privacy_policy": "Privacy Policy"
+  },
+  "diagnostic": {
+    "company": {
+      "title": "AI Maturity Diagnostic - Company",
+      "subtitle": "Evaluate your organization's level of maturity in Artificial Intelligence and get a personalized plan",
+      "steps": {
+        "profile": "1. Profile",
+        "ares": "2. ARES-AI",
+        "competencies": "3. Competencies",
+        "objectives": "4. Objectives",
+        "finish": "5. Finish",
+        "results": "Results"
+      },
+      "progress": {
+        "completed": "completed",
+        "answered": "answered",
+        "total": "total"
+      },
+      "messages": {
+        "completed": "Diagnostic completed!",
+        "completed_desc": "You can navigate freely to review your answers.",
+        "start_new": "Start a new diagnostic"
+      },
+      "pages": {
+        "profile_title": "Organization Profile",
+        "profile_desc": "Provide basic information about your organization",
+        "ares_title": "ARES Self-Assessment",
+        "ares_desc": "Evaluate your skills in Learning, Resilience, Ethics and Sociability",
+        "competencies_title": "Competencies Self-Assessment",
+        "competencies_desc": "Evaluate your level in key competencies for digital transformation",
+        "objectives_title": "Strategic Objectives",
+        "objectives_desc": "Define strategic objectives for your organization",
+        "finish_title": "Complete Diagnostic",
+        "finish_desc": "Review and complete your diagnostic",
+        "results_title": "Diagnostic Results",
+        "results_desc": "Explore the results and recommendations of your diagnostic",
+        "default_title": "AI Maturity Diagnostic",
+        "default_desc": "Comprehensive self-assessment system"
+      },
+      "loader": {
+        "title": "🤖 Artificial Intelligence",
+        "subtitle": "AI is analyzing your responses and creating a personalized report...",
+        "steps": {
+          "diagnostic": "Creating personalized diagnostic...",
+          "action_plan": "Designing strategic action plan...",
+          "recommendations": "Generating specific recommendations..."
+        },
+        "estimated_time": "⏱️ Estimated time: 30-60 seconds"
+      }
+    },
+    "person": {
+      "title": "AI Maturity Diagnostic - Person",
+      "subtitle": "Evaluate your level of competencies in Artificial Intelligence and get a personalized plan"
+    }
   }
 }

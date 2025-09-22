@@ -12,11 +12,17 @@ export interface SiteSettings {
   contactEmail?: string;
   ga4MeasurementId?: string;
   searchConsoleVerification?: string;
+  homeTitle?: string; // Título principal de la página de inicio
+  // Fondo del Home seleccionado desde Admin (para propagar a todos los dispositivos)
+  homeBackgroundKey?: string;
+  homeBackgroundName?: string;
 }
 
 export interface HomePageContent {
   typewriterPhrases: string[];
   title?: string;
+  homeBackgroundKey?: string;
+  homeBackgroundName?: string;
 }
 
 export interface TypewriterPhrase {
@@ -200,8 +206,8 @@ export class SettingsService {
     // Usar la nueva colección de frases
     const phrases$ = this.getTypewriterPhrasesAsArray(lang);
     
-    // Obtener título del home
-    const title$ = docData(this.homeRefForLang(lang)).pipe(
+    // Obtener datos del home (título + fondo)
+    const homeDoc$ = docData(this.homeRefForLang(lang)).pipe(
       opCatchError((error) => {
         console.log('⚠️ Error en ruta primaria, intentando fallback:', error);
         return docData(this.homeRefFallbackForLang(lang));
@@ -212,26 +218,37 @@ export class SettingsService {
       }),
       map((d: any) => {
         console.log('📄 Datos obtenidos del documento:', d);
-        if (!d) {
-          console.log('📄 No hay datos, retornando undefined');
-          return undefined;
-        }
+        if (!d) return undefined as any;
         const titulo = typeof d?.titulo === 'string' ? d.titulo : (typeof d?.title === 'string' ? d.title : undefined);
-        console.log('📄 Título extraído:', titulo);
-        return titulo;
+        const homeBackgroundKey = typeof d?.homeBackgroundKey === 'string' ? d.homeBackgroundKey : undefined;
+        const homeBackgroundName = typeof d?.homeBackgroundName === 'string' ? d.homeBackgroundName : undefined;
+        return { titulo, homeBackgroundKey, homeBackgroundName } as any;
       })
     );
     
     // Combinar frases y título
-    return combineLatest([phrases$, title$]).pipe(
-      map(([phrases, title]) => {
-        console.log('🔍 Contenido final del home:', { phrases, title });
-        return {
+    return combineLatest([phrases$, homeDoc$]).pipe(
+      map(([phrases, home]) => {
+        const payload: HomePageContent = {
           typewriterPhrases: phrases,
-          title
+          title: (home as any)?.titulo,
+          homeBackgroundKey: (home as any)?.homeBackgroundKey,
+          homeBackgroundName: (home as any)?.homeBackgroundName
         };
+        console.log('🔍 Contenido final del home:', payload);
+        return payload;
       })
     ) as Observable<HomePageContent>;
+  }
+
+  // Permitir que Admin publique también el fondo del Home en el documento público por idioma
+  async setHomeBackgroundKey(lang: 'es' | 'en' | 'pt', key: string, name?: string): Promise<void> {
+    try {
+      await setDoc(this.homeRefForLang(lang), { homeBackgroundKey: key, homeBackgroundName: name }, { merge: true });
+    } catch (error) {
+      console.warn('⚠️ Fallback al documento legacy para homeBackgroundKey');
+      await setDoc(this.homeRefFallbackForLang(lang), { homeBackgroundKey: key, homeBackgroundName: name }, { merge: true });
+    }
   }
 
   // Métodos legacy para compatibilidad (ahora usan la nueva colección)

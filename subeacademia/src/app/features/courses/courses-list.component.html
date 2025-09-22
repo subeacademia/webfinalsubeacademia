@@ -1,12 +1,40 @@
-<main class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
-  <!-- Encabezado 3D reutilizable -->
-  <app-page-header
-    [title]="'courses.header.title' | i18nTranslate"
-    [subtitle]="'courses.header.subtitle' | i18nTranslate">
-  </app-page-header>
+<main class="text-gray-800 dark:text-gray-200 min-h-screen">
+  <!-- Cabecera estándar transparente -->
+  <div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+    <!-- Contenido en tarjeta transparente elegante -->
+    <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+      <!-- Tarjeta principal con transparencia y bordes elegantes -->
+      <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          Formación Especializada
+        </div>
+        
+        <!-- Título principal con degradado naranja -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+          {{ 'courses.header.title' | i18nTranslate }}
+        </h1>
+        
+        <!-- Subtítulo mejorado -->
+        <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+          {{ 'courses.header.subtitle' | i18nTranslate }}
+        </p>
+      </div>
+      
+      <!-- Indicador de scroll fuera de la tarjeta -->
+      <div class="mt-8 animate-bounce">
+        <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+          <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Controles de filtros -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
       <div class="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
         <div class="relative w-full sm:w-96">
           <input (input)="updateSearchTerm($event)" type="text" class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar cursos..." i18n-placeholder>
@@ -29,7 +57,7 @@
       </div>
   </section>
 
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
     <div *ngIf="filteredCourses$ | async as courses; else loading">
       <div *ngIf="courses.length > 0; else noResults" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <a *ngFor="let course of courses" [routerLink]="['/', currentLangValue, 'cursos', course.slug]" class="group block">

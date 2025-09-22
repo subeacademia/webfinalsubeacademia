@@ -61,74 +61,130 @@
   --radius-xl: 2rem;
 }
 
-/* Tema claro por defecto */
+/* Tema claro por defecto - MEJORADO PARA MEJOR CONTRASTE */
 :root {
+  /* Colores base con mejor contraste */
   --bg: #ffffff;
-  --fg: #0b1220;
-  --fg-muted: #5a6577;
-  --surface-1: #f7f9fc;
+  --fg: #1a202c; /* Más oscuro para mejor legibilidad */
+  --fg-muted: #4a5568; /* Más oscuro que antes */
+  --surface-1: #f7fafc; /* Más sutil */
   --surface-2: #ffffff;
-  --surface-3: #f1f5f9;
+  --surface-3: #edf2f7; /* Mejor contraste */
   
-  /* Inputs */
+  /* Colores de acento mejorados */
+  --primary: #2b6cb0; /* Azul más oscuro para mejor contraste */
+  --primary-light: #ebf8ff;
+  --primary-dark: #2c5282;
+  --secondary: #805ad5; /* Púrpura con buen contraste */
+  --secondary-light: #f7fafc;
+  --secondary-dark: #553c9a;
+  
+  /* Inputs con mejor contraste */
   --input-bg: #ffffff;
-  --input-fg: var(--fg);
-  --input-placeholder: color-mix(in srgb, var(--fg-muted) 80%, transparent);
-  --input-border: #d7dbe2;
-  --input-border-focus: #3b82f6;
+  --input-fg: #1a202c;
+  --input-placeholder: #a0aec0; /* Más visible pero no demasiado */
+  --input-border: #cbd5e0; /* Borde más visible */
+  --input-border-focus: #2b6cb0;
+  --input-border-error: #e53e3e;
   
-  /* Accesibilidad / interacción */
-  --ring: #2563eb;
-  --link: var(--ring);
+  /* Estados de interacción mejorados */
+  --ring: #2b6cb0;
+  --link: #2b6cb0;
+  --link-hover: #2c5282;
+  
+  /* Colores de estado con mejor contraste */
+  --success: #38a169;
+  --success-light: #f0fff4;
+  --warning: #d69e2e;
+  --warning-light: #fffbeb;
+  --error: #e53e3e;
+  --error-light: #fed7d7;
+  --info: #3182ce;
+  --info-light: #ebf8ff;
   
   /* Compatibilidad con estilos existentes */
   --muted: var(--fg-muted);
   --border: var(--input-border);
   --card: var(--surface-1);
   --panel: var(--surface-2);
-  --accent: var(--ring);
+  --accent: var(--primary);
   
   /* Variables específicas para componentes del admin */
   --admin-bg: #ffffff;
-  --admin-card-bg: #ffffff;
-  --admin-text: #0b1220;
-  --admin-text-muted: #5a6577;
-  --admin-border: #e2e8f0;
+  --admin-card-bg: #f7fafc;
+  --admin-text: #1a202c;
+  --admin-text-muted: #4a5568;
+  --admin-border: #cbd5e0;
+  
+  /* Sombras mejoradas */
+  --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* Tema oscuro */
+/* Tema oscuro - MEJORADO PARA MEJOR CONTRASTE */
 :root.dark,
 :root[data-theme="dark"],
 .theme-dark {
-  --bg: #0b1220;
-  --fg: #E6EDF3;
-  --fg-muted: #9FB1C1;
-  --surface-1: #111827;
-  --surface-2: #0b1220;
-  --surface-3: #1e293b;
+  /* Colores base optimizados para modo oscuro */
+  --bg: #0f172a; /* Fondo principal más suave */
+  --fg: #f8fafc; /* Texto principal más claro */
+  --fg-muted: #cbd5e0; /* Texto secundario más legible */
+  --surface-1: #1e293b; /* Superficie elevada */
+  --surface-2: #0f172a; /* Superficie base */
+  --surface-3: #334155; /* Superficie más elevada */
   
-  --input-bg: var(--surface-1);
-  --input-fg: var(--fg);
-  --input-placeholder: #9FB1C180;
-  --input-border: #2b3a4b;
+  /* Colores de acento optimizados para oscuro */
+  --primary: #60a5fa; /* Azul más claro para mejor contraste */
+  --primary-light: #1e293b;
+  --primary-dark: #3b82f6;
+  --secondary: #a78bfa; /* Púrpura más claro */
+  --secondary-light: #1e293b;
+  --secondary-dark: #8b5cf6;
+  
+  /* Inputs optimizados */
+  --input-bg: #1e293b;
+  --input-fg: #f8fafc;
+  --input-placeholder: #94a3b8; /* Más visible */
+  --input-border: #475569; /* Borde más visible */
   --input-border-focus: #60a5fa;
+  --input-border-error: #f87171;
   
-  --ring: #3b82f6;
-  --link: var(--ring);
+  /* Estados de interacción mejorados */
+  --ring: #60a5fa;
+  --link: #60a5fa;
+  --link-hover: #93c5fd;
+  
+  /* Colores de estado optimizados para oscuro */
+  --success: #4ade80;
+  --success-light: #1e293b;
+  --warning: #fbbf24;
+  --warning-light: #1e293b;
+  --error: #f87171;
+  --error-light: #1e293b;
+  --info: #60a5fa;
+  --info-light: #1e293b;
   
   /* Compatibilidad */
   --muted: var(--fg-muted);
   --border: var(--input-border);
   --card: var(--surface-1);
   --panel: var(--surface-2);
-  --accent: var(--ring);
+  --accent: var(--primary);
   
   /* Variables específicas para componentes del admin en modo oscuro */
-  --admin-bg: #0b1220;
+  --admin-bg: #0f172a;
   --admin-card-bg: #1e293b;
-  --admin-text: #E6EDF3;
-  --admin-text-muted: #9FB1C1;
-  --admin-border: #2b3a4b;
+  --admin-text: #f8fafc;
+  --admin-text-muted: #cbd5e0;
+  --admin-border: #475569;
+  
+  /* Sombras optimizadas para modo oscuro */
+  --shadow-light: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-medium: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-large: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 
 /* ----- Base HTML ----- */
@@ -292,8 +348,38 @@ a:hover {
 }
 
 /* Botones del diagnóstico (mantener compatibilidad) */
+/* Gradiente naranja - NUEVO COLOR PRIMARIO GLOBAL */
+.orange-gradient-text {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
+}
+
+/* Modo oscuro */
+.dark .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
+}
+
+/* Botón primario actualizado con gradiente naranja */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  @apply text-white rounded-lg px-6 py-3 font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg;
+  box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #c2410c 0%, #b91c1c 25%, #ea580c 50%, #f97316 75%, #fb923c 100%);
+  box-shadow: 0 12px 25px rgba(234, 88, 12, 0.5);
 }
 
 .btn-secondary {
@@ -561,6 +647,36 @@ a:hover {
 }
 
 /* ----- Responsive design ----- */
+
+/* Móviles pequeños (hasta 475px) */
+@media (max-width: 475px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1 { font-size: 1.75rem; line-height: 2rem; }
+  h2 { font-size: 1.5rem; line-height: 1.75rem; }
+  h3 { font-size: 1.25rem; line-height: 1.5rem; }
+  
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px; /* Tamaño mínimo táctil */
+  }
+  
+  .input {
+    padding: 0.75rem 1rem;
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+  
+  .card {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+}
+
+/* Móviles (hasta 768px) */
 @media (max-width: 768px) {
   .diagnostic-card {
     @apply p-4;
@@ -591,6 +707,189 @@ a:hover {
   .btn {
     padding: 0.625rem 1.25rem;
     font-size: 0.8rem;
+  }
+  
+  /* Mejorar espaciado en móviles */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Formularios responsive */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  /* Grid responsive */
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Flex responsive */
+  .flex-responsive {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .flex-responsive {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  
+  .flex-responsive {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+/* Utilidades responsive */
+.responsive-text {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  line-height: 1.6;
+}
+
+.responsive-heading {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  line-height: 1.2;
+}
+
+.responsive-padding {
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.responsive-margin {
+  margin: clamp(1rem, 4vw, 3rem);
+}
+
+/* Mejoras para formularios en móviles */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px; /* Previene zoom en iOS */
+    min-height: 44px; /* Tamaño mínimo táctil */
+  }
+  
+  /* Mejorar radio buttons y checkboxes */
+  input[type="radio"],
+  input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.5rem;
+  }
+  
+  label {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    cursor: pointer;
+  }
+}
+
+/* Mejoras para navegación móvil */
+@media (max-width: 768px) {
+  .nav-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg);
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .nav-mobile.open {
+    transform: translateX(0);
+  }
+  
+  .nav-toggle {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .nav-toggle span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: var(--fg);
+    margin: 4px 0;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-toggle.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  
+  .nav-toggle.open span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .nav-toggle.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+  }
+}
+
+/* Mejoras para modales en móviles */
+@media (max-width: 768px) {
+  .modal {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  
+  .modal-content {
+    padding: 1rem;
+  }
+}
+
+/* Mejoras para tablas responsive */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-responsive table {
+    min-width: 600px;
   }
 }
 

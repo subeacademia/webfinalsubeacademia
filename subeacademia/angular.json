@@ -96,11 +96,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
-          "options": {
-            "port": 4200,
-            "open": true
-          },
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "subeacademia:build:production"
@@ -109,7 +105,11 @@
               "buildTarget": "subeacademia:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "buildTarget": "subeacademia:build",
+            "proxyConfig": "proxy.conf.json"
+          }
         },
         "serve-ssr": {
           "builder": "@angular/build:ssr-dev-server",

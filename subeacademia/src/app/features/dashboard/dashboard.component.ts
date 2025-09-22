@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -42,7 +42,7 @@ interface UserDiagnostic {
             </div>
             <div class="ml-4">
               <p class="text-sm text-gray-600 dark:text-gray-400">Total Diagnósticos</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ diagnostics.length }}</p>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ diagnostics().length }}</p>
             </div>
           </div>
         </div>
@@ -79,7 +79,7 @@ interface UserDiagnostic {
         </div>
         
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
-          <div *ngIf="diagnostics.length === 0" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+          <div *ngIf="diagnostics().length === 0" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
             <span class="text-4xl mb-4 block">🔍</span>
             <p class="text-lg">No tienes diagnósticos aún</p>
             <p class="text-sm">Comienza tu primer diagnóstico para ver tus resultados aquí</p>
@@ -89,7 +89,7 @@ interface UserDiagnostic {
             </a>
           </div>
 
-          <div *ngFor="let diagnostic of diagnostics" 
+          <div *ngFor="let diagnostic of diagnostics()" 
                class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             <div class="flex items-center justify-between">
               <div class="flex-1">
@@ -142,7 +142,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   user: User | null = null;
-  diagnostics: UserDiagnostic[] = [];
+  diagnostics = signal<UserDiagnostic[]>([]);
+  isLoading = signal(false);
   averageScore: number = 0;
   lastDiagnosticDate: Date | null = null;
 
@@ -152,7 +153,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe(user => {
         this.user = user;
         if (user) {
-          this.loadUserDiagnostics(user.uid);
+          this.loadDiagnostics(user.uid);
         }
       });
   }
@@ -162,29 +163,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private async loadUserDiagnostics(userId: string): Promise<void> {
+  async loadDiagnostics(userId: string) {
+    this.isLoading.set(true);
     try {
-      this.diagnostics = await this.diagnosticsService.getDiagnosticsForUserAsync(userId);
+      this.diagnostics.set(await this.diagnosticsService.getDiagnosticsForUser(userId));
       this.calculateStats();
     } catch (error) {
-      console.error('Error cargando diagnósticos:', error);
-      this.diagnostics = [];
+      console.error('Error loading diagnostics', error);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   private calculateStats(): void {
-    if (this.diagnostics.length === 0) {
+    if (this.diagnostics().length === 0) {
       this.averageScore = 0;
       this.lastDiagnosticDate = null;
       return;
     }
 
     // Calcular puntaje promedio
-    const totalScore = this.diagnostics.reduce((sum, d) => sum + d.puntajeGeneral, 0);
-    this.averageScore = totalScore / this.diagnostics.length;
+    const totalScore = this.diagnostics().reduce((sum, d) => sum + d.puntajeGeneral, 0);
+    this.averageScore = totalScore / this.diagnostics().length;
 
     // Obtener fecha del último diagnóstico
-    const sortedDiagnostics = [...this.diagnostics].sort((a, b) => 
+    const sortedDiagnostics = [...this.diagnostics()].sort((a, b) => 
       new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
     );
     this.lastDiagnosticDate = sortedDiagnostics[0].fecha;

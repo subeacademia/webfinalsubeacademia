@@ -26,6 +26,22 @@ export const routes: Routes = [
     loadComponent: () => import('./admin/login/login.component').then(m => m.LoginComponent),
   },
 
+  // Páginas legales SIN idioma (accesibles globalmente)
+  { 
+    path: 'terminos', 
+    loadComponent: () => import('./features/legal/terminos/terminos.component').then(m => m.TerminosComponent),
+  },
+
+  // Validación de certificados (accesible globalmente)
+  {
+    path: 'certificados/validar',
+    loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent),
+  },
+  {
+    path: 'certificados/validar/:code',
+    loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent),
+  },
+
 
 
   // Público con idioma restringido
@@ -35,15 +51,22 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent) },
       { path: 'diagnostico', loadChildren: () => import('./features/diagnostico/diagnostico.routes').then(m => m.DIAGNOSTICO_ROUTES) },
+      { path: 'diagnostico-persona', loadChildren: () => import('./features/diagnostico-persona/diagnostico-persona.routes').then(m => m.DIAGNOSTICO_PERSONA_ROUTES) },
       { path: 'blog', loadChildren: () => import('./features/blog/blog.routes').then(m => m.BLOG_ROUTES) },
       { path: 'productos', loadChildren: () => import('./features/productos/productos.routes').then(m => m.PRODUCTOS_ROUTES) },
+      { path: 'certificados/validar', loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent) },
+      { path: 'certificados/validar/:code', loadComponent: () => import('./pages/certificate-validation/certificate-validation.component').then(m => m.CertificateValidationComponent) },
       { path: 'proyectos', loadChildren: () => import('./features/projects/projects.routes').then(m => m.PROJECTS_ROUTES) },
       { path: 'nosotros', loadChildren: () => import('./features/about/about.routes').then(m => m.ABOUT_ROUTES) },
       { path: 'metodologia', loadChildren: () => import('./features/methodology/methodology.routes').then(m => m.METHODOLOGY_ROUTES) },
       { path: 'contacto', loadChildren: () => import('./features/contact/contact.routes').then(m => m.CONTACT_ROUTES) },
+      { path: 'terminos', loadChildren: () => import('./features/legal/legal.routes').then(m => m.LEGAL_ROUTES) },
     ],
   },
 
-  // 404
-  { path: '**', component: HomeComponent },
+  // 404 - Página no encontrada
+  {
+    path: '**',
+    loadComponent: () => import('./features/not-found/not-found.component').then(c => c.NotFoundComponent)
+  },
 ];

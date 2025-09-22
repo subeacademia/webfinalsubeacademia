@@ -1,417 +1,232 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, computed, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { DiagnosticStateService } from '../services/diagnostic-state.service';
-import { Subscription } from 'rxjs';
+import { ScrollService } from '../../../core/services/scroll/scroll.service';
+import { filter } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { I18nTranslatePipe } from '../../../core/i18n/i18n.pipe';
+
+interface Step {
+  path: string;
+  label: string;
+  order: number;
+}
 
 @Component({
 	selector: 'app-step-nav',
 	standalone: true,
-	imports: [CommonModule],
+  imports: [CommonModule, I18nTranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <div class="w-full max-w-6xl mb-12">
-            <!-- Header del progreso con diseño mejorado -->
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <span class="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Progreso del diagnóstico</span>
-                        <div class="text-2xl font-bold text-white">{{ getProgressPercentage() }}%</div>
-                    </div>
-                </div>
-                
-                <!-- Indicador de tiempo estimado -->
+    <!-- Solo mostrar la barra de navegación si NO estamos en la página de inicio o en el diagnóstico de empresas -->
+    @if (shouldShowNavigation()) {
+      <!-- Barra de navegación integrada -->
+      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
+          <!-- Navegación de pasos -->
+          <nav class="flex flex-wrap justify-center gap-x-1 gap-y-2 mb-3 md:mb-4">
+            @for (step of steps; track step.path) {
+              <button 
+                 (click)="isStepEnabled(step) ? navigateToStep(step.path) : null"
+                 [class.bg-blue-600]="activeStep()?.order === step.order"
+                 [class.text-white]="activeStep()?.order === step.order"
+                 [class.shadow-lg]="activeStep()?.order === step.order"
+                 [class.transform]="activeStep()?.order === step.order"
+                 [class.scale-105]="activeStep()?.order === step.order"
+                 [class.bg-blue-100]="isStepEnabled(step) && activeStep()?.order !== step.order"
+                 [class.text-blue-700]="isStepEnabled(step) && activeStep()?.order !== step.order"
+                 [class.text-gray-400]="!isStepEnabled(step)"
+                 [class.pointer-events-none]="!isStepEnabled(step)"
+                 [class.opacity-50]="!isStepEnabled(step)"
+                 [disabled]="!isStepEnabled(step)"
+                 class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md border-none bg-transparent cursor-pointer">
+                {{ step.label | i18nTranslate }}
+              </button>
+            }
+          </nav>
+
+          <!-- Progreso de la página actual -->
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-3 md:p-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
+              <div class="flex-1">
+                <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() | i18nTranslate }}</h2>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() | i18nTranslate }}</p>
+              </div>
+              <div class="flex items-center space-x-3 md:space-x-4 w-full md:w-auto">
                 <div class="text-right">
-                    <div class="text-sm text-gray-400 dark:text-gray-500 uppercase tracking-wider">Tiempo estimado</div>
-                    <div class="text-lg font-semibold text-white">{{ getEstimatedTime() }}</div>
+                  <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ getCurrentProgress().answered }} / {{ getCurrentProgress().total }}
+                  </div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% {{ 'diagnostic.company.progress.completed' | i18nTranslate }}
+                  </div>
                 </div>
-            </div>
-
-            <!-- Indicador de estado del diagnóstico -->
-            <div *ngIf="isDiagnosticComplete()" class="mb-4 p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span class="text-green-400 font-medium">¡Diagnóstico Completado! Ahora puedes navegar libremente entre los pasos.</span>
+                <div class="w-24 md:w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 md:h-3 overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
+                       [style.width.%]="(getCurrentProgress().answered / getCurrentProgress().total) * 100">
+                  </div>
                 </div>
+              </div>
             </div>
-
-            <!-- Barra de progreso principal con efectos -->
-            <div class="relative mb-8">
-                <div class="h-4 w-full bg-gray-700 dark:bg-gray-600 rounded-full overflow-hidden shadow-inner">
-                    <!-- Barra de progreso con gradiente y animación -->
-                    <div class="h-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-1000 ease-out shadow-lg relative overflow-hidden" 
-                         [style.width.%]="progress">
-                        <!-- Efecto de brillo que se mueve -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 animate-shimmer"></div>
-                    </div>
-                </div>
-                
-                <!-- Indicadores de pasos con diseño de tarjetas -->
-                <div class="flex justify-between mt-8 relative">
-                    <!-- Línea de conexión entre pasos -->
-                    <div class="absolute top-6 left-0 right-0 h-0.5 bg-gray-600 dark:bg-gray-700 -z-10"></div>
-                    
-                    <!-- Paso 1: Inicio -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(0)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(0)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(0) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(0) !== 'completed'">1</span>
-                            </div>
-                            <!-- Punto de conexión -->
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Inicio</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Configuración</div>
-                    </div>
-
-                    <!-- Paso 2: Contexto -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(1)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(16.67)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(16.67) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(16.67) !== 'completed'">2</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Contexto</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Organización</div>
-                    </div>
-
-                    <!-- Paso 3: ARES -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(2)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(50)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(50) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(50) !== 'completed'">3</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">ARES</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Framework</div>
-                    </div>
-
-                    <!-- Paso 4: Competencias -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(3)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(83.33)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(83.33) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(83.33) !== 'completed'">4</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Competencias</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">13 Claves</div>
-                    </div>
-
-                    <!-- Paso 5: Objetivo -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(4)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(91.67)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(91.67) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(91.67) !== 'completed'">5</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Objetivo</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Metas</div>
-                    </div>
-
-                    <!-- Paso 6: Contacto -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(5)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(95.83)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(95.83) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(95.83) !== 'completed'">6</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Contacto</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Información</div>
-                    </div>
-
-                    <!-- Paso 7: Resultados -->
-                    <div class="flex flex-col items-center group" 
-                         [class]="isDiagnosticComplete() ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'"
-                         (click)="navigateToStep(6)">
-                        <div class="relative">
-                            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300"
-                                 [class]="getStepStatusClass(100)"
-                                 [class.group-hover:scale-110]="isDiagnosticComplete()">
-                                <svg *ngIf="getStepStatus(100) === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span *ngIf="getStepStatus(100) !== 'completed'">7</span>
-                            </div>
-                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-600 dark:bg-gray-700 rounded-full transition-colors duration-300"
-                                 [class.group-hover:bg-blue-500]="isDiagnosticComplete()"></div>
-                        </div>
-                        <span class="mt-3 text-sm font-medium transition-colors duration-300"
-                              [class]="isDiagnosticComplete() ? 'text-gray-300 dark:text-gray-400 group-hover:text-white' : 'text-gray-500 dark:text-gray-600'">Resultados</span>
-                        <div class="text-xs text-gray-500 dark:text-gray-600 mt-1">Análisis</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mensaje motivacional -->
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full border border-blue-500/20">
-                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                    <span class="text-sm text-blue-300">{{ getMotivationalMessage() }}</span>
-                </div>
-            </div>
-
-            <!-- Navegación de pasos -->
-            <div class="flex items-center justify-between gap-4 mt-6">
-                <button (click)="goPrevious()"
-                        class="px-4 py-2 rounded-md bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Anterior
-                </button>
-
-                <button (click)="goNext()"
-                        [disabled]="!canGoNext"
-                        class="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                    Siguiente
-                </button>
-            </div>
+          </div>
         </div>
+      </div>
+
+      <!-- Mensaje cuando el diagnóstico está completado (oculto por ahora) -->
+      @if (false) {
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg text-center">
+              <p class="text-green-800 dark:text-green-200 font-semibold">{{ 'diagnostic.company.messages.completed' | i18nTranslate }}</p>
+              <p class="text-sm text-green-700 dark:text-green-300">{{ 'diagnostic.company.messages.completed_desc' | i18nTranslate }}</p>
+              <button (click)="startNew()" class="mt-2 text-sm text-blue-600 hover:underline">{{ 'diagnostic.company.messages.start_new' | i18nTranslate }}</button>
+          </div>
+        </div>
+      }
+    }
     `,
-	changeDetection: ChangeDetectionStrategy.Default,
 })
-export class StepNavComponent implements OnInit, OnDestroy {
-	@Input() progress: number = 0;
-	private diagnosticStateService = inject(DiagnosticStateService);
-	private router = inject(Router);
+export class StepNavComponent {
+  router = inject(Router);
+  stateService = inject(DiagnosticStateService);
+  scrollService = inject(ScrollService);
 
-	canGoNext = true;
-	private subs = new Subscription();
+  // Exponer Math para el template
+  Math = Math;
 
-	ngOnInit(): void {
-		// Inicialización del componente
-		this.updateCanGoNext();
-		this.subs.add(this.diagnosticStateService.state$.subscribe(() => this.updateCanGoNext()));
-		this.subs.add(this.router.events.subscribe(() => this.updateCanGoNext()));
-	}
+  steps: Step[] = [
+    { path: 'contexto', label: 'diagnostic.company.steps.profile', order: 1 },
+    { path: 'ares', label: 'diagnostic.company.steps.ares', order: 2 },
+    { path: 'competencias', label: 'diagnostic.company.steps.competencies', order: 3 },
+    { path: 'objetivo', label: 'diagnostic.company.steps.objectives', order: 4 },
+    { path: 'finalizar', label: 'diagnostic.company.steps.finish', order: 5 },
+    { path: 'resultados', label: 'diagnostic.company.steps.results', order: 6 },
+  ];
 
-	getProgressPercentage(): number {
-		return Math.round(this.progress);
-	}
+  // Señal que nos dice cuál es el paso activo actualmente
+  private currentUrl = toSignal(
+      this.router.events.pipe(
+          filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+      )
+  );
 
-	getEstimatedTime(): string {
-		const remainingSteps = 7 - Math.ceil(this.progress / 16.67);
-		const estimatedMinutes = remainingSteps * 2; // 2 minutos por paso
-		return `${estimatedMinutes} min`;
-	}
+  activeStep = computed(() => {
+    const url = this.currentUrl()?.urlAfterRedirects;
+    if (!url) return this.steps[0];
+    return this.steps.find(s => url.includes(s.path));
+  });
 
-	getStepStatus(stepProgress: number): 'completed' | 'current' | 'pending' {
-		if (this.progress >= stepProgress) {
-			return 'completed';
-		} else if (this.progress >= stepProgress - 16.67) {
-			return 'current';
-		} else {
-			return 'pending';
-		}
-	}
+  // Lógica para determinar si un paso está habilitado
+  isStepEnabled(step: Step): boolean {
+    const currentStepOrder = this.activeStep()?.order || 0;
+    // Permitir navegación al paso actual y al siguiente paso
+    return step.order <= currentStepOrder + 1;
+  }
 
-	getStepStatusClass(stepProgress: number): string {
-		const status = this.getStepStatus(stepProgress);
-		
-		switch (status) {
-			case 'completed':
-				return 'bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/25';
-			case 'current':
-				return 'bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25 animate-pulse';
-			default:
-				return 'bg-gray-600 dark:bg-gray-500 shadow-md';
-		}
-	}
+  // Método para obtener el progreso actual basado en la ruta
+  getCurrentProgress() {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/ares')) {
+      return this.stateService.aresProgress();
+    } else if (currentUrl.includes('/competencias')) {
+      return this.stateService.competenciasProgress();
+    } else if (currentUrl.includes('/contexto')) {
+      // Para contexto, siempre mostrar 0/1 ya que es solo un paso
+      return { answered: 0, total: 1, isComplete: false };
+    } else if (currentUrl.includes('/objetivo')) {
+      // Para objetivo, verificar si tiene objetivos seleccionados
+      const objetivo = this.stateService.state().objetivo;
+      const hasObjectives = objetivo && objetivo.objetivo && objetivo.objetivo.length > 0;
+      return { answered: hasObjectives ? 1 : 0, total: 1, isComplete: hasObjectives };
+    } else {
+      // Para otros pasos, mostrar progreso general
+      const totalSteps = 4; // contexto, ares, competencias, objetivo
+      const completedSteps = 
+        (this.stateService.state().contexto ? 1 : 0) +
+        (this.stateService.aresProgress().isComplete ? 1 : 0) +
+        (this.stateService.competenciasProgress().isComplete ? 1 : 0) +
+        (this.stateService.state().objetivo?.objetivo?.length > 0 ? 1 : 0);
+      
+      return { answered: completedSteps, total: totalSteps, isComplete: completedSteps === totalSteps };
+    }
+  }
 
-	getMotivationalMessage(): string {
-		const percentage = this.getProgressPercentage();
-		
-		if (percentage < 20) {
-			return '¡Comencemos este viaje juntos!';
-		} else if (percentage < 40) {
-			return '¡Excelente progreso! Sigue así';
-		} else if (percentage < 60) {
-			return '¡Ya estás a mitad de camino!';
-		} else if (percentage < 80) {
-			return '¡Casi terminamos! Mantén el ritmo';
-		} else if (percentage < 100) {
-			return '¡Último esfuerzo! Estás muy cerca';
-		} else {
-			return '¡Felicidades! Has completado el diagnóstico';
-		}
-	}
+  // Método para obtener el título de la página actual
+  getCurrentPageTitle() {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/contexto')) {
+      return 'diagnostic.company.pages.profile_title';
+    } else if (currentUrl.includes('/ares')) {
+      return 'diagnostic.company.pages.ares_title';
+    } else if (currentUrl.includes('/competencias')) {
+      return 'diagnostic.company.pages.competencies_title';
+    } else if (currentUrl.includes('/objetivo')) {
+      return 'diagnostic.company.pages.objectives_title';
+    } else if (currentUrl.includes('/finalizar')) {
+      return 'diagnostic.company.pages.finish_title';
+    } else if (currentUrl.includes('/resultados')) {
+      return 'diagnostic.company.pages.results_title';
+    } else {
+      return 'diagnostic.company.pages.default_title';
+    }
+  }
 
-	isDiagnosticComplete(): boolean {
-		return this.diagnosticStateService.isDiagnosticComplete();
-	}
+  // Método para obtener la descripción de la página actual
+  getCurrentPageDescription() {
+    const currentUrl = this.router.url;
+    
+    if (currentUrl.includes('/contexto')) {
+      return 'diagnostic.company.pages.profile_desc';
+    } else if (currentUrl.includes('/ares')) {
+      return 'diagnostic.company.pages.ares_desc';
+    } else if (currentUrl.includes('/competencias')) {
+      return 'diagnostic.company.pages.competencies_desc';
+    } else if (currentUrl.includes('/objetivo')) {
+      return 'diagnostic.company.pages.objectives_desc';
+    } else if (currentUrl.includes('/finalizar')) {
+      return 'diagnostic.company.pages.finish_desc';
+    } else if (currentUrl.includes('/resultados')) {
+      return 'diagnostic.company.pages.results_desc';
+    } else {
+      return 'diagnostic.company.pages.default_desc';
+    }
+  }
+  
+  startNew() {
+      this.stateService.reset();
+      this.router.navigate(['/diagnostico/contexto']).then(() => {
+        // Hacer scroll al inicio después de navegar
+        this.scrollService.scrollToMainContent();
+      });
+  }
 
-	private updateCanGoNext(): void {
-		const currentUrl = this.router.url;
-		this.canGoNext = this.diagnosticStateService.canProceedFromRoute(currentUrl);
-	}
+  /**
+   * Maneja la navegación entre pasos con scroll automático
+   */
+  navigateToStep(stepPath: string): void {
+    this.router.navigate([stepPath]).then(() => {
+      // Hacer scroll al inicio del contenido principal
+      this.scrollService.scrollToMainContent();
+    });
+  }
 
-	navigateToStep(stepIndex: number): void {
-		if (this.isDiagnosticComplete()) {
-			// 🔧 SOLUCIÓN: Navegar al paso específico considerando el idioma
-			const stepRoutes = [
-				'inicio',
-				'contexto',
-				'ares',
-				'competencias',
-				'objetivo',
-				'lead',
-				'resultados'
-			];
-			
-			if (stepRoutes[stepIndex]) {
-				const currentUrl = this.router.url;
-				const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-				const targetUrl = `${baseUrl}/${stepRoutes[stepIndex]}`;
-				
-				console.log(`✅ Navegando al paso ${stepIndex + 1}: ${targetUrl}`);
-				
-				this.router.navigate([targetUrl]).catch(error => {
-					console.error('❌ Error navegando al paso:', error);
-					// Fallback: intentar navegación con ruta completa
-					this.router.navigate(['/es', 'diagnostico', stepRoutes[stepIndex]]).catch(fallbackErr => {
-						console.error('❌ Error en fallback de navegación:', fallbackErr);
-					});
-				});
-			}
-		} else {
-			// Mostrar mensaje de que no se puede navegar
-			console.warn('⚠️ No puedes navegar libremente hasta que el diagnóstico esté completo.');
-			// Aquí podrías mostrar un toast o notificación al usuario
-			alert('Debes completar todo el diagnóstico antes de poder navegar libremente entre los pasos.');
-		}
-	}
-
-	goNext(): void {
-		console.log('🚀 goNext() llamado');
-		this.updateCanGoNext();
-		console.log(`🔍 canGoNext: ${this.canGoNext}`);
-		
-		if (!this.canGoNext) {
-			alert('Completa el paso actual antes de continuar.');
-			return;
-		}
-		
-		const next = this.diagnosticStateService.getNextStepLink(this.router.url);
-		console.log(`🔍 next step: ${next}`);
-		
-		if (next) {
-			// 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
-			const currentUrl = this.router.url;
-			const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-			const nextStepUrl = `${baseUrl}/${next}`;
-			
-			console.log(`🚀 Navegando al siguiente paso: ${nextStepUrl}`);
-			console.log(`🔍 currentUrl: ${currentUrl}`);
-			console.log(`🔍 baseUrl: ${baseUrl}`);
-			console.log(`🔍 next: ${next}`);
-			
-			this.router.navigate([nextStepUrl]).catch(error => {
-				console.error('❌ Error en navegación:', error);
-				// Fallback: intentar navegación con ruta completa
-				this.router.navigate(['/es', 'diagnostico', next]).catch(fallbackErr => {
-					console.error('❌ Error en fallback de navegación:', fallbackErr);
-				});
-			});
-		} else {
-			console.error('❌ No se pudo obtener el siguiente paso');
-		}
-	}
-
-	goPrevious(): void {
-		console.log('🔄 goPrevious() llamado');
-		const prev = this.diagnosticStateService.getPreviousStepLink(this.router.url);
-		console.log(`🔍 prev step: ${prev}`);
-		
-		if (prev) {
-			// 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
-			const currentUrl = this.router.url;
-			const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-			const prevStepUrl = `${baseUrl}/${prev}`;
-			
-			console.log(`🔄 Navegando al paso anterior: ${prevStepUrl}`);
-			console.log(`🔍 currentUrl: ${currentUrl}`);
-			console.log(`🔍 baseUrl: ${baseUrl}`);
-			console.log(`🔍 prev: ${prev}`);
-			
-			this.router.navigate([prevStepUrl]).catch(error => {
-				console.error('❌ Error en navegación anterior:', error);
-				// Fallback: intentar navegación con ruta completa
-				this.router.navigate(['/es', 'diagnostico', prev]).catch(fallbackErr => {
-					console.error('❌ Error en fallback de navegación anterior:', fallbackErr);
-				});
-			});
-		} else {
-			console.error('❌ No se pudo obtener el paso anterior');
-		}
-	}
-
-	ngOnDestroy(): void {
-		this.subs.unsubscribe();
-	}
+  // Método para determinar si mostrar la navegación
+  shouldShowNavigation(): boolean {
+    const currentUrl = this.router.url;
+    
+    // No mostrar en la página de inicio del diagnóstico (ruta vacía o solo /diagnostico)
+    if (currentUrl.endsWith('/diagnostico') || currentUrl.endsWith('/diagnostico/')) {
+      return false;
+    }
+    
+    // No mostrar en el nuevo diagnóstico de empresas
+    if (currentUrl.includes('/diagnostico/empresas')) {
+      return false;
+    }
+    
+    // Mostrar en todas las demás rutas del diagnóstico de personas
+    return true;
+  }
 }
-
-

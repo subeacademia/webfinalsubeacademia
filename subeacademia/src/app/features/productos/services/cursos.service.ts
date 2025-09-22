@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Firestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy } from '@angular/fire/firestore';
 import { Observable, from, map } from 'rxjs';
 import { Curso } from '../data/producto.model';
@@ -8,8 +8,7 @@ import { Curso } from '../data/producto.model';
 })
 export class CursosService {
   private readonly collectionName = 'cursos';
-
-  constructor(private firestore: Firestore) {}
+  private firestore = inject(Firestore);
 
   // Obtener todos los cursos
   getCursos(): Observable<Curso[]> {

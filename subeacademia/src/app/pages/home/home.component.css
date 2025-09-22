@@ -17,27 +17,217 @@ section { scroll-margin-top: 80px; }
   z-index: 10 !important;
 }
 
-/* Estilos para el texto con gradiente */
-.gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 50%, #818cf8 100%);
+/* Overlay para mejorar contraste del hero sobre el canvas 3D en light mode */
+:root:not(.dark) section[role="banner"] .relative.z-10::before {
+  content: "";
+  position: absolute;
+  inset: -2rem;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.35) 80%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  z-index: -1;
+  filter: saturate(1.05);
+}
+
+/* En dark mode, el overlay debe ser sutil y no aclarar demasiado */
+.dark section[role="banner"] .relative.z-10::before {
+  content: "";
+  position: absolute;
+  inset: -2rem;
+  background: radial-gradient(ellipse at center, rgba(2,6,23,0.7) 0%, rgba(2,6,23,0.55) 50%, rgba(2,6,23,0.3) 80%, rgba(2,6,23,0) 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Estilos para el texto con gradiente - NUEVO COLOR PRIMARIO NARANJA CON MEJOR CONTRASTE */
+.gradient-text, .orange-gradient-text {
+  /* Gradiente naranja vibrante - NUEVO COLOR PRIMARIO */
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   color: transparent;
   opacity: 1 !important;
   visibility: visible !important;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.9));
+  position: relative;
 }
 
-/* Typewriter cursor parpadeante */
-.cursor {
-  display: inline-block;
-  width: 1ch;
-  color: #c7d2fe; /* indigo-200 */
-  animation: blink 1s steps(2, start) infinite;
+/* Gradiente naranja brillante para modo oscuro */
+.dark .gradient-text, .dark .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
 }
+
+/* Contenedor del typewriter para mantener elementos en línea */
+.typewriter-container {
+  min-height: 1.2em; /* Altura mínima para evitar saltos */
+  align-items: center; /* Centrar verticalmente */
+  line-height: 1.2; /* Altura de línea consistente */
+  display: flex; /* Usar flex para mantener elementos juntos */
+  flex-wrap: nowrap; /* Mantener cursor inline */
+  justify-content: center;
+  max-width: 100%; /* Respetar el ancho máximo */
+  overflow: hidden; /* Ocultar desbordamiento si es necesario */
+}
+
+/* Texto del typewriter */
+.typewriter-text {
+  display: inline-block;
+  vertical-align: baseline;
+  max-width: calc(100% - 20px); /* Dejar espacio para el cursor */
+  overflow: hidden; /* Ocultar texto que se desborde */
+  text-overflow: ellipsis; /* Mostrar ... si es muy largo */
+  white-space: nowrap; /* Mantener en una línea para el efecto typewriter */
+}
+
+/* Permitir que frases largas se muestren en múltiples líneas */
+.typewriter-container {
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  min-height: 2.6em !important; /* Espacio para 2 líneas */
+}
+
+.typewriter-text {
+  white-space: normal !important;
+  text-overflow: unset !important;
+  overflow: visible !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Asegurar que el texto de descripción del hero NO se trunque */
+.hero-description {
+  white-space: normal !important;
+  text-overflow: unset !important;
+  overflow: visible !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  /* Eliminar fondo/tarjeta: texto plano que se integra con el fondo */
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Asegurar alto contraste del botón ghost en modo oscuro */
+.dark .hero-ghost-btn {
+  color: #ffffff !important;
+}
+.dark .hero-ghost-btn svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Penetrar el componente hijo y forzar blanco en modo oscuro */
+.dark ::ng-deep app-ui-button.hero-ghost-btn,
+.dark ::ng-deep app-ui-button.hero-ghost-btn *,
+.dark ::ng-deep app-ui-button.hero-ghost-btn svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Target el botón interno renderizado por app-ui-button */
+.dark app-ui-button.hero-ghost-btn .colorful-button {
+  color: #ffffff !important;
+}
+.dark app-ui-button.hero-ghost-btn .colorful-button svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Refuerzo directo al contenido del botón en dark */
+.dark .hero-ghost-btn .text-inherit,
+.dark .hero-ghost-btn span,
+.dark .hero-ghost-btn svg {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Typewriter cursor parpadeante - SIEMPRE INLINE */
+.cursor {
+  display: inline;
+  color: #dc2626; /* Rojo vibrante para modo claro */
+  animation: blink 1s steps(2, start) infinite;
+  vertical-align: baseline;
+  margin-left: 0px; /* Sin margen para estar pegado al texto */
+  flex-shrink: 0;
+  line-height: inherit;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+  position: relative; /* Asegurar posicionamiento inline */
+  white-space: nowrap; /* Nunca permitir wrap */
+}
+
+/* Cursor brillante para modo oscuro */
+.dark .cursor {
+  color: #fbbf24; /* Amarillo brillante para modo oscuro */
+  text-shadow: 0 1px 6px rgba(251, 191, 36, 0.4);
+}
+
+/* Asegurar que el contenedor del typewriter mantenga elementos en línea */
+#typewriter {
+  display: inline;
+  vertical-align: baseline;
+}
+
+/* Caret como pseudo-elemento para evitar saltos de línea en móvil */
+#typewriter::after {
+  content: '|';
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+  vertical-align: baseline;
+}
+/* Ocultar elemento .cursor legado */
+.cursor { display: none !important; }
 
 @keyframes blink {
   to { visibility: hidden; }
+}
+
+/* Responsive para el typewriter en móviles - TEXTO COMPLETO */
+@media (max-width: 640px) {
+  .typewriter-container {
+    flex-direction: column; /* Permitir que el cursor vaya abajo si es necesario */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    padding: 0 1rem;
+    min-height: 3.5em; /* Espacio para múltiples líneas en móvil */
+  }
+  
+  .typewriter-text {
+    max-width: calc(100vw - 4rem); /* Más espacio disponible */
+    overflow: visible !important; /* Mostrar todo el texto */
+    text-overflow: unset !important; /* No usar puntos suspensivos */
+    white-space: normal !important; /* Permitir saltos de línea */
+    font-size: 0.85em; /* Reducir ligeramente el tamaño en móvil */
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    text-align: center;
+    line-height: 1.2;
+  }
+  
+  /* Cursor en línea separada si es necesario */
+  .cursor {
+    margin-left: 2px;
+    flex-shrink: 0;
+    width: auto;
+    min-width: 1ch;
+    display: inline;
+  }
 }
 
 /* Carrusel infinito simple (marquee) */
@@ -100,76 +290,10 @@ section { scroll-margin-top: 80px; }
 .flip-body h3 { font-size: 1.125rem; }
 .flip-body p { font-size: 0.95rem; }
 
-/* Estilos mejorados para los botones CTA principales */
+/* Contenedor de botones CTA */
 .hero-cta-buttons {
   position: relative;
   z-index: 20;
-}
-
-/* Botón primario con efectos mejorados */
-.hero-cta-buttons app-ui-button[variant="primary"] {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  border: none;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.hero-cta-buttons app-ui-button[variant="primary"]:hover::before {
-  left: 100%;
-}
-
-/* Botón secundario con efectos mejorados */
-.hero-cta-buttons app-ui-button[variant="ghost"] {
-  position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-cta-buttons app-ui-button[variant="ghost"]:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
-}
-
-/* Efectos de partículas para los botones */
-.hero-cta-buttons app-ui-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.hero-cta-buttons app-ui-button:active::after {
-  width: 300px;
-  height: 300px;
-  opacity: 0;
 }
 
 /* Responsive para botones en móviles */
@@ -178,31 +302,610 @@ section { scroll-margin-top: 80px; }
     flex-direction: column;
     gap: 1rem;
   }
+}
+
+/* ===== ESTILOS PARA LA METODOLOGÍA ARES-AI FINAL CON CARD STACKING ===== */
+
+/* Estilos para el item de navegación de fase */
+.phase-nav-item {
+  background-color: transparent;
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phase-nav-item:hover {
+  background-color: var(--fallback-b2, oklch(var(--b2) / 0.3));
+  border-color: var(--fallback-p, oklch(var(--p) / 0.1));
+  transform: translateX(5px);
+}
+
+/* Estilo del item de navegación CUANDO ESTÁ ACTIVO */
+.phase-nav-item.active {
+  background-color: var(--fallback-b2, oklch(var(--b2) / 0.7));
+  border-color: var(--fallback-p, oklch(var(--p) / 0.3));
+  transform: translateX(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.phase-nav-item.active span {
+  color: var(--fallback-bc, oklch(var(--bc)));
+}
+
+/* ===== ESTILOS CLAVE PARA EL CARD STACKING ===== */
+
+/* Estilos para las tarjetas de contenido apilables */
+.phase-content-card {
+  /* Ya tiene sticky top-24 desde Tailwind en el HTML */
+  transition: transform 0.4s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
+  scroll-margin-top: 6rem; /* Compensa la navegación sticky */
+  transform-origin: center top; /* Punto de origen para las transformaciones */
+  position: relative; /* Asegurar contexto de apilamiento */
+}
+
+/*
+  Z-index para que las tarjetas posteriores aparezcan sobre las anteriores
+  y puedan "empujar" hacia arriba a las que están debajo
+*/
+#phase-card-1 { z-index: 1; }
+#phase-card-2 { z-index: 2; }
+#phase-card-3 { z-index: 3; }
+#phase-card-4 { z-index: 4; }
+#phase-card-5 { z-index: 5; }
+
+/* Clase para deslizar tarjetas hacia arriba cuando aparece la siguiente */
+.phase-content-card.slide-up {
+  transform: translateY(-150%) scale(0.8); /* Mayor separación y escala más pequeña */
+  opacity: 0;
+  pointer-events: none; /* Evita interacciones con tarjetas que se han deslizado */
+  visibility: hidden; /* Oculta completamente la tarjeta */
+  z-index: -1; /* Coloca las tarjetas deslizadas detrás de todo */
+  overflow: hidden; /* Evita que el contenido se desborde */
+}
+
+/* Ocultar específicamente el texto de las tarjetas deslizadas */
+.phase-content-card.slide-up * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Mejoras para las imágenes en las tarjetas */
+.phase-content-card img {
+  transition: transform 0.3s ease;
+}
+
+.phase-content-card img:hover {
+  transform: scale(1.02);
+}
+
+/* Animación sutil para los elementos de la lista de entregables */
+.phase-content-card li {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.phase-content-card li:hover {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+/* Estilos para el acordeón en móvil */
+@media (max-width: 1023px) {
+  /* Asegurar que la sección de metodología sea visible en móviles */
+  #metodologia {
+    position: relative;
+    z-index: 1;
+    min-height: auto;
+    display: block;
+    background: var(--fallback-b1, oklch(var(--b1))) !important;
+  }
+  
+  /* Asegurar que el título y descripción sean visibles */
+  #metodologia h2,
+  #metodologia p {
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Estilos específicos para el título con gradiente */
+  #metodologia .gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Asegurar que el contenido del acordeón sea visible */
+  #metodologia .lg\:hidden {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Estilos mejorados para el acordeón */
+  .collapse {
+    position: relative;
+    z-index: 2;
+    background-color: var(--fallback-b2, oklch(var(--b2)));
+    border: 1px solid var(--fallback-bc, oklch(var(--bc) / 0.1));
+    overflow: visible;
+  }
+  
+  /* Asegurar que el acordeón expandido muestre todo el contenido */
+  .collapse[open] .collapse-content,
+  .collapse input[type="radio"]:checked ~ .collapse-content {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  .collapse-title {
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 3;
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+  }
+  
+  .collapse-title:hover {
+    background-color: var(--fallback-b3, oklch(var(--b3) / 0.5));
+  }
+  
+  .collapse-content {
+    position: relative;
+    z-index: 3;
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+  }
+  
+  /* Asegurar que las imágenes del acordeón se vean bien */
+  .collapse-content img {
+    transition: transform 0.3s ease;
+    display: block !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 192px !important; /* h-48 = 12rem = 192px */
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative;
+    z-index: 10;
+    background-color: var(--fallback-b3, oklch(var(--b3)));
+  }
+  
+  .collapse-content img:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Fallback para imágenes que no cargan */
+  .collapse-content img[src=""],
+  .collapse-content img:not([src]) {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .collapse-content img[src=""]:before,
+  .collapse-content img:not([src]):before {
+    content: "📷";
+    font-size: 2rem;
+    color: var(--fallback-bc, oklch(var(--bc) / 0.3));
+  }
+  
+  /* Estilos específicos para las imágenes móviles */
+  .mobile-methodology-image {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: relative !important;
+    z-index: 15 !important;
+    width: 100% !important;
+    height: 192px !important;
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+    background-color: #f3f4f6 !important;
+    min-height: 192px !important;
+  }
+  
+  /* Asegurar que el contenedor de la imagen sea visible */
+  .collapse-content .space-y-4 {
+    position: relative;
+    z-index: 10;
+  }
+  
+  /* Estilos específicos para texto en móvil */
+  .collapse-content h3,
+  .collapse-content h4,
+  .collapse-content p,
+  .collapse-content li {
+    color: var(--fallback-bc, oklch(var(--bc))) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Asegurar que los iconos sean visibles */
+  .collapse-content svg {
+    color: var(--fallback-su, oklch(var(--su))) !important;
+  }
+  
+  /* Estilos adicionales para mejorar el contraste */
+  #metodologia .container {
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Asegurar que el CTA final sea visible */
+  #metodologia .text-center {
+    position: relative;
+    z-index: 3;
+  }
+  
+  #metodologia .text-center p {
+    color: var(--fallback-bc, oklch(var(--bc) / 0.7)) !important;
+  }
+  
+  /* Corregir gradientes en botones de metodología */
+  #metodologia .btn-primary {
+    background: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: white !important;
+  }
+  
+  #metodologia .btn-primary:hover {
+    background: #2563eb !important;
+    border-color: #2563eb !important;
+    color: white !important;
+  }
+}
+
+/* Estilos para mejorar la accesibilidad */
+.phase-nav-item:focus {
+  outline: 2px solid var(--fallback-p, oklch(var(--p)));
+  outline-offset: 2px;
+}
+
+.phase-nav-item:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Mejoras para el CTA final */
+app-ui-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mejorar el spacing en el acordeón */
+.collapse-content {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+/* Smooth scroll para los enlaces de navegación */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animaciones dinámicas para elementos de fondo */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(1deg); }
+  66% { transform: translateY(10px) rotate(-1deg); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { 
+    filter: blur(60px) brightness(1); 
+    opacity: 0.4; 
+  }
+  50% { 
+    filter: blur(80px) brightness(1.3); 
+    opacity: 0.7; 
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+/* Elementos de fondo mejorados para light mode - MÁXIMO IMPACTO */
+:root:not(.dark) .hero-bg-element-1 {
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.35) 0%, rgba(239, 68, 68, 0.2) 30%, rgba(234, 88, 12, 0.15) 60%, transparent 100%) !important;
+  filter: blur(60px) !important;
+}
+
+:root:not(.dark) .hero-bg-element-2 {
+  background: radial-gradient(circle, rgba(234, 88, 12, 0.4) 0%, rgba(217, 119, 6, 0.25) 30%, rgba(202, 138, 4, 0.15) 60%, transparent 100%) !important;
+  filter: blur(80px) !important;
+}
+
+:root:not(.dark) .hero-bg-element-3 {
+  background: radial-gradient(circle, rgba(202, 138, 4, 0.3) 0%, rgba(234, 179, 8, 0.2) 30%, rgba(250, 204, 21, 0.1) 60%, transparent 100%) !important;
+  filter: blur(100px) !important;
+}
+
+/* Mantener los estilos originales para dark mode */
+.dark .hero-bg-element-1,
+.dark .hero-bg-element-2,
+.dark .hero-bg-element-3 {
+  /* Los estilos originales se mantienen a través de las variables CSS */
+}
+
+/* ===== SISTEMA DE BOTONES UNIFORME ===== */
+
+/* Asegurar que todos los botones tengan el mismo comportamiento base */
+app-ui-button {
+  display: inline-block;
+  width: auto;
+}
+
+/* Asegurar que flag-selector no sea afectado y sea visible */
+app-flag-selector {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+app-flag-selector .flag-selector {
+  display: flex !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+app-flag-selector button {
+  all: revert !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 2rem !important;
+  height: 1.5rem !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0.25rem !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+app-flag-selector button:hover {
+  transform: scale(1.1) !important;
+  border-color: #3b82f6 !important;
+}
+
+app-flag-selector .flag-image {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+app-flag-selector svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Botones con ancho completo en secciones específicas */
+.w-full app-ui-button,
+app-ui-button.w-full {
+  width: 100%;
+}
+
+/* Asegurar alineación en secciones de soluciones */
+.solutions-grid {
+  align-items: stretch;
+}
+
+.solutions-grid .group {
+  display: flex;
+  flex-direction: column;
+}
+
+.solutions-grid .group > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.solutions-grid .relative:last-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.solutions-grid app-ui-button {
+  width: 100%;
+  margin: 0 auto;
+  margin-top: auto;
+}
+
+/* ===== ESTILOS COLORIDOS ESPECÍFICOS PARA BOTONES ===== */
+
+/* Botón principal del hero - GRADIENTE NARANJA VIBRANTE */
+.hero-primary-btn {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%) !important;
+  box-shadow: 0 10px 25px rgba(234, 88, 12, 0.5), 0 4px 15px rgba(249, 115, 22, 0.3) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.hero-primary-btn:hover {
+  background: linear-gradient(135deg, #c2410c 0%, #b91c1c 25%, #ea580c 50%, #f97316 75%, #fb923c 100%) !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 20px 40px rgba(234, 88, 12, 0.7), 0 8px 25px rgba(249, 115, 22, 0.5) !important;
+}
+
+/* Efecto de brillo en el botón principal */
+.hero-primary-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+}
+
+/* Botón principal del hero en modo oscuro */
+.dark .hero-primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 25%, #8b5cf6 50%, #a855f7 75%, #c084fc 100%) !important;
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5), 0 4px 15px rgba(139, 92, 246, 0.4) !important;
+}
+
+.dark .hero-primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 25%, #7c3aed 50%, #9333ea 75%, #a855f7 100%) !important;
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.7), 0 8px 25px rgba(139, 92, 246, 0.6) !important;
+}
+
+/* Botón ghost del hero - CONTRASTE MEJORADO */
+.hero-ghost-btn {
+  /* Fondo azul eléctrico sólido (no transparente) */
+  background: linear-gradient(135deg, #00BFFF 0%, #2563EB 50%, #1D4ED8 100%) !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  backdrop-filter: none !important;
+  font-weight: 800 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45), 0 6px 16px rgba(0, 191, 255, 0.35) !important;
+}
+
+.hero-ghost-btn:hover {
+  background: linear-gradient(135deg, #22D3EE 0%, #3B82F6 50%, #1E40AF 100%) !important;
+  transform: translateY(-4px) scale(1.08) !important;
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.6), 0 10px 24px rgba(34, 211, 238, 0.4) !important;
+}
+
+/* Botón ghost del hero en modo oscuro */
+.dark .hero-ghost-btn {
+  background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 45%, #2563EB 100%) !important;
+  border: 0 !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.45), 0 6px 16px rgba(37, 99, 235, 0.35) !important;
+}
+
+.dark .hero-ghost-btn:hover {
+  background: linear-gradient(135deg, #67E8F9 0%, #3B82F6 50%, #1E40AF 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 18px 40px rgba(14, 165, 233, 0.55), 0 10px 24px rgba(59, 130, 246, 0.45) !important;
+}
+
+/* Botón de metodología azul */
+.methodology-primary-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Botón de metodología púrpura */
+.methodology-purple-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a855f7 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.5) !important;
+}
+
+/* Botón azul de soluciones */
+.solution-blue-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.6) !important;
+}
+
+/* Botón verde de soluciones */
+.solution-green-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6) !important;
+}
+
+/* Botón naranja de soluciones */
+.solution-orange-btn:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #92400e 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(245, 158, 11, 0.6) !important;
+}
+
+/* Botón final cyan */
+.final-cta-btn:hover {
+  background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #155e75 100%) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 15px 35px rgba(6, 182, 212, 0.6) !important;
+}
+
+/* Efectos de pulsación para todos */
+.hero-primary-btn:active,
+.hero-ghost-btn:active,
+.methodology-primary-btn:active,
+.methodology-purple-btn:active,
+.solution-blue-btn:active,
+.solution-green-btn:active,
+.solution-orange-btn:active,
+.final-cta-btn:active {
+  transform: translateY(0) scale(0.95) !important;
+  transition: all 0.1s ease !important;
+}
+
+/* Responsive para móviles */
+@media (max-width: 640px) {
+  app-ui-button {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  
+  .hero-cta-buttons {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
   
   .hero-cta-buttons app-ui-button {
     width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
+    max-width: 280px;
   }
-}
-
-/* Animación de entrada para los botones */
-@keyframes buttonSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+  
+  /* Ajustar padding en móviles */
+  .hero-primary-btn,
+  .hero-ghost-btn,
+  .methodology-primary-btn,
+  .methodology-purple-btn,
+  .solution-blue-btn,
+  .solution-green-btn,
+  .solution-orange-btn,
+  .final-cta-btn {
+    padding: 0.875rem 1.5rem !important;
+    font-size: 0.95rem !important;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-cta-buttons app-ui-button {
-  animation: buttonSlideIn 0.8s ease-out forwards;
-}
-
-.hero-cta-buttons app-ui-button:nth-child(2) {
-  animation-delay: 0.2s;
 }
 

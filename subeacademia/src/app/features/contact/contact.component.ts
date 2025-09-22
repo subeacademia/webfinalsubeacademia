@@ -16,7 +16,7 @@ import { RecaptchaV3Service } from '../../core/services/recaptcha-v3.service';
       <div class="text-center mb-12">
         <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
           Habla con un 
-          <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Asesor Especializado</span>
+          <span class="orange-gradient-text">Asesor Especializado</span>
         </h1>
         <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
           Nuestros expertos en IA están listos para ayudarte a transformar tu organización. 
@@ -152,6 +152,29 @@ import { RecaptchaV3Service } from '../../core/services/recaptcha-v3.service';
     </div>
   </section>
   `,
+  styles: [`
+    /* Gradiente naranja - COLOR PRIMARIO DE LA MARCA */
+    .orange-gradient-text {
+      background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+      font-weight: 900 !important;
+    }
+    
+    /* Modo oscuro */
+    :global(.dark) .orange-gradient-text {
+      background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+      font-weight: 900 !important;
+    }
+  `]
 })
 export class ContactComponent {
   private readonly http = inject(HttpClient);

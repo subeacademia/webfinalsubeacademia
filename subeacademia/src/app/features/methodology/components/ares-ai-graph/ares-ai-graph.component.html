@@ -189,27 +189,134 @@
   </div>
 
   <!-- Panel de información lateral -->
-  <div class="info-panel" *ngIf="!activeElement">
+  <div class="info-panel bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700" *ngIf="!activeElement">
     <div class="info-content">
       <div class="default-info">
-        <h3 class="info-title">Framework ARES-AI</h3>
-        <p class="info-description">
+        <h3 class="info-title text-slate-800 dark:text-slate-100">Framework ARES-AI</h3>
+        <p class="info-description text-slate-600 dark:text-slate-300">
           Haz clic en cualquier fase o principio del gráfico para obtener información detallada sobre el Framework ARES-AI.
         </p>
         <div class="info-highlights">
-          <div class="highlight-item">
+          <div class="highlight-item bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500">
             <span class="highlight-icon">🎯</span>
-            <span>5 fases metodológicas</span>
+            <span class="text-slate-700 dark:text-slate-200">5 fases metodológicas</span>
           </div>
-          <div class="highlight-item">
+          <div class="highlight-item bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500">
             <span class="highlight-icon">⚖️</span>
-            <span>4 principios transversales</span>
+            <span class="text-slate-700 dark:text-slate-200">4 principios transversales</span>
           </div>
-          <div class="highlight-item">
+          <div class="highlight-item bg-white dark:bg-slate-600 border border-slate-200 dark:border-slate-500">
             <span class="highlight-icon">🚀</span>
-            <span>Enfoque iterativo y adaptativo</span>
+            <span class="text-slate-700 dark:text-slate-200">Enfoque iterativo y adaptativo</span>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal detallado para fases y principios -->
+  <div *ngIf="showModal() && modalContent()" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onOverlayClick($event)">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <div class="p-8">
+        <!-- Header fijo con botón de cerrar siempre visible -->
+        <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6 -m-8 mb-0">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-xl flex items-center justify-center text-white text-2xl font-bold"
+                 [style.background]="'linear-gradient(135deg, ' + modalContent()!.color + ', ' + modalContent()!.color + '90)'">
+              {{ modalContent()!.type === 'phase' ? (getPhases().indexOf(modalContent()!) + 1) : modalContent()!.icon }}
+            </div>
+            <div>
+              <h2 class="text-3xl font-bold orange-gradient-text">{{ modalContent()!.name }}</h2>
+              <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">
+                {{ modalContent()!.type === 'phase' ? 'Fase Metodológica' : 'Principio Transversal' }} del Framework ARES-AI
+              </p>
+            </div>
+          </div>
+          <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Contenido del modal con padding restaurado -->
+        <div class="px-8 pb-8">
+
+        <div class="space-y-6 text-gray-700 dark:text-gray-300">
+          <!-- Resumen principal -->
+          <div class="p-6 rounded-xl border"
+               [style.background]="'linear-gradient(135deg, ' + modalContent()!.color + '10, ' + modalContent()!.color + '05)'"
+               [style.border-color]="modalContent()!.color + '30'">
+            <h3 class="text-xl font-semibold mb-3 text-gray-900 dark:text-white">📋 Descripción General</h3>
+            <p class="leading-relaxed text-lg">{{ modalContent()!.summary }}</p>
+          </div>
+
+          <!-- Detalles específicos -->
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎯 Elementos Clave</h4>
+              <ul class="space-y-3">
+                <li *ngFor="let detail of modalContent()!.details" class="flex items-start gap-3">
+                  <span class="flex-shrink-0 w-2 h-2 rounded-full mt-2"
+                        [style.background-color]="modalContent()!.color"></span>
+                  <span class="text-sm leading-relaxed">{{ detail }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {{ modalContent()!.type === 'phase' ? '⏱️ Cronología' : '🔄 Aplicación' }}
+              </h4>
+              <div class="space-y-3 text-sm">
+                <div *ngIf="modalContent()!.type === 'phase'" class="space-y-2">
+                  <p><strong>Duración típica:</strong> {{ getPhaseTimeline(modalContent()!) }}</p>
+                  <p><strong>Entregables:</strong> {{ getPhaseDeliverables(modalContent()!) }}</p>
+                  <p><strong>Stakeholders:</strong> {{ getPhaseStakeholders(modalContent()!) }}</p>
+                </div>
+                <div *ngIf="modalContent()!.type === 'principle'" class="space-y-2">
+                  <p><strong>Aplicación:</strong> {{ getPrincipleApplication(modalContent()!) }}</p>
+                  <p><strong>Beneficios:</strong> {{ getPrincipleBenefits(modalContent()!) }}</p>
+                  <p><strong>Medición:</strong> {{ getPrincipleMetrics(modalContent()!) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información académica y técnica -->
+          <div class="p-6 rounded-xl border border-gray-200 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🎓 Fundamento Académico</h4>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">📚 Referencias Teóricas:</h5>
+                <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                  <li *ngFor="let reference of getAcademicReferences(modalContent()!)">{{ reference }}</li>
+                </ul>
+              </div>
+              <div>
+                <h5 class="font-semibold text-gray-800 dark:text-gray-200 mb-2">🏢 Casos de Éxito:</h5>
+                <ul class="space-y-1 text-gray-600 dark:text-gray-400">
+                  <li *ngFor="let case of getSuccessCases(modalContent()!)">{{ case }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call to action -->
+          <div class="text-center p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              ¿Quieres implementar {{ modalContent()!.name }} en tu organización?
+            </h4>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">
+              Nuestros expertos pueden ayudarte a aplicar esta metodología específicamente en tu contexto empresarial.
+            </p>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                    (click)="closeModal()">
+              Solicitar Consultoría Especializada
+            </button>
+          </div>
+        </div>
+        </div> <!-- Cierre del contenido del modal -->
       </div>
     </div>
   </div>

@@ -1,292 +1,63 @@
-<div class="p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md transition-colors duration-300">
-  <!-- Header -->
-  <div class="mb-6">
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Define tus objetivos</h2>
-    <p class="text-gray-600 dark:text-gray-300">Sigue el flujo para generar y seleccionar objetivos personalizados con IA</p>
-  </div>
-
-  <!-- Indicador de progreso del flujo -->
-  <div class="mb-8">
-    <div class="flex items-center justify-center space-x-4">
-      <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
-             [class]="currentStep() === 'input' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
-          1
-        </div>
-        <span class="text-sm font-medium transition-colors duration-300"
-              [class]="currentStep() === 'input' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'">
-          Describe tu meta
-        </span>
-      </div>
-      
-      <div class="w-8 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-      
-      <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
-             [class]="currentStep() === 'generating' || currentStep() === 'selection' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
-          2
-        </div>
-        <span class="text-sm font-medium transition-colors duration-300"
-              [class]="currentStep() === 'generating' || currentStep() === 'selection' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'">
-          Genera objetivos
-        </span>
-      </div>
-      
-      <div class="w-8 h-1 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-      
-      <div class="flex items-center space-x-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-300"
-             [class]="currentStep() === 'review' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'">
-          3
-        </div>
-        <span class="text-sm font-medium transition-colors duration-300"
-              [class]="currentStep() === 'review' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'">
-          Revisa y continúa
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Paso 1: Input del usuario -->
-  <div *ngIf="currentStep() === 'input'" class="space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Columna izquierda: Resumen del contexto -->
-      <div class="lg:col-span-1">
-        <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Resumen del contexto</span>
-            <span class="text-xs text-gray-500 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">Automático</span>
-          </div>
-          <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-            <li class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-              <span>Industria: <strong>{{ state.getContextoData()?.industria || '—' }}</strong></span>
-            </li>
-            <li class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>Tamaño: <strong>{{ state.getContextoData()?.tamano || '—' }}</strong></span>
-            </li>
-            <li class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
-              <span>Presupuesto: <strong>{{ state.getContextoData()?.presupuesto || '—' }}</strong></span>
-            </li>
-            <li class="flex items-center space-x-2">
-              <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
-              <span>Segmento: <strong>{{ state.form.get('segmento')?.value || '—' }}</strong></span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Columna derecha: Formulario de meta principal -->
-      <div class="lg:col-span-2">
-        <div class="p-6 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Describe tu meta principal</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Cuéntanos qué quieres lograr con la implementación de IA en tu empresa. 
-            Mientras más específico seas, mejores objetivos podremos generar.
-          </p>
-          
-          <form [formGroup]="uiForm" class="space-y-4">
-            <div>
-              <label for="descripcion" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                ¿Cuál es tu objetivo principal con la IA?
-              </label>
-              <textarea 
-                id="descripcion" 
-                formControlName="descripcion" 
-                rows="4" 
-                class="block p-3 w-full text-sm text-gray-900 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 dark:text-white dark:placeholder-gray-400 transition-colors duration-200" 
-                placeholder="Ej: Quiero automatizar el proceso de atención al cliente para reducir tiempos de respuesta y mejorar la satisfacción del usuario en un 40% durante los próximos 6 meses..."
-              ></textarea>
-              <div *ngIf="uiForm.get('descripcion')?.invalid && uiForm.get('descripcion')?.touched" class="mt-1 text-sm text-red-500">
-                <span *ngIf="uiForm.get('descripcion')?.errors?.['required']">La descripción es requerida</span>
-                <span *ngIf="uiForm.get('descripcion')?.errors?.['minlength']">Mínimo 10 caracteres</span>
-              </div>
-            </div>
-
-            <button 
-              type="button" 
-              (click)="onGenerate()" 
-              [disabled]="uiForm.invalid || isLoading()" 
-              class="w-full inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105">
-              <svg *ngIf="!isLoading()" class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
-              </svg>
-              <svg *ngIf="isLoading()" class="w-5 h-5 mr-2 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {{ isLoading() ? 'Generando objetivos...' : 'Generar objetivos con IA' }}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Paso 2: Generando objetivos -->
-  <div *ngIf="currentStep() === 'generating'" class="space-y-6">
-    <app-objetivo-progress 
-      [pasos]="pasosGeneracion()">
-    </app-objetivo-progress>
+<div class="p-4 sm:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-fade-in">
+  <form [formGroup]="form" (ngSubmit)="next()">
+    <h2 class="text-2xl font-bold mb-1 text-gray-900 dark:text-white">¿Cuál es tu principal objetivo de negocio?</h2>
+    <p class="text-gray-600 dark:text-gray-400 mb-4">Describe tu meta principal. Nuestra IA te ayudará a refinarla en objetivos SMART.</p>
     
-    <div class="text-center">
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        Nuestra IA está analizando tu contexto, competencias y descripción para crear objetivos específicos y accionables.
-      </p>
-    </div>
-  </div>
-
-  <!-- Paso 3: Selección de objetivos -->
-  <div *ngIf="currentStep() === 'selection'" class="space-y-6">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Objetivos generados para ti</h3>
-        <p class="text-gray-600 dark:text-gray-400">Selecciona los objetivos que mejor se alineen con tu estrategia</p>
-      </div>
+    <div class="relative">
+      <textarea 
+        formControlName="objetivoPrincipal" 
+        class="w-full p-4 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" 
+        rows="4" 
+        placeholder="Ej: Quiero mejorar la presencia de mi marca en redes sociales, especialmente en LinkedIn, para atraer más clientes.">
+      </textarea>
       <button 
         type="button" 
-        (click)="goBackToInput()"
-        class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
-        ← Volver a editar
+        (click)="generateObjectivesWithAI()" 
+        [disabled]="isGenerating() || form.get('objetivoPrincipal')?.invalid" 
+        class="absolute top-3 right-3 p-2 rounded-full bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        aria-label="Generar objetivos con IA">
+        <ng-container *ngIf="!isGenerating(); else loadingSpinner">
+          <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+        </ng-container>
+        <ng-template #loadingSpinner>
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+        </ng-template>
       </button>
     </div>
+    <div *ngIf="form.get('objetivoPrincipal')?.invalid && form.get('objetivoPrincipal')?.touched" class="text-red-500 text-sm mt-1">
+      Por favor, escribe un objetivo más detallado (mínimo 15 caracteres).
+    </div>
 
-    <!-- Lista de objetivos generados -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div *ngFor="let objetivo of suggestions()" 
-           class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200">
-        <div class="flex items-start space-x-3">
+    <div *ngIf="suggestedObjectives().length > 0" class="mt-6 animate-fade-in">
+      <h3 class="font-semibold text-gray-800 dark:text-gray-200 mb-3">Sugerencias de la IA (puedes seleccionar más de una):</h3>
+      <div class="space-y-3">
+        <label *ngFor="let objective of suggestedObjectives()" 
+               class="flex items-center p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+               [class.bg-blue-50]="isChecked(objective)"
+               [class.dark:bg-blue-900/50]="isChecked(objective)"
+               [class.border-blue-500]="isChecked(objective)"
+               [class.dark:border-blue-500]="isChecked(objective)">
           <input 
             type="checkbox" 
-            [checked]="isSelected(objetivo)" 
-            (change)="onToggle(objetivo, $any($event.target).checked)" 
-            class="mt-1 w-4 h-4 text-blue-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-          
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center space-x-2 mb-2">
-              <span class="text-lg">{{ getCategoriaIcon(objetivo.categoria) }}</span>
-              <span class="text-xs px-2 py-1 rounded-full border {{ getPrioridadColor(objetivo.prioridad) }}">
-                {{ objetivo.prioridad.toUpperCase() }}
-              </span>
-            </div>
-            
-            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2 leading-relaxed">
-              {{ objetivo.texto }}
-            </h4>
-            
-            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <span>⏱️ {{ objetivo.tiempoEstimado }}</span>
-              <span>📈 {{ objetivo.impacto }}</span>
-            </div>
-          </div>
-        </div>
+            [value]="objective" 
+            [checked]="isChecked(objective)"
+            (change)="onCheckboxChange($event)" 
+            class="h-5 w-5 rounded border-gray-300 dark:border-gray-500 bg-gray-100 dark:bg-gray-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800">
+          <span class="ml-4 text-gray-800 dark:text-gray-300">{{ objective }}</span>
+        </label>
+      </div>
+      <div *ngIf="selectedObjectives.invalid && selectedObjectives.touched" class="text-red-500 text-sm mt-2">
+        Por favor, selecciona al menos un objetivo para continuar.
       </div>
     </div>
-
-    <!-- Estado de selección y navegación -->
-    <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-      <div class="text-sm text-gray-600 dark:text-gray-400">
-        <span class="font-medium">{{ selectedCount() }}</span> objetivo{{ selectedCount() !== 1 ? 's' : '' }} seleccionado{{ selectedCount() !== 1 ? 's' : '' }}
-      </div>
-      
-      <div class="space-x-3">
-        <button 
-          type="button" 
-          (click)="goPrevious()" 
-          class="px-6 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
-          ← Anterior
-        </button>
-        
-        <button 
-          type="button" 
-          (click)="goNext()" 
-          [disabled]="!canProceed()" 
-          class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
-          Continuar →
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Paso 4: Revisión final -->
-  <div *ngIf="currentStep() === 'review'" class="text-center py-12">
-    <!-- Icono de éxito -->
-    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-      <svg class="w-10 h-10 text-green-600 dark:text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-      </svg>
-    </div>
     
-    <!-- Título de éxito -->
-    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">¡Objetivos configurados exitosamente!</h3>
-    
-    <!-- Resumen de objetivos -->
-    <div class="max-w-2xl mx-auto mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-center space-x-2 mb-4">
-        <span class="text-2xl">🎯</span>
-        <span class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ selectedCount() }} objetivo{{ selectedCount() !== 1 ? 's' : '' }} seleccionado{{ selectedCount() !== 1 ? 's' : '' }}
-        </span>
-      </div>
-      
-      <!-- Lista de objetivos seleccionados -->
-      <div class="space-y-3 mb-4">
-        <div *ngFor="let objetivo of getObjetivosSeleccionados(); trackBy: trackByObjetivo" 
-             class="flex items-start space-x-3 p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-          <div class="flex-shrink-0 mt-1">
-            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-900 dark:text-white leading-relaxed">
-              {{ objetivo }}
-            </p>
-          </div>
-        </div>
-      </div>
-      
-      <p class="text-gray-600 dark:text-gray-400 text-sm text-center">
-        Tus objetivos están listos para ser incluidos en el plan de acción del diagnóstico.
-      </p>
-    </div>
-    
-    <!-- Mensaje de siguiente paso -->
-    <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8">
-      Ahora puedes continuar al siguiente paso para generar tu plan de acción personalizado con IA.
-    </p>
-    
-    <!-- Botones de acción -->
-    <div class="flex items-center justify-center space-x-4">
-      <button 
-        type="button" 
-        (click)="goBackToSelection()"
-        class="px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 transform hover:scale-105">
-        <svg class="w-4 h-4 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-        </svg>
-        Volver a editar
+    <div class="mt-8 flex justify-between items-center">
+      <button type="button" (click)="diagnosticStateService.previousStep()" class="px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+        Anterior
       </button>
-      
-      <button 
-        type="button" 
-        (click)="continuarDiagnostico()"
-        class="px-8 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 shadow-lg">
-        <svg class="w-4 h-4 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-        </svg>
-        Continuar al diagnóstico
+      <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed" [disabled]="form.invalid">
+        Siguiente
       </button>
     </div>
-  </div>
-
-  <!-- Mensaje de error -->
-  <div *ngIf="errorMsg()" class="mt-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-    <div class="flex items-center space-x-2">
-      <svg class="w-5 h-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-      </svg>
-      <span class="text-sm text-red-700 dark:text-red-400">{{ errorMsg() }}</span>
-    </div>
-  </div>
+  </form>
 </div>

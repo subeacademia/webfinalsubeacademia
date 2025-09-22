@@ -1,91 +1,92 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.admin == true ||
+
+    // Regla para la colección de diagnósticos
+    // Cualquiera puede crear un diagnóstico (captura de lead)
+    // Un usuario puede leer su propio diagnóstico
+    // Solo los administradores pueden leer, actualizar o eliminar cualquier diagnóstico
+    match /diagnostics/{diagnosticId} {
+        // Un usuario puede crear su propio diagnóstico
+        allow create: if request.auth != null;
+        // Un usuario puede leer y actualizar su propio diagnóstico
+        allow read, update: if request.auth.uid == resource.data.userId;
+        // Solo los admins pueden leer y eliminar cualquier diagnóstico
+        allow read, delete: if request.auth != null && (
+          request.auth.token.email in ["bruno@subeia.tech"] ||
+          request.auth.token.email.matches(".*@subeia\\.tech$")
+        );
+    }
+
+    // Reglas para la colección de leads (original)
+    // Cualquiera puede crear un lead
+    // Solo los administradores pueden leer o interactuar con los datos.
+    match /leads/{docId} {
+        allow create: if true;
+        allow read, update, delete: if request.auth != null && (
+          request.auth.token.email in ["bruno@subeia.tech"] ||
+          request.auth.token.email.matches(".*@subeia\\.tech$")
+        );
+    }
+
+    // Nueva regla para los Leads de Diagnóstico
+    match /diagnostic-leads/{leadId} {
+      // Cualquiera puede crear un lead (cuando completa el diagnóstico)
+      allow create: if true;
+      // Solo los admins pueden leer, actualizar y eliminar leads
+      allow read, update, delete: if request.auth != null && (
         request.auth.token.email in ["bruno@subeia.tech"] ||
         request.auth.token.email.matches(".*@subeia\\.tech$")
       );
     }
 
-    // Público (lectura) de posts/courses publicados
-    match /posts/{id} {
-      allow read: if (resource.data.status == 'published') || (resource.data.published == true);
-      allow create, update, delete: if isAdmin();
-    }
-    match /courses/{id} {
-      allow read: if (resource.data.status == 'published') || (resource.data.published == true);
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Media metadata en colección media/
-    match /media/{id} {
+    // Reglas específicas para la colección de logos
+    match /logos/{logoId} {
+      // Cualquiera puede leer logos (para mostrar en el sitio web)
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      // Solo los administradores pueden crear, actualizar y eliminar logos
+      allow create, update, delete: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
     }
 
-    // Logos de clientes (empresas e instituciones)
-    match /logos/{id} {
+    // Reglas específicas para certificados
+    match /certificates/{certificateId} {
+      // Cualquiera puede leer certificados para validación pública
       allow read: if true;
-      allow create, update, delete: if isAdmin();
+      // Solo los administradores pueden crear, actualizar y eliminar certificados
+      allow create, update, delete: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
+      // Validaciones adicionales para la creación/actualización
+      allow write: if request.auth != null && 
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$") &&
+        // Validar que los campos requeridos están presentes
+        request.resource.data.studentName is string &&
+        request.resource.data.courseName is string &&
+        request.resource.data.certificateCode is string &&
+        request.resource.data.qrCode is string &&
+        request.resource.data.verificationHash is string &&
+        request.resource.data.issuedDate is timestamp &&
+        request.resource.data.completionDate is timestamp &&
+        request.resource.data.institutionName is string &&
+        request.resource.data.status in ['active', 'revoked', 'expired'] &&
+        request.resource.data.certificateType in ['completion', 'achievement', 'participation'];
     }
 
-    // Socios colaboradores
-    match /collaborators/{id} {
-      allow read: if true; // visibles públicamente y desde el admin
-      allow create, update, delete: if isAdmin(); // gestión solo para admins
-    }
-
-    // Historia (hitos)
-    match /history/{id} {
-      allow read: if true; // visible públicamente
-      allow create, update, delete: if isAdmin(); // solo administradores pueden modificar
-    }
-
-    // Settings del sitio
-    match /settings/{doc} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Contenido público del sitio (home page)
-    match /site_content/{doc} {
-      allow read: if true; // Legacy
-      allow write: if isAdmin();
-    }
-
-    // Configuración del sitio por idioma (textos de home)
-    match /configuracion_sitio/{doc} {
-      allow read: if true; // Home debe leer sin autenticación
-      allow write: if isAdmin(); // Solo administradores pueden modificar
-    }
-
-    // Frases del typewriter (públicas para lectura, solo admin para escritura)
-    match /typewriter_phrases/{id} {
-      allow read: if true; // Home debe leer sin autenticación
-      allow create, update, delete: if isAdmin(); // Solo admin puede escribir
-    }
-
-    // NUEVO: Reglas para usuarios autenticados
-    // Los usuarios pueden leer y escribir únicamente en su propio subdirectorio
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Diagnósticos (envíos del test gratuito)
-    // - Cualquier usuario puede crear (incluso no autenticado)
-    // - Lectura/actualización/eliminación solo para administradores
-    match /diagnostics/{id} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    // NUEVO: Colección de leads del diagnóstico
-    // Cualquier usuario puede crear leads, solo admins pueden leer/actualizar/eliminar
-    match /leads/{id} {
-      allow create: if true; // Usuarios pueden crear leads
-      allow read, update, delete: if isAdmin(); // Solo admins pueden ver y gestionar leads
+    // Regla general para el resto de las colecciones
+    // Cualquiera puede leer (get, list).
+    // Solo los administradores autenticados pueden escribir (create, update, delete).
+    match /{document=**} {
+      allow get, list: if true;
+      allow write: if request.auth != null && (
+        request.auth.token.email in ["bruno@subeia.tech"] ||
+        request.auth.token.email.matches(".*@subeia\\.tech$")
+      );
     }
   }
 }

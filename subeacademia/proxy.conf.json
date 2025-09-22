@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "https://apisube-smoky.vercel.app",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

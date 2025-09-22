@@ -1,6 +1,6 @@
 import { NivelCompetencia } from './diagnostic.models';
 
-export const NIVEL_TO_SCORE: Record<NivelCompetencia, number> = {
+export const NIVEL_TO_SCORE: Record<string, number> = {
   incipiente: 20,
   basico: 40,
   intermedio: 60,

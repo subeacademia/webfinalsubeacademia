@@ -1,9 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SettingsService, SiteSettings } from '../../core/data/settings.service';
-import { ToastService } from '../../core/ui/toast/toast.service';
+import { LocalSettingsService, LocalSiteSettings } from '../../core/services/local-settings.service';
+import { SettingsService as DataSettingsService } from '../../core/data/settings.service';
+import { MediaService } from '../../core/data/media.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { TypewriterManagerComponent } from './typewriter-manager.component';
+import { StorageService } from '../../core/storage.service';
 
 @Component({
   selector: 'app-admin-settings-page',
@@ -12,55 +15,139 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
   template: `
   <h1 class="text-2xl font-semibold mb-3">Ajustes</h1>
   <form [formGroup]="form" class="grid gap-4 md:grid-cols-2" (ngSubmit)="save()">
+    <!-- Configuración Principal -->
+    <div class="md:col-span-2 mb-4">
+      <h2 class="text-xl font-medium mb-3 text-blue-600">🏠 Configuración de la Página Principal</h2>
+    </div>
+    
+    <label class="block">Título de la Página de Inicio
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="homeTitle" 
+             placeholder="Potencia tu Talento en la Era de la Inteligencia Artificial" />
+      <small class="text-gray-500">Este es el título principal que aparece en el hero de la página de inicio</small>
+    </label>
+    
     <label class="block">Nombre de marca
-      <input class="w-full ui-input" formControlName="brandName" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="brandName" />
     </label>
+
+    <!-- Selección de fondo del Home -->
+    <label class="block">Fondo del Home
+      <select class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="homeBackgroundKey">
+        <option value="digital-globe-v1">Globo Digital 3D - Versión 1</option>
+        <option value="neural-3d-v1">Red Neuronal 3D - Versión 1</option>
+        <option value="tech-lines-3d-v1">Líneas Tecnológicas 3D - Versión 1</option>
+        <option value="elegant-network-v1">Red Elegante 3D - Versión 1</option>
+        <option value="ai-neural-flow-v1">Redes de Neuronas Artificiales - Versión 1</option>
+        <option value="circuit-tech-v1">Circuitos Tecnológicos - Versión 1</option>
+        <option value="circuit-tech-v2">Circuitos Tecnológicos 3D - Versión 2</option>
+        <option value="circuit-tech-v2-light">Circuitos Tecnológicos 3D - Versión 2 (Light)</option>
+      </select>
+      <small class="text-gray-500">Puedes elegir el componente visual del fondo del hero</small>
+    </label>
+
+    <!-- CRUD simple de fondos habilitados -->
+    <div class="md:col-span-2 border rounded p-3">
+      <h3 class="font-medium mb-2">Fondos habilitados</h3>
+      <div class="flex flex-wrap gap-2">
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('digital-globe-v1')" (change)="toggleEnabled('digital-globe-v1', $event.target?.checked)" /> Globo Digital 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('neural-3d-v1')" (change)="toggleEnabled('neural-3d-v1', $event.target?.checked)" /> Red Neuronal 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('tech-lines-3d-v1')" (change)="toggleEnabled('tech-lines-3d-v1', $event.target?.checked)" /> Líneas Tecnológicas 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('elegant-network-v1')" (change)="toggleEnabled('elegant-network-v1', $event.target?.checked)" /> Red Elegante 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('ai-neural-flow-v1')" (change)="toggleEnabled('ai-neural-flow-v1', $event.target?.checked)" /> Redes de Neuronas - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v1')" (change)="toggleEnabled('circuit-tech-v1', $event.target?.checked)" /> Circuitos Tecnológicos - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v2')" (change)="toggleEnabled('circuit-tech-v2', $event.target?.checked)" /> Circuitos Tecnológicos 3D - V2
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v2-light')" (change)="toggleEnabled('circuit-tech-v2-light', $event.target?.checked)" /> Circuitos Tecnológicos 3D - V2 (Light)
+        </label>
+      </div>
+      <small class="text-gray-500 block mt-2">Controla qué fondos aparecen como opciones en el selector.</small>
+    </div>
+    
     <label class="block">Logo URL
-      <input class="w-full ui-input" formControlName="logoUrl" />
+      <div class="flex gap-2 items-center">
+        <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="logoUrl" />
+        <label class="btn">
+          Subir logo
+          <input type="file" accept="image/*" class="hidden" (change)="onLogoFile($event)">
+        </label>
+      </div>
+      <small class="text-gray-500">Si dejas vacío el nombre de marca, se mostrará solo el logo</small>
     </label>
+    
     <label class="block">Idioma por defecto
-      <select class="w-full ui-input" formControlName="defaultLang">
+      <select class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="defaultLang">
         <option value="es">es</option><option value="en">en</option><option value="pt">pt</option>
       </select>
     </label>
+    
     <label class="block">Email de contacto
-      <input class="w-full ui-input" formControlName="contactEmail" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="contactEmail" />
     </label>
+
+    <!-- Configuración SEO -->
+    <div class="md:col-span-2 mb-4 mt-6">
+      <h2 class="text-xl font-medium mb-3 text-green-600">🔍 Configuración SEO</h2>
+    </div>
 
     <label class="block">GA4 Measurement ID
-      <input class="w-full ui-input" formControlName="ga4MeasurementId" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="ga4MeasurementId" />
     </label>
     <label class="block">Search Console Verification
-      <input class="w-full ui-input" formControlName="searchConsoleVerification" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="searchConsoleVerification" />
     </label>
+
+    <!-- Redes Sociales -->
+    <div class="md:col-span-2 mb-4 mt-6">
+      <h2 class="text-xl font-medium mb-3 text-purple-600">📱 Redes Sociales</h2>
+    </div>
 
     <label class="block">Twitter
-      <input class="w-full ui-input" formControlName="twitter" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="twitter" />
     </label>
     <label class="block">LinkedIn
-      <input class="w-full ui-input" formControlName="linkedin" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="linkedin" />
     </label>
     <label class="block">YouTube
-      <input class="w-full ui-input" formControlName="youtube" />
+      <input class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="youtube" />
     </label>
 
-    <div class="md:col-span-2">
+    <div class="md:col-span-2 mt-6">
       <button class="btn btn-primary" type="submit">Guardar</button>
-      <span *ngIf="saved()" class="text-green-500 ml-3">Guardado</span>
+      <span *ngIf="saved()" class="text-green-500 ml-3">✅ Guardado</span>
     </div>
   </form>
 
-  <app-typewriter-manager></app-typewriter-manager>
+  <div class="mt-8">
+    <app-typewriter-manager></app-typewriter-manager>
+  </div>
   `,
 })
 export class SettingsPageComponent {
   private fb = inject(FormBuilder);
-  private settings = inject(SettingsService);
+  private settings = inject(LocalSettingsService);
+  private dataSettings = inject(DataSettingsService);
+  private media = inject(MediaService);
   private toast = inject(ToastService);
+  private storage = inject(StorageService);
   saved = signal(false);
 
   form = this.fb.group({
-    brandName: ['Sube Academ-IA', Validators.required],
+    homeTitle: ['Potencia tu Talento en la Era de la Inteligencia Artificial'],
+    brandName: ['Sube Academ-I'],
     logoUrl: [''],
     defaultLang: ['es', Validators.required],
     contactEmail: [''],
@@ -69,12 +156,13 @@ export class SettingsPageComponent {
     twitter: [''],
     linkedin: [''],
     youtube: [''],
+    homeBackgroundKey: ['digital-globe-v1'],
   });
 
   constructor(){
-    this.settings.get().subscribe((s: SiteSettings | undefined) => {
-      if (!s) return;
+    this.settings.get().subscribe((s: LocalSiteSettings) => {
       this.form.patchValue({
+        homeTitle: s.homeTitle || 'Potencia tu Talento en la Era de la Inteligencia Artificial',
         brandName: s.brandName || 'Sube Academ-IA',
         logoUrl: s.logoUrl || '',
         defaultLang: s.defaultLang || 'es',
@@ -84,27 +172,118 @@ export class SettingsPageComponent {
         twitter: s.social?.twitter || '',
         linkedin: s.social?.linkedin || '',
         youtube: s.social?.youtube || '',
+        homeBackgroundKey: s.homeBackgroundKey || 'digital-globe-v1',
       });
     });
+  }
+
+  // === Gestión simple de fondos habilitados ===
+  isEnabled(key: string): boolean {
+    const current = this.settings.getCurrentSettings();
+    const list = current.enabledBackgrounds || [];
+    return list.includes(key);
+  }
+
+  async toggleEnabled(key: string, checked: boolean | undefined): Promise<void> {
+    const current = this.settings.getCurrentSettings();
+    const list = new Set(current.enabledBackgrounds || []);
+    if (checked) list.add(key); else list.delete(key);
+    await this.settings.save({ ...current, enabledBackgrounds: Array.from(list) });
   }
 
   async save(){
     const v = this.form.getRawValue();
     try {
       await this.settings.save({
-        brandName: v.brandName!,
+        homeTitle: v.homeTitle || 'Potencia tu Talento en la Era de la Inteligencia Artificial',
+        brandName: (v.brandName || '').trim(),
         logoUrl: v.logoUrl!,
         defaultLang: v.defaultLang as any,
         contactEmail: v.contactEmail || undefined,
         ga4MeasurementId: v.ga4MeasurementId || undefined,
         searchConsoleVerification: v.searchConsoleVerification || undefined,
-        social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined }
+        social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined },
+        homeBackgroundKey: v.homeBackgroundKey || 'digital-globe-v1',
+        homeBackgroundName: ((): string | undefined => {
+          switch(v.homeBackgroundKey){
+            case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
+            case 'tech-lines-3d-v1': return 'Líneas Tecnológicas 3D - Versión 1';
+            case 'elegant-network-v1': return 'Red Elegante 3D - Versión 1';
+            case 'ai-neural-flow-v1': return 'Redes de Neuronas Artificiales - Versión 1';
+            case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
+            case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
+            case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+            case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
+            default: return undefined;
+          }
+        })()
       });
-      this.toast.success('Ajustes guardados');
+      try {
+        await this.dataSettings.save({
+          brandName: (v.brandName || '').trim(),
+          logoUrl: v.logoUrl || undefined,
+          defaultLang: (v.defaultLang as any) || 'es',
+          contactEmail: v.contactEmail || undefined,
+          ga4MeasurementId: v.ga4MeasurementId || undefined,
+          searchConsoleVerification: v.searchConsoleVerification || undefined,
+          social: {
+            twitter: v.twitter || undefined,
+            linkedin: v.linkedin || undefined,
+            youtube: v.youtube || undefined
+          },
+          // Publicamos también el fondo del Home en Firestore para que se propague a todos los dispositivos
+          homeBackgroundKey: v.homeBackgroundKey || 'digital-globe-v1',
+          homeBackgroundName: ((): string | undefined => {
+            switch(v.homeBackgroundKey){
+              case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
+              case 'tech-lines-3d-v1': return 'Líneas Tecnológicas 3D - Versión 1';
+              case 'elegant-network-v1': return 'Red Elegante 3D - Versión 1';
+              case 'ai-neural-flow-v1': return 'Redes de Neuronas Artificiales - Versión 1';
+              case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
+              case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
+              case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+              case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
+              default: return undefined;
+            }
+          })()
+        } as any);
+        // Además, publica el fondo por idioma actual (es) para que Home lo lea directamente
+        await this.dataSettings.setHomeBackgroundKey('es', v.homeBackgroundKey || 'neural-3d-v1', ((): string | undefined => {
+          switch(v.homeBackgroundKey){
+            case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
+            case 'tech-lines-3d-v1': return 'Líneas Tecnológicas 3D - Versión 1';
+            case 'elegant-network-v1': return 'Red Elegante 3D - Versión 1';
+            case 'ai-neural-flow-v1': return 'Redes de Neuronas Artificiales - Versión 1';
+            case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
+            case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
+            case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+            case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
+            default: return undefined;
+          }
+        })());
+      } catch (err) {
+        console.warn('No se pudo guardar en Firestore (continuamos con local):', err);
+      }
+      this.toast.success('Ajustes guardados correctamente');
       this.saved.set(true);
       setTimeout(()=> this.saved.set(false), 2000);
-    } catch {
+    } catch (error) {
+      console.error('Error guardando ajustes:', error);
       this.toast.error('No se pudieron guardar los ajustes');
+    }
+  }
+
+  async onLogoFile(e:any){
+    const file: File | undefined = (e?.target?.files && e.target.files[0]) as File | undefined;
+    if (!file) return;
+    try{
+      const normalized = await this.media.normalizeLogoImage(file);
+      const uploaded = await this.storage.uploadPublicCategory('backgrounds', normalized || file);
+      this.form.patchValue({ logoUrl: uploaded.url });
+      this.toast.success('Logo subido');
+    }catch(err){
+      console.error('Error subiendo logo', err);
+      this.toast.error('No se pudo subir el logo');
     }
   }
 }

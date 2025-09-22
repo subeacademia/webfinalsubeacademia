@@ -206,5 +206,169 @@
       "example_4": "Reduzir custos operacionais",
       "example_5": "Acelerar a inovação de produtos"
     }
+  },
+  "diagnostic.objective.title": "Defina seu Objetivo Principal",
+  "diagnostic.objective.description": "Descreva qual é seu principal desafio ou meta de desenvolvimento profissional neste momento. Nossa IA ajudará você a definir objetivos claros.",
+  "diagnostic.objective.textAreaLabel": "Meu desafio ou meta é...",
+  "diagnostic.objective.textAreaPlaceholder": "Ex.: 'Quero melhorar como apresento minhas ideias em reuniões importantes' ou 'Preciso aprender a delegar tarefas de forma mais eficaz'.",
+  "diagnostic.objective.generateButton": "Gerar Objetivos com IA",
+  "diagnostic.objective.generatingButton": "Gerando...",
+  "diagnostic.objective.selectTitle": "Selecione o objetivo que melhor representa você:",
+  "Mejorar mis habilidades de liderazgo": "Melhorar minhas habilidades de liderança",
+  "Desarrollar mi inteligencia emocional": "Desenvolver minha inteligência emocional",
+  "Aumentar mi productividad y gestión del tiempo": "Aumentar minha produtividade e gestão do tempo",
+  "Mejorar la comunicación con mi equipo": "Melhorar a comunicação com minha equipe",
+  "Otra": "Outra (descreverei mais tarde)",
+  "AI_PROCESSING_TITLE": "Processando com Inteligência Artificial",
+  "AI_PROCESSING_DESCRIPTION": "Nossa IA está analisando suas respostas para criar um diagnóstico integral e um plano de ação personalizado",
+  "AI_STEP_1": "Analisando respostas do diagnóstico",
+  "AI_STEP_2": "Avaliando competências e maturidade",
+  "AI_STEP_3": "Gerando análise personalizada",
+  "AI_STEP_4": "Finalizando relatório",
+  "AI_PROCESSING_TIME": "Tempo estimado",
+  "AI_PROCESSING_SECONDS": "segundos",
+  "errors": {
+    "aiGenerationFailed": "Não foi possível gerar a resposta. Tente novamente.",
+    "aiGenerationFailedTitle": "Erro de IA",
+    "diagnosticSaveFailed": "Não foi possível salvar seu diagnóstico. Tente novamente.",
+    "diagnosticSaveFailedTitle": "Erro ao Salvar",
+    "diagnosticLoadFailed": "Não foi possível carregar seu diagnóstico. Tente novamente.",
+    "diagnosticLoadFailedTitle": "Erro ao Carregar",
+    "reportGenerationFailed": "Ocorreu um erro ao gerar seu relatório. Tente novamente.",
+    "reportGenerationFailedTitle": "Erro no Relatório",
+    "retryButton": "Tentar Novamente"
+  },
+  "notFound": {
+    "title": "Página Não Encontrada",
+    "description": "Desculpe, a página que você está procurando não existe ou foi movida.",
+    "goHome": "Ir para o Início"
+  },
+  "productos": {
+    "badge": "Nossos Produtos",
+    "title": "Soluções Abrangentes de IA",
+    "subtitle": "Descubra nosso catálogo completo de produtos projetados para acelerar sua transformação digital com Inteligência Artificial",
+    "model_title": "Modelo 50/50: A Fórmula Perfeita",
+    "standard_content": "Conteúdo Padrão",
+    "total_personalization": "Personalização Total",
+    "competitive_formula": "A fórmula que nos torna únicos no mercado de educação em IA",
+    "categories": {
+      "consulting": { "title": "Consultoria", "description": "Consultoria especializada em IA para empresas que buscam implementar soluções inteligentes de forma estratégica e eficiente.", "btn": "Ver Consultoria" },
+      "courses": { "title": "Cursos", "description": "Formação prática e aplicada em Inteligência Artificial, projetada para profissionais que querem dominar as tecnologias do futuro.", "btn": "Ver Cursos" },
+      "certifications": { "title": "Certificações", "description": "Certificações profissionais em IA que validam seu conhecimento e o posicionam como especialista no mercado de trabalho.", "btn": "Ver Certificações" }
+    },
+    "approach": {
+      "badge": "Nossa Abordagem",
+      "title": "A Metodologia",
+      "subtitle": "Combinamos rigor acadêmico com experiência prática para oferecer a formação mais completa e eficaz do mercado",
+      "personalization": {
+        "title": "Personalização Matética",
+        "subtitle": "Fundamentos Acadêmicos e Técnicos",
+        "description": "Adaptamos cada experiência de aprendizagem ao seu estilo cognitivo único, usando princípios da ciência da aprendizagem.",
+        "details": "Metodologia baseada em pesquisa do MIT",
+        "click_more": "Clique para mais detalhes"
+      },
+      "experience": {
+        "title": "Experiência Prática",
+        "subtitle": "Acelerada",
+        "description": "Você enfrentará desafios empresariais reais e complexos desde o primeiro dia. Aqui não há espaço para teoria abstrata.",
+        "detail_label": "Projetos reais:",
+        "detail_text": "Cada módulo culmina em um projeto tangível que simula ambientes profissionais reais."
+      },
+      "quality": {
+        "title": "Qualidade Premium",
+        "subtitle": "e Vanguarda",
+        "description": "Acesse conteúdo de elite, desenvolvido por uma equipe sênior com experiência comprovada em transformação digital.",
+        "detail_label": "Conhecimento validado:",
+        "detail_text": "Conteúdo atualizado em tempo real, testado em projetos empresariais de alto impacto."
+      }
+    },
+    "lists": {
+      "asesorias": {
+        "title": "Consultoria em IA",
+        "subtitle": "Consultoria personalizada para implementar soluções de Inteligência Artificial na sua empresa. Nossos especialistas o guiarão em cada etapa do processo.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_categories": "Todas as categorias",
+          "any_price": "Qualquer preço",
+          "lt500": "Menos de €500",
+          "500-1500": "€500 - €1500",
+          "gt1500": "Mais de €1500"
+        },
+        "loading": "Carregando consultorias...",
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de consultorias personalizadas em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar consultoria especializada para implementar IA na sua empresa."
+        }
+      },
+      "cursos": {
+        "title": "Cursos de IA",
+        "subtitle": "Formação especializada em Inteligência Artificial com metodologia prática e casos reais. Aprenda com especialistas e desenvolva projetos que façam a diferença.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_levels": "Todos os níveis",
+          "any_price": "Qualquer preço",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Mais de €600"
+        },
+        "loading": "Carregando cursos...",
+        "labels": {
+          "duration": "Duração:",
+          "level": "Nível:",
+          "instructor": "Instrutor:"
+        },
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de cursos em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar formação especializada com metodologia prática."
+        }
+      },
+      "certificaciones": {
+        "title": "Certificações em IA",
+        "subtitle": "Certificações oficiais reconhecidas pela indústria em tecnologias de Inteligência Artificial. Valide seus conhecimentos e melhore seu perfil profissional.",
+        "filters": {
+          "search_placeholder": "Buscar por título ou descrição",
+          "all_levels": "Todos os níveis",
+          "any_price": "Qualquer preço",
+          "lt200": "Menos de €200",
+          "200-600": "€200 - €600",
+          "gt600": "Mais de €600"
+        },
+        "loading": "Carregando certificações...",
+        "labels": {
+          "entity": "Entidade:",
+          "level": "Nível:"
+        },
+        "validator": {
+          "placeholder": "Cole seu código de certificado",
+          "btn": "Validar certificado"
+        },
+        "cta_view_details": "Ver Detalhes",
+        "empty": {
+          "coming_soon": "🚧 Em breve...",
+          "p1": "Estamos preparando nossa seção de certificações em Inteligência Artificial.",
+          "p2": "Muito em breve você poderá acessar certificações oficiais reconhecidas pela indústria."
+        }
+      },
+      "common": {
+        "price_symbol": "€",
+        "btn_back_to_products": "Voltar a Produtos",
+        "loading_product": "Carregando produto...",
+        "learn_title": "O que você aprenderá",
+        "buy_now": "Comprar Agora",
+        "modal": {
+          "title": "Pagamento em breve",
+          "desc": "Muito em breve você poderá concluir sua compra por aqui.",
+          "close": "Fechar"
+        },
+        "errors": {
+          "not_found": "Produto não encontrado.",
+          "load_error": "Erro ao carregar o produto."
+        }
+      }
+    }
   }
 }

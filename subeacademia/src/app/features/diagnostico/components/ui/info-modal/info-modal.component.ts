@@ -19,7 +19,7 @@ import { CommonModule } from '@angular/common';
            aria-hidden="true"></div>
       
       <!-- Contenido del modal -->
-      <div class="relative z-10 max-w-lg w-[90%] bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+      <div class="relative z-10 max-w-md w-[90%] bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-h-[85vh] flex flex-col"
            role="document"
            (click)="$event.stopPropagation()">
         
@@ -42,7 +42,7 @@ import { CommonModule } from '@angular/common';
         
         <!-- Contenido del modal -->
         <div [id]="'modal-content-' + modalId" 
-             class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line mb-6"
+             class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line mb-6 overflow-y-auto"
              role="textbox"
              aria-label="Contenido de la información">
           {{ content }}

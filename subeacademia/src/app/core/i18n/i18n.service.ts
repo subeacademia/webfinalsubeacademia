@@ -41,14 +41,10 @@ export class I18nService {
 
   async setLang(lang: Language): Promise<void> {
     const target: Language = this.supportedLanguages.has(lang) ? lang : 'es';
-    if (this.currentLanguageSignal() === target && this.currentDictionarySignal() && Object.keys(this.currentDictionarySignal()).length > 0) {
-      this.setDocumentLangAndDir(target);
-      return;
-    }
-
     this.currentLanguageSignal.set(target);
     this.setDocumentLangAndDir(target);
-    await this.ensureLoaded(target);
+    // Forzar recarga del diccionario en cada cambio de idioma para evitar caché obsoleta durante desarrollo
+    await this.ensureLoaded(target, true);
     this.currentDictionarySignal.set(this.languageDictionariesCache.get(target) ?? {});
   }
 
@@ -58,15 +54,20 @@ export class I18nService {
     this.documentRef.body.setAttribute('dir', dir);
   }
 
-  async ensureLoaded(lang: Language): Promise<void> {
-    if (this.languageDictionariesCache.has(lang)) return;
+  async ensureLoaded(lang: Language, forceReload: boolean = false): Promise<void> {
+    if (this.languageDictionariesCache.has(lang) && !forceReload) return;
     const win = (this.documentRef as any).defaultView as (Window & typeof globalThis) | undefined;
     if (!win) {
       // SSR: omitimos carga; el navegador la realizará en hidratación
       return;
     }
     const base = win.location?.origin || this.documentRef.baseURI || '/';
-    const url = new URL(`/assets/i18n/${lang}.json`, base).toString();
+    const urlObj = new URL(`/assets/i18n/${lang}.json`, base);
+    // Bust de caché: generar un valor nuevo en cada recarga forzada
+    if (forceReload) {
+      urlObj.searchParams.set('v', Date.now().toString());
+    }
+    const url = urlObj.toString();
     try {
       const response = await win.fetch(url);
       if (!response.ok) {
@@ -82,7 +83,12 @@ export class I18nService {
 
   translate(key: string): string {
     const dict = this.currentDictionarySignal();
-    const found = getNestedTranslation(dict, key);
+    let found = getNestedTranslation(dict, key);
+    // Compatibilidad: algunas traducciones históricas usaron 'produtos'
+    if (typeof found === 'undefined' && key.startsWith('productos.')) {
+      const aliasKey = key.replace(/^productos\./, 'produtos.');
+      found = getNestedTranslation(dict, aliasKey);
+    }
     if (typeof found === 'string') return found;
     // Fallback: intentar en ES si el idioma actual no lo contiene
     const fallback = this.languageDictionariesCache.get('es');

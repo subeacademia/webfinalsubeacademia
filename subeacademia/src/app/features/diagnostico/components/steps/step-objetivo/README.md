@@ -19,7 +19,7 @@ Este componente ha sido completamente rediseñado para proporcionar un flujo ló
   2. Procesando diagnóstico ARES (50%)
   3. Evaluando competencias (75%)
   4. Generando objetivos (90%)
-- **Integración con API de Bessel**: Utiliza el servicio especializado para generar objetivos personalizados
+- **Integración con API de Vercel**: Utiliza el servicio especializado para generar objetivos personalizados
 
 ### 3. **Paso de Selección** (`currentStep === 'selection'`)
 - **Objetivos generados**: Lista de objetivos personalizados con metadatos
@@ -38,8 +38,8 @@ Este componente ha sido completamente rediseñado para proporcionar un flujo ló
 
 ## Características Técnicas
 
-### Integración con API de Bessel
-- **Servicio especializado**: `BesselAiService` para generación de objetivos
+### Integración con API de Vercel
+- **Servicio especializado**: `VercelAiService` para generación de objetivos
 - **Prompt inteligente**: Construye prompts basados en el contexto del cliente
 - **Manejo de errores**: Fallback a objetivos predefinidos si falla la IA
 - **Validación de respuesta**: Procesa y valida respuestas JSON de la IA
@@ -99,7 +99,7 @@ import { StepObjetivoComponent } from './step-objetivo.component';
 
 ## Dependencias
 
-- `BesselAiService`: Servicio para generación de objetivos con IA
+- `VercelAiService`: Servicio para generación de objetivos con IA
 - `DiagnosticStateService`: Servicio de estado del diagnóstico
 - `ObjetivoProgressComponent`: Componente de progreso visual
 - Angular Signals para estado reactivo
@@ -108,7 +108,7 @@ import { StepObjetivoComponent } from './step-objetivo.component';
 ## Beneficios del Rediseño
 
 1. **Flujo lógico claro**: El usuario entiende exactamente qué hacer en cada paso
-2. **Mejor integración con IA**: Uso del servicio especializado de Bessel
+2. **Mejor integración con IA**: Uso del servicio especializado de Vercel
 3. **Experiencia visual mejorada**: Indicadores de progreso y transiciones suaves
 4. **Manejo robusto de errores**: Fallback automático a opciones predefinidas
 5. **Estado persistente**: Los objetivos seleccionados se mantienen durante la sesión

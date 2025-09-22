@@ -1,172 +1,71 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { competencias, Competency } from '../../../data/competencias';
+import { CompetencyQuestionCardComponent } from '../../ui/competency-question-card/competency-question-card.component';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { COMPETENCIAS } from '../../../data/competencias';
-import { SliderFieldComponent, SliderFieldConfig } from '../../ui/slider-field.component';
+import { Answer } from '../../../data/diagnostic.models';
 
 @Component({
   selector: 'app-step-competencias',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SliderFieldComponent],
+  imports: [CommonModule, CompetencyQuestionCardComponent],
   template: `
-    <div class="max-w-6xl mx-auto animate-fade-in">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-white dark:text-white mb-4">
-          Evaluación de Competencias
-        </h2>
-        <p class="text-lg text-gray-300 dark:text-gray-400">
-          Evalúa tu nivel actual en cada una de las competencias clave para la implementación de IA
-        </p>
+    <div class="p-4 md:p-6">
+      @for (competency of allCompetencies; track competency.id) {
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{{ competency.name }}</h3>
+          @for (question of competency.questions; track question.id) {
+            <app-competency-question-card
+              [question]="question"
+              [initialAnswer]="getAnswerForQuestion(question.id)"
+              (answerChange)="onAnswerChange(question.id, $event)"
+            ></app-competency-question-card>
+          }
+        </div>
+      }
+      
+      <!-- Botones de navegación -->
+      <div class="mt-8 flex justify-between">
+        <button (click)="previous()" 
+                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">
+          ← Volver
+        </button>
+        <button (click)="next()" 
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+          Continuar →
+        </button>
       </div>
-
-      <!-- Información sobre la escala al comienzo -->
-      <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 mb-8">
-        <h4 class="text-blue-200 font-medium mb-4 text-center">Escala de Evaluación:</h4>
-        <div class="grid grid-cols-5 gap-4 text-sm text-blue-100">
-          <div class="text-center">
-            <div class="font-medium">1 - Incipiente</div>
-            <div class="text-xs">Conocimiento básico</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">2 - Básico</div>
-            <div class="text-xs">Comprensión general</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">3 - Intermedio</div>
-            <div class="text-xs">Aplicación práctica</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">4 - Avanzado</div>
-            <div class="text-xs">Experiencia sólida</div>
-          </div>
-          <div class="text-center">
-            <div class="font-medium">5 - Líder</div>
-            <div class="text-xs">Experto reconocido</div>
-          </div>
-        </div>
-      </div>
-
-      <form [formGroup]="competenciasForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Lista de competencias con sliders -->
-        <div class="space-y-6">
-          <app-slider-field 
-            *ngFor="let competencia of competencias" 
-            [config]="getSliderConfig(competencia)"
-            (valueChange)="onSliderValueChange($event, competencia.id)">
-          </app-slider-field>
-        </div>
-
-        <!-- Botón de envío -->
-        <div class="pt-6">
-          <button 
-            type="submit" 
-            [disabled]="competenciasForm.invalid"
-            class="w-full btn-primary py-4 px-8 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-200">
-            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-            </svg>
-            Siguiente
-          </button>
-        </div>
-      </form>
     </div>
   `,
-  styles: [`
-    .animate-fade-in {
-      animation: fadeIn 0.6s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .btn-primary {
-      @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg;
-    }
-  `]
 })
-export class StepCompetenciasComponent implements OnInit {
-  private readonly fb = inject(FormBuilder)
-  private readonly stateService = inject(DiagnosticStateService);
-  private readonly router = inject(Router);
+export class StepCompetenciasComponent {
+  public stateService = inject(DiagnosticStateService);
+  private router = inject(Router);
+  allCompetencies = competencias;
 
-  competenciasForm!: FormGroup;
-  competencias = COMPETENCIAS;
-  nivelesCompetencia = ['Incipiente', 'Básico', 'Intermedio', 'Avanzado', 'Líder'];
-
-  ngOnInit(): void {
-    this.initializeForm();
-    this.loadExistingData();
+  getAnswerForQuestion(questionId: string): Answer {
+    return this.stateService.state().competencias[questionId] || { value: 0, isCritical: false, evidence: '' };
   }
 
-  private initializeForm(): void {
-    this.competenciasForm = this.stateService.competenciasForm;
-    
-    // Asegurar que todos los controles estén inicializados
-    this.competencias.forEach(comp => {
-      this.stateService.getCompetenciaControl(comp.id);
-    });
+  onAnswerChange(questionId: string, answer: Answer) {
+    this.stateService.updateAnswer('competencias', questionId, answer);
   }
 
-  private loadExistingData(): void {
-    // Los datos se cargan automáticamente desde el servicio
-    // que ya tiene la lógica de persistencia
+  isComplete(): boolean {
+    return this.stateService.competenciasProgress().isComplete;
   }
 
-  getCompetenciaControl(compId: string) {
-    return this.stateService.getCompetenciaControl(compId);
-  }
-
-  getSliderConfig(competencia: any): SliderFieldConfig {
-    return {
-      id: competencia.id,
-      labelKey: competencia.nameKey,
-      descriptionKey: 'Evalúa tu nivel actual de competencia en esta área',
-      tooltipKey: 'Esta competencia es fundamental para el éxito en la implementación de IA. Considera tu experiencia práctica y conocimiento teórico.',
-      dimension: 'competencia',
-      phase: 'C',
-      minValue: 1,
-      maxValue: 5,
-      step: 1,
-      labels: this.nivelesCompetencia,
-      formControl: this.getCompetenciaControl(competencia.id)
-    };
-  }
-
-  onSliderValueChange(value: number, compId: string): void {
-    const control = this.getCompetenciaControl(compId);
-    control.setValue(value);
-  }
-
-  onSubmit(): void {
-    if (this.competenciasForm.valid) {
-      // 🔧 SOLUCIÓN: Guardar los datos de competencias en el estado global
-      const competenciasData = this.competenciasForm.value;
-      console.log('🎯 Guardando datos de competencias:', competenciasData);
-      
-      this.stateService.saveCompetenciasData(competenciasData);
-      
-      // Navegar al siguiente paso
-      this.navigateToNextStep();
-    }
-  }
-
-  private navigateToNextStep(): void {
+  next() {
+    // Permitir avanzar sin validar si todas las preguntas están respondidas
     const currentUrl = this.router.url;
-    const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-    const nextStepUrl = `${baseUrl}/objetivo`;
-    
-    console.log(`🚀 Navegando al siguiente paso: ${nextStepUrl}`);
-    
-    this.router.navigate([nextStepUrl]).catch(error => {
-      console.error('❌ Error en navegación:', error);
-      // Fallback: navegar usando la ruta completa
-      this.router.navigate(['/es', 'diagnostico', 'objetivo']).catch(fallbackErr => {
-        console.error('❌ Error en fallback de navegación:', fallbackErr);
-      });
-    });
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
+  }
+
+  previous() {
+    const currentUrl = this.router.url;
+    const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+    this.router.navigate([`/${languagePrefix}/diagnostico/ares`]);
   }
 }

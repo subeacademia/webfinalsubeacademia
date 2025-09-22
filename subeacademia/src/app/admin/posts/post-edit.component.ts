@@ -306,7 +306,7 @@ export class PostEditComponent implements OnDestroy, OnInit {
   private loadCompetencies(): void {
     // Obtener las competencias desde el archivo de competencias
     import('../../features/diagnostico/data/competencias').then(module => {
-      this.competencias = module.COMPETENCIAS_COMPLETAS;
+      this.competencias = module.competencias;
     });
   }
 

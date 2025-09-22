@@ -1,29 +1,62 @@
-<div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-  <!-- Encabezado 3D reutilizable -->
-  <app-page-header
-    [title]="'about.title' | i18nTranslate"
-    [subtitle]="'about.subtitle' | i18nTranslate">
-  </app-page-header>
+<div class="text-gray-800 dark:text-gray-200">
+  <!-- Cabecera personalizada con fondo 3D transparente y estilo elegante -->
+  <div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+    <!-- Fondo 3D completamente visible -->
+    <div class="absolute inset-0 z-0" aria-hidden="true">
+      <!-- El fondo global del shell se ve completamente -->
+    </div>
+    
+    <!-- Contenido en tarjeta transparente elegante -->
+    <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+      <!-- Tarjeta principal con transparencia y bordes elegantes -->
+      <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          </svg>
+          Nuestro Equipo
+        </div>
+        
+        <!-- Título principal con degradado naranja -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+          {{ 'about.title' | i18nTranslate }}
+        </h1>
+        
+        <!-- Subtítulo mejorado -->
+        <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+          {{ 'about.subtitle' | i18nTranslate }}
+        </p>
+      </div>
+      
+      <!-- Indicador de scroll fuera de la tarjeta -->
+      <div class="mt-8 animate-bounce">
+        <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+          <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Misión, Visión y Valores como Tabs -->
-  <div class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
+  <div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold">Nuestra Filosofía</h2>
-        <p class="text-lg text-gray-400 mt-2">Los pilares que guían cada decisión que tomamos.</p>
+        <h2 class="text-4xl font-bold orange-gradient-text">{{ 'about.mvv.title' | i18nTranslate }}</h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">{{ 'about.mvv.subtitle' | i18nTranslate }}</p>
       </div>
       <div class="max-w-4xl mx-auto">
-        <div class="flex justify-center border-b border-gray-700 mb-8">
+        <div class="flex justify-center border-b border-gray-300 dark:border-gray-700 mb-8">
           <button *ngFor="let tab of philosophyTabs" (click)="setActiveTab(tab.id)" 
-                  [ngClass]="{'border-cyan-400 text-cyan-400': activeTab === tab.id, 'border-transparent text-gray-400 hover:text-white': activeTab !== tab.id}"
+                  [ngClass]="{'border-cyan-400 text-cyan-400': activeTab === tab.id, 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white': activeTab !== tab.id}"
                   class="py-4 px-6 text-lg font-medium border-b-2 focus:outline-none transition-colors duration-300">
-            {{ tab.title }}
+            {{ tab.titleKey | i18nTranslate }}
           </button>
         </div>
         <div class="relative min-h-28">
           <ng-container *ngFor="let tab of philosophyTabs">
             <div *ngIf="activeTab === tab.id" class="philosophy-content w-full">
-              <p class="text-xl text-center leading-relaxed">{{ tab.content }}</p>
+              <p class="text-xl text-center leading-relaxed">{{ tab.contentKey | i18nTranslate }}</p>
             </div>
           </ng-container>
         </div>
@@ -32,16 +65,16 @@
   </div>
 
   <!-- 1. EL EQUIPO -->
-  <section class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+  <section class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center mb-16">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'about.founders_title' | i18nTranslate }}</h2>
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'about.founders_title' | i18nTranslate }}</h2>
         <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Conoce a nuestro equipo fundador que está transformando la educación con IA</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
-          *ngFor="let member of founders"
+          *ngFor="let member of (foundersFromDB$ | async) || founders"
           class="flip-card group cursor-pointer overflow-hidden"
           [class.flipped]="member.flipped"
           (click)="toggleFlip(member)"
@@ -49,7 +82,7 @@
           <div class="flip-card-inner relative w-full h-full">
             <!-- Frente -->
             <div class="flip-card-front bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center text-center h-full overflow-hidden">
-              <img [src]="member.imageUrl" [alt]="member.name" class="w-28 h-28 rounded-full object-cover mb-3 border-4 border-indigo-100 dark:border-indigo-900 flex-shrink-0" />
+              <img [src]="member.imageUrl" [alt]="member.name" class="w-28 h-28 rounded-full object-cover mb-3 border-4 border-indigo-100 dark:border-indigo-900 flex-shrink-0 aspect-square" />
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ member.name }}</h3>
               <p class="text-indigo-600 dark:text-indigo-400 font-medium text-sm mb-2">{{ member.role }}</p>
               <p class="text-sm text-gray-600 dark:text-gray-300 flex-1 leading-relaxed">{{ member.bio }}</p>
@@ -80,7 +113,7 @@
   </section>
 
   <!-- 2. SOCIOS COLABORADORES (mismo estilo que fundadores) -->
-  <section class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
+  <section class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center mb-16">
         <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Nuestros Socios Colaboradores</h2>
@@ -98,7 +131,7 @@
           <div class="flip-card-inner relative w-full h-full">
             <!-- Frente -->
             <div class="flip-card-front bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col items-center text-center h-full overflow-hidden">
-              <img [src]="member.imageUrl" [alt]="member.name" class="w-28 h-28 rounded-full object-cover mb-3 border-4 border-indigo-100 dark:border-indigo-900 flex-shrink-0" />
+              <img [src]="member.imageUrl" [alt]="member.name" class="w-28 h-28 rounded-full object-cover mb-3 border-4 border-indigo-100 dark:border-indigo-900 flex-shrink-0 aspect-square" />
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ member.name }}</h3>
               <p class="text-indigo-600 dark:text-indigo-400 font-medium text-sm mb-2">{{ member.role }}</p>
               <p class="text-sm text-gray-600 dark:text-gray-300 flex-1 leading-relaxed">{{ member.bio }}</p>
@@ -129,10 +162,10 @@
   </section>
 
   <!-- 3. NUESTRA HISTORIA - Timeline Animado -->
-  <section class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+  <section class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center mb-16">
-        <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Nuestra Historia</h2>
+        <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">Nuestra Historia</h2>
         <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">Hitos clave de nuestro camino</p>
       </div>
       <app-history-timeline></app-history-timeline>
@@ -151,7 +184,7 @@
         <button class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200" (click)="closeModal()">✕</button>
       </div>
       <div class="mt-4 grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-4">
-        <img [src]="m.imageUrl" [alt]="m.name" class="w-28 h-28 rounded-lg object-cover border border-gray-200 dark:border-gray-700" />
+        <img [src]="m.imageUrl" [alt]="m.name" class="w-28 h-28 rounded-full object-cover border border-gray-200 dark:border-gray-700 aspect-square" />
         <ul class="text-gray-700 dark:text-gray-300 space-y-2">
           <li *ngFor="let line of m.fullBio">• {{ line }}</li>
         </ul>

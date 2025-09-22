@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Vercel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background-color: #f1f8e9; }
+        .error { border-color: #f44336; background-color: #ffebee; }
+        .loading { border-color: #2196F3; background-color: #e3f2fd; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1976D2; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de API Vercel - Sube Academ-IA</h1>
+        <p>Esta página permite probar la conexión con la API de Vercel para generar diagnósticos de IA.</p>
+
+        <div class="test-section" id="connection-test">
+            <h3>🔗 Test de Conexión</h3>
+            <button onclick="testConnection()">Probar Conexión</button>
+            <div id="connection-status" class="status"></div>
+            <pre id="connection-result"></pre>
+        </div>
+
+        <div class="test-section" id="api-test">
+            <h3>🤖 Test de Generación de Diagnóstico</h3>
+            <button onclick="testDiagnosticGeneration()">Generar Diagnóstico de Prueba</button>
+            <div id="api-status" class="status"></div>
+            <pre id="api-result"></pre>
+        </div>
+
+        <div class="test-section" id="diagnostic-data">
+            <h3>📊 Datos de Diagnóstico de Prueba</h3>
+            <button onclick="showDiagnosticData()">Mostrar Datos</button>
+            <pre id="diagnostic-data-result"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://apisube-smoky.vercel.app/api/azure/generate';
+        
+        // Datos de diagnóstico de prueba
+        const testDiagnosticData = {
+            contexto: {
+                industria: "Tecnología",
+                tamanoEquipo: 50,
+                objetivo: "innovacion"
+            },
+            ares: {
+                respuestas: {
+                    "adopcion_01": 4,
+                    "riesgos_01": 3,
+                    "etica_01": 4,
+                    "seguridad_01": 3,
+                    "capacidad_01": 4,
+                    "datos_01": 3,
+                    "gobernanza_01": 4,
+                    "valor_01": 3,
+                    "operacion_01": 3,
+                    "talento_01": 4,
+                    "tecnologia_01": 4,
+                    "integracion_01": 3,
+                    "cumplimiento_01": 3,
+                    "transparencia_01": 4,
+                    "sostenibilidad_01": 3
+                }
+            },
+            competencias: {
+                niveles: {
+                    "c1_pensamiento_critico": "avanzado",
+                    "c2_resolucion_problemas": "intermedio",
+                    "c3_creatividad": "avanzado",
+                    "c4_colaboracion": "intermedio",
+                    "c5_comunicacion": "avanzado",
+                    "c6_adaptabilidad": "intermedio",
+                    "c7_liderazgo": "avanzado",
+                    "c8_etica": "intermedio",
+                    "c9_tecnologia": "avanzado",
+                    "c10_datos": "intermedio",
+                    "c11_aprendizaje": "avanzado",
+                    "c12_innovacion": "avanzado",
+                    "c13_sostenibilidad": "intermedio"
+                }
+            },
+            lead: {
+                nombre: "Usuario de Prueba",
+                email: "test@example.com"
+            }
+        };
+
+        async function testConnection() {
+            const statusEl = document.getElementById('connection-status');
+            const resultEl = document.getElementById('connection-result');
+            const sectionEl = document.getElementById('connection-test');
+            
+            sectionEl.className = 'test-section loading';
+            statusEl.textContent = '🔄 Probando conexión...';
+            resultEl.textContent = '';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: 'Test de conexión - responde con "Conexión exitosa"'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    sectionEl.className = 'test-section success';
+                    statusEl.textContent = '✅ Conexión exitosa';
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                sectionEl.className = 'test-section error';
+                statusEl.textContent = '❌ Error de conexión';
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function testDiagnosticGeneration() {
+            const statusEl = document.getElementById('api-status');
+            const resultEl = document.getElementById('api-result');
+            const sectionEl = document.getElementById('api-test');
+            
+            sectionEl.className = 'test-section loading';
+            statusEl.textContent = '🤖 Generando diagnóstico...';
+            resultEl.textContent = '';
+
+            const prompt = `
+**Rol:** Eres un consultor experto en transformación digital e inteligencia artificial.
+
+**Contexto:** Un usuario ha completado un diagnóstico de madurez en IA.
+
+**Datos del Diagnóstico del Usuario:**
+
+**1. Contexto Organizacional:**
+- Industria: ${testDiagnosticData.contexto.industria}
+- Tamaño del equipo: ${testDiagnosticData.contexto.tamanoEquipo} personas
+- Objetivo: ${testDiagnosticData.contexto.objetivo}
+
+**2. Resultados del ARES-AI Framework:**
+- Adopción: 4/5
+- Riesgos: 3/5
+- Ética: 4/5
+- Seguridad: 3/5
+- Capacidad: 4/5
+
+**3. Resultados de Competencias:**
+- Pensamiento Crítico: Avanzado
+- Resolución de Problemas: Intermedio
+- Creatividad: Avanzado
+- Colaboración: Intermedio
+- Comunicación: Avanzado
+
+**Tarea:** Genera un informe breve en formato MARKDOWN con análisis general y 3 recomendaciones clave.
+            `;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    sectionEl.className = 'test-section success';
+                    statusEl.textContent = '✅ Diagnóstico generado exitosamente';
+                    resultEl.textContent = data.result || JSON.stringify(data, null, 2);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                sectionEl.className = 'test-section error';
+                statusEl.textContent = '❌ Error al generar diagnóstico';
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        function showDiagnosticData() {
+            const resultEl = document.getElementById('diagnostic-data-result');
+            resultEl.textContent = JSON.stringify(testDiagnosticData, null, 2);
+        }
+
+        // Test automático al cargar la página
+        window.onload = function() {
+            console.log('🧪 Página de test cargada');
+            console.log('🔗 API URL:', API_URL);
+            console.log('📊 Datos de prueba:', testDiagnosticData);
+        };
+    </script>
+</body>
+</html>

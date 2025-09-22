@@ -1,14 +1,4 @@
-/* Estilos para las tarjetas de competencias */
-.competency-card {
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-}
-
-.competency-card:hover {
-  transform: translateY(-4px);
-  border-color: #3b82f6;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+/* Estilos mínimos para las tarjetas de competencias */
 
 /* Utilidad para truncar texto */
 .line-clamp-3 {
@@ -18,30 +8,33 @@
   overflow: hidden;
 }
 
-/* Efectos de hover para las tarjetas */
-.competency-card:hover .competency-icon {
-  transform: scale(1.1);
-}
-
+/* Efectos de hover para iconos */
 .competency-icon {
   transition: transform 0.3s ease;
 }
 
-/* Responsive para las tarjetas */
-@media (max-width: 768px) {
-  .competency-card {
-    margin-bottom: 1rem;
-  }
+.competency-card:hover .competency-icon {
+  transform: scale(1.1);
 }
 
-/* Modo oscuro para las tarjetas */
-@media (prefers-color-scheme: dark) {
-  .competency-card {
-    background: #1f2937;
-    border-color: #374151;
-  }
-  
-  .competency-card:hover {
-    border-color: #60a5fa;
-  }
+/* Gradiente naranja - NUEVO COLOR PRIMARIO */
+.orange-gradient-text {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
+}
+
+/* Modo oscuro */
+:global(.dark) .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
 }

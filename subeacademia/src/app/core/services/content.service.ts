@@ -5,7 +5,7 @@ import { getMockCourses, getMockPosts } from './mock-content';
 import { Post } from '../models/post.model';
 import { Course } from '../models/course.model';
 import { generateSlug } from '../utils/slug.util';
-import { COMPETENCIAS_COMPLETAS, Competency } from '../../features/diagnostico/data/competencias';
+import { competencias, Competency } from '../../features/diagnostico/data/competencias';
 
 @Injectable({ providedIn: 'root' })
 export class ContentService {
@@ -13,7 +13,7 @@ export class ContentService {
 
   // Competencias del diagnóstico
   getCompetencies(): Competency[] {
-    return COMPETENCIAS_COMPLETAS;
+    return competencias;
   }
 
   // Posts

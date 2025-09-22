@@ -5,27 +5,29 @@ import { StepContextoComponent } from './components/steps/step-contexto/step-con
 import { StepAresComponent } from './components/steps/step-ares/step-ares.component';
 import { StepCompetenciasComponent } from './components/steps/step-competencias/step-competencias.component';
 import { StepObjetivoComponent } from './components/steps/step-objetivo/step-objetivo.component';
-import { StepLeadComponent } from './components/steps/step-lead/step-lead.component';
+import { StepLeadComponent } from './components/steps/step-lead/step-lead.component'; // Importar
 import { DiagnosticResultsComponent } from './components/ui/diagnostic-results/diagnostic-results.component';
 
 export const DIAGNOSTICO_ROUTES: Routes = [
   {
+    path: 'empresas',
+    loadComponent: () => import('./diagnostico-empresa.component').then(m => m.DiagnosticoEmpresaComponent),
+    title: 'Diagnóstico para Empresas'
+  },
+  {
     path: '',
     component: DiagnosticoComponent,
     children: [
-      { path: '', redirectTo: 'inicio', pathMatch: 'full' },
-      { path: 'inicio', component: StepStartComponent },
+      { path: '', component: StepStartComponent },
       { path: 'contexto', component: StepContextoComponent },
       { path: 'ares', component: StepAresComponent },
-      { path: 'ares/:phase', component: StepAresComponent },
       { path: 'competencias', component: StepCompetenciasComponent },
-      { path: 'competencias/:group', component: StepCompetenciasComponent },
       { path: 'objetivo', component: StepObjetivoComponent },
-      { path: 'lead', component: StepLeadComponent },
+      { path: 'finalizar', component: StepLeadComponent }, // Ruta añadida
       { path: 'resultados', component: DiagnosticResultsComponent },
-      { path: 'resultados/:id', component: DiagnosticResultsComponent },
-    ]
-  }
+      { path: '**', redirectTo: '', pathMatch: 'full' },
+    ],
+  },
 ];
 
 

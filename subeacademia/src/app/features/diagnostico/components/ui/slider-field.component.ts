@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { I18nTranslatePipe } from '../../../../core/i18n/i18n.pipe';
-import { ThemeService } from '../../../../shared/theme.service';
 import { InfoModalComponent } from './info-modal/info-modal.component';
 import { Subscription } from 'rxjs';
 
@@ -207,7 +206,6 @@ export class SliderFieldComponent implements OnInit, OnDestroy {
   currentValue: number = 1;
   
   protected readonly Math = Math;
-  private readonly themeService = inject(ThemeService);
   private subscription?: Subscription;
 
   ngOnInit(): void {

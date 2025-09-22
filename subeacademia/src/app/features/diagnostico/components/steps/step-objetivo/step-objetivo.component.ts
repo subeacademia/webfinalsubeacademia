@@ -1,573 +1,214 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef, OnDestroy, inject } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, FormArray, Validators } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
-
+import { GenerativeAiService } from '../../../../../core/ai/generative-ai.service';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
-import { BesselAiService, ObjetivoGenerado, ContextoCliente } from '../../../../../core/ai/bessel-ai.service';
-import { ObjetivoProgressComponent, ProgresoGeneracion } from './objetivo-progress.component';
+import { ToastService } from '../../../../../core/services/ui/toast/toast.service';
+import { Subscription } from 'rxjs';
 
+/**
+ * NOTA DE ARQUITECTURA (VERSIÓN FINAL):
+ * Este componente ha sido reescrito para garantizar la máxima robustez y corregir todos los errores previos.
+ * 1.  **FormArray Robusto:** La lógica de `onCheckboxChange` y `isChecked` es ahora infalible.
+ * 2.  **Sin `ExpressionChangedAfterItHasBeenCheckedError`:** Se elimina el `cdr.detectChanges()` problemático y se gestiona el estado de forma reactiva.
+ * 3.  **Prompt de IA de Precisión Quirúrgica:** El prompt es ahora extremadamente específico para forzar la coherencia.
+ * 4.  **Soporte para Dark Mode:** El HTML asociado utiliza clases de Tailwind `dark:` para una correcta visualización.
+ * 5.  **Gestión de Subscripciones:** Se implementa OnDestroy para limpiar subscripciones y evitar fugas de memoria.
+ */
 @Component({
   selector: 'app-step-objetivo',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ObjetivoProgressComponent],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './step-objetivo.component.html',
 })
-export class StepObjetivoComponent implements OnInit {
-  private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
-  readonly state = inject(DiagnosticStateService);
-  private readonly besselAi = inject(BesselAiService);
-  private readonly cdr = inject(ChangeDetectorRef);
+export class StepObjetivoComponent implements OnInit, OnDestroy {
+  form: FormGroup;
+  isGenerating = signal(false);
+  suggestedObjectives = signal<string[]>([]);
+  private formChangesSubscription: Subscription | undefined;
 
-  // Formulario local para capturar la descripción libre del usuario
-  uiForm!: FormGroup;
+  public diagnosticStateService = inject(DiagnosticStateService);
+  private generativeAiService = inject(GenerativeAiService);
+  private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
+  private toastService = inject(ToastService);
 
-  // FormArray referenciado directamente al estado global para los objetivos seleccionados
-  selectedObjectives!: FormArray<FormControl<string>>;
-
-  // Estado del flujo del componente
-  readonly currentStep = signal<'input' | 'generating' | 'selection' | 'review'>('input');
-  
-  // UI state
-  readonly isLoading = signal(false);
-  readonly errorMsg = signal<string | null>(null);
-  readonly suggestions = signal<ObjetivoGenerado[]>([]);
-  
-  // Pasos de generación para el componente de progreso
-  readonly pasosGeneracion = signal<ProgresoGeneracion[]>([
-    {
-      paso: 'Analizando contexto',
-      estado: 'pendiente',
-      mensaje: 'Evaluando industria, tamaño, presupuesto y segmento',
-      progreso: 0
-    },
-    {
-      paso: 'Procesando diagnóstico ARES',
-      estado: 'pendiente',
-      mensaje: 'Identificando fortalezas y debilidades',
-      progreso: 0
-    },
-    {
-      paso: 'Evaluando competencias',
-      estado: 'pendiente',
-      mensaje: 'Analizando nivel de competencias del equipo',
-      progreso: 0
-    },
-    {
-      paso: 'Generando objetivos',
-      estado: 'pendiente',
-      mensaje: 'Creando objetivos SMART personalizados',
-      progreso: 0
-    }
-  ]);
-  
-  // Computed properties
-  readonly canProceed = computed(() => {
-    const count = this.selectedCount();
-    const canProceed = count > 0;
-    console.log(`🔍 canProceed: ${count} objetivos seleccionados -> ${canProceed ? '✅ Puede continuar' : '❌ No puede continuar'}`);
-    return canProceed;
-  });
-  readonly selectedCount = computed(() => {
-    // 🔧 SOLUCIÓN: Contar directamente desde el FormArray sin filtrar
-    const formArrayValues = this.selectedObjectives?.value || [];
-    const count = Array.isArray(formArrayValues) ? formArrayValues.length : 0;
-    
-    // 🔧 DEBUG: Log del contador para verificar que funcione
-    console.log(`🔢 selectedCount computed: ${count} objetivos`);
-    console.log(`📋 Valores del FormArray:`, formArrayValues);
-    
-    // 🔧 SOLUCIÓN: Asegurar que el contador sea siempre un número válido
-    return Math.max(0, count);
-  });
-  readonly hasGeneratedObjectives = computed(() => this.suggestions().length > 0);
-  
-  // Opciones predefinidas como fallback
-  readonly predefinedObjectives: ObjetivoGenerado[] = [
-    {
-      id: 'pre-1',
-      texto: 'Optimizar procesos con IA (automatización y eficiencia)',
-      categoria: 'Procesos',
-      prioridad: 'alta',
-      tiempoEstimado: '3-6 meses',
-      impacto: 'Reducción del 30% en tiempo de procesos'
-    },
-    {
-      id: 'pre-2',
-      texto: 'Formar al equipo en competencias clave de IA',
-      categoria: 'Capacitación',
-      prioridad: 'alta',
-      tiempoEstimado: '6-12 meses',
-      impacto: 'Mejora del 50% en competencias del equipo'
-    },
-    {
-      id: 'pre-3',
-      texto: 'Implementar analítica avanzada para toma de decisiones',
-      categoria: 'Analítica',
-      prioridad: 'media',
-      tiempoEstimado: '4-8 meses',
-      impacto: 'Mejora del 40% en precisión de decisiones'
-    },
-    {
-      id: 'pre-4',
-      texto: 'Mejorar la experiencia del cliente con IA generativa',
-      categoria: 'CX',
-      prioridad: 'media',
-      tiempoEstimado: '2-4 meses',
-      impacto: 'Incremento del 25% en satisfacción del cliente'
-    },
-    {
-      id: 'pre-5',
-      texto: 'Fortalecer la gobernanza y ética de datos',
-      categoria: 'Gobernanza',
-      prioridad: 'baja',
-      tiempoEstimado: '6-12 meses',
-      impacto: 'Cumplimiento del 100% en regulaciones'
-    },
-  ];
+  constructor() {
+    this.form = this.fb.group({
+      objetivoPrincipal: ['', [Validators.required, Validators.minLength(15)]],
+      selectedObjectives: this.fb.array([], [Validators.required, Validators.minLength(1)])
+    });
+  }
 
   ngOnInit(): void {
-    // Enlazar el FormArray del estado global
-    const fa = this.state.form.get('objetivo');
-    this.selectedObjectives = (fa instanceof FormArray) ? fa as FormArray<FormControl<string>> : this.fb.array([]) as FormArray<FormControl<string>>;
-
-    // Formulario de UI
-    this.uiForm = this.fb.group({
-      descripcion: ['', [Validators.required, Validators.minLength(10)]],
-    });
-
-    // Si ya había objetivos seleccionados, ir al paso de revisión
-    if (this.selectedCount() > 0) {
-      this.currentStep.set('review');
+    const currentState = this.diagnosticStateService.state().objetivo;
+    if (currentState?.objetivo && currentState.objetivo.length > 0) {
+      this.form.patchValue({ objetivoPrincipal: currentState.objetivo.join(', ') });
+      this.selectedObjectives.clear();
+      currentState.objetivo.forEach(obj => this.selectedObjectives.push(new FormControl(obj)));
+      this.suggestedObjectives.set(currentState.objetivo);
     }
 
-    // Si ya había objetivos generados, cargarlos
-    this.deduplicateSelected();
+    // Escuchamos los cambios en el FormArray para forzar la re-evaluación del estado del formulario.
+    this.formChangesSubscription = this.selectedObjectives.valueChanges.subscribe(() => {
+        this.cdr.markForCheck();
+    });
   }
 
-  // Generar sugerencias con IA usando Bessel
-  async onGenerate(): Promise<void> {
-    if (this.uiForm.invalid) {
-      this.uiForm.markAllAsTouched();
+  ngOnDestroy(): void {
+      this.formChangesSubscription?.unsubscribe();
+  }
+
+  get selectedObjectives(): FormArray {
+    return this.form.get('selectedObjectives') as FormArray;
+  }
+
+  isChecked(objective: string): boolean {
+    return this.selectedObjectives.value.includes(objective);
+  }
+
+  onCheckboxChange(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+    if (checkbox.checked) {
+      this.selectedObjectives.push(new FormControl(checkbox.value));
+      } else {
+      const index = this.selectedObjectives.controls.findIndex(x => x.value === checkbox.value);
+      if (index > -1) {
+        this.selectedObjectives.removeAt(index);
+      }
+    }
+    this.selectedObjectives.markAsTouched();
+    this.selectedObjectives.markAsDirty();
+  }
+
+  async generateObjectivesWithAI(): Promise<void> {
+    const objetivoPrincipalControl = this.form.get('objetivoPrincipal');
+    if (objetivoPrincipalControl?.invalid) {
+      objetivoPrincipalControl.markAsTouched();
+      alert('Por favor, escribe un objetivo más detallado (mínimo 15 caracteres) para que la IA pueda ayudarte a refinarlo.');
       return;
     }
+    const userObjective = objetivoPrincipalControl?.value || '';
 
-    this.currentStep.set('generating');
-    this.isLoading.set(true);
-    this.errorMsg.set(null);
-    this.suggestions.set([]);
-
-    // 🔧 LIMPIAR OBJETIVOS ANTERIORES - SOLUCIÓN AL PROBLEMA DEL CONTADOR
+    this.isGenerating.set(true);
+    this.suggestedObjectives.set([]);
     this.selectedObjectives.clear();
-    console.log('🧹 FormArray limpiado. Objetivos anteriores eliminados.');
 
-    // Iniciar progreso de generación
-    this.iniciarProgresoGeneracion();
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const nextYear = currentYear + 1;
+    
+    const prompt = `Eres un consultor de estrategia. Refina este objetivo de negocio para que sea SMART. 
 
-    const desc = (this.uiForm.get('descripcion') as FormControl<string>).value ?? '';
-    
-    // Construir el contexto del cliente para Bessel
-    const contextoCliente = this.construirContextoCliente(desc);
-    
-    // Generar objetivos usando el servicio de Bessel
-    this.besselAi.generarObjetivos({
-      contexto: contextoCliente,
-      maxObjetivos: 8, // 🔧 CAMBIADO: De 6 a 8 objetivos para que cuadre la pantalla
-      enfoque: 'general'
-    }).pipe(
-      finalize(() => this.isLoading.set(false))
-    ).subscribe({
-      next: (objetivos) => {
-        if (objetivos && objetivos.length > 0) {
-          this.suggestions.set(objetivos);
-          this.completarProgresoGeneracion();
-          this.currentStep.set('selection');
+OBJETIVO: "${userObjective}"
+
+IMPORTANTE: Estamos en ${currentMonth}/${currentYear}. Genera objetivos con fechas realistas y actuales.
+
+RESPUESTA REQUERIDA: Solo devuelve un array JSON con exactamente 3 objetivos SMART. No incluyas texto adicional, explicaciones, ni formato markdown.
+
+FORMATO:
+["objetivo SMART 1", "objetivo SMART 2", "objetivo SMART 3"]
+
+EJEMPLO (fechas actuales para ${currentYear}):
+["Incrementar ventas en 25% para diciembre de ${currentYear}", "Reducir costos operativos en 15% para Q4 de ${currentYear}", "Aumentar satisfacción del cliente a 90% para marzo de ${nextYear}"]`;
+
+    try {
+      const response = await this.generativeAiService.generateText(prompt);
+      console.log('Respuesta completa de la IA:', response);
+      
+      let objectives: string[] = [];
+      
+      try {
+        // Primero intentar parsear la respuesta completa como JSON
+        const fullResponse = JSON.parse(response);
+        console.log('Respuesta parseada como JSON completo:', fullResponse);
+        
+        // Si es un objeto con choices, extraer el contenido
+        if (fullResponse.choices && fullResponse.choices[0] && fullResponse.choices[0].message) {
+          const content = fullResponse.choices[0].message.content;
+          console.log('Contenido extraído de choices:', content);
+          
+          // El contenido puede ser un string que contiene el array JSON
+          if (typeof content === 'string') {
+            const arrayMatch = content.match(/\[[\s\S]*?\]/);
+            if (arrayMatch) {
+              objectives = JSON.parse(arrayMatch[0]);
+            } else {
+              // Si no hay array, intentar parsear el contenido directamente
+              objectives = JSON.parse(content);
+            }
+          } else {
+            objectives = content;
+          }
+        } else if (Array.isArray(fullResponse)) {
+          objectives = fullResponse;
         } else {
-          // Fallback a objetivos predefinidos
-          this.handleGenerationError();
+          throw new Error("Estructura de respuesta no reconocida");
         }
-      },
-      error: (err) => {
-        console.error('Error generando objetivos con Bessel:', err);
-        this.handleGenerationError();
+      } catch (jsonError) {
+        console.log('No es JSON completo, intentando extracción con regex...');
+        
+        // Si no es JSON completo, usar regex para extraer el array
+        const arrayMatch = response.match(/\[[\s\S]*?\]/);
+        if (arrayMatch) {
+          let jsonString = arrayMatch[0];
+          console.log('JSON extraído con regex:', jsonString);
+          
+          // Limpiar caracteres problemáticos
+          jsonString = jsonString.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ');
+          
+          try {
+            objectives = JSON.parse(jsonString);
+          } catch (parseError) {
+            console.error('Error al parsear JSON extraído:', parseError);
+            
+            // Último recurso: extraer strings manualmente
+            const stringMatches = jsonString.match(/"([^"]+)"/g);
+            if (stringMatches && stringMatches.length >= 2) {
+              objectives = stringMatches.map(match => match.replace(/"/g, ''));
+              console.log('Objetivos extraídos manualmente:', objectives);
+            } else {
+              throw new Error("No se pudieron extraer objetivos válidos");
+            }
+          }
+        } else {
+          throw new Error("No se encontró un array JSON en la respuesta");
+        }
       }
-    });
-  }
-
-  // Inicia el progreso de generación
-  private iniciarProgresoGeneracion(): void {
-    const pasos = this.pasosGeneracion();
-    
-    // Paso 1: Analizando contexto
-    setTimeout(() => {
-      this.actualizarPaso(0, 'procesando', 25);
-    }, 500);
-    
-    // Paso 2: Procesando diagnóstico ARES
-    setTimeout(() => {
-      this.actualizarPaso(1, 'procesando', 50);
-    }, 1500);
-    
-    // Paso 3: Evaluando competencias
-    setTimeout(() => {
-      this.actualizarPaso(2, 'procesando', 75);
-    }, 2500);
-    
-    // Paso 4: Generando objetivos
-    setTimeout(() => {
-      this.actualizarPaso(3, 'procesando', 90);
-    }, 3500);
-  }
-
-  // Completa el progreso de generación
-  private completarProgresoGeneracion(): void {
-    const pasos = this.pasosGeneracion();
-    
-    // Marcar todos los pasos como completados
-    pasos.forEach((paso, index) => {
-      this.actualizarPaso(index, 'completado', 100);
-    });
-  }
-
-  // Actualiza un paso específico del progreso
-  private actualizarPaso(index: number, estado: ProgresoGeneracion['estado'], progreso: number): void {
-    const pasos = [...this.pasosGeneracion()];
-    if (pasos[index]) {
-      pasos[index] = { ...pasos[index], estado, progreso };
-      this.pasosGeneracion.set(pasos);
-    }
-  }
-
-  // Construye el contexto del cliente para enviar a Bessel
-  private construirContextoCliente(descripcionUsuario: string): ContextoCliente {
-    const contexto = this.state.getContextoData();
-    const segmento = this.state.form.get('segmento')?.value ?? 'No especificado';
-
-    const aresValues = this.state.aresForm.value as Record<string, number>;
-    const competenciasValues = this.state.competenciasForm.value as Record<string, number>;
-
-    // Extraer top debilidades y fortalezas ARES
-    const aresArray = Object.entries(aresValues)
-      .filter(([, v]) => typeof v === 'number')
-      .map(([id, v]) => ({ id, score: v as number }));
-    const weakestAres = [...aresArray].sort((a, b) => a.score - b.score).slice(0, 3).map(x => this.labelFromAresId(x.id));
-    const strongestAres = [...aresArray].sort((a, b) => b.score - a.score).slice(0, 3).map(x => this.labelFromAresId(x.id));
-
-    // Extraer competencias más bajas
-    const compArray = Object.entries(competenciasValues)
-      .filter(([, v]) => typeof v === 'number')
-      .map(([id, v]) => ({ id, score: v as number }));
-    const lowestCompetencias = [...compArray].sort((a, b) => a.score - b.score).slice(0, 4).map(x => this.labelFromCompetenciaId(x.id));
-
-    return {
-      industria: contexto?.industria ?? 'No especificada',
-      tamano: contexto?.tamano ?? 'No especificado',
-      presupuesto: contexto?.presupuesto ?? 'No especificado',
-      segmento: segmento,
-      descripcionUsuario: descripcionUsuario,
-      aresDebilidades: weakestAres,
-      aresFortalezas: strongestAres,
-      competenciasBajas: lowestCompetencias
-    };
-  }
-
-  private labelFromAresId(id: string): string {
-    const item = this.state.aresItems?.find(x => x.id === id);
-    return item?.labelKey ?? id;
-  }
-
-  private labelFromCompetenciaId(id: string): string {
-    const comp = this.state.competencias?.find(x => x.id === id);
-    return comp?.nameKey ?? id;
-  }
-
-  private handleGenerationError(): void {
-    this.errorMsg.set('No se pudieron generar sugerencias personalizadas con IA. Usando opciones predefinidas adaptadas a tu contexto.');
-    this.suggestions.set([...this.predefinedObjectives]);
-    
-    // Marcar progreso como error
-    const pasos = [...this.pasosGeneracion()];
-    pasos[3] = { ...pasos[3], estado: 'error', progreso: 100 };
-    this.pasosGeneracion.set(pasos);
-    
-    this.currentStep.set('selection');
-  }
-
-  // Checkbox change handler
-  onToggle(option: ObjetivoGenerado, checked: boolean): void {
-    console.log(`🔄 Toggle objetivo: ${option.texto} - ${checked ? 'seleccionado' : 'deseleccionado'}`);
-    
-    if (checked) {
-      this.addSelection(option.texto);
-    } else {
-      this.removeSelection(option.texto);
-    }
-    
-    // 🔧 SOLUCIÓN: Forzar actualización del estado
-    this.selectedObjectives.updateValueAndValidity();
-    
-    // Log del estado actual después del toggle
-    const currentCount = this.selectedCount();
-    console.log(`📊 Objetivos seleccionados después del toggle: ${currentCount}`);
-    console.log(`📋 Lista actual:`, this.getObjetivosSeleccionados());
-    
-    // 🔧 SOLUCIÓN: Forzar detección de cambios para actualizar la UI
-    this.cdr.detectChanges();
-    
-    // 🔧 SOLUCIÓN: Verificación adicional después de la detección de cambios
-    setTimeout(() => {
-      console.log(`🔄 Verificación final - Contador actual: ${this.selectedCount()}`);
-      this.cdr.detectChanges();
-      this.debugEstado(); // 🔧 DEBUG: Verificar estado completo
-    }, 0);
-    
-    // 🔧 SOLUCIÓN: Forzar actualización del estado global
-    this.state.form.updateValueAndValidity();
-  }
-
-
-
-  isSelected(option: ObjetivoGenerado): boolean {
-    const values = (this.selectedObjectives.value || []) as string[];
-    const isSelected = values.includes(option.texto);
-    console.log(`🔍 isSelected "${option.texto}": ${isSelected ? '✅' : '❌'}`);
-    return isSelected;
-  }
-
-  private addSelection(option: string): void {
-    const values = (this.selectedObjectives.value || []) as string[];
-    console.log(`➕ Agregando selección: "${option}"`);
-    
-    if (!values.includes(option)) {
-      this.selectedObjectives.push(new FormControl<string>(option, { nonNullable: true }));
-      console.log(`✅ Selección agregada exitosamente`);
       
-      // 🔧 SOLUCIÓN: Forzar actualización inmediata del computed
-      this.cdr.detectChanges();
-    } else {
-      console.log(`⚠️ La opción ya estaba seleccionada`);
-    }
-  }
-
-  private removeSelection(option: string): void {
-    const values = (this.selectedObjectives.value as string[]) || [];
-    console.log(`➖ Removiendo selección: "${option}"`);
-    
-    const idx = values.findIndex(v => v === option);
-    if (idx >= 0) {
-      this.selectedObjectives.removeAt(idx);
-      console.log(`✅ Selección removida exitosamente del índice ${idx}`);
+      // Validar que sea un array con al menos 2 elementos
+      if (!Array.isArray(objectives) || objectives.length < 2) {
+        throw new Error("La IA no devolvió un array válido de objetivos");
+      }
       
-      // 🔧 SOLUCIÓN: Forzar actualización inmediata del computed
-      this.cdr.detectChanges();
-    } else {
-      console.log(`⚠️ La opción no se encontró para remover`);
+      // Limpiar cada objetivo
+      objectives = objectives.map(obj => obj.trim()).filter(obj => obj.length > 10);
+      
+      if (objectives.length === 0) {
+        throw new Error("No se encontraron objetivos válidos después de la limpieza");
+      }
+      
+      console.log('Objetivos finales:', objectives);
+      this.suggestedObjectives.set(objectives);
+      this.toastService.show('success', `Se generaron ${objectives.length} objetivos SMART para tu meta.`);
+      
+    } catch (error) {
+      console.error('Error al refinar objetivos con IA:', error);
+      this.toastService.show('error', 'La IA no pudo generar sugerencias. Por favor, revisa que tu objetivo sea claro o inténtalo de nuevo.');
+    } finally {
+      this.isGenerating.set(false);
     }
   }
 
-  private deduplicateSelected(): void {
-    const seen = new Set<string>();
-    const toKeep: string[] = [];
-    for (const v of (this.selectedObjectives.value as string[])) {
-      if (!seen.has(v)) {
-        seen.add(v);
-        toKeep.push(v);
+  next(): void {
+    if (this.form.valid) {
+      this.diagnosticStateService.updateObjetivo(this.selectedObjectives.value);
+      this.diagnosticStateService.nextStep();
+    } else {
+      this.form.markAllAsTouched();
+      if (this.selectedObjectives.length === 0) {
+        alert('Debes generar y seleccionar al menos un objetivo para poder continuar.');
       }
     }
-    if (toKeep.length !== this.selectedObjectives.length) {
-      this.selectedObjectives.clear();
-      toKeep.forEach(v => this.selectedObjectives.push(new FormControl<string>(v, { nonNullable: true })));
-    }
-  }
-
-  // Navegación
-  goNext(): void {
-    console.log('🚀 Botón Siguiente presionado...');
-    console.log(`🔍 canProceed(): ${this.canProceed()}`);
-    console.log(`📊 selectedCount(): ${this.selectedCount()}`);
-    
-    if (!this.canProceed()) {
-      console.log('❌ No se puede continuar - no hay objetivos seleccionados');
-      this.debugEstado();
-      return;
-    }
-    
-    // 🔧 SOLUCIÓN: Ir al paso de revisión y NO navegar automáticamente
-    this.currentStep.set('review');
-    
-    console.log('✅ Objetivos configurados. Usuario puede revisar y continuar cuando esté listo.');
-    console.log('📊 Objetivos seleccionados:', this.getObjetivosSeleccionados().length);
-  }
-
-  goPrevious(): void {
-    console.log('🔄 Navegando al paso anterior...');
-    console.log(`📍 URL actual: ${this.router.url}`);
-    
-    const prev = this.state.getPreviousStepLink(this.router.url);
-    console.log(`📍 Paso anterior: ${prev}`);
-    
-    if (prev) {
-      // 🔧 SOLUCIÓN: Construir la URL correctamente considerando el idioma
-      const currentUrl = this.router.url;
-      const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-      const prevUrl = `${baseUrl}/${prev}`;
-      
-      console.log(`🔗 URL anterior: ${prevUrl}`);
-      
-      // Navegar al paso anterior
-      this.router.navigate([prevUrl]).then(() => {
-        console.log('✅ Navegación al paso anterior exitosa');
-      }).catch(err => {
-        console.error('❌ Error navegando al paso anterior:', err);
-        console.log('🔄 Intentando navegación directa...');
-        
-        // Fallback: intentar navegación directa
-        this.router.navigate(['/es', 'diagnostico', prev]).then(() => {
-          console.log('✅ Navegación directa al paso anterior exitosa');
-        }).catch(fallbackErr => {
-          console.error('❌ Error en fallback de navegación anterior:', fallbackErr);
-        });
-      });
-    } else {
-      console.error('❌ No se pudo determinar el paso anterior');
-      // Fallback: ir al inicio del diagnóstico
-      this.router.navigate(['/es', 'diagnostico', 'inicio']).catch(err => {
-        console.error('❌ Error navegando al inicio:', err);
-      });
-    }
-  }
-
-  // Utilidad para deduplicar arrays
-  private unique(arr: string[]): string[] {
-    return Array.from(new Set(arr.map(s => s.trim())));
-  }
-
-  // Métodos para el flujo del componente
-  goBackToInput(): void {
-    this.currentStep.set('input');
-    this.suggestions.set([]);
-    this.errorMsg.set(null);
-    
-    // 🔧 LIMPIAR OBJETIVOS SELECCIONADOS AL VOLVER
-    this.selectedObjectives.clear();
-    console.log('🧹 Objetivos limpiados al volver al input');
-    
-    // Resetear progreso
-    const pasos = this.pasosGeneracion();
-    pasos.forEach((paso, index) => {
-      this.actualizarPaso(index, 'pendiente', 0);
-    });
-  }
-
-  goBackToSelection(): void {
-    this.currentStep.set('selection');
-  }
-
-  // Método para continuar al siguiente paso del diagnóstico
-  continuarDiagnostico(): void {
-    console.log('🚀 Continuando al siguiente paso del diagnóstico...');
-    console.log(`📍 URL actual: ${this.router.url}`);
-    
-    // 🔧 SOLUCIÓN: Guardar los objetivos seleccionados antes de navegar
-    const objetivosSeleccionados = this.getObjetivosSeleccionados();
-    console.log('🎯 Objetivos seleccionados para guardar:', objetivosSeleccionados);
-    
-    // Asegurar que los objetivos se guarden en el estado global
-    if (objetivosSeleccionados.length > 0) {
-      // Limpiar el FormArray y agregar los objetivos seleccionados
-      this.selectedObjectives.clear();
-      objetivosSeleccionados.forEach(objetivo => {
-        this.selectedObjectives.push(this.fb.control(objetivo, { nonNullable: true }));
-      });
-      
-      // Forzar la actualización del estado
-      this.state.form.updateValueAndValidity();
-      console.log('✅ Objetivos guardados en el estado global');
-    }
-    
-    // 🔧 SOLUCIÓN: Construir la ruta correctamente basada en la URL actual
-    const currentUrl = this.router.url;
-    const baseUrl = currentUrl.split('/').slice(0, -1).join('/');
-    const resultsUrl = `${baseUrl}/resultados`;
-    
-    console.log(`🎯 Navegando a: ${resultsUrl}`);
-    
-    // Navegación a resultados del diagnóstico
-    this.router.navigate([resultsUrl]).then(() => {
-      console.log('✅ Navegación exitosa a resultados del diagnóstico');
-    }).catch(err => {
-      console.error('❌ Error navegando a resultados:', err);
-      
-      // Fallback: intentar navegación usando la ruta completa con idioma
-      console.log('🔄 Intentando navegación con ruta completa...');
-      this.router.navigate(['/es', 'diagnostico', 'resultados']).then(() => {
-        console.log('✅ Navegación con ruta completa exitosa');
-      }).catch(fallbackErr => {
-        console.error('❌ Error en navegación con ruta completa:', fallbackErr);
-        
-        // Último fallback: ir al home del diagnóstico
-        console.log('🔄 Último fallback: navegando al home del diagnóstico...');
-        this.router.navigate(['/es', 'diagnostico']).catch(finalErr => {
-          console.error('❌ Error final navegando al home:', finalErr);
-        });
-      });
-    });
-  }
-
-  getPrioridadColor(prioridad: string): string {
-    switch (prioridad) {
-      case 'alta': return 'text-red-400 bg-red-900/20 border-red-500/30';
-      case 'media': return 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30';
-      case 'baja': return 'text-green-400 bg-green-900/20 border-green-500/30';
-      default: return 'text-gray-400 bg-gray-900/20 border-gray-500/30';
-    }
-  }
-
-  getCategoriaIcon(categoria: string): string {
-    switch (categoria.toLowerCase()) {
-      case 'procesos': return '⚙️';
-      case 'capacitación': return '🎓';
-      case 'analítica': return '📊';
-      case 'cx': return '💬';
-      case 'gobernanza': return '🛡️';
-      case 'innovación': return '💡';
-      default: return '🎯';
-    }
-  }
-
-  // Método para obtener los objetivos seleccionados para mostrar en la pantalla de revisión
-  getObjetivosSeleccionados(): string[] {
-    const values = this.selectedObjectives?.value;
-    if (!values || !Array.isArray(values)) {
-      console.log(`🔍 getObjetivosSeleccionados: valores inválidos -`, values);
-      return [];
-    }
-    
-    // 🔧 SOLUCIÓN: Usar directamente los valores del FormArray para consistencia
-    const objetivosValidos = values.filter(v => v && typeof v === 'string');
-    
-    console.log(`🔍 getObjetivosSeleccionados: FormArray length=${values.length}, valores válidos=${objetivosValidos.length}`);
-    console.log(`📋 Valores completos:`, values);
-    console.log(`✅ Objetivos válidos:`, objetivosValidos);
-    
-    return objetivosValidos;
-  }
-
-  // TrackBy function para optimizar el rendimiento del *ngFor
-  trackByObjetivo(index: number, objetivo: string): string {
-    return objetivo;
-  }
-  
-  // 🔧 MÉTODO DE DEBUG: Para verificar el estado actual
-  debugEstado(): void {
-    console.log('🔍 === DEBUG ESTADO ACTUAL ===');
-    console.log(`📊 selectedCount(): ${this.selectedCount()}`);
-    console.log(`🔍 canProceed(): ${this.canProceed()}`);
-    console.log(`📋 FormArray length: ${this.selectedObjectives.length}`);
-    console.log(`📋 FormArray value:`, this.selectedObjectives.value);
-    console.log(`📋 getObjetivosSeleccionados():`, this.getObjetivosSeleccionados());
-    console.log('🔍 === FIN DEBUG ===');
   }
 }

@@ -24,9 +24,9 @@ export class UiModalComponent {
   }
 
   onBackdropClick(event: Event): void {
-    if (event.target === event.currentTarget) {
-      this.close.emit();
-    }
+    // Cerrar siempre al hacer click fuera del panel.
+    // El panel interno hace stopPropagation en el template.
+    this.close.emit();
   }
 
   onClose(): void {

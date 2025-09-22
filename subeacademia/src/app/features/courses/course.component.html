@@ -1,26 +1,52 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900" *ngIf="course() as course">
+<div class="min-h-screen" *ngIf="course() as course">
   
-  <!-- Header de la página -->
-  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex items-center gap-4 mb-6">
+  <!-- Cabecera estándar transparente -->
+  <div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+    <!-- Contenido en tarjeta transparente elegante -->
+    <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+      <!-- Navegación de regreso -->
+      <div class="absolute top-4 left-4 z-20">
         <a [routerLink]="['/', i18n.currentLang(), 'cursos']" 
-           class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+           class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 dark:bg-white/10 backdrop-blur-md text-gray-800 dark:text-white border border-white/30 rounded-full hover:bg-white/30 transition-colors font-medium">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           Volver a Cursos
         </a>
       </div>
-      <app-page-header 
-        [title]="course.title || ''"
-        [subtitle]="course.description || course.summary || ''">
-      </app-page-header>
+      
+      <!-- Tarjeta principal con transparencia y bordes elegantes -->
+      <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+          </svg>
+          Curso Especializado
+        </div>
+        
+        <!-- Título principal con degradado naranja -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+          {{ course.title || '' }}
+        </h1>
+        
+        <!-- Subtítulo mejorado -->
+        <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+          {{ course.description || course.summary || '' }}
+        </p>
+      </div>
+      
+      <!-- Indicador de scroll fuera de la tarjeta -->
+      <div class="mt-8 animate-bounce">
+        <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+          <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Contenido principal -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
       <!-- Columna Izquierda - Contenido del Curso (70%) -->

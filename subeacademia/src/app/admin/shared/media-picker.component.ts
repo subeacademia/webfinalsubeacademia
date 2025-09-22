@@ -49,7 +49,7 @@ export class MediaPickerComponent {
     this.uploading.set(true);
     for(const f of files){
       try{
-        await this.media.upload(f, 'media', p => this.progress.set(Math.round(p)));
+        await this.media.upload(f, 'public/media', p => this.progress.set(Math.round(p)));
       }catch(err:any){
         console.error(err?.code, err?.message);
         this.error.set((err?.message || 'Error subiendo archivo') + (err?.code ? ` (${err.code})` : ''));

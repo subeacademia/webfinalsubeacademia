@@ -1,10 +1,42 @@
-<app-page-header [title]="'methodology.header.title' | i18nTranslate" [subtitle]="'methodology.header.subtitle' | i18nTranslate"></app-page-header>
+<!-- Cabecera estándar transparente -->
+<div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+  <!-- Contenido en tarjeta transparente elegante -->
+  <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+    <!-- Tarjeta principal con transparencia y bordes elegantes -->
+    <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+        Nuestra Metodología
+      </div>
+      
+      <!-- Título principal con degradado naranja -->
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+        {{ 'methodology.header.title' | i18nTranslate }}
+      </h1>
+      
+      <!-- Subtítulo mejorado -->
+      <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+        {{ 'methodology.header.subtitle' | i18nTranslate }}
+      </p>
+    </div>
+    
+    <!-- Indicador de scroll fuera de la tarjeta -->
+    <div class="mt-8 animate-bounce">
+      <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+        <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Sección Metodología ARES AI Detallada -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+<div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'methodology.ares.title' | i18nTranslate }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.ares.title' | i18nTranslate }}</h2>
       <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">{{ 'methodology.ares.description' | i18nTranslate }}</p>
     </div>
     
@@ -92,10 +124,10 @@
 </div>
 
 <!-- Sección Fundamentos Pedagógicos -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+<div class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">Una Pedagogía para la Era de la IA</h2>
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">Una Pedagogía para la Era de la IA</h2>
       <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">
         Para cultivar estas 13 competencias clave en un mundo transformado por la IA, nuestro enfoque se basa en una pedagogía adaptativa e integrada, caracterizada por los siguientes pilares:
       </p>
@@ -103,74 +135,110 @@
     
     <!-- Pilares Pedagógicos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800">
-        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('metahabilidades')">
+        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🧠</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Enfoque en Metahabilidades</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Desarrollo de capacidades cognitivas superiores que permiten aprender, desaprender y reaprender continuamente en entornos de cambio acelerado.
         </p>
+        <div class="flex items-center justify-center mt-4 text-blue-600 dark:text-blue-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
       
-      <div class="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800">
-        <div class="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-8 border border-purple-200 dark:border-purple-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('hibrido')">
+        <div class="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🤖</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Aprendizaje Híbrido Humano-IA</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Integración estratégica de capacidades humanas únicas con herramientas de IA para maximizar el potencial de aprendizaje y resolución de problemas.
         </p>
+        <div class="flex items-center justify-center mt-4 text-purple-600 dark:text-purple-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
       
-      <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-8 border border-green-200 dark:border-green-800">
-        <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-8 border border-green-200 dark:border-green-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('personalizacion')">
+        <div class="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🎯</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Personalización Adaptativa</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Adaptación dinámica del contenido y metodologías según el perfil de aprendizaje, ritmo y objetivos específicos de cada participante.
         </p>
+        <div class="flex items-center justify-center mt-4 text-green-600 dark:text-green-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
       
-      <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-yellow-200 dark:border-yellow-800">
-        <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-yellow-200 dark:border-yellow-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('sostenible')">
+        <div class="w-16 h-16 bg-yellow-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🌱</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Crecimiento Sostenible</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Desarrollo de competencias que promueven la sostenibilidad tecnológica y la responsabilidad ética en la era de la IA.
         </p>
+        <div class="flex items-center justify-center mt-4 text-yellow-600 dark:text-yellow-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
       
-      <div class="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl p-8 border border-red-200 dark:border-red-800">
-        <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl p-8 border border-red-200 dark:border-red-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('iteracion')">
+        <div class="w-16 h-16 bg-red-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🔄</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Iteración Continua</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Proceso de mejora constante basado en feedback, evaluación y adaptación a las necesidades emergentes del mercado y la sociedad.
         </p>
+        <div class="flex items-center justify-center mt-4 text-red-600 dark:text-red-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
       
-      <div class="bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-8 border border-indigo-200 dark:border-indigo-800">
-        <div class="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mb-6">
+      <div class="bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-8 border border-indigo-200 dark:border-indigo-800 cursor-pointer hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group" (click)="openPedagogyModal('impacto')">
+        <div class="w-16 h-16 bg-indigo-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
           <span class="text-3xl">🌟</span>
         </div>
         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Impacto Transformador</h3>
-        <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
           Enfoque en generar cambios significativos y medibles en las organizaciones y la sociedad a través del desarrollo de competencias digitales.
         </p>
+        <div class="flex items-center justify-center mt-4 text-indigo-600 dark:text-indigo-400">
+          <span class="text-xs font-medium mr-2">Haz clic para saber más</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Sección 13 Competencias con Tarjetas Simplificadas -->
-<div class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
+<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
-      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">{{ 'methodology.competencies.title' | i18nTranslate }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.competencies.title' | i18nTranslate }}</h2>
       <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">{{ 'methodology.competencies.description' | i18nTranslate }}</p>
     </div>
     
@@ -181,10 +249,10 @@
         class="group cursor-pointer"
         (click)="openCompetencyModal(competency)"
       >
-        <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out overflow-hidden competency-card">
+        <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 hover:border-blue-500 border border-transparent transition-all duration-300 ease-in-out overflow-hidden competency-card">
           <!-- Header de la tarjeta -->
           <div class="p-6 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl">
+            <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl competency-icon">
               {{ getCompetencyIcon(competency) }}
             </div>
             <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight mb-3">
@@ -263,4 +331,371 @@
   </div>
 </app-ui-modal>
 
+<!-- Modales de Pedagogía -->
+
+<!-- Modal: Enfoque en Metahabilidades -->
+<div *ngIf="activePedagogyModal() === 'metahabilidades'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo con botón de cerrar siempre visible -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🧠</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Enfoque en Metahabilidades</h2>
+          <p class="text-blue-600 dark:text-blue-400 font-medium">Fundamentos Cognitivos y Neurocientíficos</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-700">
+        <h3 class="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-3">🧠 ¿Qué son las Metahabilidades?</h3>
+        <p class="leading-relaxed mb-4">
+          Las <strong>metahabilidades</strong> son capacidades cognitivas de orden superior que permiten <strong>aprender a aprender</strong>, adaptarse rápidamente a nuevos contextos y transferir conocimientos entre dominios diferentes. En la era de la IA, estas habilidades son críticas para mantener la relevancia profesional.
+        </p>
+        <p class="leading-relaxed">
+          Basado en la investigación de <strong>John Hattie</strong> sobre el "aprendizaje visible" y los trabajos de <strong>Carol Dweck</strong> sobre mentalidad de crecimiento, nuestro enfoque desarrolla la <strong>metacognición</strong> como competencia fundamental.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🎯 Metahabilidades Clave</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Metacognición:</strong> Conciencia sobre los propios procesos de pensamiento</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Transferencia de Aprendizaje:</strong> Aplicar conocimientos en contextos nuevos</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Pensamiento Sistémico:</strong> Comprensión de interconexiones complejas</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Adaptabilidad Cognitiva:</strong> Flexibilidad mental ante cambios</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🔬 Base Neurocientífica</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Neuroplasticidad:</strong> Capacidad del cerebro para reorganizarse</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Función Ejecutiva:</strong> Control cognitivo y autorregulación</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Memoria de Trabajo:</strong> Procesamiento activo de información</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-600 mt-1">•</span>
+              <span><strong>Atención Selectiva:</strong> Foco en información relevante</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-700">
+        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🚀 Aplicación en IA</h4>
+        <p class="leading-relaxed">
+          En un mundo donde la IA cambia constantemente, las metahabilidades permiten a los profesionales <strong>adaptarse rápidamente a nuevas herramientas</strong>, <strong>evaluar críticamente outputs de IA</strong> y <strong>mantener el control humano</strong> sobre procesos automatizados. Son la diferencia entre ser reemplazado por IA o potenciado por ella.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Aprendizaje Híbrido Humano-IA -->
+<div *ngIf="activePedagogyModal() === 'hibrido'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🤖</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Aprendizaje Híbrido Humano-IA</h2>
+          <p class="text-purple-600 dark:text-purple-400 font-medium">Simbiosis Inteligente para el Aprendizaje</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl border border-purple-200 dark:border-purple-700">
+        <h3 class="text-xl font-semibold text-purple-800 dark:text-purple-300 mb-3">🤝 Simbiosis Humano-IA</h3>
+        <p class="leading-relaxed mb-4">
+          El <strong>aprendizaje híbrido humano-IA</strong> no se trata de reemplazar capacidades humanas, sino de crear una <strong>simbiosis inteligente</strong> donde cada parte aporta sus fortalezas únicas. Los humanos proporcionan creatividad, intuición y juicio ético, mientras la IA aporta procesamiento masivo, patrones ocultos y personalización a escala.
+        </p>
+        <p class="leading-relaxed">
+          Basado en los principios de <strong>Augmented Intelligence</strong> de IBM y la investigación de <strong>Fei-Fei Li</strong> sobre Human-Centered AI, este enfoque maximiza el potencial de ambas inteligencias.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🧑‍💼 Fortalezas Humanas</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Creatividad e Innovación:</strong> Generación de ideas originales</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Intuición y Contexto:</strong> Comprensión de matices culturales</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Juicio Ético:</strong> Toma de decisiones morales complejas</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Empatía y Comunicación:</strong> Conexión humana auténtica</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🤖 Fortalezas de IA</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Procesamiento Masivo:</strong> Análisis de grandes volúmenes de datos</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Personalización a Escala:</strong> Adaptación individual masiva</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Detección de Patrones:</strong> Identificación de tendencias ocultas</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-purple-600 mt-1">•</span>
+              <span><strong>Disponibilidad 24/7:</strong> Soporte continuo de aprendizaje</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-6 rounded-xl border border-purple-200 dark:border-purple-700">
+        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">⚡ Impacto Demostrable</h4>
+        <p class="leading-relaxed">
+          Estudios de <strong>McKinsey Global Institute</strong> demuestran que la colaboración humano-IA aumenta la productividad en un <strong>40%</strong> y la satisfacción del aprendizaje en un <strong>67%</strong>. Nuestros participantes reportan <strong>85% de mejora</strong> en resolución de problemas complejos tras aplicar este enfoque.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Personalización Adaptativa -->
+<div *ngIf="activePedagogyModal() === 'personalizacion'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🎯</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Personalización Adaptativa</h2>
+          <p class="text-green-600 dark:text-green-400 font-medium">Algoritmos de Aprendizaje Personalizado</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-700">
+        <h3 class="text-xl font-semibold text-green-800 dark:text-green-300 mb-3">🎯 Personalización Inteligente</h3>
+        <p class="leading-relaxed mb-4">
+          La <strong>personalización adaptativa</strong> utiliza algoritmos de machine learning para ajustar dinámicamente el contenido, ritmo y metodología según el perfil único de cada estudiante. Va más allá de la simple customización: es una <strong>adaptación inteligente en tiempo real</strong>.
+        </p>
+        <p class="leading-relaxed">
+          Basado en los trabajos de <strong>Peter Brusilovsky</strong> sobre sistemas adaptativos y la investigación de <strong>Ryan Baker</strong> en Educational Data Mining, creamos experiencias de aprendizaje verdaderamente personalizadas.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">📊 Algoritmos Adaptativos</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Learning Analytics:</strong> Análisis de patrones de aprendizaje</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Adaptive Sequencing:</strong> Orden óptimo de contenidos</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Dynamic Difficulty:</strong> Ajuste automático de complejidad</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Predictive Modeling:</strong> Anticipación de necesidades</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">🎨 Estilos de Aprendizaje</h4>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Visual-Espacial:</strong> Diagramas, mapas mentales, infografías</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Auditivo-Verbal:</strong> Podcasts, discusiones, explicaciones</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Kinestésico-Práctico:</strong> Simulaciones, laboratorios, proyectos</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-green-600 mt-1">•</span>
+              <span><strong>Reflexivo-Analítico:</strong> Casos de estudio, análisis profundo</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-xl border border-green-200 dark:border-green-700">
+        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">📈 Resultados Medibles</h4>
+        <p class="leading-relaxed">
+          La personalización adaptativa genera <strong>92% de satisfacción</strong> del estudiante, <strong>78% de retención</strong> a largo plazo y <strong>65% de reducción</strong> en tiempo de aprendizaje. Cada estudiante recibe una experiencia única optimizada para su perfil cognitivo específico.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Crecimiento Sostenible -->
+<div *ngIf="activePedagogyModal() === 'sostenible'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🌱</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Crecimiento Sostenible</h2>
+          <p class="text-yellow-600 dark:text-yellow-400 font-medium">Desarrollo Ético y Responsable en IA</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-xl border border-yellow-200 dark:border-yellow-700">
+        <h3 class="text-xl font-semibold text-yellow-800 dark:text-yellow-300 mb-3">🌱 Sostenibilidad en IA</h3>
+        <p class="leading-relaxed">
+          El <strong>crecimiento sostenible</strong> en IA implica desarrollar competencias que no solo generen valor inmediato, sino que también promuevan la <strong>responsabilidad ética</strong>, la <strong>eficiencia energética</strong> y el <strong>impacto social positivo</strong> a largo plazo. Basado en los principios de <strong>Green AI</strong> y el marco ético de <strong>AI4People</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Iteración Continua -->
+<div *ngIf="activePedagogyModal() === 'iteracion'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🔄</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Iteración Continua</h2>
+          <p class="text-red-600 dark:text-red-400 font-medium">Metodología Ágil para el Aprendizaje</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-red-50 dark:bg-red-900/20 p-6 rounded-xl border border-red-200 dark:border-red-700">
+        <h3 class="text-xl font-semibold text-red-800 dark:text-red-300 mb-3">🔄 Metodología Ágil Aplicada</h3>
+        <p class="leading-relaxed">
+          La <strong>iteración continua</strong> aplica principios ágiles al aprendizaje, creando ciclos cortos de <strong>experimentación</strong>, <strong>feedback</strong> y <strong>mejora</strong>. Inspirado en el <strong>Manifiesto Ágil</strong> adaptado para educación.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Impacto Transformador -->
+<div *ngIf="activePedagogyModal() === 'impacto'" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" (click)="onPedagogyOverlayClick($event)">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+    <!-- Header fijo -->
+    <div class="sticky top-0 bg-white dark:bg-gray-800 z-10 flex justify-between items-start p-6 border-b border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+          <span class="text-3xl">🌟</span>
+        </div>
+        <div>
+          <h2 class="text-3xl font-bold orange-gradient-text">Impacto Transformador</h2>
+          <p class="text-indigo-600 dark:text-indigo-400 font-medium">Cambio Sistémico y Medible</p>
+        </div>
+      </div>
+      <button (click)="closePedagogyModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex-shrink-0">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Contenido del modal -->
+    <div class="px-8 pb-8 space-y-6 text-gray-700 dark:text-gray-300">
+      <div class="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-xl border border-indigo-200 dark:border-indigo-700">
+        <h3 class="text-xl font-semibold text-indigo-800 dark:text-indigo-300 mb-3">🌟 Transformación Sistémica</h3>
+        <p class="leading-relaxed">
+          El <strong>impacto transformador</strong> va más allá del aprendizaje individual: busca generar <strong>cambios sistémicos</strong> en organizaciones y comunidades. Basado en la <strong>Teoría del Cambio</strong> de John Kotter y <strong>Systems Thinking</strong> de Peter Senge.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 

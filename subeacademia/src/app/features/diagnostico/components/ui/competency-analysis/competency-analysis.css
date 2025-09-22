@@ -1,0 +1,24 @@
+.competency-analysis {
+  width: 100%;
+}
+
+.analysis-item {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.analysis-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Animación de la barra de progreso */
+.analysis-item .w-16 div {
+  transition: width 1s ease-out;
+}
+
+/* Efecto de hover en el título */
+.analysis-item:hover h4 {
+  color: var(--primary-color, #3b82f6);
+  transition: color 0.2s ease;
+}

@@ -178,11 +178,10 @@
   opacity: 1;
 }
 
-/* Panel de información */
+/* Panel de información - Base styles (background handled by Tailwind) */
 .info-panel {
   width: 100%;
   max-width: 600px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-radius: 16px;
   padding: 2rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -192,7 +191,6 @@
 .info-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
   margin: 0 0 1rem 0;
   text-align: center;
 }
@@ -200,7 +198,6 @@
 .info-description {
   font-size: 1rem;
   line-height: 1.6;
-  color: #475569;
   margin: 0 0 1.5rem 0;
   text-align: center;
 }
@@ -216,10 +213,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(148, 163, 184, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -235,7 +230,6 @@
 
 .highlight-item span:last-child {
   font-weight: 600;
-  color: #334155;
 }
 
 /* Clases utilitarias */
@@ -335,4 +329,26 @@
   .interaction-hints circle {
     animation: none;
   }
+}
+
+/* Gradiente naranja - NUEVO COLOR PRIMARIO */
+.orange-gradient-text {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 4px rgba(234, 88, 12, 0.2);
+  font-weight: 900 !important;
+}
+
+/* Modo oscuro */
+:global(.dark) .orange-gradient-text {
+  background: linear-gradient(135deg, #fdba74 0%, #fb923c 25%, #f97316 50%, #ea580c 75%, #dc2626 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4);
+  font-weight: 900 !important;
 }

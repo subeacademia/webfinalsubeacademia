@@ -1,166 +1,237 @@
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    /* Mueve el contenedor exactamente la mitad de su ancho (que es el ancho de una lista de logos) */
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scroll-reverse {
-  0% {
-    transform: translateX(-50%);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes scroll-cross-left {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes scroll-cross-right {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.logo-carousel-container {
-  width: 100%;
-  overflow: hidden;
-  padding: 1.5rem 0;
+.carousel-wrapper {
   position: relative;
-  /* Efecto de desvanecimiento en los bordes para una mejor integración visual */
-  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  width: 100%;
+  padding: 1rem 0;
 }
 
-.logo-track {
+.scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: auto; /* Cambiar a auto para movimiento más fluido */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding: 1rem 0;
+  
+  /* Gradiente de fade en los bordes */
+  -webkit-mask-image: linear-gradient(to right, 
+    rgba(0,0,0,0) 0%, 
+    rgba(0,0,0,1) 8%, 
+    rgba(0,0,0,1) 92%, 
+    rgba(0,0,0,0) 100%);
+  mask-image: linear-gradient(to right, 
+    rgba(0,0,0,0) 0%, 
+    rgba(0,0,0,1) 8%, 
+    rgba(0,0,0,1) 92%, 
+    rgba(0,0,0,0) 100%);
+}
+
+/* Ocultar scrollbar en WebKit */
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.logos-track {
   display: flex;
-  /* Asegura que el ancho sea suficiente para contener ambas listas de logos */
+  gap: 3rem;
+  padding: 0 2rem;
   width: max-content;
-  /* Aplica la animación */
-  animation: scroll 40s linear infinite;
-  will-change: transform; /* Optimización para el rendimiento de la animación */
-  gap: 2rem;
-  align-items: center;
+  min-width: 100%;
+  justify-content: flex-start; /* Cambiar para mejor alineación con auto-scroll */
+  will-change: transform; /* Optimización para animaciones */
 }
 
-.logo-track[style*="reverse"] {
-  animation: scroll-reverse 40s linear infinite;
+.logo-item {
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform; /* Optimización para hover */
 }
 
-/* Carrusel superior: empieza desde la izquierda y va hacia la derecha */
-.carousel-top .logo-track {
-  animation: scroll-cross-left 40s linear infinite !important;
+.logo-item img {
+  max-height: 60px; /* 60px para Educación */
+  width: auto;
+  filter: grayscale(100%) brightness(0.8);
+  opacity: 0.7;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
 }
 
-/* Carrusel inferior: empieza desde la derecha y va hacia la izquierda */
-.carousel-bottom .logo-track {
-  animation: scroll-cross-right 40s linear infinite !important;
+.logo-item img:hover {
+  filter: grayscale(0%) brightness(1.1);
+  opacity: 1;
+  transform: scale(1.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.logo-track:hover {
-  animation-play-state: paused; /* Pausa la animación cuando el cursor está sobre el carrusel */
+.logo-link {
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.3s ease;
 }
 
-.logo-slide {
+.logo-link:hover {
+  transform: scale(1.05);
+}
+
+.logo-link img {
+  transition: all 0.3s ease;
+}
+
+.logo-link:hover img {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Botones de navegación modernos */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 12px rgba(0,0,0,0.15),
+    0 2px 4px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  color: #374151;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  min-width: 160px; /* Tamaño estándar para todos los logos */
-  height: 80px; /* Altura estándar */
-  padding: 0 1rem;
 }
 
-.logo-slide img {
-  /* Tamaño estándar para todos los logos */
-  width: 140px;
-  height: 70px;
-  object-fit: contain;
-  filter: grayscale(100%);
-  opacity: 0.75;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--card) 85%, transparent);
-  padding: 0.5rem;
+.nav-btn:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,1), rgba(255,255,255,0.95));
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.2),
+    0 4px 8px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.4);
 }
 
-.logo-slide img:hover {
-  filter: grayscale(0%);
+.nav-btn.visible {
   opacity: 1;
+}
+
+.nav-btn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nav-btn-left {
+  left: 16px;
+}
+
+.nav-btn-right {
+  right: 16px;
+}
+
+/* Tema oscuro para botones */
+@media (prefers-color-scheme: dark) {
+  .nav-btn {
+    background: linear-gradient(135deg, rgba(55,65,81,0.95), rgba(55,65,81,0.85));
+    color: #e5e7eb;
+    box-shadow: 
+      0 4px 12px rgba(0,0,0,0.3),
+      0 2px 4px rgba(0,0,0,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  
+  .nav-btn:hover {
+    background: linear-gradient(135deg, rgba(55,65,81,1), rgba(55,65,81,0.95));
+    color: #f9fafb;
+  }
+}
+
+/* Estilos para logos */
+.logo-link, .logo-static {
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.logo-link:hover, .logo-static:hover {
   transform: scale(1.05);
-  background: color-mix(in srgb, var(--card) 92%, transparent);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--fg) 15%, transparent);
 }
 
-/* Estilos específicos para el carrusel doble */
-.carousel-row {
-  position: relative;
-  margin: 0 auto;
-  max-width: 1200px;
-}
-
-.carousel-top .logo-carousel-container {
-  border-top: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
-}
-
-.carousel-bottom .logo-carousel-container {
-  border-top: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 20%, transparent);
-}
-
-/* Responsive design */
+/* Responsive */
 @media (max-width: 768px) {
-  .logo-slide {
-    min-width: 120px;
-    height: 60px;
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
   }
   
-  .logo-slide img {
-    width: 100px;
-    height: 50px;
+  .nav-btn-left {
+    left: 8px;
   }
   
-  .logo-track {
-    gap: 1rem;
-    animation-duration: 30s;
+  .nav-btn-right {
+    right: 8px;
   }
   
-  .logo-track[style*="reverse"] {
-    animation-duration: 30s;
+  .logos-track {
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .logo-item img {
+    max-height: 50px; /* Reducir tamaño en tablets */
   }
 }
 
 @media (max-width: 480px) {
-  .logo-slide {
-    min-width: 100px;
-    height: 50px;
+  .nav-btn {
+    width: 36px;
+    height: 36px;
   }
   
-  .logo-slide img {
-    width: 80px;
-    height: 40px;
+  .logos-track {
+    gap: 1.5rem;
+    padding: 0 0.5rem;
   }
   
-  .logo-track {
-    gap: 0.5rem;
-    animation-duration: 25s;
+  .logo-item img {
+    max-height: 40px; /* Reducir más en móviles */
   }
   
-  .logo-track[style*="reverse"] {
-    animation-duration: 25s;
+  .logo-item img:hover {
+    transform: scale(1.1); /* Reducir efecto hover en móviles */
+  }
+  
+  .scroll-container {
+    /* Mejor gradiente para móviles */
+    -webkit-mask-image: linear-gradient(to right, 
+      rgba(0,0,0,0) 0%, 
+      rgba(0,0,0,1) 12%, 
+      rgba(0,0,0,1) 88%, 
+      rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to right, 
+      rgba(0,0,0,0) 0%, 
+      rgba(0,0,0,1) 12%, 
+      rgba(0,0,0,1) 88%, 
+      rgba(0,0,0,0) 100%);
+  }
+}
+
+/* Mejoras para touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .logo-item img:hover {
+    filter: grayscale(100%) brightness(0.8);
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .logo-item:active img {
+    filter: grayscale(0%) brightness(1.1);
+    opacity: 1;
+    transform: scale(1.05);
   }
 }
