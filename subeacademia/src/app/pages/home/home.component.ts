@@ -19,11 +19,13 @@ import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 import { AnimationService } from '../../core/services/animation.service';
 import { SeoService } from '../../core/seo/seo.service';
 import { LocalSettingsService } from '../../core/services/local-settings.service';
+import { ThemeService } from '../../shared/theme.service';
+import { DigitalGlobe } from '../../digital-globe/digital-globe';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, DigitalGlobe, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -38,7 +40,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private readonly seo: SeoService,
     private readonly settings: LocalSettingsService,
     private readonly dataSettings: DataSettingsService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly themeService: ThemeService
   ) {
     // Valor por defecto para asegurar que el título se muestre
     this.tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
@@ -53,6 +56,20 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   frasesDinamicas: string[] = [];
   tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
   selectedHomeBgKey: string | undefined;
+  isDarkTheme = false;
+
+  // Clave efectiva para evitar duplicación entre variantes light/dark
+  get displayedHomeBgKey(): string {
+    const key = this.selectedHomeBgKey || 'neural-3d-v1';
+    if (key === 'circuit-tech-v2' || key === 'circuit-tech-v2-light') {
+      return this.isDarkTheme ? 'circuit-tech-v2' : 'circuit-tech-v2-light';
+    }
+    if (key === 'circuit-tech-v1') {
+      // En v1 mantenemos la versión única
+      return 'circuit-tech-v1';
+    }
+    return key;
+  }
   
   // Propiedades simplificadas para el componente
   
@@ -110,6 +127,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     
     // Asegurar que el servicio i18n esté inicializado
     this.initializeI18n();
+    // Suscribirse al tema para alternar la variante del fondo sin duplicación
+    this.themeService.isDarkTheme$.subscribe(isDark => {
+      this.isDarkTheme = isDark;
+      this.cdr.detectChanges();
+    });
     
     // Configurar contenido del home combinando ajustes locales y remotos por idioma
     this.contentSub = this.i18n.currentLang$

@@ -16,6 +16,7 @@ import { TechLinesSceneComponent } from '../../../../features/home/tech-lines-sc
 import { ElegantNetworkSceneComponent } from '../../../../features/home/elegant-network-scene/elegant-network-scene.component';
 import { AiNeuralFlowSceneComponent } from '../../../../features/home/ai-neural-flow-scene/ai-neural-flow-scene.component';
 import { NeuralNetworkBackgroundV2Component } from '../../../../features/home/circuit-neural-background/neural-network-background-v2.component';
+import { DigitalGlobe } from '../../../../digital-globe/digital-globe';
 
 @Component({
   selector: 'app-shell',
@@ -34,6 +35,7 @@ import { NeuralNetworkBackgroundV2Component } from '../../../../features/home/ci
     ElegantNetworkSceneComponent,
     AiNeuralFlowSceneComponent,
     NeuralNetworkBackgroundV2Component,
+    DigitalGlobe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -57,6 +59,7 @@ import { NeuralNetworkBackgroundV2Component } from '../../../../features/home/ci
                                         [density]="'medium'"
                                         [glowEffect]="true"
                                         [flowSpeed]="1.0"></app-neural-network-background-v2>
+      <app-digital-globe *ngIf="selectedBg() === 'digital-globe-v1'" class="absolute inset-0 w-full h-full"></app-digital-globe>
     </div>
     <header class="fixed top-0 inset-x-0 z-50 border-b border-white/10 bg-[var(--panel)]/70 backdrop-blur" role="banner">
         <nav class="container mx-auto max-w-7xl flex items-center justify-between h-16 px-4 md:px-6" role="navigation" aria-label="Navegación principal">
@@ -325,6 +328,7 @@ export class AppShellComponent {
         if (remote) {
           if (typeof remote.brandName === 'string') this.brandName.set(remote.brandName.trim());
           this.logoUrl.set((remote.logoUrl || null) as string | null);
+          if ((remote as any).homeBackgroundKey) this.selectedBg.set((remote as any).homeBackgroundKey as string);
           return;
         }
         // Fallback a configuración local

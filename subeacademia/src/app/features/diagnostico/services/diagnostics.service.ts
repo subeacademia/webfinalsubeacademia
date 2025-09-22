@@ -74,9 +74,14 @@ export class DiagnosticsService {
       const leadId = await this.leadsService.createDiagnosticLead(data.lead, diagnosticId);
       console.log('✅ [DiagnosticsService] Lead creado con ID:', leadId);
       
-      // PASO 3: También guardar usando el método original para compatibilidad
-      const source = data.lead.type === 'empresa' ? 'diagnostico_empresa' : 'diagnostico_persona';
-      await this.leadsService.saveLead(data.lead, data, source);
+      // PASO 3: Adjuntar el diagnóstico, reporte y scores al mismo lead
+      try {
+        const scores = (report as any)?.scores || undefined;
+        await this.leadsService.attachDiagnosticData(leadId, data, report, scores);
+      } catch (err) {
+        console.warn('⚠️ No se pudo adjuntar reporte/scores, se adjuntará solo el diagnóstico básico.', err);
+        await this.leadsService.attachDiagnosticData(leadId, data);
+      }
       
       console.log('✅ [DiagnosticsService] Diagnóstico y lead guardados exitosamente');
       console.log('Lead ID:', leadId);

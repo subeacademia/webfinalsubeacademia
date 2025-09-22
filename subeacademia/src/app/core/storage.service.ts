@@ -23,6 +23,30 @@ export class StorageService {
   private storageStatus = inject(StorageStatusService);
   private interceptor = inject(FirebaseStorageInterceptorService);
 
+  // Categorías públicas estándar para organizar el Storage
+  public static readonly PUBLIC_CATEGORIES = [
+    'media',
+    'logos',
+    'backgrounds',
+    'documents',
+    'avatars',
+    'courses',
+    'reports',
+    'misc'
+  ] as const;
+  public static getPublicCategories(): ReadonlyArray<string> {
+    return StorageService.PUBLIC_CATEGORIES as unknown as ReadonlyArray<string>;
+  }
+
+  /** Construye prefijo público estructurado: public/{category}/YYYY/MM */
+  private buildPublicPathPrefix(category: string): string {
+    const year = new Date().getFullYear();
+    const month = (new Date().getMonth() + 1).toString().padStart(2, '0');
+    const base = 'public';
+    const safeCategory = (category || 'media').toString();
+    return `${base}/${safeCategory}/${year}/${month}`;
+  }
+
   uploadPublic(file: File): Observable<UploadProgress> {
     // Usar directamente el interceptor para evitar cualquier uso de Firebase Functions
     console.log('StorageService: Usando interceptor para evitar Firebase Functions');
@@ -40,5 +64,11 @@ export class StorageService {
     // Usar directamente el interceptor para evitar cualquier uso de Firebase Functions
     console.log('StorageService: Usando interceptor para uploadTo');
     return this.interceptor.uploadFile(file, pathPrefix);
+  }
+
+  /** Sube un archivo a Firebase Storage en una categoría pública organizada */
+  uploadPublicCategory(category: string, file: File): Promise<{ url: string; path: string; }> {
+    const prefix = this.buildPublicPathPrefix(category);
+    return this.interceptor.uploadFile(file, prefix);
   }
 }

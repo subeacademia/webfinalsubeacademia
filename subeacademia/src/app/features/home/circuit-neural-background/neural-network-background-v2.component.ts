@@ -19,7 +19,7 @@ export class NeuralNetworkBackgroundV2Component implements OnInit, OnDestroy {
   @Input() animationDurationDestroy: number = 1000;
   @Input() nodeColor: string = '#00FFFF';
   @Input() lineColor: string = '#00BFFF';
-  @Input() backgroundColor: string = '#1A1A2E';
+  @Input() backgroundColor: string = 'transparent';
   @Input() density: Density = 'medium';
   @Input() glowEffect: boolean = true;
   @Input() flowSpeed: number = 1.0; // 0.1 - 2.0
@@ -88,7 +88,8 @@ export class NeuralNetworkBackgroundV2Component implements OnInit, OnDestroy {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     this.renderer.setSize(w, h);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setClearColor(new THREE.Color(this.backgroundColor), 0);
+    const isTransparent = (this.backgroundColor || '').toLowerCase() === 'transparent';
+    this.renderer.setClearColor(new THREE.Color(isTransparent ? '#000000' : this.backgroundColor), isTransparent ? 0 : 1);
     this.camera = new THREE.PerspectiveCamera(60, w / h, 1, 3000);
     this.camera.position.set(0, 0, 420);
     this.group = new THREE.Group();
@@ -188,8 +189,9 @@ export class NeuralNetworkBackgroundV2Component implements OnInit, OnDestroy {
 
   private applyTheme(isDark: boolean): void {
     // Fondo transparente para que herede el del sitio, pero ajustamos blending/opacity
-    const bg = isDark ? this.backgroundColor : '#FFFFFF';
-    this.renderer?.setClearColor(new THREE.Color(bg), 0);
+    const isTransparent = (this.backgroundColor || '').toLowerCase() === 'transparent';
+    const bg = isDark ? (isTransparent ? '#000000' : this.backgroundColor) : '#FFFFFF';
+    this.renderer?.setClearColor(new THREE.Color(bg), isTransparent ? 0 : 1);
     // Líneas y partículas: en light usamos blending normal y más opacidad; en dark, aditivo y menos opacidad
     const lineOpacity = isDark ? 0.45 : 0.8;
     const pointOpacity = isDark ? 0.6 : 0.9;

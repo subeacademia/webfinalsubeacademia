@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { ToastService } from '../../../../../core/services/ui/toast/toast.service';
+import { ShareService } from '../../../../../core/services/share.service';
 
 @Component({
   selector: 'app-diagnostic-results',
@@ -117,7 +118,7 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
           </div>
         } @else if (report()) {
           <!-- Results Content -->
-          <div class="space-y-8">
+          <div class="space-y-8" #shareCard>
             
             <!-- Executive Summary -->
             <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl shadow-lg p-8 border-l-4 border-blue-500">
@@ -711,6 +712,41 @@ import { ToastService } from '../../../../../core/services/ui/toast/toast.servic
               </div>
             </div>
 
+            <!-- Tarjeta OG para compartir (oculta) -->
+            <div #shareCardOg style="position:absolute; left:-99999px; top:0; width:1200px; height:630px;">
+              <div class="w-[1200px] h-[630px] rounded-2xl overflow-hidden relative"
+                   style="background: radial-gradient(1000px 500px at 10% 10%, rgba(255,255,255,0.15), transparent), radial-gradient(900px 500px at 90% 90%, rgba(255,255,255,0.1), transparent), linear-gradient(135deg, #0f172a 0%, #1e293b 100%)">
+                <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(2px 2px at 20px 20px, #38bdf8 2px, transparent 2px), radial-gradient(2px 2px at 60px 60px, #60a5fa 2px, transparent 2px); background-size: 120px 120px;"></div>
+                <div class="relative z-10 flex flex-col justify-between h-full p-16 text-white">
+                  <div>
+                    <div class="text-5xl font-extrabold tracking-tight mb-4">Diagnóstico de Madurez en IA</div>
+                    <div class="text-xl opacity-90">Resultados personalizados de tu evaluación</div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-6">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                      <div class="text-6xl font-black leading-none">{{ report()?.aiMaturity?.level || 'N/A' }}</div>
+                      <div class="mt-2 text-sm opacity-80">Nivel Actual</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                      <div class="text-6xl font-black leading-none">{{ (report()?.aiMaturity?.score ?? '0') }}/100</div>
+                      <div class="mt-2 text-sm opacity-80">Puntuación Total</div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                      <div class="text-6xl font-black leading-none">{{ getMaturityGap() }}</div>
+                      <div class="mt-2 text-sm opacity-80">Próximo Nivel</div>
+                    </div>
+                  </div>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <div class="text-3xl font-bold">Sube IA</div>
+                      <div class="text-lg opacity-90">Evalúa tu madurez en IA como empresa o persona</div>
+                    </div>
+                    <div class="text-2xl font-semibold">{{ windowOrigin }}/{{ currentLang }}/diagnostico</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Download Report and Actions -->
             <div class="text-center space-y-4">
               <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -758,6 +794,16 @@ export class DiagnosticResultsComponent implements OnInit {
   private diagnosticsService = inject(DiagnosticsService);
   private diagnosticStateService = inject(DiagnosticStateService);
   private toastService = inject(ToastService);
+  private shareService = inject(ShareService);
+
+  @ViewChild('shareCard') shareCardRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('shareCardOg') shareCardOgRef?: ElementRef<HTMLDivElement>;
+
+  windowOrigin = window?.location?.origin || 'https://subeia.tech';
+  get currentLang(): string {
+    const match = this.router.url.match(/^\/(\w{2})\//);
+    return match ? match[1] : 'es';
+  }
 
   report = signal<any>(null);
   leadData = signal<any>(null);
@@ -835,18 +881,28 @@ export class DiagnosticResultsComponent implements OnInit {
     this.toastService.show('info', 'Función de descarga próximamente disponible');
   }
 
-  shareReport(): void {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Mi Diagnóstico de Madurez en IA - Sube Academia',
-        text: 'He completado mi diagnóstico de madurez en IA. ¡Mira mis resultados!',
-        url: window.location.href
-      });
-      } else {
-      // Fallback para navegadores que no soportan Web Share API
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        this.toastService.show('success', 'Enlace copiado al portapapeles');
-      });
+  async shareReport(): Promise<void> {
+    try {
+      const el = (this.shareCardOgRef?.nativeElement || this.shareCardRef?.nativeElement);
+      if (!el) { this.toastService.show('error', 'No se pudo capturar la tarjeta de resultados'); return; }
+      const blob = await this.shareService.captureElementAsBlob(el, 2);
+
+      // Mensaje estándar invitando a realizar el diagnóstico
+      const msg = '🚀 Acabo de completar el Diagnóstico de Madurez en IA en Sube IA. ¡Te invito a evaluar tu empresa o como persona y descubrir tu nivel!';
+
+      // Intentar compartir directo con Web Share (con archivo)
+      const shared = await this.shareService.shareViaDevice(blob, msg);
+      if (shared) return;
+
+      // Si no hay Web Share con archivos, subimos la imagen y abrimos redes
+      const imageUrl = await this.shareService.uploadAndGetUrl(blob);
+      // Por accesibilidad y compatibilidad, abrimos una nueva pestaña con LinkedIn share; el usuario puede pegar el mensaje si corresponde
+      this.shareService.openLinkedInShare(imageUrl);
+      this.shareService.openFacebookShare(imageUrl, msg);
+      this.toastService.show('success', 'Se abrió la ventana de compartir. Imagen generada automáticamente.');
+    } catch (e:any) {
+      console.error(e);
+      this.toastService.show('error', 'No se pudo compartir automáticamente.');
     }
   }
 

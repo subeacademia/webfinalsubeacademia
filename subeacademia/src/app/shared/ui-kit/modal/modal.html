@@ -9,7 +9,7 @@
   <!-- Modal Panel -->
   <div class="flex min-h-full items-center justify-center p-4">
     <div 
-      [class]="'relative bg-[var(--panel)] border border-[var(--border)] rounded-lg shadow-xl w-full ' + modalSizeClasses"
+      [class]="'relative bg-[var(--panel)] border border-[var(--border)] rounded-lg shadow-xl w-full max-h-[85vh] flex flex-col ' + modalSizeClasses"
       (click)="$event.stopPropagation()">
       
       <!-- Header -->
@@ -27,7 +27,7 @@
       </div>
       
       <!-- Body -->
-      <div class="p-6">
+      <div class="p-6 overflow-y-auto">
         <ng-content select="[slot='body']"></ng-content>
       </div>
     </div>

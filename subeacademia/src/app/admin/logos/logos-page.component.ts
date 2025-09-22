@@ -488,8 +488,8 @@ export class LogosPageComponent {
 			console.log('Email del usuario:', this.auth.currentUser?.email);
 			
 			// Normalizar y subir la imagen
-			const normalized = await this.media.normalizeLogoImage(file);
-			const upload = await this.storage.uploadTo('public/logos', normalized || file);
+            const normalized = await this.media.normalizeLogoImage(file);
+            const upload = await this.storage.uploadPublicCategory('logos', normalized || file);
 			
 			// Crear el objeto Logo y guardarlo en Firestore
 			const logo: Logo = {
@@ -665,8 +665,8 @@ export class LogosPageComponent {
 				const logoData = this.bulkUploadLogos[i];
 				
 				// Subir imagen
-				const normalized = await this.media.normalizeLogoImage(logoData.file);
-				const upload = await this.storage.uploadTo('public/logos', normalized || logoData.file);
+                const normalized = await this.media.normalizeLogoImage(logoData.file);
+                const upload = await this.storage.uploadPublicCategory('logos', normalized || logoData.file);
 				
 				// Crear objeto logo
 				const logo: Logo = {

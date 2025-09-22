@@ -22,13 +22,23 @@ export class LeadsService {
       console.log('💾 [LeadsService] Creando lead de diagnóstico:', leadData);
       console.log('📋 [LeadsService] ID del diagnóstico:', diagnosticId);
       
+      // Validaciones mínimas
+      const name = (leadData.name || '').trim();
+      const email = (leadData.email || '').trim();
+      if (!name) {
+        throw new Error('El nombre es obligatorio');
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error('El email es obligatorio y debe ser válido');
+      }
+
       // Crear el payload según la interfaz DiagnosticLead
       const diagnosticLead: DiagnosticLead = {
-        name: leadData.name,
-        email: leadData.email,
+        name: name,
+        email: email,
         phone: leadData.phone || '',
-        company: leadData.companyName || undefined, // Solo para empresas
-        type: leadData.type === 'empresa' ? 'empresa' : 'persona',
+        companyName: leadData.companyName || undefined,
+        type: leadData.type, // 'persona_natural' | 'empresa'
         diagnosticId: diagnosticId,
         createdAt: serverTimestamp()
       };
@@ -58,6 +68,65 @@ export class LeadsService {
   }
 
   /**
+   * Adjunta los datos del diagnóstico y resumen al lead creado, evitando duplicados
+   */
+  async attachDiagnosticData(leadId: string, diagnosticData: DiagnosticData, report?: any, scores?: any): Promise<void> {
+    try {
+      console.log('📎 [LeadsService] Adjuntando datos de diagnóstico al lead:', leadId);
+
+      // Preparar respuestas en forma compacta
+      const diagnosticResponses = {
+        objetivo: diagnosticData.objetivo,
+        contexto: diagnosticData.contexto,
+        competencias: diagnosticData.competencias,
+        ares: diagnosticData.ares
+      };
+
+      // Calcular resumen simple (promedios) a partir de ARES/competencias 1-5
+      const calcAverage = (obj?: Record<string, any>): number => {
+        if (!obj) return 0;
+        const values = Object.values(obj)
+          .map((v: any) => (typeof v === 'object' && v !== null ? (v as any).value : v))
+          .filter((n: any) => typeof n === 'number' && !isNaN(n));
+        if (values.length === 0) return 0;
+        return Math.round((values.reduce((s, n) => s + n, 0) / values.length) * 10) / 10;
+      };
+
+      const aresAvg = calcAverage(diagnosticData.ares);
+      const compAvg = calcAverage(diagnosticData.competencias);
+      const maturity = (() => {
+        const s = aresAvg;
+        if (s >= 4.5) return 'Avanzado';
+        if (s >= 3.5) return 'Intermedio';
+        if (s >= 2.5) return 'Básico';
+        if (s >= 1.5) return 'Inicial';
+        return 'Principiante';
+      })();
+
+      const payload: any = {
+        diagnosticData,
+        diagnosticResponses,
+        summary: {
+          aresAverage: aresAvg,
+          competenciesAverage: compAvg,
+          maturityLevel: maturity
+        },
+        updatedAt: serverTimestamp()
+      };
+
+      if (report) payload.report = report;
+      if (scores) payload.scores = scores;
+
+      const ref = doc(this.firestore, 'diagnostic-leads', leadId);
+      await updateDoc(ref, payload);
+      console.log('✅ [LeadsService] Datos de diagnóstico adjuntados');
+    } catch (error) {
+      console.error('❌ [LeadsService] Error adjuntando datos al lead:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Obtiene el diagnóstico completo asociado a un lead
    */
   async getDiagnosticForLead(diagnosticId: string): Promise<any> {
@@ -82,10 +151,20 @@ export class LeadsService {
     try {
       console.log('💾 [LeadsService] Guardando lead:', leadData);
       
+      // Validaciones mínimas
+      const name = (leadData.name || '').trim();
+      const email = (leadData.email || '').trim();
+      if (!name) {
+        throw new Error('El nombre es obligatorio');
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error('El email es obligatorio y debe ser válido');
+      }
+
       // Construir el payload base con campos obligatorios
       const leadPayload: any = {
-        name: leadData.name,
-        email: leadData.email,
+        name: name,
+        email: email,
         type: leadData.type,
         acceptsCommunications: leadData.acceptsCommunications,
         createdAt: new Date(),
@@ -123,6 +202,30 @@ export class LeadsService {
           contexto: diagnosticData.contexto,
           competencias: diagnosticData.competencias,
           ares: diagnosticData.ares
+        };
+        // Añadir resumen para listados
+        const calcAverage = (obj?: Record<string, any>): number => {
+          if (!obj) return 0;
+          const values = Object.values(obj)
+            .map((v: any) => (typeof v === 'object' && v !== null ? (v as any).value : v))
+            .filter((n: any) => typeof n === 'number' && !isNaN(n));
+          if (values.length === 0) return 0;
+          return Math.round((values.reduce((s, n) => s + n, 0) / values.length) * 10) / 10;
+        };
+        const aresAvg = calcAverage(diagnosticData.ares);
+        const compAvg = calcAverage(diagnosticData.competencias);
+        const maturity = (() => {
+          const s = aresAvg;
+          if (s >= 4.5) return 'Avanzado';
+          if (s >= 3.5) return 'Intermedio';
+          if (s >= 2.5) return 'Básico';
+          if (s >= 1.5) return 'Inicial';
+          return 'Principiante';
+        })();
+        leadPayload.summary = {
+          aresAverage: aresAvg,
+          competenciesAverage: compAvg,
+          maturityLevel: maturity
         };
       }
 

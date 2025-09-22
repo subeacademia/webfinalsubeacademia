@@ -15,6 +15,8 @@ export interface LocalSiteSettings {
   // Fondo del Home seleccionable desde Admin
   homeBackgroundKey?: string; // e.g. 'neural-3d-v1'
   homeBackgroundName?: string; // e.g. 'Red Neuronal 3D - Versión 1'
+  // Lista de fondos habilitados para el selector
+  enabledBackgrounds?: string[];
 }
 
 export interface LocalTypewriterPhrase {
@@ -38,8 +40,18 @@ export class LocalSettingsService {
     brandName: 'Sube Academ-I',
     defaultLang: 'es',
     homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial',
-    homeBackgroundKey: 'neural-3d-v1',
-    homeBackgroundName: 'Red Neuronal 3D - Versión 1'
+    homeBackgroundKey: 'digital-globe-v1',
+    homeBackgroundName: 'Globo Digital 3D - Versión 1',
+    enabledBackgrounds: [
+      'digital-globe-v1',
+      'neural-3d-v1',
+      'tech-lines-3d-v1',
+      'elegant-network-v1',
+      'ai-neural-flow-v1',
+      'circuit-tech-v1',
+      'circuit-tech-v2',
+      'circuit-tech-v2-light'
+    ]
   });
 
   private typewriterPhrasesSubject = new BehaviorSubject<LocalTypewriterPhrase[]>([]);
@@ -127,8 +139,18 @@ export class LocalSettingsService {
       brandName: 'Sube Academ-IA',
       defaultLang: 'es',
       homeTitle: 'Potencia tu Talento en la Era de la Inteligencia Artificial',
-      homeBackgroundKey: 'neural-3d-v1',
-      homeBackgroundName: 'Red Neuronal 3D - Versión 1'
+      homeBackgroundKey: 'digital-globe-v1',
+      homeBackgroundName: 'Globo Digital 3D - Versión 1',
+      enabledBackgrounds: [
+        'digital-globe-v1',
+        'neural-3d-v1',
+        'tech-lines-3d-v1',
+        'elegant-network-v1',
+        'ai-neural-flow-v1',
+        'circuit-tech-v1',
+        'circuit-tech-v2',
+        'circuit-tech-v2-light'
+      ]
     };
     await this.save(defaultSettings);
   }

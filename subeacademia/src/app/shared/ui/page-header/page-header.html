@@ -1,4 +1,4 @@
-<div class="relative w-full h-80 md:h-96 overflow-hidden">
+<div class="relative w-full min-h-[18rem] md:min-h-[24rem] overflow-hidden">
   <!-- Fondo 3D dinámico según Settings -->
   <app-hero-scene *ngIf="(selectedHomeBgKey() || '') === 'neural-3d-v1'" class="absolute top-0 left-0 w-full h-full z-0"></app-hero-scene>
   <app-tech-lines-scene *ngIf="(selectedHomeBgKey() || '') === 'tech-lines-3d-v1'" class="absolute top-0 left-0 w-full h-full z-0"></app-tech-lines-scene>
@@ -10,17 +10,17 @@
                                     [animationDurationDestroy]="800"
                                     [nodeColor]="'#00FFFF'"
                                     [lineColor]="'#00BFFF'"
-                                    [backgroundColor]="(selectedHomeBgKey() || '') === 'circuit-tech-v2' ? '#1A1A2E' : '#FFFFFF'"
+                                    [backgroundColor]="'transparent'"
                                     [density]="'medium'"
                                     [glowEffect]="true"
                                     [flowSpeed]="1.0"></app-neural-network-background-v2>
 
   <!-- Contenido de Texto Superpuesto -->
-  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-6" style="background: linear-gradient(to top, color-mix(in srgb, var(--bg) 40%, transparent), transparent)">
-    <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl drop-shadow-lg orange-gradient-text">
+  <div class="relative z-10 flex flex-col items-center justify-center h-full text-center p-4 sm:p-6" style="background: linear-gradient(to top, color-mix(in srgb, var(--bg) 40%, transparent), transparent)">
+    <h1 class="font-extrabold tracking-tight drop-shadow-lg orange-gradient-text heading-fluid text-balance break-words-all">
       {{ title }}
     </h1>
-    <p *ngIf="subtitle" class="mt-4 max-w-3xl text-lg leading-8 text-[var(--muted)] drop-shadow-md">
+    <p *ngIf="subtitle" class="mt-3 sm:mt-4 max-w-3xl text-base sm:text-lg leading-7 sm:leading-8 text-[var(--muted)] drop-shadow-md text-balance break-words-all">
       {{ subtitle }}
     </p>
   </div>

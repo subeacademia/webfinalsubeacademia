@@ -22,6 +22,9 @@ interface DiagnosticRow {
   tipo?: LeadType;
   telefono?: string;
   estado?: string;
+  resumenNivel?: string;
+  aresAvg?: number;
+  objetivoBreve?: string;
 }
 
 @Component({
@@ -117,16 +120,18 @@ interface DiagnosticRow {
 
     <!-- Tabla de leads -->
     <div class="border rounded overflow-hidden">
-      <div class="grid grid-cols-12 bg-[var(--panel)]/50 p-3 text-sm font-medium">
+      <div class="grid grid-cols-14 bg-[var(--panel)]/50 p-3 text-sm font-medium">
         <div class="col-span-2">Tipo</div>
         <div class="col-span-2">Nombre</div>
         <div class="col-span-2">Email</div>
         <div class="col-span-2">Empresa</div>
+        <div class="col-span-1">Nivel</div>
+        <div class="col-span-1">ARES</div>
         <div class="col-span-2">Estado</div>
         <div class="col-span-1">Fecha</div>
         <div class="col-span-1 text-right">Acciones</div>
       </div>
-      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-12 p-3 border-t items-center text-sm hover:bg-[var(--panel)]/30">
+      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-14 p-3 border-t items-center text-sm hover:bg-[var(--panel)]/30">
         <div class="col-span-2">
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 [class]="d.tipo === 'empresa' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
@@ -136,6 +141,8 @@ interface DiagnosticRow {
         <div class="col-span-2 truncate">{{ d.nombre }}</div>
         <div class="col-span-2 truncate">{{ d.email }}</div>
         <div class="col-span-2 truncate">{{ d.empresa || '-' }}</div>
+        <div class="col-span-1 truncate">{{ d.resumenNivel || '-' }}</div>
+        <div class="col-span-1 truncate">{{ (d.aresAvg || 0) }}/5</div>
         <div class="col-span-2">
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 [class]="getStatusClass(d.estado)">
@@ -597,10 +604,23 @@ export class AdminDiagnosticLeadsComponent {
         fecha: lead.createdAt,
         tipo: lead.type,
         telefono: lead.phone,
-        estado: lead.status
+        estado: lead.status,
+        resumenNivel: (lead as any)?.summary?.maturityLevel || undefined,
+        aresAvg: (lead as any)?.summary?.aresAverage || this.calcAresAvgFromLead(lead),
+        objetivoBreve: (lead.diagnosticResponses?.objetivo?.objetivo || [])?.[0] || ''
       } as DiagnosticRow));
       this.rowsSig.set(mapped);
     });
+  }
+
+  private calcAresAvgFromLead(lead: LeadData): number | undefined {
+    const ares = lead?.diagnosticResponses?.ares || lead?.diagnosticData?.ares || undefined;
+    if (!ares) return undefined;
+    const values = Object.values(ares)
+      .map((v: any) => (typeof v === 'object' && v !== null ? (v as any).value : v))
+      .filter((n: any) => typeof n === 'number' && !isNaN(n));
+    if (values.length === 0) return undefined;
+    return Math.round((values.reduce((s, n) => s + n, 0) / values.length) * 10) / 10;
   }
 
   private async loadStats() {

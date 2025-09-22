@@ -644,25 +644,26 @@ export class CollaboratorsPageComponent {
         if (v.state === 'running') {
           this.uploadProgress.set(v.progress);
         }
-        if (v.state === 'success' && v.url) {
+        const finalUrl = v.url || v.downloadURL;
+        if (v.state === 'success' && finalUrl) {
           console.log(`✅ Imagen subida exitosamente: ${v.url}`);
           
           if (type === 'main') {
             // Para imagen principal
-            this.form.controls.imageUrl.setValue(v.url);
-            this.previewMainUrl.set(v.url);
+            this.form.controls.imageUrl.setValue(finalUrl);
+            this.previewMainUrl.set(finalUrl);
             
             // Si no es fundador, también actualizar logoUrl
             if (!this.isEditingFounder()) {
-              this.form.controls.logoUrl.setValue(v.url);
+              this.form.controls.logoUrl.setValue(finalUrl);
             }
             
-            console.log(`📸 Imagen principal actualizada: ${v.url}`);
+            console.log(`📸 Imagen principal actualizada: ${finalUrl}`);
           } else if (type === 'logo') {
             // Para logo alternativo (solo fundadores)
-          this.form.controls.logoUrl.setValue(v.url);
-            this.previewLogoUrl.set(v.url);
-            console.log(`🏢 Logo alternativo actualizado: ${v.url}`);
+          this.form.controls.logoUrl.setValue(finalUrl);
+            this.previewLogoUrl.set(finalUrl);
+            console.log(`🏢 Logo alternativo actualizado: ${finalUrl}`);
           }
           
           this.uploadProgress.set(100);
@@ -717,16 +718,13 @@ export class CollaboratorsPageComponent {
         // Para fundadores: imageUrl es la foto personal, logoUrl es opcional
         if (formValue.imageUrl) {
           collaboratorData.imageUrl = formValue.imageUrl;
-          console.log('📸 Fundador - Guardando imageUrl:', formValue.imageUrl);
-        }
-        if (formValue.logoUrl) {
+          collaboratorData.logoUrl = formValue.logoUrl || formValue.imageUrl; // espejo por consistencia
+          console.log('📸 Fundador - Guardando imageUrl y espejo en logoUrl:', formValue.imageUrl);
+        } else if (formValue.logoUrl) {
+          // Si solo subieron logo, úsalo también como foto para evitar huecos
+          collaboratorData.imageUrl = formValue.logoUrl;
           collaboratorData.logoUrl = formValue.logoUrl;
-          console.log('🏢 Fundador - Guardando logoUrl:', formValue.logoUrl);
-        }
-        // Si no hay logoUrl, usar imageUrl como fallback
-        if (!formValue.logoUrl && formValue.imageUrl) {
-          collaboratorData.logoUrl = formValue.imageUrl;
-          console.log('🔄 Fundador - Usando imageUrl como logoUrl fallback');
+          console.log('🏢 Fundador - Usando logoUrl también como imageUrl:', formValue.logoUrl);
         }
       } else {
         // Para colaboradores: logoUrl es la imagen principal

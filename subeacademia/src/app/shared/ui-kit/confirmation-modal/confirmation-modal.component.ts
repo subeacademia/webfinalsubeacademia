@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
          *ngIf="isOpen" 
          (click)="onBackdropClick($event)">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full mx-4 transform transition-all duration-300 scale-100 max-h-[80vh] flex flex-col"
            (click)="$event.stopPropagation()">
         
         <!-- Header -->
@@ -47,7 +47,7 @@ import { CommonModule } from '@angular/common';
         </div>
 
         <!-- Body -->
-        <div class="p-6">
+        <div class="p-6 overflow-y-auto">
           <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
             {{ message }}
           </p>

@@ -6,6 +6,7 @@ import { SettingsService as DataSettingsService } from '../../core/data/settings
 import { MediaService } from '../../core/data/media.service';
 import { ToastService } from '../../core/services/ui/toast/toast.service';
 import { TypewriterManagerComponent } from './typewriter-manager.component';
+import { StorageService } from '../../core/storage.service';
 
 @Component({
   selector: 'app-admin-settings-page',
@@ -39,9 +40,42 @@ import { TypewriterManagerComponent } from './typewriter-manager.component';
         <option value="circuit-tech-v1">Circuitos Tecnológicos - Versión 1</option>
         <option value="circuit-tech-v2">Circuitos Tecnológicos 3D - Versión 2</option>
         <option value="circuit-tech-v2-light">Circuitos Tecnológicos 3D - Versión 2 (Light)</option>
+        <option value="digital-globe-v1">Globo Digital 3D - Versión 1</option>
       </select>
       <small class="text-gray-500">Puedes elegir el componente visual del fondo del hero</small>
     </label>
+
+    <!-- CRUD simple de fondos habilitados -->
+    <div class="md:col-span-2 border rounded p-3">
+      <h3 class="font-medium mb-2">Fondos habilitados</h3>
+      <div class="flex flex-wrap gap-2">
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('digital-globe-v1')" (change)="toggleEnabled('digital-globe-v1', $event.target?.checked)" /> Globo Digital 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('neural-3d-v1')" (change)="toggleEnabled('neural-3d-v1', $event.target?.checked)" /> Red Neuronal 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('tech-lines-3d-v1')" (change)="toggleEnabled('tech-lines-3d-v1', $event.target?.checked)" /> Líneas Tecnológicas 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('elegant-network-v1')" (change)="toggleEnabled('elegant-network-v1', $event.target?.checked)" /> Red Elegante 3D - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('ai-neural-flow-v1')" (change)="toggleEnabled('ai-neural-flow-v1', $event.target?.checked)" /> Redes de Neuronas - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v1')" (change)="toggleEnabled('circuit-tech-v1', $event.target?.checked)" /> Circuitos Tecnológicos - V1
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v2')" (change)="toggleEnabled('circuit-tech-v2', $event.target?.checked)" /> Circuitos Tecnológicos 3D - V2
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" [checked]="isEnabled('circuit-tech-v2-light')" (change)="toggleEnabled('circuit-tech-v2-light', $event.target?.checked)" /> Circuitos Tecnológicos 3D - V2 (Light)
+        </label>
+      </div>
+      <small class="text-gray-500 block mt-2">Controla qué fondos aparecen como opciones en el selector.</small>
+    </div>
     
     <label class="block">Logo URL
       <div class="flex gap-2 items-center">
@@ -108,6 +142,7 @@ export class SettingsPageComponent {
   private dataSettings = inject(DataSettingsService);
   private media = inject(MediaService);
   private toast = inject(ToastService);
+  private storage = inject(StorageService);
   saved = signal(false);
 
   form = this.fb.group({
@@ -121,7 +156,7 @@ export class SettingsPageComponent {
     twitter: [''],
     linkedin: [''],
     youtube: [''],
-    homeBackgroundKey: ['neural-3d-v1'],
+    homeBackgroundKey: ['digital-globe-v1'],
   });
 
   constructor(){
@@ -137,9 +172,23 @@ export class SettingsPageComponent {
         twitter: s.social?.twitter || '',
         linkedin: s.social?.linkedin || '',
         youtube: s.social?.youtube || '',
-        homeBackgroundKey: s.homeBackgroundKey || 'neural-3d-v1',
+        homeBackgroundKey: s.homeBackgroundKey || 'digital-globe-v1',
       });
     });
+  }
+
+  // === Gestión simple de fondos habilitados ===
+  isEnabled(key: string): boolean {
+    const current = this.settings.getCurrentSettings();
+    const list = current.enabledBackgrounds || [];
+    return list.includes(key);
+  }
+
+  async toggleEnabled(key: string, checked: boolean | undefined): Promise<void> {
+    const current = this.settings.getCurrentSettings();
+    const list = new Set(current.enabledBackgrounds || []);
+    if (checked) list.add(key); else list.delete(key);
+    await this.settings.save({ ...current, enabledBackgrounds: Array.from(list) });
   }
 
   async save(){
@@ -164,6 +213,7 @@ export class SettingsPageComponent {
             case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
             case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
             case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+            case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
             default: return undefined;
           }
         })()
@@ -192,6 +242,7 @@ export class SettingsPageComponent {
               case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
               case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
               case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+              case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
               default: return undefined;
             }
           })()
@@ -206,6 +257,7 @@ export class SettingsPageComponent {
             case 'circuit-tech-v1': return 'Circuitos Tecnológicos - Versión 1';
             case 'circuit-tech-v2': return 'Circuitos Tecnológicos 3D - Versión 2';
             case 'circuit-tech-v2-light': return 'Circuitos Tecnológicos 3D - Versión 2 (Light)';
+            case 'digital-globe-v1': return 'Globo Digital 3D - Versión 1';
             default: return undefined;
           }
         })());
@@ -226,7 +278,7 @@ export class SettingsPageComponent {
     if (!file) return;
     try{
       const normalized = await this.media.normalizeLogoImage(file);
-      const uploaded = await this.media.upload(normalized || file, 'public/brand');
+      const uploaded = await this.storage.uploadPublicCategory('backgrounds', normalized || file);
       this.form.patchValue({ logoUrl: uploaded.url });
       this.toast.success('Logo subido');
     }catch(err){

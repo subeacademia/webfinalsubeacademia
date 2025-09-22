@@ -1,4 +1,5 @@
 import { Timestamp, FieldValue } from '@angular/fire/firestore';
+import { LeadType } from '../../features/diagnostico/data/diagnostic.models';
 
 /**
  * Interfaz principal para los leads de diagnóstico según requerimientos
@@ -8,8 +9,8 @@ export interface DiagnosticLead {
   name: string;
   email: string;
   phone: string;
-  company?: string; // Este campo es opcional, para cuando el tipo es 'persona'
-  type: 'persona' | 'empresa'; // Esto diferencia los dos tipos de leads
+  companyName?: string; // Nombre de la empresa si aplica
+  type: LeadType; // 'persona_natural' | 'empresa'
   diagnosticId: string; // ID del documento del diagnóstico completo
   createdAt: Timestamp | Date | FieldValue; // Firestore Timestamp
 }

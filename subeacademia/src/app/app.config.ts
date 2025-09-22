@@ -29,22 +29,12 @@ export const appConfig: ApplicationConfig = {
     // --- INICIO DE LA MODIFICACIÓN DE FIREBASE ---
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
-    provideStorage(() => getStorage()),
+    // Usar explícitamente el bucket real de Firebase Storage
+    provideStorage(() => getStorage(undefined, 'gs://web-subeacademia.firebasestorage.app')),
     provideFirestore(() => initializeFirestore(getApp(), {
       experimentalForceLongPolling: true,
       localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
     })),
     // --- FIN DE LA MODIFICACIÓN DE FIREBASE ---
-    {
-      provide: 'APP_INIT_LIGHT_MODE',
-      useFactory: () => {
-        const doc = inject(DOCUMENT);
-        try {
-          doc.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        } catch {}
-        return true;
-      }
-    }
   ],
 };

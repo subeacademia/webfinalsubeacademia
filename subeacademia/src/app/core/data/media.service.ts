@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { Storage, ref, getDownloadURL, deleteObject } from '@angular/fire/storage';
-import { Firestore, addDoc, collection, serverTimestamp, collectionData, query, orderBy } from '@angular/fire/firestore';
+import { Storage } from '@angular/fire/storage';
+import { Firestore, addDoc, collection, serverTimestamp, collectionData, query, orderBy, doc, updateDoc, deleteDoc, where, limit } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, from, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { generateSlug } from '../utils/slug.util';
 import { FallbackStorageService } from '../services/fallback-storage.service';
 import { FirebaseStorageInterceptorService } from '../services/firebase-storage-interceptor.service';
+import { MediaItem } from '../models/media.model';
 
 @Injectable({ providedIn:'root' })
 export class MediaService {
@@ -37,43 +39,56 @@ export class MediaService {
     return this.interceptor.deleteFile(path);
   }
 
-  listAll() {
-    // En un sistema real, esto requeriría listAll de Firebase Storage
-    // Para simplicidad, devolvemos un observable vacío
-    return new Observable(observer => {
-      observer.next([]);
-      observer.complete();
-    });
-  }
-
-  listRecent(limitCount: number = 60) {
+  listAll(): Observable<MediaItem[]> {
     const mediaCollection = collection(this.firestore, 'media');
     const q = query(mediaCollection, orderBy('uploadedAt', 'desc'));
-    
-    return collectionData(q, { idField: 'id' }) as Observable<any[]>;
+    return collectionData(q, { idField: 'id' }) as unknown as Observable<MediaItem[]>;
   }
 
-  async recordUpload(entry: { name: string; path: string; url: string; size: number; type: string }) {
+  listRecent(limitCount: number = 60): Observable<MediaItem[]> {
+    const mediaCollection = collection(this.firestore, 'media');
+    const q = query(mediaCollection, orderBy('uploadedAt', 'desc'), limit(limitCount));
+    return collectionData(q, { idField: 'id' }) as unknown as Observable<MediaItem[]>;
+  }
+
+  async recordUpload(entry: { name: string; path: string; url: string; size: number; type: string; category?: string; tags?: string[]; description?: string; }): Promise<string> {
     const user = this.auth.currentUser;
     if (!user) {
       throw new Error('Usuario no autenticado');
     }
 
     const mediaCollection = collection(this.firestore, 'media');
-    const docData = {
+    const docData: MediaItem = {
       ...entry,
       uploadedBy: user.uid,
       uploadedAt: serverTimestamp(),
-      slug: generateSlug(entry.name)
+      name: entry.name,
+      path: entry.path,
+      url: entry.url,
+      size: entry.size,
+      type: entry.type,
     };
 
     try {
-      const docRef = await addDoc(mediaCollection, docData);
-      console.log('Media registrado con ID:', docRef.id);
-      return docRef;
+      const docRef = await addDoc(mediaCollection, docData as any);
+      return docRef.id;
     } catch (error) {
       console.error('Error registrando media:', error);
       throw error;
+    }
+  }
+
+  async update(itemId: string, partial: Partial<MediaItem>): Promise<void> {
+    const ref = doc(this.firestore, 'media', itemId);
+    await updateDoc(ref, { ...partial, updatedAt: serverTimestamp() } as any);
+  }
+
+  async remove(item: MediaItem): Promise<void> {
+    try {
+      await this.interceptor.deleteFile(item.path);
+    } catch {}
+    if (item.id) {
+      await deleteDoc(doc(this.firestore, 'media', item.id));
     }
   }
 
@@ -159,8 +174,9 @@ export class MediaService {
   }
 
   uploadPublic(file: File): Observable<{ progress: number; state: 'running'|'success'|'error'; url?: string; path?: string; error?: any; downloadURL?: string }> {
-    // Usar directamente el interceptor para evitar cualquier uso de Firebase Functions
     console.log('MediaService: Usando interceptor para uploadPublic');
-    return this.interceptor.uploadPublicFile(file);
+    return this.interceptor.uploadPublicFile(file).pipe(
+      map((v: any) => ({ ...v, url: v.url ?? v.downloadURL }))
+    );
   }
 }

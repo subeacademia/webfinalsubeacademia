@@ -58,7 +58,7 @@ import { HistoryBulkUploadService, HistoryBulkUploadResult, HistoryBulkUploadPro
 
   <div *ngIf="isOpen()" class="fixed inset-0 z-50 grid place-items-center">
     <div class="absolute inset-0 bg-black/50" (click)="close()"></div>
-    <div class="relative bg-[var(--panel)] p-4 rounded-lg w-[min(700px,90vw)] border border-white/10">
+    <div class="relative bg-[var(--panel)] p-4 rounded-lg w-[min(600px,90vw)] max-h-[85vh] border border-white/10 overflow-y-auto">
       <h2 class="text-lg font-semibold mb-4">{{ editingId() ? 'Editar' : 'Añadir' }} hito</h2>
       <form [formGroup]="form" class="grid gap-3" (ngSubmit)="save()">
         <div class="grid md:grid-cols-3 gap-3">

@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { ContentService } from '../../core/services/content.service';
+import { StorageService } from '../../core/storage.service';
 import { Course } from '../../core/models/course.model';
 
 @Component({
@@ -181,6 +182,8 @@ import { Course } from '../../core/models/course.model';
                 <mat-label>URL</mat-label>
                 <input matInput formControlName="url" />
               </mat-form-field>
+              <input type="file" (change)="onResourceFileSelected($event, i)" class="hidden" [id]="'resFile'+i" />
+              <button mat-stroked-button type="button" (click)="triggerResourceFile(i)">Subir archivo</button>
               <div class="flex gap-2 items-center">
                 <mat-form-field appearance="outline" class="flex-1">
                   <mat-label>Título</mat-label>
@@ -240,6 +243,7 @@ import { Course } from '../../core/models/course.model';
 export class AdminCoursesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly content = inject(ContentService);
+  private readonly storage = inject(StorageService);
 
   filterLang: 'es' | 'pt' | 'en' = 'es';
   filterStatus: 'draft' | 'published' | 'scheduled' = 'draft';
@@ -445,6 +449,32 @@ export class AdminCoursesComponent {
         success: false,
         message: 'Por favor selecciona un archivo JSON válido'
       });
+    }
+  }
+
+  triggerResourceFile(index: number) {
+    const el = document.getElementById('resFile' + index) as HTMLInputElement | null;
+    el?.click();
+  }
+
+  async onResourceFileSelected(event: any, index: number) {
+    const file: File | undefined = (event?.target?.files && event.target.files[0]) as File | undefined;
+    if (!file) return;
+    try {
+      // Determinar categoría por tipo de recurso seleccionado
+      const group = this.resources().at(index);
+      const type = group?.get('type')?.value as string;
+      let category = 'courses';
+      if (type === 'pdf') category = 'documents';
+      if (type === 'zip') category = 'courses';
+      if (type === 'image' || type === 'video') category = 'courses';
+
+      const upload = await this.storage.uploadPublicCategory(category, file);
+      group?.get('url')?.setValue(upload.url);
+    } catch (err) {
+      console.error('Error subiendo recurso del curso', err);
+    } finally {
+      event.target.value = '';
     }
   }
 

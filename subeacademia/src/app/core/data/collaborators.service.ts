@@ -43,7 +43,15 @@ export class CollaboratorsService {
 
   async updateCollaborator(id: string, changes: Partial<Collaborator>): Promise<void> {
     const ref = doc(this.db, 'collaborators', id);
-    await updateDoc(ref, changes as any);
+    // Normalizar URLs: si viene imageUrl pero no logoUrl, espejar; y viceversa
+    const normalized: any = { ...changes };
+    if (normalized.imageUrl && !normalized.logoUrl) {
+      normalized.logoUrl = normalized.imageUrl;
+    }
+    if (normalized.logoUrl && !normalized.imageUrl) {
+      normalized.imageUrl = normalized.logoUrl;
+    }
+    await updateDoc(ref, normalized as any);
   }
 
   async deleteCollaborator(id: string): Promise<void> {
