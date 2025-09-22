@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-diagnostico-persona',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, I18nTranslatePipe],
   template: `
     <div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <!-- Header del diagnóstico de persona -->
@@ -13,10 +14,10 @@ import { RouterOutlet } from '@angular/router';
         <div class="max-w-7xl mx-auto px-4 py-6">
           <div class="text-center">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Diagnóstico de Madurez en IA - Persona
+              {{ 'diagnostic.person.title' | i18nTranslate }}
             </h1>
             <p class="text-lg text-gray-600 dark:text-gray-400">
-              Evalúa tu nivel de competencias en Inteligencia Artificial y obtén un plan personalizado
+              {{ 'diagnostic.person.subtitle' | i18nTranslate }}
             </p>
           </div>
         </div>

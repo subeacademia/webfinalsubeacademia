@@ -1,7 +1,39 @@
-<app-page-header [title]="'methodology.header.title' | i18nTranslate" [subtitle]="'methodology.header.subtitle' | i18nTranslate"></app-page-header>
+<!-- Cabecera estándar transparente -->
+<div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+  <!-- Contenido en tarjeta transparente elegante -->
+  <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+    <!-- Tarjeta principal con transparencia y bordes elegantes -->
+    <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+        Nuestra Metodología
+      </div>
+      
+      <!-- Título principal con degradado naranja -->
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+        {{ 'methodology.header.title' | i18nTranslate }}
+      </h1>
+      
+      <!-- Subtítulo mejorado -->
+      <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+        {{ 'methodology.header.subtitle' | i18nTranslate }}
+      </p>
+    </div>
+    
+    <!-- Indicador de scroll fuera de la tarjeta -->
+    <div class="mt-8 animate-bounce">
+      <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+        <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Sección Metodología ARES AI Detallada -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+<div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.ares.title' | i18nTranslate }}</h2>
@@ -92,7 +124,7 @@
 </div>
 
 <!-- Sección Fundamentos Pedagógicos -->
-<div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+<div class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">Una Pedagogía para la Era de la IA</h2>
@@ -203,7 +235,7 @@
 </div>
 
 <!-- Sección 13 Competencias con Tarjetas Simplificadas -->
-<div class="bg-gray-50 dark:bg-gray-950 py-24 sm:py-32">
+<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm py-24 sm:py-32">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.competencies.title' | i18nTranslate }}</h2>

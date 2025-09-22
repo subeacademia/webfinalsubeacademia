@@ -33,6 +33,7 @@ import { StorageService } from '../../core/storage.service';
     <!-- Selección de fondo del Home -->
     <label class="block">Fondo del Home
       <select class="w-full rounded-md border border-gray-300 bg-white text-gray-800 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm" formControlName="homeBackgroundKey">
+        <option value="digital-globe-v1">Globo Digital 3D - Versión 1</option>
         <option value="neural-3d-v1">Red Neuronal 3D - Versión 1</option>
         <option value="tech-lines-3d-v1">Líneas Tecnológicas 3D - Versión 1</option>
         <option value="elegant-network-v1">Red Elegante 3D - Versión 1</option>
@@ -40,7 +41,6 @@ import { StorageService } from '../../core/storage.service';
         <option value="circuit-tech-v1">Circuitos Tecnológicos - Versión 1</option>
         <option value="circuit-tech-v2">Circuitos Tecnológicos 3D - Versión 2</option>
         <option value="circuit-tech-v2-light">Circuitos Tecnológicos 3D - Versión 2 (Light)</option>
-        <option value="digital-globe-v1">Globo Digital 3D - Versión 1</option>
       </select>
       <small class="text-gray-500">Puedes elegir el componente visual del fondo del hero</small>
     </label>
@@ -203,7 +203,7 @@ export class SettingsPageComponent {
         ga4MeasurementId: v.ga4MeasurementId || undefined,
         searchConsoleVerification: v.searchConsoleVerification || undefined,
         social: { twitter: v.twitter || undefined, linkedin: v.linkedin || undefined, youtube: v.youtube || undefined },
-        homeBackgroundKey: v.homeBackgroundKey || 'neural-3d-v1',
+        homeBackgroundKey: v.homeBackgroundKey || 'digital-globe-v1',
         homeBackgroundName: ((): string | undefined => {
           switch(v.homeBackgroundKey){
             case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';
@@ -232,7 +232,7 @@ export class SettingsPageComponent {
             youtube: v.youtube || undefined
           },
           // Publicamos también el fondo del Home en Firestore para que se propague a todos los dispositivos
-          homeBackgroundKey: v.homeBackgroundKey || 'neural-3d-v1',
+          homeBackgroundKey: v.homeBackgroundKey || 'digital-globe-v1',
           homeBackgroundName: ((): string | undefined => {
             switch(v.homeBackgroundKey){
               case 'neural-3d-v1': return 'Red Neuronal 3D - Versión 1';

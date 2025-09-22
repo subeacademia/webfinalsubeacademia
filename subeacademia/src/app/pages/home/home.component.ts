@@ -50,6 +50,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.companyLogos$ = this.logos.listByType('Empresa');
     this.educationLogos$ = this.logos.listByType('Institución Educativa');
     this.allianceLogos$ = this.logos.listByType('Alianza Estratégica');
+    
+    // Inicializar fases de metodología
+    this.loadMethodologyPhases();
   }
 
   private contentSub?: Subscription;
@@ -238,6 +241,56 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return ['0', '1', '2']; // Siempre 3 entregables por fase
   }
 
+  // Método para hacer scroll suave a una fase específica
+  scrollToPhase(phaseId: number): void {
+    const elementId = `fase-${phaseId}`;
+    const element = document.getElementById(elementId);
+    
+    if (element) {
+      // Calcular offset para compensar el header sticky
+      const offset = 100; // Ajustar según la altura del header
+      const elementPosition = element.offsetTop - offset;
+      
+      // Scroll suave
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+      
+      // Actualizar la fase activa para efectos visuales
+      this.activePhase = phaseId;
+    }
+  }
+
+  // Configurar scroll spy para detectar automáticamente la fase visible
+  private setupScrollSpy(): void {
+    if (typeof window === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const phaseId = parseInt(entry.target.id.replace('fase-', ''));
+            this.activePhase = phaseId;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      {
+        rootMargin: '-20% 0px -60% 0px', // Ajustar según sea necesario
+        threshold: 0.3
+      }
+    );
+
+    // Observar todas las fases
+    this.methodologyPhases.forEach(phase => {
+      const element = document.getElementById(`fase-${phase.id}`);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+  }
+
   // Método para obtener logos a mostrar, solo logos reales de Firestore
   getLogosToDisplay(type: 'company' | 'education' | 'alliance'): Logo[] {
     switch (type) {
@@ -322,6 +375,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       (titleEl as HTMLElement).style.opacity = '1';
       (titleEl as HTMLElement).style.visibility = 'visible';
     }
+
+    // Configurar scroll spy para las fases de metodología
+    this.setupScrollSpy();
 
     // Inicializar el scroll-spying solo en desktop y en el navegador
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {

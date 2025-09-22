@@ -77,7 +77,6 @@
       </div>
     </div>
 
-    
 
     <!-- Botones de acción con efectos -->
     <div class="hero-cta-buttons flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up" style="animation-delay: 0.9s;" role="group" aria-label="Acciones principales">
@@ -120,7 +119,7 @@
 </section>
 
 <!-- 2. SECCIÓN "NUESTRA METODOLOGÍA ARES-AI" FINAL CON CARD STACKING -->
-<section id="metodologia" class="bg-base-100 dark:bg-base-900" role="region" aria-labelledby="methodology-title">
+<section id="metodologia" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm" role="region" aria-labelledby="methodology-title">
   <div class="container mx-auto px-4 py-16 sm:py-24">
     <div class="text-center mb-12 lg:mb-16">
       <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
@@ -136,15 +135,14 @@
       <!-- Navegación sticky en la izquierda -->
       <div class="col-span-4">
         <div class="sticky top-24 space-y-4">
-          <a *ngFor="let phase of methodologyPhases"
-             #phaseNavItem
-             [routerLink]="['/', i18n.currentLang(), 'metodologia']"
-             [fragment]="'fase-' + phase.id"
-             class="phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline"
-             [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
-            <span class="text-xl font-bold text-primary mr-4">{{ '0' + phase.id }}</span>
-            <span class="text-lg font-semibold text-base-content">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
-          </a>
+          <button *ngFor="let phase of methodologyPhases"
+                  #phaseNavItem
+                  (click)="scrollToPhase(phase.id)"
+                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left ' + (activePhase === phase.id ? 'bg-primary/20 dark:bg-primary/30 border-primary/50 dark:border-primary/40 shadow-lg' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:bg-white/90 dark:hover:bg-gray-700/90')"
+                  [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
+            <span class="text-xl font-bold mr-4" [class]="activePhase === phase.id ? 'text-primary' : 'text-primary'">{{ '0' + phase.id }}</span>
+            <span class="text-lg font-semibold" [class]="activePhase === phase.id ? 'text-primary dark:text-primary-300' : 'text-base-content'">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
+          </button>
         </div>
       </div>
 
@@ -153,8 +151,8 @@
         <div class="space-y-8">
           <div *ngFor="let phase of methodologyPhases; let i = index"
                #phaseContentCard
-               [id]="'phase-card-' + phase.id" 
-               class="phase-content-card sticky top-24 bg-base-200 dark:bg-base-800 rounded-2xl shadow-xl p-8 min-h-[80vh] flex items-center">
+               [id]="'fase-' + phase.id" 
+               class="phase-content-card sticky top-24 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-2xl shadow-xl p-8 min-h-[80vh] flex items-center">
             <div class="w-full max-w-2xl mx-auto">
               <img [src]="phase.imageUrl" 
                    [alt]="phase.title" 
@@ -179,7 +177,7 @@
 
     <!-- Acordeón para móvil mejorado -->
     <div class="lg:hidden space-y-4 relative z-10">
-      <div *ngFor="let phase of methodologyPhases" class="collapse collapse-plus bg-base-200 dark:bg-base-800 rounded-lg shadow-sm border border-base-300">
+      <div *ngFor="let phase of methodologyPhases" class="collapse collapse-plus bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-sm border border-white/20 dark:border-white/10">
         <input type="radio" name="methodology-accordion" [checked]="phase.id === 1" />
         <div class="collapse-title text-xl font-bold flex items-center text-base-content min-h-[60px]">
           <span class="text-primary mr-3 flex-shrink-0">{{ '0' + phase.id }}</span>
@@ -229,19 +227,20 @@
           {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
         </app-ui-button>
         
-        <app-ui-button 
-          variant="purple" 
-          size="lg"
-          class="methodology-purple-btn"
-          style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
-          aria-label="Ver detalles completos de la metodología ARES-AI">
-          <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" class="flex items-center justify-center w-full h-full text-inherit no-underline">
+        <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" 
+           class="inline-flex items-center justify-center w-full h-full text-inherit no-underline">
+          <app-ui-button 
+            variant="purple" 
+            size="lg"
+            class="methodology-purple-btn w-full"
+            style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
+            aria-label="Ver detalles completos de la metodología ARES-AI">
             {{ 'home.methodology.btn_view_methodology' | i18nTranslate }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-          </a>
-        </app-ui-button>
+          </app-ui-button>
+        </a>
       </div>
       
       <!-- Texto adicional -->
@@ -255,7 +254,7 @@
 <!-- Modal eliminado: ahora las tarjetas muestran los detalles al darse vuelta (flip) -->
 
 <!-- 3. SECCIÓN "NUESTRAS SOLUCIONES" REDISEÑADA -->
-<section class="py-24 bg-gradient-to-br from-neutral-50 via-white to-primary-50/30 dark:from-neutral-900 dark:via-neutral-800 dark:to-primary-950/30 relative overflow-hidden" role="region" aria-labelledby="solutions-title">
+<section class="py-24 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm relative overflow-hidden" role="region" aria-labelledby="solutions-title">
   <!-- Elementos de fondo mejorados -->
   <div class="absolute inset-0" aria-hidden="true">
     <div class="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-primary-200/20 to-secondary-200/20 rounded-full blur-3xl"></div>

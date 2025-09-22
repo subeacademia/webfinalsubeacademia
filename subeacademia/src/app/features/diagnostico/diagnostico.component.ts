@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { StepNavComponent } from './components/step-nav.component';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-diagnostico',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, StepNavComponent],
+  imports: [CommonModule, RouterOutlet, StepNavComponent, I18nTranslatePipe],
   template: `
     <div class="bg-white dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
       <!-- Barra de navegación integrada -->
@@ -29,27 +30,27 @@ import { DiagnosticStateService } from './services/diagnostic-state.service';
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div class="bg-white dark:bg-gray-800 rounded-lg p-8 max-w-md mx-4 text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">🤖 Inteligencia Artificial</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-4">La IA está analizando tus respuestas y creando un reporte personalizado...</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ 'diagnostic.company.loader.title' | i18nTranslate }}</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-4">{{ 'diagnostic.company.loader.subtitle' | i18nTranslate }}</p>
             
             <!-- Pasos del proceso -->
             <div class="text-left space-y-2 text-sm text-gray-500 dark:text-gray-400">
               <div class="flex items-center">
                 <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span>Creando diagnóstico personalizado...</span>
+                <span>{{ 'diagnostic.company.loader.steps.diagnostic' | i18nTranslate }}</span>
               </div>
               <div class="flex items-center">
                 <div class="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-                <span>Diseñando plan de acción estratégico...</span>
+                <span>{{ 'diagnostic.company.loader.steps.action_plan' | i18nTranslate }}</span>
               </div>
               <div class="flex items-center">
                 <div class="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
-                <span>Generando recomendaciones específicas...</span>
+                <span>{{ 'diagnostic.company.loader.steps.recommendations' | i18nTranslate }}</span>
               </div>
             </div>
             
             <div class="mt-4 text-xs text-gray-400">
-              ⏱️ Tiempo estimado: 30-60 segundos
+              {{ 'diagnostic.company.loader.estimated_time' | i18nTranslate }}
             </div>
           </div>
         </div>

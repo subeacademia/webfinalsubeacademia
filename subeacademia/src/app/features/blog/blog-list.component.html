@@ -1,11 +1,39 @@
-<div class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
-  <!-- Encabezado 3D reutilizable -->
-  <app-page-header
-    [title]="'blog.header.title' | i18nTranslate"
-    [subtitle]="'blog.header.subtitle' | i18nTranslate">
-  </app-page-header>
+<div class="text-gray-800 dark:text-gray-200 min-h-screen">
+  <!-- Cabecera estándar transparente -->
+  <div class="relative w-full min-h-[28rem] md:min-h-[36rem] overflow-hidden flex items-center justify-center">
+    <!-- Contenido en tarjeta transparente elegante -->
+    <div class="relative z-10 text-center p-8 max-w-5xl mx-auto">
+      <!-- Tarjeta principal con transparencia y bordes elegantes -->
+      <div class="relative bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
+        <!-- Badge superior -->
+        <div class="inline-flex items-center px-6 py-3 rounded-full text-sm font-medium mb-8 bg-white/20 dark:bg-white/10 text-gray-800 dark:text-white border border-white/30 backdrop-blur-md">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+          </svg>
+          Nuestro Blog
+        </div>
+        
+        <!-- Título principal con degradado naranja -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight orange-gradient-text">
+          {{ 'blog.header.title' | i18nTranslate }}
+        </h1>
+        
+        <!-- Subtítulo mejorado -->
+        <p class="text-lg md:text-xl lg:text-2xl text-gray-800 dark:text-white/80 leading-relaxed max-w-4xl mx-auto">
+          {{ 'blog.header.subtitle' | i18nTranslate }}
+        </p>
+      </div>
+      
+      <!-- Indicador de scroll fuera de la tarjeta -->
+      <div class="mt-8 animate-bounce">
+        <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center mx-auto">
+          <div class="w-1 h-3 bg-white/80 rounded-full mt-2 animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
     <!-- Aviso de índice de Firestore -->
     <div *ngIf="indexErrorUrl()" class="mb-6 p-4 border border-amber-300 bg-amber-50 dark:bg-amber-900/30 rounded">
       <div class="text-amber-800 dark:text-amber-200 text-sm" i18n>

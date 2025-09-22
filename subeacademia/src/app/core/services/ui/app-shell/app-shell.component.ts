@@ -309,7 +309,7 @@ export class AppShellComponent {
   brandName = signal<string>('Sube Academ-IA');
   logoUrl = signal<string | null>(null);
   // Fondo global seleccionado desde Settings
-  selectedBg: WritableSignal<string> = signal('neural-3d-v1');
+  selectedBg: WritableSignal<string> = signal('digital-globe-v1');
   private readonly authService = inject(AuthService);
 
   // Observable del usuario actual para la UI

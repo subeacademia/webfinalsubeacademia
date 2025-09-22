@@ -552,5 +552,59 @@
     "dashboard": "Dashboard",
     "logout": "Sign Out",
     "privacy_policy": "Privacy Policy"
+  },
+  "diagnostic": {
+    "company": {
+      "title": "AI Maturity Diagnostic - Company",
+      "subtitle": "Evaluate your organization's level of maturity in Artificial Intelligence and get a personalized plan",
+      "steps": {
+        "profile": "1. Profile",
+        "ares": "2. ARES-AI",
+        "competencies": "3. Competencies",
+        "objectives": "4. Objectives",
+        "finish": "5. Finish",
+        "results": "Results"
+      },
+      "progress": {
+        "completed": "completed",
+        "answered": "answered",
+        "total": "total"
+      },
+      "messages": {
+        "completed": "Diagnostic completed!",
+        "completed_desc": "You can navigate freely to review your answers.",
+        "start_new": "Start a new diagnostic"
+      },
+      "pages": {
+        "profile_title": "Organization Profile",
+        "profile_desc": "Provide basic information about your organization",
+        "ares_title": "ARES Self-Assessment",
+        "ares_desc": "Evaluate your skills in Learning, Resilience, Ethics and Sociability",
+        "competencies_title": "Competencies Self-Assessment",
+        "competencies_desc": "Evaluate your level in key competencies for digital transformation",
+        "objectives_title": "Strategic Objectives",
+        "objectives_desc": "Define strategic objectives for your organization",
+        "finish_title": "Complete Diagnostic",
+        "finish_desc": "Review and complete your diagnostic",
+        "results_title": "Diagnostic Results",
+        "results_desc": "Explore the results and recommendations of your diagnostic",
+        "default_title": "AI Maturity Diagnostic",
+        "default_desc": "Comprehensive self-assessment system"
+      },
+      "loader": {
+        "title": "🤖 Artificial Intelligence",
+        "subtitle": "AI is analyzing your responses and creating a personalized report...",
+        "steps": {
+          "diagnostic": "Creating personalized diagnostic...",
+          "action_plan": "Designing strategic action plan...",
+          "recommendations": "Generating specific recommendations..."
+        },
+        "estimated_time": "⏱️ Estimated time: 30-60 seconds"
+      }
+    },
+    "person": {
+      "title": "AI Maturity Diagnostic - Person",
+      "subtitle": "Evaluate your level of competencies in Artificial Intelligence and get a personalized plan"
+    }
   }
 }

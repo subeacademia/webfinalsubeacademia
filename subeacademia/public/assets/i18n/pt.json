@@ -552,5 +552,59 @@
     "dashboard": "Painel",
     "logout": "Sair",
     "privacy_policy": "Política de Privacidade"
+  },
+  "diagnostic": {
+    "company": {
+      "title": "Diagnóstico de Maturidade em IA - Empresa",
+      "subtitle": "Avalie o nível de maturidade da sua organização em Inteligência Artificial e obtenha um plano personalizado",
+      "steps": {
+        "profile": "1. Perfil",
+        "ares": "2. ARES-AI",
+        "competencies": "3. Competências",
+        "objectives": "4. Objetivos",
+        "finish": "5. Finalizar",
+        "results": "Resultados"
+      },
+      "progress": {
+        "completed": "completado",
+        "answered": "respondidas",
+        "total": "total"
+      },
+      "messages": {
+        "completed": "Diagnóstico concluído!",
+        "completed_desc": "Você pode navegar livremente para revisar suas respostas.",
+        "start_new": "Iniciar um novo diagnóstico"
+      },
+      "pages": {
+        "profile_title": "Perfil da Organização",
+        "profile_desc": "Forneça informações básicas sobre sua organização",
+        "ares_title": "Autoavaliação ARES",
+        "ares_desc": "Avalie suas habilidades em Aprendizagem, Resiliência, Ética e Sociabilidade",
+        "competencies_title": "Autoavaliação de Competências",
+        "competencies_desc": "Avalie seu nível nas competências-chave para transformação digital",
+        "objectives_title": "Objetivos Estratégicos",
+        "objectives_desc": "Defina os objetivos estratégicos para sua organização",
+        "finish_title": "Finalizar Diagnóstico",
+        "finish_desc": "Revise e complete seu diagnóstico",
+        "results_title": "Resultados do Diagnóstico",
+        "results_desc": "Explore os resultados e recomendações do seu diagnóstico",
+        "default_title": "Diagnóstico de Maturidade em IA",
+        "default_desc": "Sistema de autoavaliação abrangente"
+      },
+      "loader": {
+        "title": "🤖 Inteligência Artificial",
+        "subtitle": "A IA está analisando suas respostas e criando um relatório personalizado...",
+        "steps": {
+          "diagnostic": "Criando diagnóstico personalizado...",
+          "action_plan": "Projetando plano de ação estratégico...",
+          "recommendations": "Gerando recomendações específicas..."
+        },
+        "estimated_time": "⏱️ Tempo estimado: 30-60 segundos"
+      }
+    },
+    "person": {
+      "title": "Diagnóstico de Maturidade em IA - Pessoa",
+      "subtitle": "Avalie seu nível de competências em Inteligência Artificial e obtenha um plano personalizado"
+    }
   }
 }

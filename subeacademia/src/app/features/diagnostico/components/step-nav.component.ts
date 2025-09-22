@@ -5,6 +5,7 @@ import { DiagnosticStateService } from '../services/diagnostic-state.service';
 import { ScrollService } from '../../../core/services/scroll/scroll.service';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { I18nTranslatePipe } from '../../../core/i18n/i18n.pipe';
 
 interface Step {
   path: string;
@@ -15,7 +16,7 @@ interface Step {
 @Component({
 	selector: 'app-step-nav',
 	standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, I18nTranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
     <!-- Solo mostrar la barra de navegación si NO estamos en la página de inicio o en el diagnóstico de empresas -->
@@ -40,7 +41,7 @@ interface Step {
                  [class.opacity-50]="!isStepEnabled(step)"
                  [disabled]="!isStepEnabled(step)"
                  class="px-3 md:px-4 py-2 text-xs md:text-sm font-medium rounded-full transition-all duration-200 hover:scale-105 hover:shadow-md border-none bg-transparent cursor-pointer">
-                {{ step.label }}
+                {{ step.label | i18nTranslate }}
               </button>
             }
           </nav>
@@ -49,8 +50,8 @@ interface Step {
           <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-3 md:p-4">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
               <div class="flex-1">
-                <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() }}</h2>
-                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() }}</p>
+                <h2 class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ getCurrentPageTitle() | i18nTranslate }}</h2>
+                <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">{{ getCurrentPageDescription() | i18nTranslate }}</p>
               </div>
               <div class="flex items-center space-x-3 md:space-x-4 w-full md:w-auto">
                 <div class="text-right">
@@ -58,7 +59,7 @@ interface Step {
                     {{ getCurrentProgress().answered }} / {{ getCurrentProgress().total }}
                   </div>
                   <div class="text-xs text-gray-600 dark:text-gray-400">
-                    {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% completado
+                    {{ Math.round((getCurrentProgress().answered / getCurrentProgress().total) * 100) }}% {{ 'diagnostic.company.progress.completed' | i18nTranslate }}
                   </div>
                 </div>
                 <div class="w-24 md:w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 md:h-3 overflow-hidden">
@@ -76,9 +77,9 @@ interface Step {
       @if (false) {
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
           <div class="mb-4 p-3 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg text-center">
-              <p class="text-green-800 dark:text-green-200 font-semibold">¡Diagnóstico completado!</p>
-              <p class="text-sm text-green-700 dark:text-green-300">Puedes navegar libremente para revisar tus respuestas.</p>
-              <button (click)="startNew()" class="mt-2 text-sm text-blue-600 hover:underline">Iniciar un nuevo diagnóstico</button>
+              <p class="text-green-800 dark:text-green-200 font-semibold">{{ 'diagnostic.company.messages.completed' | i18nTranslate }}</p>
+              <p class="text-sm text-green-700 dark:text-green-300">{{ 'diagnostic.company.messages.completed_desc' | i18nTranslate }}</p>
+              <button (click)="startNew()" class="mt-2 text-sm text-blue-600 hover:underline">{{ 'diagnostic.company.messages.start_new' | i18nTranslate }}</button>
           </div>
         </div>
       }
@@ -94,12 +95,12 @@ export class StepNavComponent {
   Math = Math;
 
   steps: Step[] = [
-    { path: 'contexto', label: '1. Perfil', order: 1 },
-    { path: 'ares', label: '2. ARES-AI', order: 2 },
-    { path: 'competencias', label: '3. Competencias', order: 3 },
-    { path: 'objetivo', label: '4. Objetivos', order: 4 },
-    { path: 'finalizar', label: '5. Finalizar', order: 5 },
-    { path: 'resultados', label: 'Resultados', order: 6 },
+    { path: 'contexto', label: 'diagnostic.company.steps.profile', order: 1 },
+    { path: 'ares', label: 'diagnostic.company.steps.ares', order: 2 },
+    { path: 'competencias', label: 'diagnostic.company.steps.competencies', order: 3 },
+    { path: 'objetivo', label: 'diagnostic.company.steps.objectives', order: 4 },
+    { path: 'finalizar', label: 'diagnostic.company.steps.finish', order: 5 },
+    { path: 'resultados', label: 'diagnostic.company.steps.results', order: 6 },
   ];
 
   // Señal que nos dice cuál es el paso activo actualmente
@@ -156,19 +157,19 @@ export class StepNavComponent {
     const currentUrl = this.router.url;
     
     if (currentUrl.includes('/contexto')) {
-      return 'Perfil de la Organización';
+      return 'diagnostic.company.pages.profile_title';
     } else if (currentUrl.includes('/ares')) {
-      return 'Autoevaluación ARES';
+      return 'diagnostic.company.pages.ares_title';
     } else if (currentUrl.includes('/competencias')) {
-      return 'Autoevaluación de Competencias';
+      return 'diagnostic.company.pages.competencies_title';
     } else if (currentUrl.includes('/objetivo')) {
-      return 'Objetivos Estratégicos';
+      return 'diagnostic.company.pages.objectives_title';
     } else if (currentUrl.includes('/finalizar')) {
-      return 'Finalizar Diagnóstico';
+      return 'diagnostic.company.pages.finish_title';
     } else if (currentUrl.includes('/resultados')) {
-      return 'Resultados del Diagnóstico';
+      return 'diagnostic.company.pages.results_title';
     } else {
-      return 'Diagnóstico de Madurez en IA';
+      return 'diagnostic.company.pages.default_title';
     }
   }
 
@@ -177,19 +178,19 @@ export class StepNavComponent {
     const currentUrl = this.router.url;
     
     if (currentUrl.includes('/contexto')) {
-      return 'Proporciona información básica sobre tu organización';
+      return 'diagnostic.company.pages.profile_desc';
     } else if (currentUrl.includes('/ares')) {
-      return 'Evalúa tus habilidades en Aprendizaje, Resiliencia, Ética y Sociabilidad';
+      return 'diagnostic.company.pages.ares_desc';
     } else if (currentUrl.includes('/competencias')) {
-      return 'Evalúa tu nivel en las competencias clave para la transformación digital';
+      return 'diagnostic.company.pages.competencies_desc';
     } else if (currentUrl.includes('/objetivo')) {
-      return 'Define los objetivos estratégicos para tu organización';
+      return 'diagnostic.company.pages.objectives_desc';
     } else if (currentUrl.includes('/finalizar')) {
-      return 'Revisa y completa tu diagnóstico';
+      return 'diagnostic.company.pages.finish_desc';
     } else if (currentUrl.includes('/resultados')) {
-      return 'Explora los resultados y recomendaciones de tu diagnóstico';
+      return 'diagnostic.company.pages.results_desc';
     } else {
-      return 'Sistema de autoevaluación integral';
+      return 'diagnostic.company.pages.default_desc';
     }
   }
   

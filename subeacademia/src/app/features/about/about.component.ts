@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
-import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
+// import { PageHeaderComponent } from '../../shared/ui/page-header/page-header';
 import * as AnimeNS from 'animejs';
 const animeFn: any = (AnimeNS as any).default ?? (AnimeNS as any);
 import { CollaboratorsService } from '../../core/data/collaborators.service';
@@ -22,7 +22,7 @@ interface TeamMember {
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule, I18nTranslatePipe, PageHeaderComponent, HistoryTimelineComponent],
+  imports: [CommonModule, I18nTranslatePipe, HistoryTimelineComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css']
 })
