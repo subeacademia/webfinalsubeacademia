@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { StepNavComponent } from './components/step-nav.component';
 import { DiagnosticStateService } from './services/diagnostic-state.service';
 import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
@@ -11,8 +11,10 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
   imports: [CommonModule, RouterOutlet, StepNavComponent, I18nTranslatePipe],
   template: `
     <div class="bg-white dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
-      <!-- Barra de navegación integrada -->
-      <app-step-nav></app-step-nav>
+      <!-- Barra de navegación integrada - Solo mostrar en páginas de fases -->
+      @if (shouldShowNavigation()) {
+        <app-step-nav></app-step-nav>
+      }
       
       <main>
         <div class="max-w-7xl mx-auto py-6 md:py-10 px-4 md:px-6">
@@ -61,6 +63,7 @@ import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 })
 export class DiagnosticoComponent implements OnInit, OnDestroy {
   private stateService = inject(DiagnosticStateService);
+  private router = inject(Router);
 
   // Estado de carga centralizado en el servicio de estado
   isGeneratingReport = this.stateService.isGeneratingReport;
@@ -85,12 +88,36 @@ export class DiagnosticoComponent implements OnInit, OnDestroy {
 
     try {
       await this.stateService.handleDiagnosticFinished();
+      
+      // Navegar a resultados después de generar el reporte exitosamente
+      console.log('✅ Reporte generado exitosamente, navegando a resultados...');
+      const currentUrl = this.router.url;
+      const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
+      this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+      
     } catch (error) {
       console.error('Error final en la generación del diagnóstico:', error);
       alert('Hubo un problema al generar tu diagnóstico. La IA no respondió correctamente. Por favor, inténtalo de nuevo.');
     } finally {
       this.isGeneratingReport.set(false);
     }
+  }
+
+  // Método para determinar si mostrar la navegación
+  shouldShowNavigation(): boolean {
+    const currentUrl = this.router.url;
+    
+    // Solo mostrar en las páginas específicas de fases del diagnóstico
+    const allowedPaths = [
+      '/diagnostico/contexto',
+      '/diagnostico/ares', 
+      '/diagnostico/competencias',
+      '/diagnostico/objetivo',
+      '/diagnostico/finalizar'
+    ];
+    
+    // Verificar si la URL actual está en la lista de rutas permitidas
+    return allowedPaths.some(path => currentUrl.includes(path));
   }
 
 }

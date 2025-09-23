@@ -148,8 +148,9 @@
     <!-- Layout de card stacking para desktop -->
     <div class="hidden lg:grid grid-cols-12 gap-8">
       <!-- Navegación sticky en la izquierda - Solo en esta sección -->
-      <div class="col-span-4">
-        <div class="phase-nav-container space-y-3 z-20" style="position: fixed; top: 6rem; left: 2rem; width: 300px; max-height: calc(100vh - 8rem); overflow-y: auto; overflow-x: hidden;">
+      <!-- COMENTADO: La navegación lateral se movió a la página de metodología dedicada -->
+      <!-- <div class="col-span-4">
+        <div class="phase-nav-container space-y-3 z-20" style="position: sticky; top: 6rem; width: 300px; max-height: calc(100vh - 8rem); overflow-y: auto; overflow-x: hidden;">
           <button *ngFor="let phase of methodologyPhases"
                   #phaseNavItem
                   (click)="scrollToPhase(phase.id)"
@@ -159,10 +160,10 @@
             <span class="text-lg font-semibold text-white dark:text-white">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
           </button>
         </div>
-      </div>
+      </div> -->
 
-      <!-- Contenedor de tarjetas con scroll normal -->
-      <div class="col-span-8" style="margin-left: 320px;">
+      <!-- Contenedor de tarjetas con scroll normal - Ahora ocupa todo el ancho -->
+      <div class="col-span-12">
         <div class="space-y-6 relative">
           <div *ngFor="let phase of methodologyPhases; let i = index"
                #phaseContentCard

@@ -265,19 +265,9 @@ export class StepLeadComponent {
       this.toastService.show('info', '🤖 Generando tu diagnóstico personalizado... Esto puede tomar hasta 2 minutos.');
       
       try {
-        // Usar el nuevo flujo de generación de reporte que incluye el guardado
-        console.log('🔍 StepLead: Usando nuevo flujo de generación de reporte...');
-        await this.diagnosticStateService.handleDiagnosticFinished();
-        
-        // Navegar a resultados
-        const currentUrl = this.router.url;
-        const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
-        this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
-        
-        // Hacer scroll automático hacia arriba después de la navegación
-        setTimeout(() => {
-          this.scrollService.scrollToTopForDiagnostic();
-        }, 200);
+        // Emitir el evento para que el componente padre maneje la generación
+        console.log('🔍 StepLead: Emitiendo evento diagnosticFinished...');
+        this.diagnosticFinished.emit();
         
         this.isGenerating = false; // Éxito, reset
         
