@@ -15,6 +15,7 @@ import { Subscription, distinctUntilChanged, switchMap, Observable, combineLates
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
+import { TestimonialsCarouselComponent } from '../../shared/ui/testimonials-carousel/testimonials-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 import { AnimationService } from '../../core/services/animation.service';
 import { SeoService } from '../../core/seo/seo.service';
@@ -25,7 +26,7 @@ import { DigitalGlobe } from '../../digital-globe/digital-globe';
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, DigitalGlobe, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, DigitalGlobe, LogoCarouselComponent, TestimonialsCarouselComponent, UiButtonComponent, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -58,12 +59,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private contentSub?: Subscription;
   frasesDinamicas: string[] = [];
   tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
-  selectedHomeBgKey: string | undefined;
+  selectedHomeBgKey: string = 'digital-globe-v1'; // Inicializar con valor por defecto correcto
   isDarkTheme = false;
 
   // Clave efectiva para evitar duplicación entre variantes light/dark
   get displayedHomeBgKey(): string {
-    const key = this.selectedHomeBgKey || 'neural-3d-v1';
+    const key = this.selectedHomeBgKey;
     if (key === 'circuit-tech-v2' || key === 'circuit-tech-v2-light') {
       return this.isDarkTheme ? 'circuit-tech-v2' : 'circuit-tech-v2-light';
     }
@@ -100,6 +101,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren('phaseNavItem') navItems!: QueryList<ElementRef>;
   @ViewChildren('phaseContentCard') contentCards!: QueryList<ElementRef>;
   private observer!: IntersectionObserver;
+  private isManualScroll = false; // Flag para detectar scroll manual
   
   // Solo mostrar logos reales de Firestore, sin fallbacks de ejemplo
 
@@ -131,6 +133,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Asegurar que el servicio i18n esté inicializado
     this.initializeI18n();
     // Suscribirse al tema para alternar la variante del fondo sin duplicación
+    this.isDarkTheme = this.themeService.current() === 'dark'; // Inicializar inmediatamente
     this.themeService.isDarkTheme$.subscribe(isDark => {
       this.isDarkTheme = isDark;
       this.cdr.detectChanges();
@@ -152,11 +155,17 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.tituloHome = finalTitle;
 
         // Fondo prioriza doc público -> settings remotos -> locales -> default
-        this.selectedHomeBgKey = (homeDoc as any)?.homeBackgroundKey
+        const newBgKey = (homeDoc as any)?.homeBackgroundKey
           || (remoteSettings as any)?.homeBackgroundKey
           || (localSettings as any)?.homeBackgroundKey
-          || 'neural-3d-v1';
-        console.log('🎨 Fondo del Home seleccionado:', this.selectedHomeBgKey);
+          || 'digital-globe-v1';
+        
+        // Solo actualizar si es diferente para evitar parpadeos
+        if (newBgKey !== this.selectedHomeBgKey) {
+          this.selectedHomeBgKey = newBgKey;
+          console.log('🎨 Fondo del Home actualizado:', this.selectedHomeBgKey);
+          this.cdr.detectChanges();
+        }
 
         // Frases del typewriter
         this.frasesDinamicas = Array.isArray(typewriterPhrases) && typewriterPhrases.length ? typewriterPhrases : this.frasesDinamicas;
@@ -243,22 +252,24 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Método para hacer scroll suave a una fase específica
   scrollToPhase(phaseId: number): void {
+    console.log(`🎯 Navegando a fase ${phaseId}`);
+    
+    // Actualizar la fase activa
+    this.activePhase = phaseId;
+    this.cdr.detectChanges();
+
+    // Buscar el elemento
     const elementId = `fase-${phaseId}`;
     const element = document.getElementById(elementId);
     
     if (element) {
-      // Calcular offset para compensar el header sticky
-      const offset = 100; // Ajustar según la altura del header
-      const elementPosition = element.offsetTop - offset;
-      
-      // Scroll suave
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
+      // Scroll directo al elemento
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
       });
-      
-      // Actualizar la fase activa para efectos visuales
-      this.activePhase = phaseId;
+    } else {
+      console.error(`❌ No se encontró el elemento: ${elementId}`);
     }
   }
 
@@ -266,29 +277,50 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private setupScrollSpy(): void {
     if (typeof window === 'undefined') return;
 
+    // Limpiar observer anterior si existe
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
+        // No actualizar si es scroll manual
+        if (this.isManualScroll) {
+          console.log('🚫 Scroll spy deshabilitado por navegación manual');
+          return;
+        }
+        
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const phaseId = parseInt(entry.target.id.replace('fase-', ''));
-            this.activePhase = phaseId;
-            this.cdr.detectChanges();
+            if (this.activePhase !== phaseId) {
+              console.log(`🔄 Scroll spy detectó fase ${phaseId} (${entry.intersectionRatio} visible)`);
+              this.activePhase = phaseId;
+              this.cdr.detectChanges();
+            }
           }
         });
       },
       {
-        rootMargin: '-20% 0px -60% 0px', // Ajustar según sea necesario
-        threshold: 0.3
+        rootMargin: '-10% 0px -50% 0px', // Ajustado para mejor detección
+        threshold: [0.1, 0.2, 0.3, 0.4, 0.5] // Múltiples thresholds para mejor detección
       }
     );
 
-    // Observar todas las fases
-    this.methodologyPhases.forEach(phase => {
-      const element = document.getElementById(`fase-${phase.id}`);
-      if (element) {
-        observer.observe(element);
-      }
-    });
+    this.observer = observer;
+
+    // Observar todas las fases con un pequeño delay para asegurar que estén en el DOM
+    setTimeout(() => {
+      this.methodologyPhases.forEach(phase => {
+        const element = document.getElementById(`fase-${phase.id}`);
+        if (element) {
+          console.log(`👀 Observando elemento: fase-${phase.id}`);
+          observer.observe(element);
+        } else {
+          console.warn(`⚠️ No se encontró elemento: fase-${phase.id}`);
+        }
+      });
+    }, 500); // Aumentado el delay para asegurar que el DOM esté completamente renderizado
   }
 
   // Método para obtener logos a mostrar, solo logos reales de Firestore
@@ -379,12 +411,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Configurar scroll spy para las fases de metodología
     this.setupScrollSpy();
 
-    // Inicializar el scroll-spying solo en desktop y en el navegador
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      setTimeout(() => {
-        this.initObserver();
-      }, 100);
-    }
+    // Scroll spy ya configurado en setupScrollSpy()
+    // No necesitamos initObserver() duplicado
   }
 
   private initObserver(): void {
@@ -402,7 +430,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (mostVisible && mostVisible.isIntersecting) {
         const id = mostVisible.target.getAttribute('id');
-        const currentPhaseId = parseInt(id?.replace('phase-card-', '') || '1');
+        const currentPhaseId = parseInt(id?.replace('fase-', '') || '1');
         
         const navItem = this.navItems.find(
           item => item.nativeElement.getAttribute('fragment') === `fase-${currentPhaseId}`

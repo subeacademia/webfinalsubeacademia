@@ -3,33 +3,34 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthCoreService } from '../core/auth-core.service';
 import { environment } from '../../environments/environment';
+import { I18nTranslatePipe } from '../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-admin-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterOutlet, I18nTranslatePipe],
   template: `
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
       <!-- Sidebar -->
       <div class="flex">
         <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen">
           <div class="p-6">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">Admin Panel</h1>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-8">{{ 'admin.panel_title' | i18nTranslate }}</h1>
             <nav class="space-y-4">
-              <a class="btn w-full" routerLink="/admin/posts">Posts</a>
+              <a class="btn w-full" routerLink="/admin/posts">{{ 'admin.menu.posts' | i18nTranslate }}</a>
               
               <!-- Menú de Productos con subsecciones -->
               <div class="space-y-2">
-                <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-2 py-1">Productos</div>
-                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/asesorias">💡 Asesorías</a>
-                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/cursos">📚 Cursos</a>
-                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/certificaciones">🏆 Certificaciones</a>
+                <div class="text-sm font-semibold text-gray-600 dark:text-gray-400 px-2 py-1">{{ 'admin.menu.productos' | i18nTranslate }}</div>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/asesorias">💡 {{ 'admin.menu.asesorias' | i18nTranslate }}</a>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/cursos">📚 {{ 'admin.menu.cursos' | i18nTranslate }}</a>
+                <a class="btn w-full pl-6 text-sm" routerLink="/admin/productos/certificaciones">🏆 {{ 'admin.menu.certificados' | i18nTranslate }}</a>
               </div>
               
-              <a class="btn w-full" routerLink="/admin/projects">Proyectos</a>
-              <a class="btn w-full" routerLink="/admin/media">Media</a>
-              <a class="btn w-full" routerLink="/admin/logos">Logos</a>
-              <a class="btn w-full" routerLink="/admin/settings">Ajustes</a>
+              <a class="btn w-full" routerLink="/admin/projects">{{ 'admin.menu.projects' | i18nTranslate }}</a>
+              <a class="btn w-full" routerLink="/admin/media">{{ 'admin.menu.media' | i18nTranslate }}</a>
+              <a class="btn w-full" routerLink="/admin/clientes">👥 {{ 'admin.menu.clientes' | i18nTranslate }}</a>
+              <a class="btn w-full" routerLink="/admin/settings">{{ 'admin.menu.settings' | i18nTranslate }}</a>
             </nav>
           </div>
         </aside>

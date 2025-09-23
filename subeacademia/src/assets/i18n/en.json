@@ -107,11 +107,19 @@
     "trust_title": "They Trust Us",
     "trust_subtitle": "Join the organizations already transforming their future with AI",
     "cta_final": "Start Now",
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Discover the real experiences of those who have transformed their organizations with us",
+      "carousel_label": "Client testimonials",
+      "go_to_testimonial": "Go to testimonial {index}",
+      "previous_testimonial": "Previous testimonial",
+      "next_testimonial": "Next testimonial"
+    },
     "methodology": {
       "title": "Our ARES-AI Methodology",
       "subtitle": "A 5-phase framework that guarantees successful AI implementation, combining agility, responsibility, and tangible results.",
       "cta_ready": "Ready to start your AI transformation?",
-      "btn_start_diagnostic": "Start Diagnosis",
+      "btn_start_diagnostic": "Start Free Diagnostic",
       "btn_view_methodology": "View Complete Methodology",
       "additional_text": "Framework tested and validated by more than 100 organizations",
       "phases": {
@@ -389,7 +397,7 @@
     "subtitle": "Discover our complete catalog of products designed to accelerate your digital transformation with Artificial Intelligence",
     "model_title": "50/50 Model: The Perfect Formula",
     "standard_content": "Standard Content",
-    "total_personalization": "Total Personalization",
+    "total_personalization": "Mathetic Personalization",
     "competitive_formula": "The formula that makes us unique in the AI education market",
     "categories": {
       "consulting": { "title": "Consulting", "description": "Specialized AI consulting for companies looking to implement intelligent solutions strategically and efficiently.", "btn": "View Consulting" },
@@ -539,6 +547,37 @@
     "header": {
       "title": "Our Blog",
       "subtitle": "Ideas, tutorials and news about Artificial Intelligence and technology"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "productos": "Products",
+    "nosotros": "About Us",
+    "metodologia": "Methodology",
+    "blog": "Blog",
+    "contacto": "Contact",
+    "admin": "Admin",
+    "login_google": "Sign In with Google",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out",
+    "privacy_policy": "Privacy Policy"
+  },
+  "admin": {
+    "panel_title": "Administration Panel",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Products",
+      "asesorias": "Consultations",
+      "cursos": "Courses",
+      "projects": "Projects",
+      "certificados": "Certificates",
+      "media": "Media",
+      "clientes": "Clients",
+      "history": "History",
+      "collaborators": "Collaborators",
+      "leads": "Leads",
+      "users": "Users",
+      "settings": "Settings"
     }
   },
   "notFound": {

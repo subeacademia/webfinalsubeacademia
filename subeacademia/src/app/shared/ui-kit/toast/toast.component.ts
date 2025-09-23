@@ -14,7 +14,7 @@ export interface ToastMessage {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed top-4 right-4 z-50 space-y-2">
+    <div class="fixed top-20 right-4 z-[9999] space-y-2">
       <div *ngFor="let toast of toasts()" 
            class="transform transition-all duration-300 ease-in-out"
            [class]="getToastClasses(toast.type)"

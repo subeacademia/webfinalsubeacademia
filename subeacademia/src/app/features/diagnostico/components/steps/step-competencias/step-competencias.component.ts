@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { competencias, Competency } from '../../../data/competencias';
 import { CompetencyQuestionCardComponent } from '../../ui/competency-question-card/competency-question-card.component';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { ScrollService } from '../../../../../core/services/scroll/scroll.service';
 import { Answer } from '../../../data/diagnostic.models';
 
 @Component({
@@ -42,6 +43,7 @@ import { Answer } from '../../../data/diagnostic.models';
 export class StepCompetenciasComponent {
   public stateService = inject(DiagnosticStateService);
   private router = inject(Router);
+  private scrollService = inject(ScrollService);
   allCompetencies = competencias;
 
   getAnswerForQuestion(questionId: string): Answer {
@@ -61,11 +63,21 @@ export class StepCompetenciasComponent {
     const currentUrl = this.router.url;
     const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
     this.router.navigate([`/${languagePrefix}/diagnostico/objetivo`]);
+    
+    // Hacer scroll automático hacia arriba después de la navegación
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 
   previous() {
     const currentUrl = this.router.url;
     const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
     this.router.navigate([`/${languagePrefix}/diagnostico/ares`]);
+    
+    // Hacer scroll automático hacia arriba después de la navegación
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 }

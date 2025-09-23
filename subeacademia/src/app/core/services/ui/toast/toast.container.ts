@@ -7,7 +7,7 @@ import { ToastService } from './toast.service';
   standalone: true,
   imports: [NgFor, NgClass],
   template: `
-    <div class="fixed top-4 right-4 z-[100] space-y-2">
+    <div class="fixed top-20 right-4 z-[9999] space-y-2">
       <div *ngFor="let t of toasts()" class="px-4 py-3 rounded shadow text-white flex items-center gap-3"
         [ngClass]="{
           'bg-green-600': t.kind==='success',

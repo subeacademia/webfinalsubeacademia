@@ -113,6 +113,12 @@ import {
                       ✏️ Editar
                     </button>
                     <button 
+                      *ngIf="canManageUsers()"
+                      class="text-green-600 hover:text-green-900 dark:text-green-400"
+                      (click)="resetPassword(user)">
+                      🔑 Restablecer
+                    </button>
+                    <button 
                       *ngIf="canDeleteUser(user)"
                       class="text-red-600 hover:text-red-900 dark:text-red-400"
                       (click)="confirmDelete(user)">
@@ -205,6 +211,20 @@ import {
 
               <div *ngIf="showEditModal">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nueva Contraseña (Opcional)
+                </label>
+                <input 
+                  type="password" 
+                  class="w-full ui-input"
+                  formControlName="newPassword"
+                  placeholder="Dejar vacío para mantener la actual">
+                <div class="text-xs text-gray-500 mt-1">
+                  💡 Si dejas vacío, se enviará un email de restablecimiento
+                </div>
+              </div>
+
+              <div *ngIf="showEditModal">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Estado
                 </label>
                 <select class="w-full ui-input" formControlName="status">
@@ -230,6 +250,34 @@ import {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- Modal de confirmación de restablecimiento de contraseña -->
+      <div *ngIf="showResetModal && userToReset" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
+          <h3 class="text-lg font-semibold mb-4 text-green-600">🔑 Restablecer Contraseña</h3>
+          <p class="text-gray-700 dark:text-gray-300 mb-6">
+            ¿Deseas enviar un email de restablecimiento de contraseña a <strong>{{ userToReset.displayName }}</strong> ({{ userToReset.email }})?
+          </p>
+          <p class="text-sm text-blue-600 mb-6">
+            📧 El usuario recibirá un email con instrucciones para crear una nueva contraseña.
+          </p>
+          <div class="flex justify-end space-x-3">
+            <button 
+              type="button" 
+              class="btn btn-secondary"
+              (click)="cancelReset()">
+              Cancelar
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-primary"
+              (click)="confirmResetPassword()"
+              [disabled]="resetting()">
+              {{ resetting() ? 'Enviando...' : 'Enviar Email' }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -294,16 +342,20 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   showCreateModal = false;
   showEditModal = false;
   showDeleteModal = false;
+  showResetModal = false;
   userToDelete: AppUser | null = null;
+  userToReset: AppUser | null = null;
   editingUser: AppUser | null = null;
   
   saving = signal(false);
   deleting = signal(false);
+  resetting = signal(false);
 
   userForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     displayName: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(6)]],
+    newPassword: ['', [Validators.minLength(6)]],
     role: ['usuario' as UserRole, Validators.required],
     status: ['active' as UserStatus]
   });
@@ -447,6 +499,8 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.userForm.patchValue({
       email: user.email,
       displayName: user.displayName,
+      password: '', // No mostrar contraseña actual
+      newPassword: '', // Campo para nueva contraseña
       role: user.role,
       status: user.status
     });
@@ -463,47 +517,6 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
     this.showDeleteModal = true;
   }
 
-  async saveUser(): Promise<void> {
-    if (this.userForm.invalid) return;
-
-    const formValue = this.userForm.value;
-    const currentUser = this.currentUser();
-    if (!currentUser) return;
-
-    this.saving.set(true);
-
-    try {
-      if (this.showCreateModal) {
-        // Crear usuario
-        const request: CreateUserRequest = {
-          email: formValue.email!,
-          displayName: formValue.displayName!,
-          password: formValue.password!,
-          role: formValue.role as UserRole
-        };
-
-        await this.userManagement.createUser(request, currentUser.id).toPromise();
-        this.toast.success('Usuario creado correctamente');
-      } else if (this.showEditModal && this.editingUser) {
-        // Actualizar usuario
-        const request: UpdateUserRequest = {
-          displayName: formValue.displayName!,
-          role: formValue.role as UserRole,
-          status: formValue.status as UserStatus
-        };
-
-        await this.userManagement.updateUser(this.editingUser.id, request, currentUser.id).toPromise();
-        this.toast.success('Usuario actualizado correctamente');
-      }
-
-      this.cancelEdit();
-    } catch (error: any) {
-      console.error('Error saving user:', error);
-      this.toast.error(error.message || 'Error al guardar el usuario');
-    } finally {
-      this.saving.set(false);
-    }
-  }
 
   async deleteUser(): Promise<void> {
     if (!this.userToDelete) return;
@@ -538,6 +551,7 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
       email: '',
       displayName: '',
       password: '',
+      newPassword: '',
       role: 'usuario',
       status: 'active'
     });
@@ -546,5 +560,117 @@ export class UsersManagementComponent implements OnInit, OnDestroy {
   cancelDelete(): void {
     this.showDeleteModal = false;
     this.userToDelete = null;
+  }
+
+  // Métodos para restablecimiento de contraseña
+  resetPassword(user: AppUser): void {
+    this.userToReset = user;
+    this.showResetModal = true;
+  }
+
+  cancelReset(): void {
+    this.showResetModal = false;
+    this.userToReset = null;
+  }
+
+  confirmResetPassword(): void {
+    if (!this.userToReset) return;
+
+    this.resetting.set(true);
+
+    this.userManagement.resetUserPassword(this.userToReset.email)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.toast.success(`Email de restablecimiento enviado a ${this.userToReset!.email}`);
+          this.cancelReset();
+          this.resetting.set(false);
+        },
+        error: (error) => {
+          console.error('Error restableciendo contraseña:', error);
+          this.toast.error(error.message || 'Error al enviar email de restablecimiento');
+          this.resetting.set(false);
+        }
+      });
+  }
+
+  // Actualizar método saveUser para manejar nueva contraseña
+  saveUser(): void {
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      return;
+    }
+
+    this.saving.set(true);
+    const formValue = this.userForm.value;
+    const currentUser = this.currentUser()?.email || 'system';
+
+    if (this.showCreateModal) {
+      // Crear usuario
+      const createRequest: CreateUserRequest = {
+        email: formValue.email!,
+        displayName: formValue.displayName!,
+        password: formValue.password!,
+        role: formValue.role!,
+        permissions: undefined // Se asignarán por defecto según el rol
+      };
+
+      this.userManagement.createUser(createRequest, currentUser)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (user) => {
+            this.toast.success(`Usuario ${user.displayName} creado exitosamente`);
+            this.cancelEdit();
+            this.saving.set(false);
+          },
+          error: (error) => {
+            console.error('Error creando usuario:', error);
+            this.toast.error(error.message || 'Error al crear usuario');
+            this.saving.set(false);
+          }
+        });
+
+    } else if (this.showEditModal && this.editingUser) {
+      // Editar usuario
+      const updateRequest: UpdateUserRequest = {
+        displayName: formValue.displayName || undefined,
+        role: formValue.role || undefined,
+        status: formValue.status || undefined
+      };
+
+      this.userManagement.updateUser(this.editingUser.id, updateRequest, currentUser)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (user) => {
+            // Si se proporcionó una nueva contraseña, intentar cambiarla
+            if (formValue.newPassword && formValue.newPassword.trim()) {
+              this.userManagement.changeUserPassword(user.id, formValue.newPassword)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                  next: () => {
+                    this.toast.success(`Usuario ${user.displayName} actualizado y email de restablecimiento enviado`);
+                    this.cancelEdit();
+                    this.saving.set(false);
+                  },
+                  error: (error) => {
+                    console.error('Error cambiando contraseña:', error);
+                    this.toast.warning(`Usuario actualizado, pero error al cambiar contraseña: ${error.message}`);
+                    this.cancelEdit();
+                    this.saving.set(false);
+                  }
+                });
+            } else {
+              this.toast.success(`Usuario ${user.displayName} actualizado exitosamente`);
+              this.cancelEdit();
+              this.saving.set(false);
+            }
+          },
+          error: (error) => {
+            console.error('Error actualizando usuario:', error);
+            this.toast.error(error.message || 'Error al actualizar usuario');
+            this.saving.set(false);
+          }
+        });
+    }
   }
 }

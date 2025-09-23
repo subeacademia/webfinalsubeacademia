@@ -29,7 +29,8 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'projects/:id', loadComponent: () => import('./projects/project-edit.component').then(m => m.ProjectEditComponent), canActivate: [AdminGuard] },
 
       { path: 'media', loadComponent: () => import('./media/media-page.component').then(m => m.MediaPageComponent), canActivate: [AdminGuard] },
-      { path: 'logos', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
+      { path: 'clientes', loadComponent: () => import('./logos/logos-page.component').then(m => m.LogosPageComponent), canActivate: [AdminGuard] },
+      { path: 'logos', redirectTo: 'clientes', pathMatch: 'full' }, // Redirección para mantener compatibilidad
       { path: 'history', loadComponent: () => import('./history/history-page.component').then(m => m.HistoryPageComponent), canActivate: [AdminGuard] },
       { path: 'collaborators', loadComponent: () => import('./collaborators/collaborators-page.component').then(m => m.CollaboratorsPageComponent), canActivate: [AdminGuard] },
       { path: 'leads', loadComponent: () => import('./leads/admin-diagnostic-leads.component').then(m => m.AdminDiagnosticLeadsComponent), canActivate: [AdminGuard] },

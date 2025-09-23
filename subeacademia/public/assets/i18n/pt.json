@@ -32,6 +32,14 @@
     "logos": {
       "title": "Empresas que já Confiam em Nós"
     },
+    "testimonials": {
+      "title": "O que nossos clientes dizem",
+      "subtitle": "Descubra as experiências reais daqueles que transformaram suas organizações conosco",
+      "carousel_label": "Depoimentos de clientes",
+      "go_to_testimonial": "Ir para o depoimento {index}",
+      "previous_testimonial": "Depoimento anterior",
+      "next_testimonial": "Próximo depoimento"
+    },
     "cta_final": {
       "title": "Pronto para Liderar a Transformação?",
       "subtitle": "Vamos conversar sobre como podemos capacitar sua equipe e preparar sua organização para o futuro da IA.",
@@ -369,7 +377,7 @@
     "subtitle": "Descubra nosso catálogo completo de produtos projetados para acelerar sua transformação digital com Inteligência Artificial",
     "model_title": "Modelo 50/50: A Fórmula Perfeita",
     "standard_content": "Conteúdo Padrão",
-    "total_personalization": "Personalização Total",
+    "total_personalization": "Personalização Matética",
     "competitive_formula": "A fórmula que nos torna únicos no mercado de educação em IA",
     "categories": {
       "consulting": { "title": "Consultoria", "description": "Consultoria especializada em IA para empresas que buscam implementar soluções inteligentes de forma estratégica e eficiente.", "btn": "Ver Consultoria" },
@@ -498,7 +506,7 @@
       "projects": "Projetos",
       "certificados": "Certificados",
       "media": "Mídia",
-      "logos": "Logos",
+      "clientes": "Clientes",
       "history": "História",
       "collaborators": "Colaboradores",
       "leads": "Leads",
@@ -605,6 +613,37 @@
     "person": {
       "title": "Diagnóstico de Maturidade em IA - Pessoa",
       "subtitle": "Avalie seu nível de competências em Inteligência Artificial e obtenha um plano personalizado"
+    }
+  },
+  "navigation": {
+    "home": "Início",
+    "productos": "Produtos",
+    "nosotros": "Sobre Nós",
+    "metodologia": "Metodologia",
+    "blog": "Blog",
+    "contacto": "Contato",
+    "admin": "Admin",
+    "login_google": "Entrar com Google",
+    "dashboard": "Painel",
+    "logout": "Sair",
+    "privacy_policy": "Política de Privacidade"
+  },
+  "admin": {
+    "panel_title": "Painel de Administração",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Produtos",
+      "asesorias": "Consultorias",
+      "cursos": "Cursos",
+      "projects": "Projetos",
+      "certificados": "Certificados",
+      "media": "Mídia",
+      "clientes": "Clientes",
+      "history": "Histórico",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuários",
+      "settings": "Configurações"
     }
   }
 }

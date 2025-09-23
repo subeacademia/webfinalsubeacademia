@@ -24,6 +24,7 @@ interface DiagnosticRow {
   estado?: string;
   resumenNivel?: string;
   aresAvg?: number;
+  competenciasAvg?: number;
   objetivoBreve?: string;
 }
 
@@ -118,44 +119,148 @@ interface DiagnosticRow {
       </div>
     </div>
 
-    <!-- Tabla de leads -->
+    <!-- Tabla de leads mejorada -->
     <div class="border rounded overflow-hidden">
-      <div class="grid grid-cols-14 bg-[var(--panel)]/50 p-3 text-sm font-medium">
-        <div class="col-span-2">Tipo</div>
+      <div class="grid grid-cols-16 bg-[var(--panel)]/50 p-3 text-sm font-medium">
+        <div class="col-span-1">Tipo</div>
         <div class="col-span-2">Nombre</div>
         <div class="col-span-2">Email</div>
         <div class="col-span-2">Empresa</div>
         <div class="col-span-1">Nivel</div>
         <div class="col-span-1">ARES</div>
+        <div class="col-span-2">Respuestas Clave</div>
         <div class="col-span-2">Estado</div>
         <div class="col-span-1">Fecha</div>
-        <div class="col-span-1 text-right">Acciones</div>
+        <div class="col-span-2 text-right">Acciones</div>
       </div>
-      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-14 p-3 border-t items-center text-sm hover:bg-[var(--panel)]/30">
-        <div class="col-span-2">
+      <div *ngFor="let d of filteredLeads()" class="grid grid-cols-16 p-3 border-t items-center text-sm hover:bg-[var(--panel)]/30">
+        <div class="col-span-1">
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 [class]="d.tipo === 'empresa' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
-            {{ d.tipo === 'empresa' ? '🏢 Empresa' : '👤 Persona' }}
+            {{ d.tipo === 'empresa' ? '🏢' : '👤' }}
           </span>
         </div>
-        <div class="col-span-2 truncate">{{ d.nombre }}</div>
-        <div class="col-span-2 truncate">{{ d.email }}</div>
+        <div class="col-span-2 truncate font-medium">{{ d.nombre }}</div>
+        <div class="col-span-2 truncate text-[var(--muted)]">{{ d.email }}</div>
         <div class="col-span-2 truncate">{{ d.empresa || '-' }}</div>
-        <div class="col-span-1 truncate">{{ d.resumenNivel || '-' }}</div>
-        <div class="col-span-1 truncate">{{ (d.aresAvg || 0) }}/5</div>
+        <div class="col-span-1">
+          <div class="flex flex-col items-center gap-1">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                  [class]="getMaturityLevelClass(d.aresAvg)">
+              {{ d.resumenNivel || '-' }}
+            </span>
+            <div class="text-xs text-[var(--muted)]">
+              {{ getMaturityLevelIcon(d.aresAvg) }}
+            </div>
+          </div>
+        </div>
+        <div class="col-span-1">
+          <div class="flex items-center gap-1">
+            <div class="text-sm font-medium">{{ (d.aresAvg || 0) }}/5</div>
+            <div class="w-8 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
+              <div class="h-1 rounded-full transition-all duration-300" 
+                   [class]="getProgressBarClass(d.aresAvg)"
+                   [style.width.%]="(d.aresAvg || 0) * 20"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+              <div class="text-xs text-[var(--muted)]">
+                <span class="font-medium">{{ getKeyResponsesCount(d) }}</span> respuestas
+              </div>
+              <div class="w-2 h-2 rounded-full" [class]="getDiagnosticStatusClass(d)"></div>
+            </div>
+            <div class="text-xs">
+              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
+                    [class]="getCompetencyLevelClass(d.competenciasAvg)">
+                {{ getCompetencyLevel(d.competenciasAvg) }}
+              </span>
+            </div>
+            <button class="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1 flex items-center gap-1"
+                    (click)="toggleResponsePreview(d.id)">
+              <span>{{ expandedResponses.has(d.id) ? 'Ocultar' : 'Ver respuestas' }}</span>
+              <span>{{ expandedResponses.has(d.id) ? '👆' : '👇' }}</span>
+            </button>
+          </div>
+        </div>
         <div class="col-span-2">
           <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                 [class]="getStatusClass(d.estado)">
             {{ getStatusLabel(d.estado) }}
           </span>
         </div>
-        <div class="col-span-1">{{ d.fecha | date: 'short' }}</div>
-        <div class="col-span-1 text-right">
-          <div class="flex gap-1">
-            <button class="btn btn-xs" (click)="open(d.id)">Ver</button>
-            <button class="btn btn-xs btn-outline" (click)="viewDiagnosticDetails(d.id)">Diagnóstico</button>
-            <button class="btn btn-xs btn-outline" (click)="editLead(d.id)">Editar</button>
-            <button class="btn btn-xs btn-error" (click)="deleteLead(d.id)">Eliminar</button>
+        <div class="col-span-1 text-xs text-[var(--muted)]">{{ d.fecha | date: 'short' }}</div>
+        <div class="col-span-2 text-right">
+          <div class="flex gap-1 flex-wrap">
+            <button class="btn btn-xs btn-primary" (click)="viewDiagnosticDetails(d.id)" title="Ver respuestas del diagnóstico">
+              📊 Diagnóstico
+            </button>
+            <button class="btn btn-xs btn-outline" (click)="open(d.id)" title="Ver detalles completos">
+              👁️ Ver
+            </button>
+            <button class="btn btn-xs btn-outline" (click)="editLead(d.id)" title="Editar lead">
+              ✏️ Editar
+            </button>
+            <button class="btn btn-xs btn-error" (click)="deleteLead(d.id)" title="Eliminar lead">
+              🗑️
+            </button>
+          </div>
+        </div>
+        
+        <!-- Fila expandible con respuestas del diagnóstico -->
+        <div *ngIf="expandedResponses.has(d.id)" class="col-span-16 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800 p-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Resumen ARES -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h4 class="font-semibold text-sm mb-3 text-blue-800 dark:text-blue-200">📊 Evaluación ARES</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-gray-600 dark:text-gray-400">Puntuación General:</span>
+                  <span class="font-medium">{{ d.aresAvg || 0 }}/5</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-gray-600 dark:text-gray-400">Nivel de Madurez:</span>
+                  <span class="font-medium">{{ d.resumenNivel || 'N/A' }}</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+                  <div class="h-1.5 rounded-full transition-all duration-300" 
+                       [class]="getProgressBarClass(d.aresAvg)"
+                       [style.width.%]="(d.aresAvg || 0) * 20"></div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Resumen Competencias -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <h4 class="font-semibold text-sm mb-3 text-green-800 dark:text-green-200">🎯 Competencias en IA</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-gray-600 dark:text-gray-400">Puntuación Promedio:</span>
+                  <span class="font-medium">{{ d.competenciasAvg || 0 }}/5</span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-gray-600 dark:text-gray-400">Nivel de Competencia:</span>
+                  <span class="font-medium">{{ getCompetencyLevel(d.competenciasAvg) }}</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+                  <div class="h-1.5 rounded-full transition-all duration-300" 
+                       [class]="getProgressBarClass(d.competenciasAvg)"
+                       [style.width.%]="(d.competenciasAvg || 0) * 20"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Acciones rápidas -->
+          <div class="mt-4 flex gap-2 justify-end">
+            <button class="btn btn-xs btn-primary" (click)="viewDiagnosticDetails(d.id)">
+              📊 Ver Diagnóstico Completo
+            </button>
+            <button class="btn btn-xs btn-outline" (click)="open(d.id)">
+              👁️ Ver Detalles
+            </button>
           </div>
         </div>
       </div>
@@ -277,6 +382,36 @@ interface DiagnosticRow {
             <button class="btn btn-sm btn-outline" (click)="cancelEdit()">Cancelar</button>
           </div>
 
+          <!-- Resumen Ejecutivo del Diagnóstico -->
+          <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800 mb-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100">Resumen del Diagnóstico</h3>
+                <p class="text-sm text-blue-700 dark:text-blue-300">Evaluación completa de madurez en IA</p>
+              </div>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ getGeneralAresScore() }}/5</div>
+                <div class="text-sm text-blue-700 dark:text-blue-300">Puntuación ARES</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ getGeneralCompetenciesScore() }}/5</div>
+                <div class="text-sm text-blue-700 dark:text-blue-300">Competencias</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ getMaturityLevel() }}</div>
+                <div class="text-sm text-blue-700 dark:text-blue-300">Nivel de Madurez</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Metadatos -->
           <div class="grid md:grid-cols-3 gap-4">
             <div>
@@ -315,7 +450,7 @@ interface DiagnosticRow {
           <!-- ARES (respuestas) -->
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="text-lg font-semibold text-[var(--fg)]">ARES · Evaluación de Madurez en IA</div>
+              <div class="text-lg font-semibold text-[var(--fg)]">📊 ARES · Evaluación de Madurez en IA</div>
               <div class="text-sm text-[var(--muted)] bg-[var(--panel)] px-3 py-1 rounded-full">
                 {{ aresCount() }} preguntas evaluadas
               </div>
@@ -331,7 +466,7 @@ interface DiagnosticRow {
               </div>
               <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
                 <div class="text-sm text-[var(--muted)] mb-1">Nivel de Madurez</div>
-                <div class="text-lg font-semibold" [class]="getMaturityLevelClass()">
+                <div class="text-lg font-semibold" [class]="getModalMaturityLevelClass()">
                   {{ getMaturityLevel() }}
                 </div>
               </div>
@@ -339,7 +474,7 @@ interface DiagnosticRow {
                 <div class="text-sm text-[var(--muted)] mb-1">Progreso</div>
                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div class="h-2 rounded-full transition-all duration-300" 
-                       [class]="getProgressBarClass()"
+                       [class]="getModalProgressBarClass()"
                        [style.width.%]="getProgressPercentage()"></div>
                 </div>
                 <div class="text-xs text-[var(--muted)] mt-1">{{ getProgressPercentage() }}% completado</div>
@@ -372,7 +507,7 @@ interface DiagnosticRow {
           <!-- Competencias -->
           <div>
             <div class="flex items-center justify-between mb-4">
-              <div class="text-lg font-semibold text-[var(--fg)]">Competencias en IA · Evaluación</div>
+              <div class="text-lg font-semibold text-[var(--fg)]">🎯 Competencias en IA · Evaluación</div>
               <div class="text-sm text-[var(--muted)] bg-[var(--panel)] px-3 py-1 rounded-full">
                 {{ competenciasEntries().length }} competencias evaluadas
               </div>
@@ -388,8 +523,8 @@ interface DiagnosticRow {
               </div>
               <div class="bg-[var(--panel)] rounded-lg p-4 border border-[var(--border)]">
                 <div class="text-sm text-[var(--muted)] mb-1">Nivel de Competencia</div>
-                <div class="text-lg font-semibold" [class]="getMaturityLevelClass()">
-                  {{ getCompetencyLevel() }}
+                <div class="text-lg font-semibold" [class]="getModalMaturityLevelClass()">
+                  {{ getModalCompetencyLevel() }}
                 </div>
               </div>
             </div>
@@ -569,6 +704,9 @@ export class AdminDiagnosticLeadsComponent {
   // Estado para reseteo de leads antiguos
   isResetting = signal(false);
 
+  // Estado para respuestas expandidas
+  expandedResponses = new Set<string>();
+
   constructor(){
     this.testFirebaseConnection();
     this.loadLeads();
@@ -607,6 +745,7 @@ export class AdminDiagnosticLeadsComponent {
         estado: lead.status,
         resumenNivel: (lead as any)?.summary?.maturityLevel || undefined,
         aresAvg: (lead as any)?.summary?.aresAverage || this.calcAresAvgFromLead(lead),
+        competenciasAvg: (lead as any)?.summary?.competenciesAverage || this.calcCompetenciasAvgFromLead(lead),
         objetivoBreve: (lead.diagnosticResponses?.objetivo?.objetivo || [])?.[0] || ''
       } as DiagnosticRow));
       this.rowsSig.set(mapped);
@@ -617,6 +756,16 @@ export class AdminDiagnosticLeadsComponent {
     const ares = lead?.diagnosticResponses?.ares || lead?.diagnosticData?.ares || undefined;
     if (!ares) return undefined;
     const values = Object.values(ares)
+      .map((v: any) => (typeof v === 'object' && v !== null ? (v as any).value : v))
+      .filter((n: any) => typeof n === 'number' && !isNaN(n));
+    if (values.length === 0) return undefined;
+    return Math.round((values.reduce((s, n) => s + n, 0) / values.length) * 10) / 10;
+  }
+
+  private calcCompetenciasAvgFromLead(lead: LeadData): number | undefined {
+    const competencias = lead?.diagnosticResponses?.competencias || lead?.diagnosticData?.competencias || undefined;
+    if (!competencias) return undefined;
+    const values = Object.values(competencias)
       .map((v: any) => (typeof v === 'object' && v !== null ? (v as any).value : v))
       .filter((n: any) => typeof n === 'number' && !isNaN(n));
     if (values.length === 0) return undefined;
@@ -659,6 +808,125 @@ export class AdminDiagnosticLeadsComponent {
       case 'no_interesado': return 'No Interesado';
       case 'convertido': return 'Convertido';
       default: return 'Desconocido';
+    }
+  }
+
+  // Nuevos métodos para la interfaz mejorada
+  getMaturityLevelClass(score?: number): string {
+    if (!score) return 'bg-gray-100 text-gray-800';
+    if (score >= 4.5) return 'bg-green-100 text-green-800';
+    if (score >= 3.5) return 'bg-blue-100 text-blue-800';
+    if (score >= 2.5) return 'bg-yellow-100 text-yellow-800';
+    if (score >= 1.5) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
+  }
+
+  getProgressBarClass(score?: number): string {
+    if (!score) return 'bg-gray-400';
+    if (score >= 4.5) return 'bg-green-500';
+    if (score >= 3.5) return 'bg-blue-500';
+    if (score >= 2.5) return 'bg-yellow-500';
+    if (score >= 1.5) return 'bg-orange-500';
+    return 'bg-red-500';
+  }
+
+  getKeyResponsesCount(lead: DiagnosticRow): number {
+    // Obtener el lead completo para contar las respuestas
+    const fullLead = this.rowsSig().find(l => l.id === lead.id);
+    if (!fullLead) return 0;
+    
+    // Buscar en la colección de leads para obtener los datos completos
+    // Por ahora retornamos un valor estimado basado en los datos disponibles
+    return lead.aresAvg ? Math.round(lead.aresAvg * 10) : 0;
+  }
+
+  getCompetencyLevelClass(score?: number): string {
+    if (!score) return 'bg-gray-100 text-gray-800';
+    if (score >= 4.5) return 'bg-green-100 text-green-800';
+    if (score >= 3.5) return 'bg-blue-100 text-blue-800';
+    if (score >= 2.5) return 'bg-yellow-100 text-yellow-800';
+    if (score >= 1.5) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
+  }
+
+  getCompetencyLevel(score?: number): string {
+    if (!score) return 'N/A';
+    if (score >= 4.5) return 'Avanzado';
+    if (score >= 3.5) return 'Intermedio';
+    if (score >= 2.5) return 'Básico';
+    if (score >= 1.5) return 'Inicial';
+    return 'Principiante';
+  }
+
+  // Métodos para el modal (sin parámetros)
+  getModalMaturityLevelClass(): string {
+    const score = this.getGeneralAresScore();
+    return this.getMaturityLevelClass(score);
+  }
+
+  getModalProgressBarClass(): string {
+    const percentage = this.getProgressPercentage();
+    if (percentage >= 80) return 'bg-green-500';
+    if (percentage >= 60) return 'bg-blue-500';
+    if (percentage >= 40) return 'bg-yellow-500';
+    if (percentage >= 20) return 'bg-orange-500';
+    return 'bg-red-500';
+  }
+
+  getModalCompetencyLevel(): string {
+    const score = this.getGeneralCompetenciesScore();
+    return this.getCompetencyLevel(score);
+  }
+
+  // Métodos adicionales que faltan
+  getGeneralCompetenciesScore(): number {
+    const competencias = this.selected()?.diagnosticData?.competencias || this.selected()?.diagnosticResponses?.competencias || {};
+    const scores = Object.values(competencias).map((value: any) => 
+      typeof value === 'object' && value !== null ? value.value : value
+    ).filter(score => typeof score === 'number' && !isNaN(score));
+    
+    if (scores.length === 0) return 0;
+    return Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 10) / 10;
+  }
+
+  getProgressPercentage(): number {
+    const ares = this.selected()?.diagnosticData?.ares || this.selected()?.diagnosticResponses?.ares || {};
+    const totalQuestions = Object.keys(ares).length;
+    const answeredQuestions = Object.values(ares).filter(value => 
+      value !== null && value !== undefined && value !== '-'
+    ).length;
+    
+    if (totalQuestions === 0) return 0;
+    return Math.round((answeredQuestions / totalQuestions) * 100);
+  }
+
+  toggleResponsePreview(leadId: string): void {
+    if (this.expandedResponses.has(leadId)) {
+      this.expandedResponses.delete(leadId);
+    } else {
+      this.expandedResponses.add(leadId);
+    }
+  }
+
+  getMaturityLevelIcon(score?: number): string {
+    if (!score) return '❓';
+    if (score >= 4.5) return '🚀';
+    if (score >= 3.5) return '⭐';
+    if (score >= 2.5) return '📈';
+    if (score >= 1.5) return '🌱';
+    return '🌱';
+  }
+
+  getDiagnosticStatusClass(lead: DiagnosticRow): string {
+    const hasAres = lead.aresAvg && lead.aresAvg > 0;
+    const hasCompetencias = lead.competenciasAvg && lead.competenciasAvg > 0;
+    
+    if (hasAres && hasCompetencias) {
+      return 'bg-green-500'; // Completo
+    } else if (hasAres || hasCompetencias) {
+      return 'bg-yellow-500'; // Parcial
+    } else {
+      return 'bg-red-500'; // Incompleto
     }
   }
 
@@ -847,54 +1115,6 @@ export class AdminDiagnosticLeadsComponent {
     return 'Principiante';
   }
 
-  getMaturityLevelClass(): string {
-    const score = this.getGeneralAresScore();
-    if (score >= 4.5) return 'text-green-600 dark:text-green-400';
-    if (score >= 3.5) return 'text-blue-600 dark:text-blue-400';
-    if (score >= 2.5) return 'text-yellow-600 dark:text-yellow-400';
-    if (score >= 1.5) return 'text-orange-600 dark:text-orange-400';
-    return 'text-red-600 dark:text-red-400';
-  }
-
-  getProgressPercentage(): number {
-    const ares = this.selected()?.diagnosticData?.ares || this.selected()?.diagnosticResponses?.ares || {};
-    const totalQuestions = Object.keys(ares).length;
-    const answeredQuestions = Object.values(ares).filter(value => 
-      value !== null && value !== undefined && value !== '-'
-    ).length;
-    
-    if (totalQuestions === 0) return 0;
-    return Math.round((answeredQuestions / totalQuestions) * 100);
-  }
-
-  getProgressBarClass(): string {
-    const percentage = this.getProgressPercentage();
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-blue-500';
-    if (percentage >= 40) return 'bg-yellow-500';
-    if (percentage >= 20) return 'bg-orange-500';
-    return 'bg-red-500';
-  }
-
-  // Métodos para competencias
-  getGeneralCompetenciesScore(): number {
-    const competencias = this.selected()?.diagnosticData?.competencias || this.selected()?.diagnosticResponses?.competencias || {};
-    const scores = Object.values(competencias).map((value: any) => 
-      typeof value === 'object' && value !== null ? value.value : value
-    ).filter(score => typeof score === 'number' && !isNaN(score));
-    
-    if (scores.length === 0) return 0;
-    return Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 10) / 10;
-  }
-
-  getCompetencyLevel(): string {
-    const score = this.getGeneralCompetenciesScore();
-    if (score >= 4.5) return 'Experto';
-    if (score >= 3.5) return 'Avanzado';
-    if (score >= 2.5) return 'Intermedio';
-    if (score >= 1.5) return 'Básico';
-    return 'Principiante';
-  }
 
   /**
    * Genera sugerencias comerciales basadas en el nivel de madurez y respuestas

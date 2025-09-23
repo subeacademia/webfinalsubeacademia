@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Auth } from '@angular/fire/auth';
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
+import { TestimonialsService } from '../../core/data/testimonials.service';
+import { Testimonial } from '../../core/models/testimonial.model';
 import { MediaService } from '../../core/data/media.service';
 import { StorageService } from '../../core/storage.service';
 import { ToastService } from '../../core/services/ui/toast/toast.service';
@@ -14,14 +16,36 @@ import { ToastService } from '../../core/services/ui/toast/toast.service';
 	template: `
     <div class="container mx-auto p-4 md:p-8">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Gestión de Logos</h1>
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Gestión de Clientes</h1>
         <div class="text-sm text-gray-600 dark:text-gray-400">
-          Total: {{ empresas().length + educacion().length + alianzas().length }} logos
+          Logos: {{ empresas().length + educacion().length + alianzas().length }} | Testimonios: {{ testimonials().length }}
         </div>
       </div>
 
-      <!-- Modal de Edición -->
-      <div *ngIf="isEditing()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <!-- Pestañas de navegación -->
+      <div class="mb-8">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+          <nav class="-mb-px flex space-x-8">
+            <button 
+              (click)="activeTab.set('logos')"
+              [class]="activeTab() === 'logos' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+              class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              🏢 Logos
+            </button>
+            <button 
+              (click)="activeTab.set('testimonials')"
+              [class]="activeTab() === 'testimonials' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+              class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm">
+              💬 Testimonios
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Contenido de Logos -->
+      <div *ngIf="activeTab() === 'logos'">
+        <!-- Modal de Edición de Logo -->
+        <div *ngIf="isEditing()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
           <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Editar Logo</h3>
           <div class="space-y-4">
@@ -378,19 +402,220 @@ import { ToastService } from '../../core/services/ui/toast/toast.service';
           <p>Sube tu primer logo usando los formularios de arriba.</p>
         </div>
       </div>
+      </div>
+
+      <!-- Contenido de Testimonios -->
+      <div *ngIf="activeTab() === 'testimonials'">
+        <!-- Modal de Edición de Testimonio -->
+        <div *ngIf="isEditingTestimonial()" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+            <h3 class="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">
+              {{ editingTestimonial() ? 'Editar Testimonio' : 'Nuevo Testimonio' }}
+            </h3>
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Nombre</label>
+                  <input type="text" [(ngModel)]="testimonialForm.name" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Empresa</label>
+                  <input type="text" [(ngModel)]="testimonialForm.company" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Cargo (opcional)</label>
+                <input type="text" [(ngModel)]="testimonialForm.position" 
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Testimonio</label>
+                <textarea [(ngModel)]="testimonialForm.testimonial" rows="4"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
+              </div>
+              
+              <!-- Campo de foto -->
+              <div>
+                <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Foto del testimonio</label>
+                <div class="space-y-4">
+                  <!-- Input de archivo -->
+                  <input type="file" 
+                         (change)="onTestimonialPhotoSelected($event)" 
+                         accept="image/*" 
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600">
+                  
+                  <!-- Preview de la foto actual o nueva -->
+                  <div *ngIf="testimonialForm.photoUrl || testimonialPhotoPreview" class="flex items-center space-x-4">
+                    <img [src]="testimonialPhotoPreview || testimonialForm.photoUrl" 
+                         [alt]="testimonialForm.name || 'Preview'"
+                         class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600">
+                    <div class="flex-1">
+                      <p class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ testimonialPhotoPreview ? 'Nueva foto seleccionada' : 'Foto actual' }}
+                      </p>
+                      <button type="button" 
+                              (click)="removeTestimonialPhoto()"
+                              class="text-red-600 hover:text-red-800 text-sm">
+                        {{ testimonialPhotoPreview ? 'Cancelar nueva foto' : 'Eliminar foto actual' }}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Botón de subir foto -->
+                  <button type="button" 
+                          (click)="uploadTestimonialPhoto()"
+                          [disabled]="!testimonialPhotoFile || isUploadingTestimonialPhoto"
+                          class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                    <span *ngIf="isUploadingTestimonialPhoto" class="mr-2">⏳</span>
+                    {{ isUploadingTestimonialPhoto ? 'Subiendo foto...' : '📤 Subir Foto' }}
+                  </button>
+                  
+                  <!-- Barra de progreso -->
+                  <div *ngIf="testimonialPhotoUploadProgress && (testimonialPhotoUploadProgress | async) as progress" class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" [style.width.%]="progress"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Calificación (1-5)</label>
+                  <select [(ngModel)]="testimonialForm.rating" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="">Sin calificación</option>
+                    <option value="1">1 estrella</option>
+                    <option value="2">2 estrellas</option>
+                    <option value="3">3 estrellas</option>
+                    <option value="4">4 estrellas</option>
+                    <option value="5">5 estrellas</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Orden de visualización</label>
+                  <input type="number" [(ngModel)]="testimonialForm.displayOrder" min="0"
+                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+              </div>
+              <div class="flex items-center space-x-4">
+                <label class="flex items-center">
+                  <input type="checkbox" [(ngModel)]="testimonialForm.isActive" 
+                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                  <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Activo</span>
+                </label>
+              </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+              <button (click)="cancelEditTestimonial()" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                Cancelar
+              </button>
+              <button (click)="saveTestimonial()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                Guardar
+              </button>
+            </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón para agregar testimonio -->
+        <div class="mb-6 text-center">
+          <button (click)="addNewTestimonial()" 
+                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg">
+            <span class="mr-2">➕</span>
+            Agregar Testimonio
+          </button>
+        </div>
+
+        <!-- Lista de Testimonios -->
+        <div class="space-y-6">
+          <div *ngFor="let testimonial of testimonials()" 
+               class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <div class="flex items-start gap-6">
+              <!-- Foto del testimonio -->
+              <div class="flex-shrink-0">
+                <img *ngIf="testimonial.photoUrl" 
+                     [src]="testimonial.photoUrl" 
+                     [alt]="testimonial.name"
+                     class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600">
+                <div *ngIf="!testimonial.photoUrl" 
+                     class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl">
+                  👤
+                </div>
+              </div>
+              
+              <!-- Contenido del testimonio -->
+              <div class="flex-1">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ testimonial.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ testimonial.company }}</p>
+                    <p *ngIf="testimonial.position" class="text-sm text-gray-500 dark:text-gray-500">{{ testimonial.position }}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span *ngIf="testimonial.rating" class="text-yellow-400">
+                      {{ '★'.repeat(testimonial.rating) }}{{ '☆'.repeat(5 - testimonial.rating) }}
+                    </span>
+                    <span [class]="testimonial.isActive ? 'text-green-600' : 'text-red-600'" class="text-sm font-medium">
+                      {{ testimonial.isActive ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </div>
+                </div>
+                
+                <blockquote class="mt-3 text-gray-700 dark:text-gray-300 italic">
+                  "{{ testimonial.testimonial }}"
+                </blockquote>
+                
+                <div class="mt-4 flex items-center gap-2">
+                  <span class="text-xs text-gray-500 dark:text-gray-400">Orden: {{ testimonial.displayOrder || 0 }}</span>
+                </div>
+              </div>
+              
+              <!-- Botones de acción -->
+              <div class="flex gap-2">
+                <button (click)="editTestimonial(testimonial)" 
+                        class="w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-xs flex items-center justify-center" 
+                        title="Editar">
+                  ✏️
+                </button>
+                <button (click)="deleteTestimonial(testimonial)" 
+                        class="w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center" 
+                        title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Estado vacío -->
+          <div *ngIf="testimonials().length === 0" class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <div class="text-6xl mb-4">💬</div>
+            <h3 class="text-xl font-semibold mb-2">No hay testimonios todavía</h3>
+            <p>Agrega tu primer testimonio usando el botón de arriba.</p>
+          </div>
+        </div>
+      </div>
     </div>
 	`
 })
 export class LogosPageComponent {
     private readonly logos = inject(LogosService);
+    private readonly testimonialsService = inject(TestimonialsService);
     private readonly media = inject(MediaService);
     private readonly storage = inject(StorageService);
     private readonly toast = inject(ToastService);
     private readonly auth = inject(Auth);
 
+	// Pestaña activa
+	activeTab = signal<'logos' | 'testimonials'>('logos');
+	
+	// Logos
 	empresas = signal<Logo[]>([]);
 	educacion = signal<Logo[]>([]);
 	alianzas = signal<Logo[]>([]);
+	
+	// Testimonios
+	testimonials = signal<Testimonial[]>([]);
 	
 	selectedFile: { education: File | null, company: File | null, alliance: File | null } = { education: null, company: null, alliance: null };
 	newLogoName: { education: string, company: string, alliance: string } = { education: '', company: '', alliance: '' };
@@ -413,9 +638,30 @@ export class LogosPageComponent {
 	isBulkUploading = signal<boolean>(false);
 	bulkUploadProgress = signal<number>(0);
 	showBulkUpload = signal<boolean>(false);
+	
+	// Estados para testimonios
+	editingTestimonial = signal<Testimonial | null>(null);
+	isEditingTestimonial = signal<boolean>(false);
+	testimonialForm = {
+		name: '',
+		company: '',
+		position: '',
+		testimonial: '',
+		photoUrl: '',
+		rating: 5,
+		isActive: true,
+		displayOrder: 0
+	};
+	
+	// Estados para carga de fotos de testimonios
+	testimonialPhotoFile: File | null = null;
+	testimonialPhotoPreview: string | null = null;
+	isUploadingTestimonialPhoto = false;
+	testimonialPhotoUploadProgress: any = null;
 
 	constructor(){
 		this.loadLogos();
+		this.loadTestimonials();
 	}
 
 	private loadLogos() {
@@ -703,6 +949,176 @@ export class LogosPageComponent {
 	removeBulkLogo(index: number): void {
 		this.bulkUploadLogos.splice(index, 1);
 		this.bulkUploadFiles.splice(index, 1);
+	}
+
+	// Métodos para testimonios
+	private loadTestimonials() {
+		this.testimonialsService.listAll().subscribe(testimonials => {
+			this.testimonials.set(testimonials);
+		});
+	}
+
+	addNewTestimonial(): void {
+		this.editingTestimonial.set(null);
+		this.testimonialForm = {
+			name: '',
+			company: '',
+			position: '',
+			testimonial: '',
+			photoUrl: '',
+			rating: 5,
+			isActive: true,
+			displayOrder: this.testimonials().length
+		};
+		// Limpiar estados de foto
+		this.testimonialPhotoFile = null;
+		this.testimonialPhotoPreview = null;
+		this.isUploadingTestimonialPhoto = false;
+		this.testimonialPhotoUploadProgress = null;
+		this.isEditingTestimonial.set(true);
+	}
+
+	editTestimonial(testimonial: Testimonial): void {
+		this.editingTestimonial.set(testimonial);
+		this.testimonialForm = {
+			name: testimonial.name,
+			company: testimonial.company,
+			position: testimonial.position || '',
+			testimonial: testimonial.testimonial,
+			photoUrl: testimonial.photoUrl,
+			rating: testimonial.rating || 5,
+			isActive: testimonial.isActive ?? true,
+			displayOrder: testimonial.displayOrder || 0
+		};
+		// Limpiar estados de foto para edición
+		this.testimonialPhotoFile = null;
+		this.testimonialPhotoPreview = null;
+		this.isUploadingTestimonialPhoto = false;
+		this.testimonialPhotoUploadProgress = null;
+		this.isEditingTestimonial.set(true);
+	}
+
+	cancelEditTestimonial(): void {
+		this.editingTestimonial.set(null);
+		this.isEditingTestimonial.set(false);
+		this.testimonialForm = {
+			name: '',
+			company: '',
+			position: '',
+			testimonial: '',
+			photoUrl: '',
+			rating: 5,
+			isActive: true,
+			displayOrder: 0
+		};
+		// Limpiar estados de foto
+		this.testimonialPhotoFile = null;
+		this.testimonialPhotoPreview = null;
+		this.isUploadingTestimonialPhoto = false;
+		this.testimonialPhotoUploadProgress = null;
+	}
+
+	async saveTestimonial(): Promise<void> {
+		if (!this.testimonialForm.name.trim() || !this.testimonialForm.company.trim() || !this.testimonialForm.testimonial.trim()) {
+			this.toast.error('Por favor, completa todos los campos obligatorios');
+			return;
+		}
+
+		try {
+			const testimonialData: Omit<Testimonial, 'id' | 'createdAt' | 'createdBy'> = {
+				name: this.testimonialForm.name.trim(),
+				company: this.testimonialForm.company.trim(),
+				position: this.testimonialForm.position.trim() || undefined,
+				testimonial: this.testimonialForm.testimonial.trim(),
+				photoUrl: this.testimonialForm.photoUrl.trim() || 'https://via.placeholder.com/150x150?text=👤',
+				rating: this.testimonialForm.rating,
+				isActive: this.testimonialForm.isActive,
+				displayOrder: this.testimonialForm.displayOrder
+			};
+
+			if (this.editingTestimonial()) {
+				// Actualizar testimonio existente
+				await this.testimonialsService.updateTestimonial(this.editingTestimonial()!.id!, testimonialData);
+				this.toast.success('Testimonio actualizado exitosamente');
+			} else {
+				// Crear nuevo testimonio
+				await this.testimonialsService.addTestimonial(testimonialData);
+				this.toast.success('Testimonio agregado exitosamente');
+			}
+
+			this.loadTestimonials();
+			this.cancelEditTestimonial();
+		} catch (error) {
+			console.error('Error al guardar testimonio:', error);
+			this.toast.error('Error al guardar el testimonio');
+		}
+	}
+
+	async deleteTestimonial(testimonial: Testimonial): Promise<void> {
+		const confirmMessage = `¿Estás seguro de que quieres eliminar el testimonio de "${testimonial.name}"?\n\nEsta acción no se puede deshacer.`;
+		if (confirm(confirmMessage)) {
+		try {
+			await this.testimonialsService.deleteTestimonial(testimonial);
+			this.loadTestimonials();
+			this.toast.success(`Testimonio de ${testimonial.name} eliminado exitosamente`);
+		} catch (error) {
+			console.error('Error al eliminar el testimonio:', error);
+			this.toast.error('Hubo un error al eliminar el testimonio.');
+		}
+		}
+	}
+
+	// Métodos para carga de fotos de testimonios
+	onTestimonialPhotoSelected(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		if (input.files && input.files[0]) {
+			this.testimonialPhotoFile = input.files[0];
+			
+			// Crear preview
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				this.testimonialPhotoPreview = e.target?.result as string;
+			};
+			reader.readAsDataURL(this.testimonialPhotoFile);
+		}
+	}
+
+	removeTestimonialPhoto(): void {
+		this.testimonialPhotoFile = null;
+		this.testimonialPhotoPreview = null;
+		if (!this.editingTestimonial()) {
+			// Si es un testimonio nuevo, limpiar también la URL
+			this.testimonialForm.photoUrl = '';
+		}
+	}
+
+	async uploadTestimonialPhoto(): Promise<void> {
+		if (!this.testimonialPhotoFile) {
+			this.toast.error('Por favor selecciona una foto');
+			return;
+		}
+
+		try {
+			this.isUploadingTestimonialPhoto = true;
+			
+			// Usar uploadPublicCategory para subir a la categoría 'testimonials'
+			const result = await this.storage.uploadPublicCategory('testimonials', this.testimonialPhotoFile);
+			
+			// Actualizar el formulario con la nueva URL
+			this.testimonialForm.photoUrl = result.url;
+			
+			// Limpiar estados
+			this.testimonialPhotoFile = null;
+			this.testimonialPhotoPreview = null;
+			this.testimonialPhotoUploadProgress = null;
+			
+			this.toast.success('Foto subida exitosamente');
+		} catch (error) {
+			console.error('Error al subir la foto:', error);
+			this.toast.error('Error al subir la foto');
+		} finally {
+			this.isUploadingTestimonialPhoto = false;
+		}
 	}
 }
 

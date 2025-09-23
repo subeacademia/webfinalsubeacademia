@@ -121,11 +121,19 @@
     "solutions_subtitle": "Herramientas y servicios diseñados para acelerar tu adopción de IA de manera responsable",
     "trust_title": "Han confiado en nosotros",
     "trust_subtitle": "Únete a las organizaciones que ya están transformando su futuro con IA",
+    "testimonials": {
+      "title": "Lo que dicen nuestros clientes",
+      "subtitle": "Descubre las experiencias reales de quienes han transformado sus organizaciones con nosotros",
+      "carousel_label": "Testimonios de clientes",
+      "go_to_testimonial": "Ir al testimonio {index}",
+      "previous_testimonial": "Testimonio anterior",
+      "next_testimonial": "Siguiente testimonio"
+    },
     "methodology": {
       "title": "Nuestra Metodología ARES-AI",
       "subtitle": "Un marco de 5 fases que garantiza la implementación exitosa de IA, combinando agilidad, responsabilidad y resultados tangibles.",
       "cta_ready": "¿Listo para comenzar tu transformación con IA?",
-      "btn_start_diagnostic": "Comenzar Diagnóstico",
+      "btn_start_diagnostic": "Comenzar Diagnóstico Gratuito",
       "btn_view_methodology": "Ver Metodología Completa",
       "additional_text": "Framework probado y validado por más de 100 organizaciones",
       "phases": {
@@ -231,13 +239,16 @@
     "privacy_policy": "Política de privacidad"
   },
   "admin": {
+    "panel_title": "Panel de Administración",
     "menu": {
       "posts": "Publicaciones",
       "productos": "Productos",
+      "asesorias": "Asesorías",
+      "cursos": "Cursos",
       "projects": "Proyectos",
       "certificados": "Certificados",
       "media": "Medios",
-      "logos": "Logos",
+      "clientes": "Clientes",
       "history": "Historial",
       "collaborators": "Colaboradores",
       "leads": "Leads",
@@ -245,6 +256,14 @@
       "settings": "Ajustes",
       "logout": "Cerrar sesión"
     }
+  },
+  "testimonials": {
+    "title": "Lo que dicen nuestros clientes",
+    "subtitle": "Descubre las experiencias reales de quienes han transformado sus organizaciones con nosotros",
+    "carousel_label": "Testimonios de clientes",
+    "go_to_testimonial": "Ir al testimonio {index}",
+    "previous_testimonial": "Testimonio anterior",
+    "next_testimonial": "Siguiente testimonio"
   },
   "shared": {
     "back": "Volver",
@@ -345,7 +364,18 @@
       "example_3": "Optimizar la experiencia del cliente",
       "example_4": "Reducir costos operativos",
       "example_5": "Acelerar la innovación de productos"
-    }
+    },
+    "title": "Diagnóstico de Madurez en IA",
+    "subtitle": "Descubre tu nivel de competencias en Inteligencia Artificial y obtén un plan de acción personalizado",
+    "estimated_time": "Tiempo estimado: 5-7 minutos",
+    "select_type": "Selecciona tu tipo de diagnóstico",
+    "company_option": "Para Empresas",
+    "company_description": "Evaluación completa de madurez organizacional en IA con recomendaciones estratégicas",
+    "company_button": "Comenzar Diagnóstico gratis",
+    "person_option": "Para Personas",
+    "person_description": "Autoevaluación personal de competencias en IA con plan de desarrollo individual",
+    "person_button": "Comenzar Diagnóstico gratis",
+    "privacy_notice": "Tus datos están protegidos y solo se utilizan para generar tu diagnóstico personalizado"
   },
   "diagnostic.objective.title": "Define tu Objetivo Principal",
   "diagnostic.objective.description": "Describe cuál es tu principal desafío o meta de desarrollo profesional en este momento. Nuestra IA te ayudará a definir objetivos claros.",
@@ -583,6 +613,58 @@
     "ares": {
       "title": "Framework ARES-AI",
       "description": "Nuestro marco metodológico integral que combina Agilidad, Responsabilidad y Sostenibilidad en la implementación de soluciones de IA."
+    },
+    "phases": {
+      "1": {
+        "title": "Análisis y Evaluación",
+        "shortTitle": "Análisis y Evaluación",
+        "description": "Evaluamos la situación actual de tu organización, identificamos oportunidades de mejora y definimos los objetivos estratégicos para la implementación de IA.",
+        "deliverables": {
+          "0": "Auditoría completa de capacidades actuales",
+          "1": "Análisis de brechas y oportunidades",
+          "2": "Roadmap estratégico personalizado"
+        }
+      },
+      "2": {
+        "title": "Estrategia y Planificación",
+        "shortTitle": "Estrategia y Planificación",
+        "description": "Desarrollamos una estrategia integral que incluye la selección de tecnologías, definición de procesos y planificación de recursos necesarios.",
+        "deliverables": {
+          "0": "Estrategia de IA alineada con objetivos de negocio",
+          "1": "Arquitectura tecnológica recomendada",
+          "2": "Plan de implementación detallado"
+        }
+      },
+      "3": {
+        "title": "Implementación y Desarrollo",
+        "shortTitle": "Implementación y Desarrollo",
+        "description": "Ejecutamos la implementación de las soluciones de IA, desarrollamos los modelos necesarios y integramos los sistemas existentes.",
+        "deliverables": {
+          "0": "Modelos de IA entrenados y optimizados",
+          "1": "Sistemas integrados y funcionales",
+          "2": "Documentación técnica completa"
+        }
+      },
+      "4": {
+        "title": "Despliegue y Monitoreo",
+        "shortTitle": "Despliegue y Monitoreo",
+        "description": "Desplegamos las soluciones en producción, establecemos sistemas de monitoreo y garantizamos el funcionamiento óptimo del sistema.",
+        "deliverables": {
+          "0": "Sistema desplegado en producción",
+          "1": "Dashboard de monitoreo en tiempo real",
+          "2": "Procedimientos de mantenimiento"
+        }
+      },
+      "5": {
+        "title": "Optimización y Escalabilidad",
+        "shortTitle": "Optimización y Escalabilidad",
+        "description": "Optimizamos continuamente el rendimiento, escalamos las soluciones según las necesidades del negocio y mantenemos la competitividad tecnológica.",
+        "deliverables": {
+          "0": "Sistema optimizado y escalable",
+          "1": "Plan de crecimiento y expansión",
+          "2": "Capacitación continua del equipo"
+        }
+      }
     }
   },
   "blog": {
@@ -595,5 +677,48 @@
     "title": "Página No Encontrada",
     "description": "Lo sentimos, la página que buscas no existe o fue movida.",
     "goHome": "Volver al Inicio"
+  },
+  "admin": {
+    "panel_title": "Panel de Administración",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Productos",
+      "asesorias": "Asesorías",
+      "cursos": "Cursos",
+      "certificados": "Certificados",
+      "projects": "Proyectos",
+      "media": "Media",
+      "clientes": "Clientes",
+      "settings": "Configuración",
+      "history": "Historial",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuarios",
+      "logout": "Cerrar Sesión"
+    },
+    "productos": {
+      "dashboard": {
+        "title": "Dashboard de Productos",
+        "download_structure": "Descargar Estructura",
+        "bulk_upload": "Carga Masiva",
+        "manage_asesorias": "Gestionar Asesorías",
+        "manage_cursos": "Gestionar Cursos",
+        "manage_certificaciones": "Gestionar Certificaciones",
+        "total_asesorias": "Total Asesorías",
+        "total_cursos": "Total Cursos",
+        "total_certificaciones": "Total Certificaciones",
+        "active": "activos",
+        "recent_products": "Productos Recientes"
+      },
+      "back_to_products": "Volver a Productos",
+      "manage_asesorias": "Administrar Asesorías",
+      "manage_cursos": "Administrar Cursos",
+      "manage_certificaciones": "Administrar Certificaciones",
+      "download_json": "Descargar JSON",
+      "bulk_upload": "Carga Masiva",
+      "new_asesoria": "Nueva Asesoría",
+      "new_curso": "Nuevo Curso",
+      "new_certificacion": "Nueva Certificación"
+    }
   }
 }

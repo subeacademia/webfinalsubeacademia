@@ -39,8 +39,8 @@ import { Subject, takeUntil } from 'rxjs';
       <a class="menu-item" routerLink="/admin/media">
         <span class="menu-icon">📷</span> {{ 'admin.menu.media' | i18nTranslate }}
       </a>
-      <a class="menu-item" routerLink="/admin/logos">
-        <span class="menu-icon">🎨</span> {{ 'admin.menu.logos' | i18nTranslate }}
+      <a class="menu-item" routerLink="/admin/clientes">
+        <span class="menu-icon">👥</span> {{ 'admin.menu.clientes' | i18nTranslate }}
       </a>
       <a class="menu-item" routerLink="/admin/history">
         <span class="menu-icon">📚</span> {{ 'admin.menu.history' | i18nTranslate }}
