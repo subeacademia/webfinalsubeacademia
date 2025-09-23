@@ -21,9 +21,9 @@
   font-family: inherit;
   font-weight: 700;
   text-align: center;
-  white-space: normal; /* permitir salto de línea en móviles */
+  white-space: nowrap; /* mantener texto en una línea */
   word-break: keep-all;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   letter-spacing: 0.025em;
   
   /* Diseño moderno */

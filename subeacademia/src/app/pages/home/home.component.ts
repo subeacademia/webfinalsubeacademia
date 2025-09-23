@@ -59,12 +59,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private contentSub?: Subscription;
   frasesDinamicas: string[] = [];
   tituloHome = 'Potencia tu Talento en la Era de la Inteligencia Artificial';
-  selectedHomeBgKey: string | undefined;
+  selectedHomeBgKey: string = 'digital-globe-v1'; // Inicializar con valor por defecto correcto
   isDarkTheme = false;
 
   // Clave efectiva para evitar duplicación entre variantes light/dark
   get displayedHomeBgKey(): string {
-    const key = this.selectedHomeBgKey || 'neural-3d-v1';
+    const key = this.selectedHomeBgKey;
     if (key === 'circuit-tech-v2' || key === 'circuit-tech-v2-light') {
       return this.isDarkTheme ? 'circuit-tech-v2' : 'circuit-tech-v2-light';
     }
@@ -133,6 +133,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Asegurar que el servicio i18n esté inicializado
     this.initializeI18n();
     // Suscribirse al tema para alternar la variante del fondo sin duplicación
+    this.isDarkTheme = this.themeService.current() === 'dark'; // Inicializar inmediatamente
     this.themeService.isDarkTheme$.subscribe(isDark => {
       this.isDarkTheme = isDark;
       this.cdr.detectChanges();
@@ -154,11 +155,17 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.tituloHome = finalTitle;
 
         // Fondo prioriza doc público -> settings remotos -> locales -> default
-        this.selectedHomeBgKey = (homeDoc as any)?.homeBackgroundKey
+        const newBgKey = (homeDoc as any)?.homeBackgroundKey
           || (remoteSettings as any)?.homeBackgroundKey
           || (localSettings as any)?.homeBackgroundKey
-          || 'neural-3d-v1';
-        console.log('🎨 Fondo del Home seleccionado:', this.selectedHomeBgKey);
+          || 'digital-globe-v1';
+        
+        // Solo actualizar si es diferente para evitar parpadeos
+        if (newBgKey !== this.selectedHomeBgKey) {
+          this.selectedHomeBgKey = newBgKey;
+          console.log('🎨 Fondo del Home actualizado:', this.selectedHomeBgKey);
+          this.cdr.detectChanges();
+        }
 
         // Frases del typewriter
         this.frasesDinamicas = Array.isArray(typewriterPhrases) && typewriterPhrases.length ? typewriterPhrases : this.frasesDinamicas;
@@ -245,43 +252,24 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Método para hacer scroll suave a una fase específica
   scrollToPhase(phaseId: number): void {
+    console.log(`🎯 Navegando a fase ${phaseId}`);
+    
+    // Actualizar la fase activa
+    this.activePhase = phaseId;
+    this.cdr.detectChanges();
+
+    // Buscar el elemento
     const elementId = `fase-${phaseId}`;
     const element = document.getElementById(elementId);
-
-    console.log(`🎯 Intentando navegar a fase ${phaseId}, elemento:`, element);
-
+    
     if (element) {
-      // Marcar como scroll manual para evitar interferencia del scroll spy
-      this.isManualScroll = true;
-      
-      // Calcular offset para compensar el header sticky
-      const offset = 120; // Ajustado para mejor alineación
-      const elementPosition = element.offsetTop - offset;
-
-      console.log(`📍 Posición calculada: ${elementPosition}px (offset: ${offset}px)`);
-
-      // Actualizar la fase activa inmediatamente
-      this.activePhase = phaseId;
-      this.cdr.detectChanges();
-
-      // Scroll suave
-      window.scrollTo({
-        top: elementPosition,
-        behavior: 'smooth'
+      // Scroll directo al elemento
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
       });
-
-      // Rehabilitar scroll spy después de que termine el scroll
-      setTimeout(() => {
-        this.isManualScroll = false;
-        this.activePhase = phaseId;
-        this.cdr.detectChanges();
-        console.log(`✅ Navegación a fase ${phaseId} completada`);
-      }, 800); // Tiempo suficiente para que termine el scroll suave
     } else {
-      console.error(`❌ No se encontró el elemento con ID: ${elementId}`);
-      // Listar todos los elementos disponibles para debug
-      const allElements = document.querySelectorAll('[id^="fase-"]');
-      console.log('Elementos disponibles:', Array.from(allElements).map(el => el.id));
+      console.error(`❌ No se encontró el elemento: ${elementId}`);
     }
   }
 
@@ -314,8 +302,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       },
       {
-        rootMargin: '-20% 0px -60% 0px', // Ajustado para mejor detección
-        threshold: [0.1, 0.3, 0.5, 0.7] // Múltiples thresholds para mejor detección
+        rootMargin: '-10% 0px -50% 0px', // Ajustado para mejor detección
+        threshold: [0.1, 0.2, 0.3, 0.4, 0.5] // Múltiples thresholds para mejor detección
       }
     );
 
@@ -332,7 +320,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           console.warn(`⚠️ No se encontró elemento: fase-${phase.id}`);
         }
       });
-    }, 100);
+    }, 500); // Aumentado el delay para asegurar que el DOM esté completamente renderizado
   }
 
   // Método para obtener logos a mostrar, solo logos reales de Firestore

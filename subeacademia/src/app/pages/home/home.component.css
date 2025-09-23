@@ -334,11 +334,48 @@ section { scroll-margin-top: 80px; }
 
 /* ===== ESTILOS CLAVE PARA EL CARD STACKING ===== */
 
+/* Estilos para la barra de navegación fija */
+.phase-nav-container {
+  position: fixed !important;
+  top: 6rem !important;
+  left: 2rem !important;
+  width: 300px !important;
+  z-index: 20 !important;
+  max-height: calc(100vh - 8rem) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 1rem !important;
+  padding: 1rem !important;
+}
+
+/* Asegurar que el grid container no interfiera */
+.grid {
+  display: grid !important;
+}
+
+/* Asegurar que el contenido principal no se superponga con el menú fijo */
+.col-span-8 {
+  margin-left: 320px !important;
+}
+
+/* Responsive: ocultar el menú fijo en pantallas pequeñas */
+@media (max-width: 1024px) {
+  .phase-nav-container {
+    display: none !important;
+  }
+  
+  .col-span-8 {
+    margin-left: 0 !important;
+  }
+}
+
 /* Estilos para las tarjetas de contenido apilables */
 .phase-content-card {
   /* Ya tiene sticky top-24 desde Tailwind en el HTML */
   transition: transform 0.4s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
-  scroll-margin-top: 6rem; /* Compensa la navegación sticky */
+  scroll-margin-top: 8rem; /* Compensa la navegación sticky */
   transform-origin: center top; /* Punto de origen para las transformaciones */
   position: relative; /* Asegurar contexto de apilamiento */
 }

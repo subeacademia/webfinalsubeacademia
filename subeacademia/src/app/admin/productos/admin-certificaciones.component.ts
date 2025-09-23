@@ -8,11 +8,12 @@ import { CertificateService } from '../../features/productos/services/certificat
 import { BulkUploadService, BulkUploadProgress } from './services/bulk-upload.service';
 import { Timestamp } from '@angular/fire/firestore';
 import { Subject, takeUntil } from 'rxjs';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-admin-certificaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, I18nTranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex justify-between items-center">
@@ -22,9 +23,9 @@ import { Subject, takeUntil } from 'rxjs';
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Volver a Productos
+            {{ 'admin.productos.back_to_products' | i18nTranslate }}
           </a>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Administrar Certificaciones</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'admin.productos.manage_certificaciones' | i18nTranslate }}</h1>
         </div>
         <div class="flex gap-2">
           <button (click)="descargarEstructuraJSON()" 

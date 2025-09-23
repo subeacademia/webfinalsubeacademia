@@ -149,11 +149,11 @@
     <div class="hidden lg:grid grid-cols-12 gap-8">
       <!-- Navegación sticky en la izquierda - Solo en esta sección -->
       <div class="col-span-4">
-        <div class="sticky top-8 space-y-3">
+        <div class="phase-nav-container space-y-3 z-20" style="position: fixed; top: 6rem; left: 2rem; width: 300px; max-height: calc(100vh - 8rem); overflow-y: auto; overflow-x: hidden;">
           <button *ngFor="let phase of methodologyPhases"
                   #phaseNavItem
                   (click)="scrollToPhase(phase.id)"
-                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left ' + (activePhase === phase.id ? 'bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 shadow-lg' : 'bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:bg-white/20 dark:hover:bg-white/10')"
+                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left backdrop-blur-md ' + (activePhase === phase.id ? 'bg-white/30 dark:bg-white/20 border border-white/40 dark:border-white/30 shadow-xl' : 'bg-white/15 dark:bg-white/10 border border-white/25 dark:border-white/15 hover:bg-white/25 dark:hover:bg-white/15')"
                   [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
             <span class="text-xl font-bold mr-4 text-white dark:text-white">{{ '0' + phase.id }}</span>
             <span class="text-lg font-semibold text-white dark:text-white">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
@@ -162,26 +162,26 @@
       </div>
 
       <!-- Contenedor de tarjetas con scroll normal -->
-      <div class="col-span-8">
-        <div class="space-y-6">
+      <div class="col-span-8" style="margin-left: 320px;">
+        <div class="space-y-6 relative">
           <div *ngFor="let phase of methodologyPhases; let i = index"
                #phaseContentCard
                [id]="'fase-' + phase.id" 
-               [class]="'phase-content-card bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl p-8 min-h-[80vh] flex items-center'">
+               [class]="'phase-content-card bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-2xl shadow-2xl p-8 min-h-[80vh] flex flex-col justify-center'">
             <div class="w-full max-w-2xl mx-auto">
               <img [src]="phase.imageUrl" 
                    [alt]="phase.title" 
                    class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
                    loading="lazy">
-              <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
-              <p class="mb-6 text-slate-600 dark:text-gray-300 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
-              <h4 class="text-lg font-semibold mb-3 text-slate-800 dark:text-white">{{ 'shared.deliverables' | i18nTranslate }}</h4>
-              <ul class="space-y-2">
-                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-center text-slate-600 dark:text-gray-300">
-                  <svg class="w-5 h-5 mr-2 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <h3 class="text-3xl font-bold text-slate-800 dark:text-white mb-4 leading-tight">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+              <p class="mb-6 text-slate-600 dark:text-gray-300 leading-relaxed text-lg">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+              <h4 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white">{{ 'shared.deliverables' | i18nTranslate }}</h4>
+              <ul class="space-y-3">
+                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-slate-600 dark:text-gray-300">
+                  <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
-                  <span>{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
+                  <span class="text-base leading-relaxed">{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
                 </li>
               </ul>
             </div>
@@ -344,20 +344,16 @@
             
             <!-- Botón mejorado -->
             <div class="mt-auto">
-              <app-ui-button 
-                variant="primary" 
-                size="lg"
-                (clicked)="iniciarDiagnostico()" 
-                class="w-full solution-blue-btn"
-                style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease; width: 100%;"
+              <button 
+                (click)="iniciarDiagnostico()" 
+                class="w-full solution-blue-btn inline-flex items-center justify-center gap-2 font-bold rounded-2xl transition-all duration-300 focus:outline-none transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl"
+                style="background: linear-gradient(135deg, #ea580c 0%, #dc2626 25%, #f97316 50%, #fb923c 75%, #fdba74 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.4); transition: all 0.3s ease; width: 100%; white-space: nowrap;"
                 aria-label="Realizar diagnóstico de competencias">
-                <span class="inline-flex items-center justify-center gap-2 whitespace-nowrap">
-                  {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
-                  <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </span>
-              </app-ui-button>
+                {{ 'home.methodology.btn_start_diagnostic' | i18nTranslate }}
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+              </button>
             </div>
           </div>
         </div>

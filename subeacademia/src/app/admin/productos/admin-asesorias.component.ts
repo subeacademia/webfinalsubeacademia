@@ -6,11 +6,12 @@ import { Asesoria } from '../../features/productos/data/asesoria.model';
 import { AsesoriasService } from '../../features/productos/services/asesorias.service';
 import { BulkUploadService, BulkUploadProgress } from './services/bulk-upload.service';
 import { Subject, takeUntil } from 'rxjs';
+import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 
 @Component({
   selector: 'app-admin-asesorias',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, I18nTranslatePipe],
   template: `
     <div class="space-y-6">
       <div class="flex justify-between items-center">
@@ -20,9 +21,9 @@ import { Subject, takeUntil } from 'rxjs';
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Volver a Productos
+            {{ 'admin.productos.back_to_products' | i18nTranslate }}
           </a>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Administrar Asesorías</h1>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'admin.productos.manage_asesorias' | i18nTranslate }}</h1>
         </div>
         <div class="flex gap-2">
           <button (click)="descargarEstructuraJSON()" 
@@ -30,18 +31,18 @@ import { Subject, takeUntil } from 'rxjs';
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            Descargar JSON
+            {{ 'admin.productos.download_json' | i18nTranslate }}
           </button>
           <button (click)="mostrarModalCargaMasiva = true" 
                   class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
             </svg>
-            Carga Masiva
+            {{ 'admin.productos.bulk_upload' | i18nTranslate }}
           </button>
           <button (click)="mostrarFormulario = true" 
                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            + Nueva Asesoría
+            + {{ 'admin.productos.new_asesoria' | i18nTranslate }}
           </button>
         </div>
       </div>

@@ -107,6 +107,14 @@
     "trust_title": "Eles Confiam em Nós",
     "trust_subtitle": "Junte-se às organizações que já estão transformando seu futuro com IA",
     "cta_final": "Começar Agora",
+    "methodology": {
+      "title": "Nossa Metodologia ARES-AI",
+      "subtitle": "Um framework de 5 fases que garante a implementação bem-sucedida de IA, combinando agilidade, responsabilidade e resultados tangíveis.",
+      "cta_ready": "Pronto para começar sua transformação com IA?",
+      "btn_start_diagnostic": "Começar Diagnóstico Gratuito",
+      "btn_view_methodology": "Ver Metodologia Completa",
+      "additional_text": "Framework testado e validado por mais de 100 organizações"
+    },
     "testimonials": {
       "title": "O que nossos clientes dizem",
       "subtitle": "Descubra as experiências reais daqueles que transformaram suas organizações conosco",
@@ -257,7 +265,7 @@
     "subtitle": "Descubra nosso catálogo completo de produtos projetados para acelerar sua transformação digital com Inteligência Artificial",
     "model_title": "Modelo 50/50: A Fórmula Perfeita",
     "standard_content": "Conteúdo Padrão",
-    "total_personalization": "Personalização Total",
+    "total_personalization": "Personalização Matética",
     "competitive_formula": "A fórmula que nos torna únicos no mercado de educação em IA",
     "categories": {
       "consulting": { "title": "Consultoria", "description": "Consultoria especializada em IA para empresas que buscam implementar soluções inteligentes de forma estratégica e eficiente.", "btn": "Ver Consultoria" },
