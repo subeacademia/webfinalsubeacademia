@@ -3,6 +3,7 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { ScrollService } from '../../../../../core/services/scroll/scroll.service';
 
 @Component({
   selector: 'app-step-contexto',
@@ -234,6 +235,7 @@ export class StepContextoComponent {
   private fb = inject(FormBuilder);
   private diagnosticState = inject(DiagnosticStateService);
   private router = inject(Router);
+  private scrollService = inject(ScrollService);
 
   form = this.fb.group({
     rol: ['', Validators.required],
@@ -265,6 +267,11 @@ export class StepContextoComponent {
       this.router.navigate([`/${languagePrefix}/diagnostico/ares`]).then(success => {
         console.log('Navigation success:', success);
         console.log('URL after navigation:', this.router.url);
+        
+        // Hacer scroll automático hacia arriba después de la navegación
+        setTimeout(() => {
+          this.scrollService.scrollToTopForDiagnostic();
+        }, 200);
       }).catch(error => {
         console.error('Navigation error:', error);
       });

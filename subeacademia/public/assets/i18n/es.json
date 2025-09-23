@@ -32,6 +32,14 @@
     "logos": {
       "title": "Empresas que ya Confían en Nosotros"
     },
+    "testimonials": {
+      "title": "Lo que dicen nuestros clientes",
+      "subtitle": "Descubre las experiencias reales de quienes han transformado sus organizaciones con nosotros",
+      "carousel_label": "Testimonios de clientes",
+      "go_to_testimonial": "Ir al testimonio {index}",
+      "previous_testimonial": "Testimonio anterior",
+      "next_testimonial": "Siguiente testimonio"
+    },
     "cta_final": {
       "title": "¿Listo para Liderar la Transformación?",
       "subtitle": "Hablemos sobre cómo podemos potenciar a tu equipo y preparar a tu organización para el futuro de la IA.",
@@ -360,7 +368,7 @@
       "projects": "Proyectos",
       "certificados": "Certificados",
       "media": "Medios",
-      "logos": "Logos",
+      "clientes": "Clientes",
       "history": "Historia",
       "collaborators": "Colaboradores",
       "leads": "Leads",
@@ -617,6 +625,37 @@
     "person": {
       "title": "Diagnóstico de Madurez en IA - Persona",
       "subtitle": "Evalúa tu nivel de competencias en Inteligencia Artificial y obtén un plan personalizado"
+    }
+  },
+  "navigation": {
+    "home": "Inicio",
+    "productos": "Productos",
+    "nosotros": "Nosotros",
+    "metodologia": "Metodología",
+    "blog": "Blog",
+    "contacto": "Contacto",
+    "admin": "Admin",
+    "login_google": "Iniciar sesión con Google",
+    "dashboard": "Mi panel",
+    "logout": "Cerrar sesión",
+    "privacy_policy": "Política de privacidad"
+  },
+  "admin": {
+    "panel_title": "Panel de Administración",
+    "menu": {
+      "posts": "Publicaciones",
+      "productos": "Productos",
+      "asesorias": "Asesorías",
+      "cursos": "Cursos",
+      "projects": "Proyectos",
+      "certificados": "Certificados",
+      "media": "Medios",
+      "clientes": "Clientes",
+      "history": "Historial",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuarios",
+      "settings": "Ajustes"
     }
   }
 }

@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
 import { DiagnosticsService } from '../../../services/diagnostics.service';
 import { ToastService } from '../../../../../core/services/ui/toast/toast.service';
+import { ScrollService } from '../../../../../core/services/scroll/scroll.service';
 
 @Component({
   selector: 'app-step-lead',
@@ -200,6 +201,7 @@ export class StepLeadComponent {
   private router = inject(Router);
   private diagnosticsService = inject(DiagnosticsService);
   private toastService = inject(ToastService);
+  private scrollService = inject(ScrollService);
   public diagnosticStateService = inject(DiagnosticStateService);
 
   isGenerating = false;
@@ -271,6 +273,12 @@ export class StepLeadComponent {
         const currentUrl = this.router.url;
         const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
         this.router.navigate([`/${languagePrefix}/diagnostico/resultados`]);
+        
+        // Hacer scroll automático hacia arriba después de la navegación
+        setTimeout(() => {
+          this.scrollService.scrollToTopForDiagnostic();
+        }, 200);
+        
         this.isGenerating = false; // Éxito, reset
         
       } catch (error) {

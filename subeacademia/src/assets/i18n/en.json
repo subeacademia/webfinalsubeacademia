@@ -107,6 +107,14 @@
     "trust_title": "They Trust Us",
     "trust_subtitle": "Join the organizations already transforming their future with AI",
     "cta_final": "Start Now",
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Discover the real experiences of those who have transformed their organizations with us",
+      "carousel_label": "Client testimonials",
+      "go_to_testimonial": "Go to testimonial {index}",
+      "previous_testimonial": "Previous testimonial",
+      "next_testimonial": "Next testimonial"
+    },
     "methodology": {
       "title": "Our ARES-AI Methodology",
       "subtitle": "A 5-phase framework that guarantees successful AI implementation, combining agility, responsibility, and tangible results.",
@@ -539,6 +547,37 @@
     "header": {
       "title": "Our Blog",
       "subtitle": "Ideas, tutorials and news about Artificial Intelligence and technology"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "productos": "Products",
+    "nosotros": "About Us",
+    "metodologia": "Methodology",
+    "blog": "Blog",
+    "contacto": "Contact",
+    "admin": "Admin",
+    "login_google": "Sign In with Google",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out",
+    "privacy_policy": "Privacy Policy"
+  },
+  "admin": {
+    "panel_title": "Administration Panel",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Products",
+      "asesorias": "Consultations",
+      "cursos": "Courses",
+      "projects": "Projects",
+      "certificados": "Certificates",
+      "media": "Media",
+      "clientes": "Clients",
+      "history": "History",
+      "collaborators": "Collaborators",
+      "leads": "Leads",
+      "users": "Users",
+      "settings": "Settings"
     }
   },
   "notFound": {

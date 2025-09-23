@@ -6,6 +6,7 @@ import { Report, ReportData } from '../data/report.model';
 import { VercelAiService } from '../../../core/ai/vercel-ai.service';
 import { DiagnosticsService } from './diagnostics.service';
 import { CursosService } from '../../productos/services/cursos.service';
+import { ScrollService } from '../../../core/services/scroll/scroll.service';
 import { firstValueFrom, take } from 'rxjs';
 import { aresQuestions } from '../data/ares-items';
 import { competencias } from '../data/competencias';
@@ -19,6 +20,7 @@ export class DiagnosticStateService {
   private vercelAiService = inject(VercelAiService);
   private diagnosticsService = inject(DiagnosticsService);
   private cursosService = inject(CursosService);
+  private scrollService = inject(ScrollService);
 
   private diagnosticData = signal<DiagnosticData>(JSON.parse(JSON.stringify(INITIAL_DIAGNOSTIC_DATA)));
   private leadType = signal<'persona_natural' | 'empresa' | null>(null);
@@ -181,10 +183,21 @@ export class DiagnosticStateService {
       console.log('🔄 Fallback: navigating to home');
       this.router.navigate([`/${languagePrefix}/`]);
     }
+
+    // Hacer scroll automático hacia arriba después de la navegación
+    // Usar un pequeño delay para asegurar que la navegación se complete
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 
   previousStep(): void {
     this.currentStep.update(step => step - 1);
+    
+    // Hacer scroll automático hacia arriba después de la navegación hacia atrás
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 
   // MÉTODO ELIMINADO: La lógica de generación y navegación se centraliza ahora en diagnostico.component.ts

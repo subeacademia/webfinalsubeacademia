@@ -32,6 +32,14 @@
     "logos": {
       "title": "Companies That Already Trust Us"
     },
+    "testimonials": {
+      "title": "What Our Clients Say",
+      "subtitle": "Discover the real experiences of those who have transformed their organizations with us",
+      "carousel_label": "Client testimonials",
+      "go_to_testimonial": "Go to testimonial {index}",
+      "previous_testimonial": "Previous testimonial",
+      "next_testimonial": "Next testimonial"
+    },
     "cta_final": {
       "title": "Ready to Lead the Transformation?",
       "subtitle": "Let's talk about how we can empower your team and prepare your organization for the future of AI.",
@@ -498,7 +506,7 @@
       "projects": "Projects",
       "certificados": "Certificates",
       "media": "Media",
-      "logos": "Logos",
+      "clientes": "Clients",
       "history": "History",
       "collaborators": "Collaborators",
       "leads": "Leads",
@@ -605,6 +613,37 @@
     "person": {
       "title": "AI Maturity Diagnostic - Person",
       "subtitle": "Evaluate your level of competencies in Artificial Intelligence and get a personalized plan"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "productos": "Products",
+    "nosotros": "About Us",
+    "metodologia": "Methodology",
+    "blog": "Blog",
+    "contacto": "Contact",
+    "admin": "Admin",
+    "login_google": "Sign In with Google",
+    "dashboard": "Dashboard",
+    "logout": "Sign Out",
+    "privacy_policy": "Privacy Policy"
+  },
+  "admin": {
+    "panel_title": "Administration Panel",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Products",
+      "asesorias": "Consultations",
+      "cursos": "Courses",
+      "projects": "Projects",
+      "certificados": "Certificates",
+      "media": "Media",
+      "clientes": "Clients",
+      "history": "History",
+      "collaborators": "Collaborators",
+      "leads": "Leads",
+      "users": "Users",
+      "settings": "Settings"
     }
   }
 }

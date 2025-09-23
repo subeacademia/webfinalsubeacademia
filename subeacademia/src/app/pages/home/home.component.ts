@@ -15,6 +15,7 @@ import { Subscription, distinctUntilChanged, switchMap, Observable, combineLates
 import { LogosService } from '../../core/data/logos.service';
 import { Logo } from '../../core/models/logo.model';
 import { LogoCarouselComponent } from '../../shared/ui/logo-carousel/logo-carousel.component';
+import { TestimonialsCarouselComponent } from '../../shared/ui/testimonials-carousel/testimonials-carousel.component';
 import { UiButtonComponent } from '../../shared/ui-kit/button/button';
 import { AnimationService } from '../../core/services/animation.service';
 import { SeoService } from '../../core/seo/seo.service';
@@ -25,7 +26,7 @@ import { DigitalGlobe } from '../../digital-globe/digital-globe';
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, DigitalGlobe, LogoCarouselComponent, UiButtonComponent, I18nTranslatePipe],
+  imports: [CommonModule, RouterModule, HeroSceneComponent, TechLinesSceneComponent, ElegantNetworkSceneComponent, AiNeuralFlowSceneComponent, NeuralNetworkBackgroundComponent, NeuralNetworkBackgroundV2Component, DigitalGlobe, LogoCarouselComponent, TestimonialsCarouselComponent, UiButtonComponent, I18nTranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -100,6 +101,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChildren('phaseNavItem') navItems!: QueryList<ElementRef>;
   @ViewChildren('phaseContentCard') contentCards!: QueryList<ElementRef>;
   private observer!: IntersectionObserver;
+  private isManualScroll = false; // Flag para detectar scroll manual
   
   // Solo mostrar logos reales de Firestore, sin fallbacks de ejemplo
 
@@ -245,20 +247,41 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   scrollToPhase(phaseId: number): void {
     const elementId = `fase-${phaseId}`;
     const element = document.getElementById(elementId);
-    
+
+    console.log(`🎯 Intentando navegar a fase ${phaseId}, elemento:`, element);
+
     if (element) {
-      // Calcular offset para compensar el header sticky
-      const offset = 100; // Ajustar según la altura del header
-      const elementPosition = element.offsetTop - offset;
+      // Marcar como scroll manual para evitar interferencia del scroll spy
+      this.isManualScroll = true;
       
+      // Calcular offset para compensar el header sticky
+      const offset = 120; // Ajustado para mejor alineación
+      const elementPosition = element.offsetTop - offset;
+
+      console.log(`📍 Posición calculada: ${elementPosition}px (offset: ${offset}px)`);
+
+      // Actualizar la fase activa inmediatamente
+      this.activePhase = phaseId;
+      this.cdr.detectChanges();
+
       // Scroll suave
       window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
       });
-      
-      // Actualizar la fase activa para efectos visuales
-      this.activePhase = phaseId;
+
+      // Rehabilitar scroll spy después de que termine el scroll
+      setTimeout(() => {
+        this.isManualScroll = false;
+        this.activePhase = phaseId;
+        this.cdr.detectChanges();
+        console.log(`✅ Navegación a fase ${phaseId} completada`);
+      }, 800); // Tiempo suficiente para que termine el scroll suave
+    } else {
+      console.error(`❌ No se encontró el elemento con ID: ${elementId}`);
+      // Listar todos los elementos disponibles para debug
+      const allElements = document.querySelectorAll('[id^="fase-"]');
+      console.log('Elementos disponibles:', Array.from(allElements).map(el => el.id));
     }
   }
 
@@ -266,29 +289,50 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private setupScrollSpy(): void {
     if (typeof window === 'undefined') return;
 
+    // Limpiar observer anterior si existe
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
+        // No actualizar si es scroll manual
+        if (this.isManualScroll) {
+          console.log('🚫 Scroll spy deshabilitado por navegación manual');
+          return;
+        }
+        
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const phaseId = parseInt(entry.target.id.replace('fase-', ''));
-            this.activePhase = phaseId;
-            this.cdr.detectChanges();
+            if (this.activePhase !== phaseId) {
+              console.log(`🔄 Scroll spy detectó fase ${phaseId} (${entry.intersectionRatio} visible)`);
+              this.activePhase = phaseId;
+              this.cdr.detectChanges();
+            }
           }
         });
       },
       {
-        rootMargin: '-20% 0px -60% 0px', // Ajustar según sea necesario
-        threshold: 0.3
+        rootMargin: '-20% 0px -60% 0px', // Ajustado para mejor detección
+        threshold: [0.1, 0.3, 0.5, 0.7] // Múltiples thresholds para mejor detección
       }
     );
 
-    // Observar todas las fases
-    this.methodologyPhases.forEach(phase => {
-      const element = document.getElementById(`fase-${phase.id}`);
-      if (element) {
-        observer.observe(element);
-      }
-    });
+    this.observer = observer;
+
+    // Observar todas las fases con un pequeño delay para asegurar que estén en el DOM
+    setTimeout(() => {
+      this.methodologyPhases.forEach(phase => {
+        const element = document.getElementById(`fase-${phase.id}`);
+        if (element) {
+          console.log(`👀 Observando elemento: fase-${phase.id}`);
+          observer.observe(element);
+        } else {
+          console.warn(`⚠️ No se encontró elemento: fase-${phase.id}`);
+        }
+      });
+    }, 100);
   }
 
   // Método para obtener logos a mostrar, solo logos reales de Firestore
@@ -379,12 +423,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Configurar scroll spy para las fases de metodología
     this.setupScrollSpy();
 
-    // Inicializar el scroll-spying solo en desktop y en el navegador
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-      setTimeout(() => {
-        this.initObserver();
-      }, 100);
-    }
+    // Scroll spy ya configurado en setupScrollSpy()
+    // No necesitamos initObserver() duplicado
   }
 
   private initObserver(): void {
@@ -402,7 +442,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (mostVisible && mostVisible.isIntersecting) {
         const id = mostVisible.target.getAttribute('id');
-        const currentPhaseId = parseInt(id?.replace('phase-card-', '') || '1');
+        const currentPhaseId = parseInt(id?.replace('fase-', '') || '1');
         
         const navItem = this.navItems.find(
           item => item.nativeElement.getAttribute('fragment') === `fase-${currentPhaseId}`

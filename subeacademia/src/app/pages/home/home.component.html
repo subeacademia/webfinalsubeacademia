@@ -119,51 +119,66 @@
 </section>
 
 <!-- 2. SECCIÓN "NUESTRA METODOLOGÍA ARES-AI" FINAL CON CARD STACKING -->
-<section id="metodologia" class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm" role="region" aria-labelledby="methodology-title">
-  <div class="container mx-auto px-4 py-16 sm:py-24">
+<section id="metodologia" class="relative overflow-hidden" role="region" aria-labelledby="methodology-title">
+  <!-- Fondo completamente transparente -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900/20 via-blue-900/20 to-slate-900/20 dark:from-slate-800/20 dark:via-blue-800/20 dark:to-slate-800/20" aria-hidden="true">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.08),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.05),transparent_50%)] dark:bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.08),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.05),transparent_50%)] dark:bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.08),transparent_50%)]"></div>
+  </div>
+  
+  <!-- Patrón de puntos decorativo sutil -->
+  <div class="absolute inset-0 opacity-10 dark:opacity-15" aria-hidden="true">
+    <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 dark:bg-blue-300 rounded-full animate-pulse"></div>
+    <div class="absolute top-1/3 right-1/3 w-1 h-1 bg-purple-400 dark:bg-purple-300 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-cyan-400 dark:bg-cyan-300 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-1 h-1 bg-indigo-400 dark:bg-indigo-300 rounded-full animate-pulse" style="animation-delay: 1.5s;"></div>
+  </div>
+
+  <div class="container mx-auto px-4 py-16 sm:py-24 relative z-10">
     <div class="text-center mb-12 lg:mb-16">
-      <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
+      <h2 id="methodology-title" class="text-3xl sm:text-4xl font-bold tracking-tight text-white">
         {{ 'methodology.header.title' | i18nTranslate }}
       </h2>
-      <p class="max-w-3xl mx-auto text-base-content/70 mt-4 text-lg">
+      <p class="max-w-3xl mx-auto text-white/80 mt-4 text-lg">
         {{ 'methodology.header.subtitle' | i18nTranslate }}
       </p>
     </div>
 
     <!-- Layout de card stacking para desktop -->
     <div class="hidden lg:grid grid-cols-12 gap-8">
-      <!-- Navegación sticky en la izquierda -->
+      <!-- Navegación sticky en la izquierda - Solo en esta sección -->
       <div class="col-span-4">
-        <div class="sticky top-24 space-y-4">
+        <div class="sticky top-8 space-y-3">
           <button *ngFor="let phase of methodologyPhases"
                   #phaseNavItem
                   (click)="scrollToPhase(phase.id)"
-                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left ' + (activePhase === phase.id ? 'bg-primary/20 dark:bg-primary/30 border-primary/50 dark:border-primary/40 shadow-lg' : 'bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:bg-white/90 dark:hover:bg-gray-700/90')"
+                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left ' + (activePhase === phase.id ? 'bg-white/20 dark:bg-white/10 backdrop-blur-sm border border-white/30 dark:border-white/20 shadow-lg' : 'bg-white/10 dark:bg-white/5 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:bg-white/20 dark:hover:bg-white/10')"
                   [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
-            <span class="text-xl font-bold mr-4" [class]="activePhase === phase.id ? 'text-primary' : 'text-primary'">{{ '0' + phase.id }}</span>
-            <span class="text-lg font-semibold" [class]="activePhase === phase.id ? 'text-primary dark:text-primary-300' : 'text-base-content'">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
+            <span class="text-xl font-bold mr-4 text-white dark:text-white">{{ '0' + phase.id }}</span>
+            <span class="text-lg font-semibold text-white dark:text-white">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
           </button>
         </div>
       </div>
 
       <!-- Contenedor de tarjetas con scroll normal -->
       <div class="col-span-8">
-        <div class="space-y-8">
+        <div class="space-y-6">
           <div *ngFor="let phase of methodologyPhases; let i = index"
                #phaseContentCard
                [id]="'fase-' + phase.id" 
-               class="phase-content-card sticky top-24 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-2xl shadow-xl p-8 min-h-[80vh] flex items-center">
+               [class]="'phase-content-card bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl p-8 min-h-[80vh] flex items-center'">
             <div class="w-full max-w-2xl mx-auto">
               <img [src]="phase.imageUrl" 
                    [alt]="phase.title" 
                    class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
                    loading="lazy">
-              <h3 class="text-2xl font-bold text-primary mb-3">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
-              <p class="mb-6 text-base-content/80 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
-              <h4 class="text-lg font-semibold mb-3 text-base-content">{{ 'shared.deliverables' | i18nTranslate }}</h4>
+              <h3 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+              <p class="mb-6 text-slate-600 dark:text-gray-300 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+              <h4 class="text-lg font-semibold mb-3 text-slate-800 dark:text-white">{{ 'shared.deliverables' | i18nTranslate }}</h4>
               <ul class="space-y-2">
-                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-center text-base-content/70">
-                  <svg class="w-5 h-5 mr-2 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-center text-slate-600 dark:text-gray-300">
+                  <svg class="w-5 h-5 mr-2 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                   </svg>
                   <span>{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
@@ -177,26 +192,26 @@
 
     <!-- Acordeón para móvil mejorado -->
     <div class="lg:hidden space-y-4 relative z-10">
-      <div *ngFor="let phase of methodologyPhases" class="collapse collapse-plus bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-sm border border-white/20 dark:border-white/10">
+      <div *ngFor="let phase of methodologyPhases" class="collapse collapse-plus bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg shadow-lg border border-white/20 dark:border-white/10">
         <input type="radio" name="methodology-accordion" [checked]="phase.id === 1" />
-        <div class="collapse-title text-xl font-bold flex items-center text-base-content min-h-[60px]">
-          <span class="text-primary mr-3 flex-shrink-0">{{ '0' + phase.id }}</span>
+        <div class="collapse-title text-xl font-bold flex items-center text-slate-800 dark:text-white min-h-[60px]">
+          <span class="text-blue-600 dark:text-blue-400 mr-3 flex-shrink-0">{{ '0' + phase.id }}</span>
           <span class="flex-1">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
         </div>
         <div class="collapse-content relative z-20 p-4">
           <div class="space-y-4">
             <img [src]="phase.imageUrl" 
                  [alt]="phase.title" 
-                 class="mobile-methodology-image rounded-lg object-cover w-full h-48 mb-4 border border-base-300"
+                 class="mobile-methodology-image rounded-lg object-cover w-full h-48 mb-4 border border-slate-200 dark:border-gray-600"
                  loading="eager"
                  [style.display]="'block'"
                  onerror="this.style.background='linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'; this.alt='Imagen no disponible'">
-            <h3 class="text-lg font-bold mb-2 text-base-content">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
-            <p class="mb-4 text-sm text-base-content/80 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
-            <h4 class="font-semibold mb-2 text-base-content">{{ 'shared.deliverables' | i18nTranslate }}:</h4>
+            <h3 class="text-lg font-bold mb-2 text-slate-800 dark:text-white">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+            <p class="mb-4 text-sm text-slate-600 dark:text-gray-300 leading-relaxed">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+            <h4 class="font-semibold mb-2 text-slate-800 dark:text-white">{{ 'shared.deliverables' | i18nTranslate }}:</h4>
             <ul class="space-y-2 text-sm">
-              <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-base-content/80">
-                <svg class="w-4 h-4 mr-2 mt-0.5 text-success flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-slate-600 dark:text-gray-300">
+                <svg class="w-4 h-4 mr-2 mt-0.5 text-green-500 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                 </svg>
                 <span class="flex-1">{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
@@ -208,10 +223,28 @@
     </div>
   </div>
 
-  <!-- CTA final de la metodología -->
-  <div class="container mx-auto px-4 pb-16">
+</section>
+
+<!-- CTA final de la metodología - Separado de la sección principal -->
+<section class="py-16 relative overflow-hidden">
+  <!-- Fondo con gradiente elegante -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-slate-800 dark:via-blue-800 dark:to-slate-800" aria-hidden="true">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.15),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.15),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.15),transparent_50%)]"></div>
+  </div>
+  
+  <!-- Patrón de puntos decorativo -->
+  <div class="absolute inset-0 opacity-20 dark:opacity-30" aria-hidden="true">
+    <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 dark:bg-blue-300 rounded-full animate-pulse"></div>
+    <div class="absolute top-1/3 right-1/3 w-1 h-1 bg-purple-400 dark:bg-purple-300 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-cyan-400 dark:bg-cyan-300 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-1 h-1 bg-indigo-400 dark:bg-indigo-300 rounded-full animate-pulse" style="animation-delay: 1.5s;"></div>
+  </div>
+
+  <div class="container mx-auto px-4 relative z-10">
     <div class="text-center">
-      <p class="text-lg sm:text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
+      <p class="text-lg sm:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
         {{ 'home.methodology.cta_ready' | i18nTranslate }}
       </p>
       
@@ -228,15 +261,15 @@
         </app-ui-button>
         
         <a [routerLink]="['/', i18n.currentLang(), 'metodologia']" 
-           class="inline-flex items-center justify-center w-full h-full text-inherit no-underline">
+           class="inline-flex items-center justify-center text-inherit no-underline">
           <app-ui-button 
             variant="purple" 
-            size="lg"
-            class="methodology-purple-btn w-full"
-            style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 1rem 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
+            size="md"
+            class="methodology-purple-btn"
+            style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%); color: white; border: none; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); transition: all 0.3s ease;"
             aria-label="Ver detalles completos de la metodología ARES-AI">
             {{ 'home.methodology.btn_view_methodology' | i18nTranslate }}
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
           </app-ui-button>
@@ -244,7 +277,7 @@
       </div>
       
       <!-- Texto adicional -->
-      <p class="text-sm text-base-content/60 mt-4">
+      <p class="text-sm text-white/60 mt-4">
         {{ 'home.methodology.additional_text' | i18nTranslate }}
       </p>
     </div>
@@ -421,7 +454,45 @@
   </div>
 </section>
 
-<!-- 4. SECCIÓN "HAN CONFIADO" CON CARRUSEL MEJORADO -->
+<!-- 4. SECCIÓN DE TESTIMONIOS -->
+<section class="py-24 relative overflow-hidden" role="region" aria-labelledby="testimonials-title">
+  <!-- Fondo con gradiente y patrón de puntos -->
+  <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 dark:from-slate-800 dark:via-blue-800 dark:to-slate-800" aria-hidden="true">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.15),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.15),transparent_50%)]"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_75%_75%,rgba(168,85,247,0.15),transparent_50%)]"></div>
+  </div>
+  
+  <!-- Patrón de puntos decorativo -->
+  <div class="absolute inset-0 opacity-20 dark:opacity-30" aria-hidden="true">
+    <div class="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 dark:bg-blue-300 rounded-full animate-pulse"></div>
+    <div class="absolute top-1/3 right-1/3 w-1 h-1 bg-purple-400 dark:bg-purple-300 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+    <div class="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-cyan-400 dark:bg-cyan-300 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-1/3 right-1/4 w-1 h-1 bg-indigo-400 dark:bg-indigo-300 rounded-full animate-pulse" style="animation-delay: 1.5s;"></div>
+  </div>
+  
+  <div class="container mx-auto px-4 relative z-10">
+    <div class="text-center mb-2">
+      <h2 id="testimonials-title" class="text-4xl md:text-5xl font-bold mb-2 text-white">
+        {{ 'home.testimonials.title' | i18nTranslate }}
+      </h2>
+      <p class="text-xl text-white/80 max-w-3xl mx-auto mb-0">
+        {{ 'home.testimonials.subtitle' | i18nTranslate }}
+      </p>
+    </div>
+    
+    <!-- Carrusel de testimonios -->
+    <div class="max-w-6xl mx-auto">
+      <app-testimonials-carousel 
+        [autoPlay]="true"
+        [interval]="6000"
+        [attr.aria-label]="'home.testimonials.carousel_label' | i18nTranslate">
+      </app-testimonials-carousel>
+    </div>
+  </div>
+</section>
+
+<!-- 5. SECCIÓN "HAN CONFIADO" CON CARRUSEL MEJORADO -->
 <section class="py-24 bg-white dark:bg-slate-900 relative overflow-hidden" role="region" aria-labelledby="trust-title">
   <!-- Elementos de fondo -->
   <div class="absolute inset-0" aria-hidden="true">

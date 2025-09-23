@@ -24,8 +24,29 @@ export class ScrollService {
         delay(100) // Pequeño delay para asegurar que el DOM se haya renderizado
       )
       .subscribe((event: NavigationEnd) => {
-        this.scrollToTop();
+        // Hacer scroll automático especialmente para navegaciones del diagnóstico
+        if (this.isDiagnosticNavigation(event.urlAfterRedirects)) {
+          console.log('🎯 Navegación del diagnóstico detectada, haciendo scroll automático');
+          this.scrollToTop();
+        } else {
+          // Para otras navegaciones, usar el comportamiento normal
+          this.scrollToTop();
+        }
       });
+  }
+
+  /**
+   * Verifica si la URL corresponde a una navegación del diagnóstico
+   */
+  private isDiagnosticNavigation(url: string): boolean {
+    return url.includes('/diagnostico/') && (
+      url.includes('/contexto') ||
+      url.includes('/ares') ||
+      url.includes('/competencias') ||
+      url.includes('/objetivo') ||
+      url.includes('/finalizar') ||
+      url.includes('/resultados')
+    );
   }
 
   /**
@@ -81,6 +102,24 @@ export class ScrollService {
       this.scrollToElement('main-content', 80); // Offset para el header fijo
     } else {
       this.scrollToTop();
+    }
+  }
+
+  /**
+   * Método específico para hacer scroll automático en navegaciones del diagnóstico
+   * Se puede llamar explícitamente desde los componentes del diagnóstico
+   */
+  scrollToTopForDiagnostic(): void {
+    console.log('🎯 Scroll automático para diagnóstico activado');
+    if (typeof window !== 'undefined') {
+      // Scroll suave hacia arriba con un pequeño delay para asegurar que el contenido esté renderizado
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth'
+        });
+      }, 150);
     }
   }
 }

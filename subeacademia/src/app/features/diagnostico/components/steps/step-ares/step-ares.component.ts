@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { aresQuestions } from '../../../data/ares-items';
 import { QuestionCardComponent } from '../../ui/question-card/question-card.component';
 import { DiagnosticStateService } from '../../../services/diagnostic-state.service';
+import { ScrollService } from '../../../../../core/services/scroll/scroll.service';
 import { Answer } from '../../../data/diagnostic.models';
 
 @Component({
@@ -39,6 +40,7 @@ import { Answer } from '../../../data/diagnostic.models';
 export class StepAresComponent {
   public stateService = inject(DiagnosticStateService);
   private router = inject(Router);
+  private scrollService = inject(ScrollService);
   questions = aresQuestions;
 
   getAnswerForQuestion(questionId: string): Answer {
@@ -58,11 +60,21 @@ export class StepAresComponent {
     const currentUrl = this.router.url;
     const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
     this.router.navigate([`/${languagePrefix}/diagnostico/competencias`]);
+    
+    // Hacer scroll automático hacia arriba después de la navegación
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 
   previous() {
     const currentUrl = this.router.url;
     const languagePrefix = currentUrl.match(/^\/([a-z]{2})\//)?.[1] || 'es';
     this.router.navigate([`/${languagePrefix}/diagnostico/contexto`]);
+    
+    // Hacer scroll automático hacia arriba después de la navegación
+    setTimeout(() => {
+      this.scrollService.scrollToTopForDiagnostic();
+    }, 200);
   }
 }

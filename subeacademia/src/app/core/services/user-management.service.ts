@@ -2,7 +2,7 @@ import { Injectable, PLATFORM_ID, Inject, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { Auth, createUserWithEmailAndPassword, updateProfile } from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, updateProfile, updatePassword, sendPasswordResetEmail } from '@angular/fire/auth';
 import { 
   AppUser, 
   UserRole, 
@@ -268,6 +268,83 @@ export class UserManagementService {
 
     console.log('✅ Último login actualizado para:', email, 'a las', now.toLocaleString());
     return updatedUser;
+  }
+
+  // Restablecer contraseña de usuario
+  resetUserPassword(email: string): Observable<boolean> {
+    return from(this.performResetPassword(email));
+  }
+
+  private async performResetPassword(email: string): Promise<boolean> {
+    try {
+      console.log('🔄 Enviando email de restablecimiento de contraseña a:', email);
+      
+      await sendPasswordResetEmail(this.auth, email);
+      
+      console.log('✅ Email de restablecimiento enviado correctamente');
+      return true;
+      
+    } catch (firebaseError: any) {
+      console.error('❌ Error enviando email de restablecimiento:', firebaseError);
+      
+      let errorMessage = 'Error al enviar el email de restablecimiento';
+      
+      if (firebaseError.code === 'auth/user-not-found') {
+        errorMessage = 'No existe un usuario registrado con este email';
+      } else if (firebaseError.code === 'auth/invalid-email') {
+        errorMessage = 'El formato del email no es válido';
+      } else if (firebaseError.code === 'auth/too-many-requests') {
+        errorMessage = 'Demasiados intentos. Intenta más tarde';
+      } else if (firebaseError.message) {
+        errorMessage = firebaseError.message;
+      }
+      
+      throw new Error(errorMessage);
+    }
+  }
+
+  // Cambiar contraseña de usuario (requiere autenticación)
+  changeUserPassword(userId: string, newPassword: string): Observable<boolean> {
+    return from(this.performChangePassword(userId, newPassword));
+  }
+
+  private async performChangePassword(userId: string, newPassword: string): Promise<boolean> {
+    try {
+      // Verificar que el usuario existe en nuestro sistema
+      const users = this.usersSubject.value;
+      const user = users.find(u => u.id === userId);
+      
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+
+      // Para cambiar la contraseña, necesitamos que el usuario esté autenticado
+      // En un sistema real, esto se haría a través de una Cloud Function
+      // o requiriendo que el usuario ingrese su contraseña actual
+      console.log('⚠️ Cambio de contraseña requiere autenticación del usuario');
+      console.log('💡 Se enviará un email de restablecimiento en su lugar');
+      
+      // En lugar de cambiar directamente, enviamos email de restablecimiento
+      await sendPasswordResetEmail(this.auth, user.email);
+      
+      console.log('✅ Email de restablecimiento enviado para cambio de contraseña');
+      return true;
+      
+    } catch (firebaseError: any) {
+      console.error('❌ Error cambiando contraseña:', firebaseError);
+      
+      let errorMessage = 'Error al cambiar la contraseña';
+      
+      if (firebaseError.code === 'auth/user-not-found') {
+        errorMessage = 'Usuario no encontrado';
+      } else if (firebaseError.code === 'auth/weak-password') {
+        errorMessage = 'La nueva contraseña debe tener al menos 6 caracteres';
+      } else if (firebaseError.message) {
+        errorMessage = firebaseError.message;
+      }
+      
+      throw new Error(errorMessage);
+    }
   }
 
   // Obtener estadísticas de usuarios

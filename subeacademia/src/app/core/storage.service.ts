@@ -32,6 +32,7 @@ export class StorageService {
     'avatars',
     'courses',
     'reports',
+    'testimonials',
     'misc'
   ] as const;
   public static getPublicCategories(): ReadonlyArray<string> {

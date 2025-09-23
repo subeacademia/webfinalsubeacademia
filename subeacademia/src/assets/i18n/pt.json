@@ -106,7 +106,15 @@
     "solutions_subtitle": "Ferramentas e serviços projetados para acelerar sua adoção de IA de forma responsável",
     "trust_title": "Eles Confiam em Nós",
     "trust_subtitle": "Junte-se às organizações que já estão transformando seu futuro com IA",
-    "cta_final": "Começar Agora"
+    "cta_final": "Começar Agora",
+    "testimonials": {
+      "title": "O que nossos clientes dizem",
+      "subtitle": "Descubra as experiências reais daqueles que transformaram suas organizações conosco",
+      "carousel_label": "Depoimentos de clientes",
+      "go_to_testimonial": "Ir para o depoimento {index}",
+      "previous_testimonial": "Depoimento anterior",
+      "next_testimonial": "Próximo depoimento"
+    }
   },
   "shared": {
     "back": "Voltar",
@@ -369,6 +377,37 @@
           "load_error": "Erro ao carregar o produto."
         }
       }
+    }
+  },
+  "navigation": {
+    "home": "Início",
+    "productos": "Produtos",
+    "nosotros": "Sobre Nós",
+    "metodologia": "Metodologia",
+    "blog": "Blog",
+    "contacto": "Contato",
+    "admin": "Admin",
+    "login_google": "Entrar com Google",
+    "dashboard": "Painel",
+    "logout": "Sair",
+    "privacy_policy": "Política de Privacidade"
+  },
+  "admin": {
+    "panel_title": "Painel de Administração",
+    "menu": {
+      "posts": "Posts",
+      "productos": "Produtos",
+      "asesorias": "Consultorias",
+      "cursos": "Cursos",
+      "projects": "Projetos",
+      "certificados": "Certificados",
+      "media": "Mídia",
+      "clientes": "Clientes",
+      "history": "Histórico",
+      "collaborators": "Colaboradores",
+      "leads": "Leads",
+      "users": "Usuários",
+      "settings": "Configurações"
     }
   }
 }
