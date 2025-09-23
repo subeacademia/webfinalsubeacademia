@@ -38,7 +38,7 @@ import { LeadsService } from '../../core/services/leads.service';
               <option value="25001-100000">25.001 - 100.000 UF (Mediana empresa)</option>
               <option value="100001+">Más de 100.000 UF (Grande empresa)</option>
             </select>
-            <button type="submit" [disabled]="metadataForm.invalid" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-700 disabled:bg-gray-300 text-base shadow-lg">Comenzar Diagnóstico</button>
+            <button type="submit" [disabled]="metadataForm.invalid" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-600 hover:to-orange-700 disabled:bg-gray-300 text-base shadow-lg">Comenzar Diagnóstico gratis</button>
           </form>
         </div>
       } @else if (isStepNumber() && getCurrentStepNumber() >= 0 && getCurrentStepNumber() < CUESTIONARIO_EMPRESAS.length) {

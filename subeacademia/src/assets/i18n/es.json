@@ -364,7 +364,18 @@
       "example_3": "Optimizar la experiencia del cliente",
       "example_4": "Reducir costos operativos",
       "example_5": "Acelerar la innovación de productos"
-    }
+    },
+    "title": "Diagnóstico de Madurez en IA",
+    "subtitle": "Descubre tu nivel de competencias en Inteligencia Artificial y obtén un plan de acción personalizado",
+    "estimated_time": "Tiempo estimado: 5-7 minutos",
+    "select_type": "Selecciona tu tipo de diagnóstico",
+    "company_option": "Para Empresas",
+    "company_description": "Evaluación completa de madurez organizacional en IA con recomendaciones estratégicas",
+    "company_button": "Comenzar Diagnóstico gratis",
+    "person_option": "Para Personas",
+    "person_description": "Autoevaluación personal de competencias en IA con plan de desarrollo individual",
+    "person_button": "Comenzar Diagnóstico gratis",
+    "privacy_notice": "Tus datos están protegidos y solo se utilizan para generar tu diagnóstico personalizado"
   },
   "diagnostic.objective.title": "Define tu Objetivo Principal",
   "diagnostic.objective.description": "Describe cuál es tu principal desafío o meta de desarrollo profesional en este momento. Nuestra IA te ayudará a definir objetivos claros.",
