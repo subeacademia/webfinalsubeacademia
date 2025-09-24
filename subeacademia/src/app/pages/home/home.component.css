@@ -304,125 +304,703 @@ section { scroll-margin-top: 80px; }
   }
 }
 
-/* ===== ESTILOS PARA LA METODOLOGÍA ARES-AI FINAL CON CARD STACKING ===== */
+/* ===== CARRUSEL 3D COMPACTO Y EQUILIBRADO ===== */
 
-/* Estilos para el item de navegación de fase */
-.phase-nav-item {
-  background-color: transparent;
-  border: 1px solid transparent;
-  text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Contenedor principal del carrusel */
+.carousel-container {
+  perspective: 1800px;
+  perspective-origin: center center;
+  overflow: hidden;
+  user-select: none;
+  position: relative;
+  width: 100%;
+  height: 65vh;
+  max-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
 }
 
-.phase-nav-item:hover {
-  background-color: var(--fallback-b2, oklch(var(--b2) / 0.3));
-  border-color: var(--fallback-p, oklch(var(--p) / 0.1));
-  transform: translateX(5px);
+/* Viewport del carrusel */
+.carousel-viewport {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  position: relative;
+  max-width: 1200px;
 }
 
-/* Estilo del item de navegación CUANDO ESTÁ ACTIVO */
-.phase-nav-item.active {
-  background-color: var(--fallback-b2, oklch(var(--b2) / 0.7));
-  border-color: var(--fallback-p, oklch(var(--p) / 0.3));
-  transform: translateX(10px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Track del carrusel que rota */
+.carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+  transform-origin: center center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.phase-nav-item.active span {
-  color: var(--fallback-bc, oklch(var(--bc)));
+.carousel-track:active {
+  cursor: grabbing;
 }
 
-/* ===== ESTILOS CLAVE PARA EL CARD STACKING ===== */
-
-/* Estilos para la barra de navegación fija */
-.phase-nav-container {
-  position: fixed !important;
-  top: 6rem !important;
-  left: 2rem !important;
-  width: 300px !important;
-  z-index: 20 !important;
-  max-height: calc(100vh - 8rem) !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  background: rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 1rem !important;
-  padding: 1rem !important;
+/* Tarjetas individuales del carrusel - MUCHO MÁS ANCHAS */
+.carousel-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 520px;
+  height: 480px;
+  margin-left: -260px;
+  margin-top: -240px;
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* Asegurar que el grid container no interfiera */
-.grid {
-  display: grid !important;
+/* Posicionamiento orbital base - AJUSTADO PARA TARJETAS MUCHO MÁS ANCHAS */
+.carousel-card:nth-child(1) { 
+  transform: rotateY(0deg) translateZ(380px) scale(0.7); 
+}
+.carousel-card:nth-child(2) { 
+  transform: rotateY(72deg) translateZ(380px) scale(0.7); 
+}
+.carousel-card:nth-child(3) { 
+  transform: rotateY(144deg) translateZ(380px) scale(0.7); 
+}
+.carousel-card:nth-child(4) { 
+  transform: rotateY(216deg) translateZ(380px) scale(0.7); 
+}
+.carousel-card:nth-child(5) { 
+  transform: rotateY(288deg) translateZ(380px) scale(0.7); 
 }
 
-/* Asegurar que el contenido principal no se superponga con el menú fijo */
-.col-span-8 {
-  margin-left: 320px !important;
+/* Tarjeta activa (centro) - AJUSTADA PARA TARJETAS MUCHO MÁS ANCHAS */
+.carousel-card.active {
+  opacity: 1 !important;
+  filter: none !important;
+  z-index: 10;
 }
 
-/* Responsive: ocultar el menú fijo en pantallas pequeñas */
-@media (max-width: 1024px) {
-  .phase-nav-container {
-    display: none !important;
-  }
-  
-  .col-span-8 {
-    margin-left: 0 !important;
-  }
+.carousel-card.active:nth-child(1) { 
+  transform: rotateY(0deg) translateZ(480px) scale(1) !important; 
+}
+.carousel-card.active:nth-child(2) { 
+  transform: rotateY(72deg) translateZ(480px) scale(1) !important; 
+}
+.carousel-card.active:nth-child(3) { 
+  transform: rotateY(144deg) translateZ(480px) scale(1) !important; 
+}
+.carousel-card.active:nth-child(4) { 
+  transform: rotateY(216deg) translateZ(480px) scale(1) !important; 
+}
+.carousel-card.active:nth-child(5) { 
+  transform: rotateY(288deg) translateZ(480px) scale(1) !important; 
 }
 
-/* Estilos para las tarjetas de contenido apilables */
-.phase-content-card {
-  /* Ya tiene sticky top-24 desde Tailwind en el HTML */
-  transition: transform 0.4s ease-out, opacity 0.2s ease-out, visibility 0.2s ease-out;
-  scroll-margin-top: 8rem; /* Compensa la navegación sticky */
-  transform-origin: center top; /* Punto de origen para las transformaciones */
-  position: relative; /* Asegurar contexto de apilamiento */
+/* Tarjetas inactivas (laterales) */
+.carousel-card:not(.active) {
+  opacity: 0.4 !important;
+  filter: blur(1.5px) brightness(0.7) !important;
+  z-index: 1;
 }
 
-/*
-  Z-index para que las tarjetas posteriores aparezcan sobre las anteriores
-  y puedan "empujar" hacia arriba a las que están debajo
-*/
-#phase-card-1 { z-index: 1; }
-#phase-card-2 { z-index: 2; }
-#phase-card-3 { z-index: 3; }
-#phase-card-4 { z-index: 4; }
-#phase-card-5 { z-index: 5; }
+.carousel-card.active .active-card-content {
+  transform: scale(1);
+  opacity: 1;
+  filter: none;
+  pointer-events: auto;
+}
 
-/* Clase para deslizar tarjetas hacia arriba cuando aparece la siguiente */
-.phase-content-card.slide-up {
-  transform: translateY(-150%) scale(0.8); /* Mayor separación y escala más pequeña */
+.carousel-card:not(.active) .inactive-card-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.carousel-card:not(.active) .active-card-content {
+  transform: scale(0);
   opacity: 0;
-  pointer-events: none; /* Evita interacciones con tarjetas que se han deslizado */
-  visibility: hidden; /* Oculta completamente la tarjeta */
-  z-index: -1; /* Coloca las tarjetas deslizadas detrás de todo */
-  overflow: hidden; /* Evita que el contenido se desborde */
+  pointer-events: none;
 }
 
-/* Ocultar específicamente el texto de las tarjetas deslizadas */
-.phase-content-card.slide-up * {
-  opacity: 0 !important;
-  visibility: hidden !important;
+/* Estilos para las flash cards reversibles */
+.active-card-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  perspective: 1000px;
 }
 
-/* Mejoras para las imágenes en las tarjetas */
-.phase-content-card img {
+.flash-card-container {
+  width: 100%;
+  height: 100%;
+  max-width: 520px;
+  max-height: 480px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.flash-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.flash-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.flash-card-front,
+.flash-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Dark mode por defecto */
+  background: rgba(30, 41, 59, 0.95); /* slate-800 con transparencia */
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(71, 85, 105, 0.3); /* slate-600 */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flash-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Light mode para flash cards */
+.light .flash-card-front,
+.light .flash-card-back {
+  background: rgba(255, 255, 255, 0.98);
+  border: 2px solid rgba(226, 232, 240, 0.5); /* slate-200 */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Textos para light mode en flash cards */
+.light .flash-card-front h3,
+.light .flash-card-back h3 {
+  color: #1e293b !important; /* slate-800 */
+}
+
+.light .flash-card-front p,
+.light .flash-card-back p {
+  color: #475569 !important; /* slate-600 */
+}
+
+.light .flash-card-front span,
+.light .flash-card-back span {
+  color: #3b82f6 !important; /* blue-500 */
+}
+
+.light .flash-card-front h4,
+.light .flash-card-back h4 {
+  color: #1e293b !important; /* slate-800 */
+}
+
+.light .flash-card-front li,
+.light .flash-card-back li {
+  color: #475569 !important; /* slate-600 */
+}
+
+/* Estilos específicos para light mode en el frente de la tarjeta */
+.light .flash-card-front h3 {
+  color: #1e293b !important; /* slate-800 */
+}
+
+.light .flash-card-front p {
+  color: #475569 !important; /* slate-600 */
+}
+
+.light .flash-card-front h4 {
+  color: #3b82f6 !important; /* blue-500 */
+}
+
+.light .flash-card-front li {
+  color: #64748b !important; /* slate-500 */
+}
+
+.light .flash-card-front .text-blue-300 {
+  color: #3b82f6 !important; /* blue-500 */
+}
+
+.light .flash-card-front .text-white\/90 {
+  color: #475569 !important; /* slate-600 */
+}
+
+.light .flash-card-front .text-white\/80 {
+  color: #64748b !important; /* slate-500 */
+}
+
+/* Light mode para botones de navegación */
+.light .carousel-nav-btn {
+  background: rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+.light .carousel-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.light .carousel-nav-btn svg {
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.light .carousel-nav-btn:focus {
+  ring-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para line-clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.inactive-card-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.inactive-card-content > div {
+  /* Dark mode por defecto */
+  background: rgba(51, 65, 85, 0.8); /* slate-700 */
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(71, 85, 105, 0.4); /* slate-600 */
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  max-height: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  margin: 0;
+}
+
+/* Light mode para tarjetas inactivas */
+.light .inactive-card-content > div {
+  background: rgba(248, 250, 252, 0.8); /* slate-50 */
+  border: 1px solid rgba(203, 213, 225, 0.4); /* slate-300 */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenido interno de tarjetas activas - DISTRIBUCIÓN OPTIMIZADA PARA TODO EL CONTENIDO */
+.active-card-content .flex {
+  gap: 1.5rem;
+  height: 100%;
+  overflow: hidden;
+}
+
+.active-card-content .flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.active-card-content img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.active-card-content .flex-1 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Títulos y texto optimizados para que todo quepa */
+.active-card-content h3 {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+  color: #f1f5f9; /* slate-100 */
+}
+
+.light .active-card-content h3 {
+  color: #1e293b; /* slate-800 */
+}
+
+.active-card-content p {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  color: #cbd5e1; /* slate-300 */
+  flex-shrink: 0;
+}
+
+.light .active-card-content p {
+  color: #475569; /* slate-600 */
+}
+
+.active-card-content h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #f1f5f9; /* slate-100 */
+}
+
+.light .active-card-content h4 {
+  color: #1e293b; /* slate-800 */
+}
+
+.active-card-content ul {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.active-card-content li {
+  margin-bottom: 0.25rem;
+  color: #cbd5e1; /* slate-300 */
+}
+
+.light .active-card-content li {
+  color: #475569; /* slate-600 */
+}
+
+.active-card-content svg {
+  color: #10b981; /* emerald-500 */
+}
+
+/* Contenido de tarjetas inactivas - AJUSTADO PARA TARJETAS MÁS ANCHAS */
+.inactive-card-content span {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: #3b82f6; /* blue-500 */
+}
+
+.inactive-card-content h4 {
+  font-size: 1.125rem;
+  line-height: 1.3;
+  color: #f1f5f9; /* slate-100 */
+}
+
+.light .inactive-card-content h4 {
+  color: #1e293b; /* slate-800 */
+}
+
+/* Botones de navegación laterales - MÁS LARGOS VERTICALMENTE */
+.carousel-nav-btn {
+  cursor: pointer;
+  user-select: none;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* position se maneja en el HTML */
+  overflow: hidden;
+  /* Dimensiones más largas verticalmente */
+  min-width: 60px;
+  min-height: 160px; /* Más largo verticalmente para mejor apariencia */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Sin inclinación del botón completo - se maneja en el HTML */
+  border-radius: 8px;
+}
+
+.carousel-nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.carousel-nav-btn:hover::before {
+  opacity: 1;
+}
+
+.carousel-nav-btn:hover {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+}
+
+.carousel-nav-btn:active {
+  /* Se mantiene el posicionamiento original */
+}
+
+.carousel-nav-btn:focus {
+  outline: none;
+  ring: 2px solid rgba(255, 255, 255, 0.2);
+  ring-offset: 2px;
+}
+
+/* Estilos específicos para botón izquierdo */
+.carousel-nav-prev {
+  border-radius: 8px;
+}
+
+/* Estilos específicos para botón derecho */
+.carousel-nav-next {
+  border-radius: 8px;
+}
+
+/* Light mode para botones de navegación */
+.light .carousel-nav-btn {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(15px);
+}
+
+.light .carousel-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+}
+
+.light .carousel-nav-btn svg {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.light .carousel-nav-btn:hover svg {
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.light .carousel-nav-btn:focus {
+  ring-color: rgba(0, 0, 0, 0.3);
+}
+
+.light .carousel-nav-btn:focus {
+  ring-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Indicadores de fase */
+.carousel-indicator {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.carousel-indicator:hover {
+  transform: scale(1.2);
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.carousel-indicator:active {
+  transform: scale(0.9);
+}
+
+.carousel-indicator.active {
+  background-color: rgba(255, 255, 255, 1) !important;
+  transform: scale(1.25);
+}
+
+/* Animaciones suaves para el contenido */
+.active-card-content,
+.inactive-card-content {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center center;
+}
+
+/* Efectos de hover en las tarjetas */
+.carousel-card:hover:not(.active) {
+  transform: scale(0.65) !important;
+  opacity: 0.5 !important;
+  filter: blur(2px) brightness(0.8) !important;
+}
+
+/* Mejoras para las imágenes en las tarjetas activas */
+.carousel-card.active img {
   transition: transform 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-.phase-content-card img:hover {
-  transform: scale(1.02);
+.carousel-card.active img:hover {
+  transform: scale(1.05);
 }
 
-/* Animación sutil para los elementos de la lista de entregables */
-.phase-content-card li {
+/* Animación para los elementos de la lista */
+.carousel-card.active li {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.phase-content-card li:hover {
+.carousel-card.active li:hover {
   transform: translateX(4px);
   opacity: 1;
+}
+
+/* Efectos de profundidad mejorados */
+.carousel-card:nth-child(1) { z-index: 5; }
+.carousel-card:nth-child(2) { z-index: 4; }
+.carousel-card:nth-child(3) { z-index: 6; } /* Activa */
+.carousel-card:nth-child(4) { z-index: 3; }
+.carousel-card:nth-child(5) { z-index: 2; }
+
+/* Responsive para el carrusel con tarjetas mucho más anchas */
+@media (max-width: 1400px) {
+  .carousel-container {
+    height: 60vh;
+    max-height: 500px;
+  }
+  
+  .carousel-card {
+    width: 520px;
+    height: 520px;
+    margin-left: -260px;
+    margin-top: -260px;
+  }
+  
+  .carousel-card:nth-child(1) { 
+    transform: rotateY(0deg) translateZ(320px) scale(0.7); 
+  }
+  .carousel-card:nth-child(2) { 
+    transform: rotateY(72deg) translateZ(320px) scale(0.7); 
+  }
+  .carousel-card:nth-child(3) { 
+    transform: rotateY(144deg) translateZ(320px) scale(0.7); 
+  }
+  .carousel-card:nth-child(4) { 
+    transform: rotateY(216deg) translateZ(320px) scale(0.7); 
+  }
+  .carousel-card:nth-child(5) { 
+    transform: rotateY(288deg) translateZ(320px) scale(0.7); 
+  }
+  
+  .carousel-card.active:nth-child(1) { 
+    transform: rotateY(0deg) translateZ(420px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(2) { 
+    transform: rotateY(72deg) translateZ(420px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(3) { 
+    transform: rotateY(144deg) translateZ(420px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(4) { 
+    transform: rotateY(216deg) translateZ(420px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(5) { 
+    transform: rotateY(288deg) translateZ(420px) scale(1) !important; 
+  }
+  
+  .active-card-content > div {
+    max-width: 480px;
+    max-height: 480px;
+    padding: 1.25rem;
+  }
+  
+  .inactive-card-content > div {
+    max-width: 360px;
+    max-height: 400px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .carousel-container {
+    height: 55vh;
+    max-height: 450px;
+  }
+  
+  .carousel-card {
+    width: 480px;
+    height: 480px;
+    margin-left: -240px;
+    margin-top: -240px;
+  }
+  
+  .carousel-card:nth-child(1) { 
+    transform: rotateY(0deg) translateZ(300px) scale(0.65); 
+  }
+  .carousel-card:nth-child(2) { 
+    transform: rotateY(72deg) translateZ(300px) scale(0.65); 
+  }
+  .carousel-card:nth-child(3) { 
+    transform: rotateY(144deg) translateZ(300px) scale(0.65); 
+  }
+  .carousel-card:nth-child(4) { 
+    transform: rotateY(216deg) translateZ(300px) scale(0.65); 
+  }
+  .carousel-card:nth-child(5) { 
+    transform: rotateY(288deg) translateZ(300px) scale(0.65); 
+  }
+  
+  .carousel-card.active:nth-child(1) { 
+    transform: rotateY(0deg) translateZ(380px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(2) { 
+    transform: rotateY(72deg) translateZ(380px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(3) { 
+    transform: rotateY(144deg) translateZ(380px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(4) { 
+    transform: rotateY(216deg) translateZ(380px) scale(1) !important; 
+  }
+  .carousel-card.active:nth-child(5) { 
+    transform: rotateY(288deg) translateZ(380px) scale(1) !important; 
+  }
+  
+  .active-card-content > div {
+    max-width: 420px;
+    max-height: 440px;
+    padding: 1rem;
+  }
+  
+  .inactive-card-content > div {
+    max-width: 320px;
+    max-height: 360px;
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .carousel-container {
+    height: 50vh;
+    max-height: 400px;
+  }
+  
+  .carousel-nav-btn {
+    padding: 0.5rem;
+  }
+  
+  .carousel-nav-btn svg {
+    width: 1rem;
+    height: 1rem;
+  }
 }
 
 /* Estilos para el acordeón en móvil */

@@ -89,19 +89,19 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   companyLogos$: Observable<Logo[]>;
   educationLogos$: Observable<Logo[]>;
   allianceLogos$: Observable<Logo[]>;
-  // Variable para controlar la pestaña activa, inicializada en la primera fase
-  activePhase = 1;
+  // Propiedades para el carrusel 3D
+  activePhaseIndex = 0; // Índice de la fase activa (centro)
+  carouselRotation = 0; // Ángulo de rotación del carrusel
+  private isDragging = false; // Flag para detectar arrastre
+  private dragStartX = 0; // Posición inicial del arrastre
+  private dragStartRotation = 0; // Rotación inicial del arrastre
+  private autoRotateTimer: any; // Timer para auto-rotación
+  isFlipped: boolean[] = [false, false, false, false, false]; // Estado de flip para cada tarjeta
 
   // Array con toda la información enriquecida de las fases
   methodologyPhases: any[] = [];
   // Estado de tarjetas volteadas
   private flippedSet = new Set<number>();
-  
-  // Propiedades para el scroll-spying
-  @ViewChildren('phaseNavItem') navItems!: QueryList<ElementRef>;
-  @ViewChildren('phaseContentCard') contentCards!: QueryList<ElementRef>;
-  private observer!: IntersectionObserver;
-  private isManualScroll = false; // Flag para detectar scroll manual
   
   // Solo mostrar logos reales de Firestore, sin fallbacks de ejemplo
 
@@ -250,77 +250,102 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     return ['0', '1', '2']; // Siempre 3 entregables por fase
   }
 
-  // Método para hacer scroll suave a una fase específica
-  scrollToPhase(phaseId: number): void {
-    console.log(`🎯 Navegando a fase ${phaseId}`);
-    
-    // Actualizar la fase activa
-    this.activePhase = phaseId;
-    this.cdr.detectChanges();
+  // Métodos del carrusel 3D
+  
+  // Navegar a la fase siguiente
+  nextPhase(): void {
+    this.activePhaseIndex = (this.activePhaseIndex + 1) % this.methodologyPhases.length;
+    this.updateCarouselRotation();
+  }
 
-    // Buscar el elemento
-    const elementId = `fase-${phaseId}`;
-    const element = document.getElementById(elementId);
+  // Navegar a la fase anterior
+  previousPhase(): void {
+    this.activePhaseIndex = this.activePhaseIndex === 0 
+      ? this.methodologyPhases.length - 1 
+      : this.activePhaseIndex - 1;
+    this.updateCarouselRotation();
+  }
+
+  // Ir a una fase específica
+  goToPhase(index: number): void {
+    this.activePhaseIndex = index;
+    this.updateCarouselRotation();
+  }
+
+  // Actualizar la rotación del carrusel basada en la fase activa
+  private updateCarouselRotation(): void {
+    const anglePerPhase = 72; // 360° / 5 fases = 72° por fase
+    const targetRotation = -this.activePhaseIndex * anglePerPhase;
     
-    if (element) {
-      // Scroll directo al elemento
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-      });
-    } else {
-      console.error(`❌ No se encontró el elemento: ${elementId}`);
+    // Aplicar transición suave
+    this.carouselRotation = targetRotation;
+    this.cdr.detectChanges();
+  }
+
+  // Eventos de arrastre con mouse
+  onMouseDown(event: MouseEvent): void {
+    this.isDragging = true;
+    this.dragStartX = event.clientX;
+    this.dragStartRotation = this.carouselRotation;
+    event.preventDefault();
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    if (!this.isDragging) return;
+    
+    const deltaX = event.clientX - this.dragStartX;
+    const sensitivity = 0.5; // Sensibilidad del arrastre
+    this.carouselRotation = this.dragStartRotation + (deltaX * sensitivity);
+    this.cdr.detectChanges();
+  }
+
+  onMouseUp(event: MouseEvent): void {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.snapToNearestPhase();
+  }
+
+  // Eventos de arrastre táctil
+  onTouchStart(event: TouchEvent): void {
+    if (event.touches.length === 1) {
+      this.isDragging = true;
+      this.dragStartX = event.touches[0].clientX;
+      this.dragStartRotation = this.carouselRotation;
+      event.preventDefault();
     }
   }
 
-  // Configurar scroll spy para detectar automáticamente la fase visible
-  private setupScrollSpy(): void {
-    if (typeof window === 'undefined') return;
+  onTouchMove(event: TouchEvent): void {
+    if (!this.isDragging || event.touches.length !== 1) return;
+    
+    const deltaX = event.touches[0].clientX - this.dragStartX;
+    const sensitivity = 0.5;
+    this.carouselRotation = this.dragStartRotation + (deltaX * sensitivity);
+    this.cdr.detectChanges();
+    event.preventDefault();
+  }
 
-    // Limpiar observer anterior si existe
-    if (this.observer) {
-      this.observer.disconnect();
-    }
+  onTouchEnd(event: TouchEvent): void {
+    if (!this.isDragging) return;
+    
+    this.isDragging = false;
+    this.snapToNearestPhase();
+  }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // No actualizar si es scroll manual
-        if (this.isManualScroll) {
-          console.log('🚫 Scroll spy deshabilitado por navegación manual');
-          return;
-        }
-        
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const phaseId = parseInt(entry.target.id.replace('fase-', ''));
-            if (this.activePhase !== phaseId) {
-              console.log(`🔄 Scroll spy detectó fase ${phaseId} (${entry.intersectionRatio} visible)`);
-              this.activePhase = phaseId;
-              this.cdr.detectChanges();
-            }
-          }
-        });
-      },
-      {
-        rootMargin: '-10% 0px -50% 0px', // Ajustado para mejor detección
-        threshold: [0.1, 0.2, 0.3, 0.4, 0.5] // Múltiples thresholds para mejor detección
-      }
-    );
+  // Ajustar automáticamente a la fase más cercana
+  private snapToNearestPhase(): void {
+    const anglePerPhase = 72;
+    const currentAngle = Math.abs(this.carouselRotation) % 360;
+    const nearestPhaseIndex = Math.round(currentAngle / anglePerPhase) % this.methodologyPhases.length;
+    
+    this.activePhaseIndex = nearestPhaseIndex;
+    this.updateCarouselRotation();
+  }
 
-    this.observer = observer;
-
-    // Observar todas las fases con un pequeño delay para asegurar que estén en el DOM
-    setTimeout(() => {
-      this.methodologyPhases.forEach(phase => {
-        const element = document.getElementById(`fase-${phase.id}`);
-        if (element) {
-          console.log(`👀 Observando elemento: fase-${phase.id}`);
-          observer.observe(element);
-        } else {
-          console.warn(`⚠️ No se encontró elemento: fase-${phase.id}`);
-        }
-      });
-    }, 500); // Aumentado el delay para asegurar que el DOM esté completamente renderizado
+  // Método para voltear las flash cards
+  flipCard(index: number): void {
+    this.isFlipped[index] = !this.isFlipped[index];
   }
 
   // Método para obtener logos a mostrar, solo logos reales de Firestore
@@ -391,14 +416,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  isFlipped(phaseId: number): boolean {
-    return this.flippedSet.has(phaseId);
-  }
 
-  // Función para cambiar la fase activa
-  selectPhase(phaseId: number): void {
-    this.activePhase = phaseId;
-  }
 
   ngAfterViewInit(): void {
     // Aseguramos que el título sea visible
@@ -408,84 +426,40 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       (titleEl as HTMLElement).style.visibility = 'visible';
     }
 
-    // Configurar scroll spy para las fases de metodología
-    this.setupScrollSpy();
-
-    // Scroll spy ya configurado en setupScrollSpy()
-    // No necesitamos initObserver() duplicado
+    // Inicializar el carrusel 3D
+    this.initializeCarousel();
   }
 
-  private initObserver(): void {
-    const options = {
-      root: null,
-      rootMargin: '-20% 0px -50% 0px', // Activa cuando el elemento está visible en la parte superior
-      threshold: 0.3 // Se activa cuando el 30% del elemento es visible
-    };
+  // Inicializar el carrusel 3D
+  private initializeCarousel(): void {
+    // Establecer la rotación inicial
+    this.updateCarouselRotation();
+    
+    // Configurar auto-rotación opcional (descomentado si se desea)
+    // this.startAutoRotation();
+  }
 
-    this.observer = new IntersectionObserver(entries => {
-      // Encuentra la entrada que está más intersectando
-      let mostVisible = entries.reduce((prev, current) => {
-        return (current.intersectionRatio > prev.intersectionRatio) ? current : prev;
-      });
-
-      if (mostVisible && mostVisible.isIntersecting) {
-        const id = mostVisible.target.getAttribute('id');
-        const currentPhaseId = parseInt(id?.replace('fase-', '') || '1');
-        
-        const navItem = this.navItems.find(
-          item => item.nativeElement.getAttribute('fragment') === `fase-${currentPhaseId}`
-        );
-
-        // Primero, quita 'active' de todos los items de navegación
-        this.navItems.forEach(item => {
-          item.nativeElement.classList.remove('active');
-          item.nativeElement.style.backgroundColor = '';
-          item.nativeElement.style.borderColor = '';
-          item.nativeElement.style.transform = '';
-          const textSpan = item.nativeElement.querySelector('span:last-child');
-          if (textSpan) {
-            textSpan.style.color = '';
-          }
-        });
-
-        // Maneja las clases de deslizamiento para las tarjetas
-        this.contentCards.forEach((card, index) => {
-          const cardPhaseId = index + 1;
-          if (cardPhaseId < currentPhaseId) {
-            // Las tarjetas anteriores se deslizan hacia arriba
-            card.nativeElement.classList.add('slide-up');
-          } else {
-            // Las tarjetas actuales y posteriores vuelven a su posición normal
-            card.nativeElement.classList.remove('slide-up');
-          }
-        });
-        
-        // Luego, añade 'active' solo al item de navegación que corresponde
-        if (navItem) {
-          navItem.nativeElement.classList.add('active');
-          // Forzar estilos por si las clases de DaisyUI no se aplican dinámicamente
-          navItem.nativeElement.style.backgroundColor = 'var(--fallback-b2, oklch(var(--b2) / 0.7))';
-          navItem.nativeElement.style.borderColor = 'var(--fallback-p, oklch(var(--p) / 0.3))';
-          navItem.nativeElement.style.transform = 'translateX(10px)';
-          const textSpan = navItem.nativeElement.querySelector('span:last-child');
-          if (textSpan) {
-            textSpan.style.color = 'var(--fallback-bc, oklch(var(--bc)))';
-          }
-        }
+  // Auto-rotación del carrusel (opcional)
+  private startAutoRotation(): void {
+    this.autoRotateTimer = setInterval(() => {
+      if (!this.isDragging) {
+        this.nextPhase();
       }
-    }, options);
+    }, 5000); // Cambiar cada 5 segundos
+  }
 
-    this.contentCards.forEach(card => {
-      this.observer.observe(card.nativeElement);
-    });
+  // Detener auto-rotación
+  private stopAutoRotation(): void {
+    if (this.autoRotateTimer) {
+      clearInterval(this.autoRotateTimer);
+      this.autoRotateTimer = null;
+    }
   }
 
   ngOnDestroy(): void {
     this.contentSub?.unsubscribe();
     clearTimeout(this.timeoutId);
-    if (this.observer) {
-      this.observer.disconnect();
-    }
+    this.stopAutoRotation();
   }
 }
 

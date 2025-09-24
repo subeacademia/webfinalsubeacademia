@@ -145,47 +145,158 @@
       </p>
     </div>
 
-    <!-- Layout de card stacking para desktop -->
-    <div class="hidden lg:grid grid-cols-12 gap-8">
-      <!-- Navegación sticky en la izquierda - Solo en esta sección -->
-      <!-- COMENTADO: La navegación lateral se movió a la página de metodología dedicada -->
-      <!-- <div class="col-span-4">
-        <div class="phase-nav-container space-y-3 z-20" style="position: sticky; top: 6rem; width: 300px; max-height: calc(100vh - 8rem); overflow-y: auto; overflow-x: hidden;">
-          <button *ngFor="let phase of methodologyPhases"
-                  #phaseNavItem
-                  (click)="scrollToPhase(phase.id)"
-                  [class]="'phase-nav-item flex items-center p-4 rounded-lg transition-all duration-300 cursor-pointer block no-underline w-full text-left backdrop-blur-md ' + (activePhase === phase.id ? 'bg-white/30 dark:bg-white/20 border border-white/40 dark:border-white/30 shadow-xl' : 'bg-white/15 dark:bg-white/10 border border-white/25 dark:border-white/15 hover:bg-white/25 dark:hover:bg-white/15')"
-                  [attr.aria-label]="'Ir a ' + phase.title + ' en la página de metodología'">
-            <span class="text-xl font-bold mr-4 text-white dark:text-white">{{ '0' + phase.id }}</span>
-            <span class="text-lg font-semibold text-white dark:text-white">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</span>
+    <!-- Carrusel 3D inmersivo para desktop -->
+    <div class="hidden lg:block relative w-full">
+      <!-- Contenedor principal -->
+      <div class="relative w-full h-[60vh] flex items-center justify-center">
+        
+        <!-- Contenedor del carrusel -->
+        <div class="carousel-container w-full h-full flex items-center justify-center relative">
+          
+          <!-- Botones de navegación - A LOS LADOS DEL CARRUSEL -->
+          <!-- Botón anterior - IZQUIERDA -->
+          <button 
+            (click)="previousPhase()"
+            class="carousel-nav-btn carousel-nav-prev absolute left-4 top-1/2 transform -translate-y-1/2 z-50 bg-white/5 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-20 transition-all duration-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 group"
+            aria-label="Fase anterior">
+            <svg class="w-6 h-6 text-white/70 group-hover:text-white transition-all duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(-45deg);">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+            </svg>
           </button>
-        </div>
-      </div> -->
 
-      <!-- Contenedor de tarjetas con scroll normal - Ahora ocupa todo el ancho -->
-      <div class="col-span-12">
-        <div class="space-y-6 relative">
-          <div *ngFor="let phase of methodologyPhases; let i = index"
-               #phaseContentCard
-               [id]="'fase-' + phase.id" 
-               [class]="'phase-content-card bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-2xl shadow-2xl p-8 min-h-[80vh] flex flex-col justify-center'">
-            <div class="w-full max-w-2xl mx-auto">
-              <img [src]="phase.imageUrl" 
-                   [alt]="phase.title" 
-                   class="rounded-lg shadow-md object-cover w-full h-64 mb-6 transition-transform duration-300 hover:scale-105"
-                   loading="lazy">
-              <h3 class="text-3xl font-bold text-slate-800 dark:text-white mb-4 leading-tight">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
-              <p class="mb-6 text-slate-600 dark:text-gray-300 leading-relaxed text-lg">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
-              <h4 class="text-xl font-semibold mb-4 text-slate-800 dark:text-white">{{ 'shared.deliverables' | i18nTranslate }}</h4>
-              <ul class="space-y-3">
-                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let i = index" class="flex items-start text-slate-600 dark:text-gray-300">
-                  <svg class="w-6 h-6 mr-3 text-green-500 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                  </svg>
-                  <span class="text-base leading-relaxed">{{ ('methodology.phases.' + phase.id + '.deliverables.' + i) | i18nTranslate }}</span>
-                </li>
-              </ul>
+          <!-- Botón siguiente - DERECHA -->
+          <button 
+            (click)="nextPhase()"
+            class="carousel-nav-btn carousel-nav-next absolute right-4 top-1/2 transform -translate-y-1/2 z-50 bg-white/5 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-20 transition-all duration-500 hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white/20 group"
+            aria-label="Fase siguiente">
+            <svg class="w-6 h-6 text-white/70 group-hover:text-white transition-all duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transform: rotate(45deg);">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+          
+          <!-- Contenedor del carrusel 3D -->
+          <div class="carousel-viewport w-full h-full flex items-center justify-center">
+            <div 
+              class="carousel-track"
+              [style.transform]="'rotateY(' + carouselRotation + 'deg)'"
+              (mousedown)="onMouseDown($event)"
+              (mousemove)="onMouseMove($event)"
+              (mouseup)="onMouseUp($event)"
+              (mouseleave)="onMouseUp($event)"
+              (touchstart)="onTouchStart($event)"
+              (touchmove)="onTouchMove($event)"
+              (touchend)="onTouchEnd($event)">
+            
+              <!-- Tarjetas del carrusel -->
+              <div *ngFor="let phase of methodologyPhases; let i = index"
+                   [class]="'carousel-card' + (i === activePhaseIndex ? ' active' : '')"
+                   [style.transform]="'rotateY(' + (i * 72) + 'deg) translateZ(400px)'">
+              
+              <!-- Contenido de la tarjeta activa (centro) - FLASH CARD REVERSIBLE -->
+              <div *ngIf="i === activePhaseIndex" class="active-card-content">
+                <div class="flash-card-container">
+                  <div class="flash-card" [class.flipped]="isFlipped[i]">
+                    <!-- Frente de la tarjeta - INFORMACIÓN COMPLETA -->
+                    <div class="flash-card-front">
+                      <div class="flex flex-col h-full">
+                        <!-- Imagen con número integrado -->
+                        <div class="relative flex-shrink-0">
+                          <img [src]="phase.imageUrl" 
+                               [alt]="phase.title" 
+                               class="rounded-t-xl object-cover w-full h-40 transition-transform duration-300 hover:scale-105"
+                               loading="lazy">
+                          <!-- Número integrado en la esquina -->
+                          <div class="absolute top-3 left-3 bg-blue-500 text-white rounded-lg w-10 h-10 flex items-center justify-center text-lg font-bold shadow-lg">
+                            {{ '0' + phase.id }}
+                          </div>
+                          <!-- Indicador de flip -->
+                          <div class="absolute top-3 right-3 bg-white/20 backdrop-blur-sm rounded-lg p-2">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        
+                        <!-- Contenido completo -->
+                        <div class="flex-1 flex flex-col justify-between p-4">
+                          <!-- Título y descripción -->
+                          <div class="flex-1">
+                            <h3 class="text-xl font-bold leading-tight mb-3 text-center text-white dark:text-white">{{ ('methodology.phases.' + phase.id + '.title') | i18nTranslate }}</h3>
+                            <p class="text-sm leading-relaxed text-center opacity-90 text-white/90 dark:text-white/90 mb-4">{{ ('methodology.phases.' + phase.id + '.description') | i18nTranslate }}</p>
+                            
+                            <!-- Entregables resumidos -->
+                            <div class="mb-4">
+                              <h4 class="text-sm font-semibold mb-2 text-blue-300 dark:text-blue-400 text-center">{{ 'shared.deliverables' | i18nTranslate }}</h4>
+                              <ul class="space-y-1 text-xs">
+                                <li *ngFor="let deliverable of getPhaseDeliverables(phase.id).slice(0, 3); let j = index" class="flex items-start text-white/80 dark:text-white/80">
+                                  <svg class="w-3 h-3 mr-2 flex-shrink-0 mt-1 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                  </svg>
+                                  <span class="flex-1">{{ ('methodology.phases.' + phase.id + '.deliverables.' + j) | i18nTranslate }}</span>
+                                </li>
+                                <li *ngIf="getPhaseDeliverables(phase.id).length > 3" class="text-blue-300 dark:text-blue-400 text-center text-xs font-medium">
+                                  +{{ getPhaseDeliverables(phase.id).length - 3 }} más...
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                          
+                          <!-- Botón para voltear -->
+                          <div class="mt-2">
+                            <button (click)="flipCard(i)" 
+                                    class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                              Ver Todos los Entregables
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Reverso de la tarjeta - INFORMACIÓN DETALLADA -->
+                    <div class="flash-card-back">
+                      <div class="flex flex-col h-full">
+                        <!-- Header con número y botón de volver -->
+                        <div class="flex items-center justify-between p-3 border-b border-white/10">
+                          <span class="text-2xl font-bold text-blue-400">{{ '0' + phase.id }}</span>
+                          <button (click)="flipCard(i)" 
+                                  class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-2 rounded-full transition-all duration-300 hover:scale-110">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        <!-- Contenido detallado -->
+                        <div class="flex-1 p-3 overflow-y-auto">
+                          <h4 class="text-lg font-semibold mb-3 text-blue-300">{{ 'shared.deliverables' | i18nTranslate }}</h4>
+                          <ul class="space-y-2">
+                            <li *ngFor="let deliverable of getPhaseDeliverables(phase.id); let j = index" class="flex items-start">
+                              <svg class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                              </svg>
+                              <span class="flex-1 text-sm leading-relaxed">{{ ('methodology.phases.' + phase.id + '.deliverables.' + j) | i18nTranslate }}</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contenido de las tarjetas inactivas (laterales) -->
+              <div *ngIf="i !== activePhaseIndex" class="inactive-card-content">
+                <div>
+                  <div class="text-center">
+                    <span class="text-7xl font-bold text-blue-600 dark:text-blue-400 mb-6 block">{{ '0' + phase.id }}</span>
+                    <h4 class="text-xl font-bold text-slate-800 dark:text-white leading-tight px-4">{{ ('methodology.phases.' + phase.id + '.shortTitle') | i18nTranslate }}</h4>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
           </div>
         </div>
       </div>
@@ -222,9 +333,8 @@
         </div>
       </div>
     </div>
-  </div>
-
 </section>
+
 
 <!-- CTA final de la metodología - Separado de la sección principal -->
 <section class="py-16 relative overflow-hidden">
