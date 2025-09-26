@@ -20,6 +20,9 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'productos/asesorias', loadComponent: () => import('./productos/admin-asesorias.component').then(m => m.AdminAsesoriasComponent), canActivate: [AdminGuard] },
       { path: 'productos/cursos', loadComponent: () => import('./productos/admin-cursos.component').then(m => m.AdminCursosComponent), canActivate: [AdminGuard] },
       { path: 'productos/certificaciones', loadComponent: () => import('./productos/admin-certificaciones.component').then(m => m.AdminCertificacionesComponent), canActivate: [AdminGuard] },
+      { path: 'productos/certificaciones/wizard', loadComponent: () => import('./productos/certification-wizard-simple-working.component').then(m => m.CertificationWizardSimpleWorkingComponent), canActivate: [AdminGuard] },
+      { path: 'productos/certificaciones/wizard/:id', loadComponent: () => import('./productos/certification-wizard.component').then(m => m.CertificationWizardComponent), canActivate: [AdminGuard] },
+      { path: 'productos/convalidaciones', loadComponent: () => import('./productos/applications-management.component').then(m => m.ApplicationsManagementComponent), canActivate: [AdminGuard] },
 
       // Certificados (validador): CRUD propio
       { path: 'certificados', loadComponent: () => import('./certificados/admin-certificados.component').then(m => m.AdminCertificadosComponent), canActivate: [AdminGuard] },

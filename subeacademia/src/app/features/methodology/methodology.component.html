@@ -33,40 +33,9 @@
 </div>
 
 <!-- Sección Metodología ARES AI Detallada -->
-<div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-24 sm:py-32">
+<div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm py-12 sm:py-16">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     
-    <!-- Navegación lateral de fases - Solo en desktop -->
-    <div class="hidden lg:block fixed left-6 top-32 w-80 z-20">
-      <div class="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-white/30 dark:border-white/20 rounded-2xl shadow-2xl p-6">
-        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-          <span class="text-blue-600 dark:text-blue-400 mr-2">📋</span>
-          Fases de la Metodología
-        </h3>
-        <div class="space-y-3">
-          <div class="flex items-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <span class="text-xl font-bold mr-3 text-blue-600 dark:text-blue-400">01</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">Análisis y Evaluación</span>
-          </div>
-          <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-            <span class="text-xl font-bold mr-3 text-gray-400">02</span>
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Estrategia y Planificación</span>
-          </div>
-          <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-            <span class="text-xl font-bold mr-3 text-gray-400">03</span>
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Implementación y Desarrollo</span>
-          </div>
-          <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-            <span class="text-xl font-bold mr-3 text-gray-400">04</span>
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Despliegue y Monitoreo</span>
-          </div>
-          <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-            <span class="text-xl font-bold mr-3 text-gray-400">05</span>
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Optimización y Escalabilidad</span>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.ares.title' | i18nTranslate }}</h2>
       <p class="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-400">{{ 'methodology.ares.description' | i18nTranslate }}</p>
@@ -156,7 +125,7 @@
 </div>
 
 <!-- Sección Fundamentos Pedagógicos -->
-<div class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm py-24 sm:py-32">
+<div class="bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm py-12 sm:py-16">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">Una Pedagogía para la Era de la IA</h2>
@@ -267,7 +236,7 @@
 </div>
 
 <!-- Sección 13 Competencias con Tarjetas Simplificadas -->
-<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm py-24 sm:py-32">
+<div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm py-12 sm:py-16">
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
     <div class="mx-auto max-w-2xl lg:text-center mb-16">
       <h2 class="text-3xl font-bold tracking-tight sm:text-4xl orange-gradient-text">{{ 'methodology.competencies.title' | i18nTranslate }}</h2>
@@ -281,22 +250,22 @@
         class="group cursor-pointer"
         (click)="openCompetencyModal(competency)"
       >
-        <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 hover:border-blue-500 border border-transparent transition-all duration-300 ease-in-out overflow-hidden competency-card">
+        <div class="h-full bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 hover:border-blue-500 border border-transparent transition-all duration-300 ease-in-out overflow-hidden competency-card flex flex-col">
           <!-- Header de la tarjeta -->
-          <div class="p-6 text-center">
+          <div class="p-6 text-center flex-1 flex flex-col">
             <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl competency-icon">
               {{ getCompetencyIcon(competency) }}
             </div>
             <h3 class="font-semibold text-gray-900 dark:text-white text-lg leading-tight mb-3">
               {{ competency.name }}
             </h3>
-            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-3">
+            <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-3 flex-1">
               {{ competency.description }}
             </p>
           </div>
           
-          <!-- Footer de la tarjeta -->
-          <div class="px-6 pb-6">
+          <!-- Footer de la tarjeta - Siempre en la parte inferior -->
+          <div class="px-6 pb-6 mt-auto">
             <div class="text-center">
               <div class="inline-flex items-center justify-center px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-sm font-medium rounded-lg">
                 <span class="mr-2">👆</span>

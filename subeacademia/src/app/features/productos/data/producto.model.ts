@@ -27,7 +27,7 @@ export interface Asesoria extends Producto {
   tags: string[];
 }
 
-export interface Certificacion extends Producto {
+export interface CertificacionLegacy extends Producto {
   tipo: 'certificacion';
   entidadCertificadora: string;
   nivel: string;

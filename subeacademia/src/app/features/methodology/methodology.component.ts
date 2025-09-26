@@ -46,11 +46,22 @@ export class MethodologyComponent {
   }
 
   getCompetencyIcon(competency: Competency): string {
-    const icons = [
-      '🚀', '💡', '🔧', '📊', '🎯', '🌐', '⚡', '🔄', 
-      '📈', '🎨', '🔒', '📱', '🌟'
-    ];
-    return icons[parseInt(competency.id) - 1] || '📋';
+    const iconMap: Record<string, string> = {
+      'pensamiento_critico': '🧠',
+      'resolucion_problemas': '🔍',
+      'alfabetizacion_datos': '📊',
+      'comunicacion_efectiva': '💬',
+      'colaboracion_trabajo_equipo': '👥',
+      'creatividad_innovacion': '💡',
+      'diseno_tecnologico': '🎨',
+      'automatizacion_agentes_ia': '🤖',
+      'adaptabilidad_flexibilidad': '🔄',
+      'etica_responsabilidad': '⚖️',
+      'sostenibilidad': '🌱',
+      'aprendizaje_continuo': '📚',
+      'liderazgo_ia': '👑'
+    };
+    return iconMap[competency.id] || '📋';
   }
 
   getLevelColor(level: string): string {

@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HistoryService } from '../../core/data/history.service';
 import { HistoryEvent } from '../../core/models/history-event.model';
 import { HistoryBulkUploadService, HistoryBulkUploadResult, HistoryBulkUploadProgress } from '../../core/services/history-bulk-upload.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 
 @Component({
   selector: 'app-history-page',
@@ -20,7 +21,7 @@ import { HistoryBulkUploadService, HistoryBulkUploadResult, HistoryBulkUploadPro
         </svg>
         Descargar JSON
       </button>
-      <button class="btn btn-secondary" (click)="openBulkUpload()">
+      <button class="btn btn-secondary" (click)="triggerJsonUpload()">
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 12l3 3m0 0l3-3m-3 3V9"></path>
         </svg>
@@ -29,6 +30,14 @@ import { HistoryBulkUploadService, HistoryBulkUploadResult, HistoryBulkUploadPro
       <button class="btn" (click)="openCreate()">Añadir hito</button>
     </div>
   </div>
+
+  <!-- Input oculto para la carga de archivos -->
+  <input 
+    type="file" 
+    class="hidden" 
+    accept=".json"
+    (change)="handleJsonFile($event)"
+    #fileInput>
 
   <div class="overflow-x-auto border border-white/10 rounded-lg">
     <table class="min-w-full text-sm">
@@ -92,6 +101,9 @@ import { HistoryBulkUploadService, HistoryBulkUploadResult, HistoryBulkUploadPro
 export class HistoryPageComponent {
   private fb = inject(FormBuilder);
   private svc = inject(HistoryService);
+  private toast = inject(ToastService);
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   events = signal<HistoryEvent[]>([]);
   isOpen = signal(false);
@@ -122,15 +134,192 @@ export class HistoryPageComponent {
   }
   async remove(e: HistoryEvent){ if (!e.id) return; if (confirm('¿Eliminar hito?')) await this.svc.delete(e.id); }
 
-  // Métodos para carga masiva (placeholders por ahora)
-  downloadCurrentStructure() {
-    console.log('Funcionalidad de descarga de estructura JSON pendiente de implementación');
-    // TODO: Implementar descarga de estructura JSON
+  // Método para descargar la estructura actual como JSON
+  downloadCurrentStructure(): void {
+    try {
+      const currentEvents = this.events();
+      
+      // Crear la estructura de datos para exportar
+      let exportData;
+      
+      if (currentEvents.length === 0) {
+        // Si no hay eventos, crear estructura de ejemplo
+        exportData = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          description: 'Estructura de ejemplo para eventos de historia. Reemplaza los ejemplos con tus propios datos.',
+          history: [
+            {
+              year: 2024,
+              title: "Ejemplo: Lanzamiento de la plataforma",
+              description: "Descripción detallada del evento de historia. Puedes escribir aquí toda la información relevante sobre este hito importante.",
+              order: 1
+            },
+            {
+              year: 2023,
+              title: "Ejemplo: Desarrollo inicial del proyecto",
+              description: "Otra descripción de ejemplo. Cada evento debe tener un año, título y descripción. El campo 'order' controla el orden de aparición.",
+              order: 2
+            },
+            {
+              year: 2022,
+              title: "Ejemplo: Fundación de la empresa",
+              description: "Tercer ejemplo de evento histórico. Puedes agregar tantos eventos como necesites. Recuerda que el año debe ser un número.",
+              order: 3
+            }
+          ]
+        };
+      } else {
+        // Si hay eventos, exportar los datos actuales
+        exportData = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          history: currentEvents.map(event => ({
+            id: event.id,
+            year: event.year,
+            title: event.title,
+            description: event.description,
+            order: event.order || 0
+          }))
+        };
+      }
+
+      // Convertir a JSON con formato legible
+      const jsonString = JSON.stringify(exportData, null, 2);
+      
+      // Crear y descargar el archivo
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Nombre del archivo según si hay datos o es estructura de ejemplo
+      const fileName = currentEvents.length === 0 
+        ? `estructura-historia-ejemplo-${new Date().toISOString().split('T')[0]}.json`
+        : `historia-completa-${new Date().toISOString().split('T')[0]}.json`;
+      
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mensaje diferente según si hay datos o es estructura de ejemplo
+      const message = currentEvents.length === 0 
+        ? 'Se ha descargado la estructura de ejemplo. Puedes editarla y cargarla con tus propios datos.'
+        : `Se ha descargado la estructura con ${currentEvents.length} eventos de historia`;
+      
+      this.toast.success(message);
+      
+    } catch (error: any) {
+      console.error('Error al descargar la estructura:', error);
+      this.toast.error(`Error al descargar la estructura: ${error.message}`);
+    }
   }
 
-  openBulkUpload() {
-    console.log('Funcionalidad de carga masiva JSON pendiente de implementación');
-    // TODO: Implementar modal de carga masiva JSON
+  // Método para activar la carga de archivo JSON
+  triggerJsonUpload(): void {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }
+  }
+
+  // Método para manejar la carga del archivo JSON
+  async handleJsonFile(event: Event): Promise<void> {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    
+    if (!file) return;
+
+    try {
+      this.toast.info('Procesando archivo de historia...');
+      
+      // Leer el archivo
+      const content = await this.readFileAsText(file);
+      
+      // Parsear JSON
+      let historyData: any;
+      try {
+        historyData = JSON.parse(content);
+      } catch (parseError) {
+        throw new Error('El archivo no contiene un JSON válido');
+      }
+
+      // Validar estructura
+      if (!this.validateHistoryStructure(historyData)) {
+        throw new Error('El archivo JSON no tiene la estructura correcta de historia');
+      }
+
+      // Extraer los eventos de historia
+      const events = Array.isArray(historyData.history) ? historyData.history : [historyData.history];
+      
+      // Procesar cada evento
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const eventData of events) {
+        try {
+          if (eventData.id) {
+            // Actualizar evento existente
+            await this.svc.update(eventData.id, eventData);
+          } else {
+            // Crear nuevo evento
+            await this.svc.add(eventData);
+          }
+          successCount++;
+        } catch (eventError: any) {
+          console.error(`Error procesando evento ${eventData.title || eventData.id}:`, eventError);
+          errorCount++;
+        }
+      }
+
+      // Mostrar resultado
+      if (errorCount === 0) {
+        this.toast.success(`Se han cargado ${successCount} eventos de historia exitosamente`);
+      } else {
+        this.toast.warning(`Se cargaron ${successCount} eventos, ${errorCount} con errores`);
+      }
+
+      // Recargar la lista
+      this.svc.list().subscribe(v => this.events.set(v));
+      
+      // Limpiar el input
+      target.value = '';
+      
+    } catch (error: any) {
+      this.toast.error(`Error al procesar el archivo: ${error.message}`);
+      target.value = '';
+    }
+  }
+
+  // Función auxiliar para leer archivo como texto
+  private readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = (e) => reject(new Error('Error al leer el archivo'));
+      reader.readAsText(file);
+    });
+  }
+
+  // Función para validar la estructura del JSON de historia
+  private validateHistoryStructure(data: any): boolean {
+    // Verificar que existe la propiedad history
+    if (!data.history) {
+      return false;
+    }
+
+    // Verificar que history es un array
+    const events = Array.isArray(data.history) ? data.history : [data.history];
+    
+    // Validar cada evento
+    return events.every((event: any) => 
+      typeof event.year === 'number' &&
+      typeof event.title === 'string' &&
+      typeof event.description === 'string' &&
+      event.title.trim().length > 0 &&
+      event.description.trim().length > 0
+    );
   }
 }
 

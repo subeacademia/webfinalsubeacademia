@@ -97,6 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   private dragStartRotation = 0; // Rotación inicial del arrastre
   private autoRotateTimer: any; // Timer para auto-rotación
   isFlipped: boolean[] = [false, false, false, false, false]; // Estado de flip para cada tarjeta
+  isLightMode = false; // Detectar si estamos en modo claro
 
   // Array con toda la información enriquecida de las fases
   methodologyPhases: any[] = [];
@@ -134,8 +135,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializeI18n();
     // Suscribirse al tema para alternar la variante del fondo sin duplicación
     this.isDarkTheme = this.themeService.current() === 'dark'; // Inicializar inmediatamente
+    this.isLightMode = this.themeService.current() === 'light'; // Detectar modo claro
     this.themeService.isDarkTheme$.subscribe(isDark => {
       this.isDarkTheme = isDark;
+      this.isLightMode = !isDark; // Actualizar modo claro
       this.cdr.detectChanges();
     });
     

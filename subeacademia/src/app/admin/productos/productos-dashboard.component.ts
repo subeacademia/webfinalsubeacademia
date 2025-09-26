@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { I18nTranslatePipe } from '../../core/i18n/i18n.pipe';
 import { AsesoriasService } from '../../features/productos/services/asesorias.service';
 import { CertificacionesService } from '../../features/productos/services/certificaciones.service';
 import { CursosService } from '../../features/productos/services/cursos.service';
@@ -13,92 +12,156 @@ import { Curso } from '../../features/productos/data/producto.model';
 @Component({
   selector: 'app-productos-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, I18nTranslatePipe],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="space-y-6">
       <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'admin.productos.dashboard.title' | i18nTranslate }}</h1>
-        <div class="flex gap-2">
-          <!-- Botones de carga masiva -->
-          <button (click)="descargarEstructuraJSON()" 
-                  class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            {{ 'admin.productos.dashboard.download_structure' | i18nTranslate }}
-          </button>
-          <button (click)="mostrarModalCargaMasiva = true" 
-                  class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
-            {{ 'admin.productos.dashboard.bulk_upload' | i18nTranslate }}
-          </button>
-          <a routerLink="/admin/productos/asesorias" 
-             class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            {{ 'admin.productos.dashboard.manage_asesorias' | i18nTranslate }}
-          </a>
-          <a routerLink="/admin/productos/cursos" 
-             class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            {{ 'admin.productos.dashboard.manage_cursos' | i18nTranslate }}
-          </a>
-          <a routerLink="/admin/productos/certificaciones" 
-             class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-            {{ 'admin.productos.dashboard.manage_certificaciones' | i18nTranslate }}
-          </a>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard de Productos</h1>
+          <p class="text-gray-600 dark:text-gray-400 mt-1">Gestiona tu catálogo de productos y servicios</p>
         </div>
+      </div>
+
+      <!-- Información sobre los módulos -->
+      <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">¿Cuál es la diferencia entre los módulos?</h3>
+            <div class="grid md:grid-cols-2 gap-4 text-sm text-blue-800 dark:text-blue-200">
+              <div>
+                <p class="font-medium mb-1">📋 Catálogo de Certificaciones:</p>
+                <p>Gestiona los tipos de certificaciones que ofreces para venta (precios, modalidades, niveles)</p>
+              </div>
+              <div>
+                <p class="font-medium mb-1">🏆 Emisión de Certificados:</p>
+                <p>Genera certificados individuales para estudiantes específicos (ve al módulo "Certificados" en el menú principal)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de gestión organizados -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <a routerLink="/admin/productos/asesorias" 
+           class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <span class="text-xl">💡</span>
+            </div>
+            <div>
+              <h3 class="font-semibold">Gestionar Asesorías</h3>
+              <p class="text-sm opacity-90">{{ asesorias.length }} asesorías disponibles</p>
+            </div>
+          </div>
+        </a>
+
+        <a routerLink="/admin/productos/cursos" 
+           class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <span class="text-xl">📚</span>
+            </div>
+            <div>
+              <h3 class="font-semibold">Gestionar Cursos</h3>
+              <p class="text-sm opacity-90">{{ cursos.length }} cursos disponibles</p>
+            </div>
+          </div>
+        </a>
+
+        <a routerLink="/admin/productos/certificaciones" 
+           class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white p-4 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <span class="text-xl">🏆</span>
+            </div>
+            <div>
+              <h3 class="font-semibold">Catálogo de Certificaciones</h3>
+              <p class="text-sm opacity-90">{{ certificaciones.length }} certificaciones para venta</p>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- Botones de utilidades -->
+      <div class="flex gap-3 mb-6">
+        <button (click)="descargarEstructuraJSON()" 
+                class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Descargar Estructura JSON
+        </button>
+        <button (click)="mostrarModalCargaMasiva = true" 
+                class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+          </svg>
+          Carga Masiva JSON
+        </button>
       </div>
 
       <!-- Estadísticas generales -->
       <div class="grid md:grid-cols-3 gap-6">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-              <span class="text-2xl">💡</span>
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-6 rounded-lg shadow-lg border border-blue-200 dark:border-blue-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <span class="text-2xl text-white">💡</span>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total Asesorías</p>
+                <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ asesorias.length }}</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_asesorias' | i18nTranslate }}</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ asesorias.length }}</p>
+            <div class="text-right">
+              <span class="text-sm text-blue-600 dark:text-blue-400">
+                {{ asesoriasActivas }} activas
+              </span>
             </div>
-          </div>
-          <div class="mt-4">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ asesoriasActivas }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
-            </span>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span class="text-2xl">📚</span>
+        <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-6 rounded-lg shadow-lg border border-green-200 dark:border-green-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <span class="text-2xl text-white">📚</span>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-green-700 dark:text-green-300">Total Cursos</p>
+                <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ cursos.length }}</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_cursos' | i18nTranslate }}</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ cursos.length }}</p>
+            <div class="text-right">
+              <span class="text-sm text-green-600 dark:text-green-400">
+                {{ cursosActivos }} activos
+              </span>
             </div>
-          </div>
-          <div class="mt-4">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ cursosActivos }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
-            </span>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center">
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-              <span class="text-2xl">🏆</span>
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 p-6 rounded-lg shadow-lg border border-purple-200 dark:border-purple-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
+                <span class="text-2xl text-white">🏆</span>
+              </div>
+              <div class="ml-4">
+                <p class="text-sm font-medium text-purple-700 dark:text-purple-300">Certificaciones</p>
+                <p class="text-2xl font-bold text-purple-900 dark:text-purple-100">{{ certificaciones.length }}</p>
+              </div>
             </div>
-            <div class="ml-4">
-              <p class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ 'admin.productos.dashboard.total_certificaciones' | i18nTranslate }}</p>
-              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ certificaciones.length }}</p>
+            <div class="text-right">
+              <span class="text-sm text-purple-600 dark:text-purple-400">
+                {{ certificacionesActivas }} disponibles
+              </span>
             </div>
-          </div>
-          <div class="mt-4">
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-              {{ certificacionesActivas }} {{ 'admin.productos.dashboard.active' | i18nTranslate }}
-            </span>
           </div>
         </div>
       </div>
@@ -106,7 +169,7 @@ import { Curso } from '../../features/productos/data/producto.model';
       <!-- Productos recientes -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'admin.productos.dashboard.recent_products' | i18nTranslate }}</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">Productos Recientes</h3>
         </div>
         
         <div class="p-6">
@@ -428,19 +491,19 @@ export class ProductosDashboardComponent implements OnInit {
 
   get asesoriasRecientes(): Asesoria[] {
     return this.asesorias
-      .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
+        .sort((a, b) => new Date(b.fechaCreacion || new Date()).getTime() - new Date(a.fechaCreacion || new Date()).getTime())
       .slice(0, 2);
   }
 
   get cursosRecientes(): Curso[] {
     return this.cursos
-      .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
+        .sort((a, b) => new Date(b.fechaCreacion || new Date()).getTime() - new Date(a.fechaCreacion || new Date()).getTime())
       .slice(0, 2);
   }
 
   get certificacionesRecientes(): Certificacion[] {
     return this.certificaciones
-      .sort((a, b) => new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime())
+        .sort((a, b) => new Date(b.fechaCreacion || new Date()).getTime() - new Date(a.fechaCreacion || new Date()).getTime())
       .slice(0, 2);
   }
 

@@ -1,10 +1,11 @@
-import { Component, computed, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CollaboratorsService } from '../../core/data/collaborators.service';
 import { Collaborator } from '../../core/models/collaborator.model';
 import { MediaService } from '../../core/data/media.service';
 import { FoundersInitializationService } from '../../core/services/founders-initialization.service';
+import { ToastService } from '../../core/services/ui/toast/toast.service';
 
 @Component({
   selector: 'app-admin-collaborators-page',
@@ -14,10 +15,30 @@ import { FoundersInitializationService } from '../../core/services/founders-init
 <div class="space-y-6">
   <div class="flex items-center justify-between">
     <h1 class="text-xl font-semibold">Equipo y Colaboradores</h1>
-    <div class="flex gap-2">
+    <div class="flex gap-2 flex-wrap">
+      <button class="btn btn-secondary" (click)="downloadCurrentStructure()">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Descargar JSON
+      </button>
+      <button class="btn btn-secondary" (click)="triggerJsonUpload()">
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 12l3 3m0 0l3-3m-3 3V9"></path>
+        </svg>
+        Cargar JSON
+      </button>
       <button class="btn btn-primary" (click)="openCreate()">Añadir Colaborador</button>
     </div>
   </div>
+
+  <!-- Input oculto para la carga de archivos -->
+  <input 
+    type="file" 
+    class="hidden" 
+    accept=".json"
+    (change)="handleJsonFile($event)"
+    #fileInput>
 
   <div class="overflow-x-auto border border-white/10 rounded-lg">
     <table class="min-w-full text-sm">
@@ -227,6 +248,9 @@ export class CollaboratorsPageComponent {
   private media = inject(MediaService);
   private foundersService = inject(FoundersInitializationService);
   private cdr = inject(ChangeDetectorRef);
+  private toast = inject(ToastService);
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   collaborators = signal<Collaborator[]>([]);
   isOpen = signal(false);
@@ -1309,6 +1333,261 @@ export class CollaboratorsPageComponent {
       }
       
       return imageUrl;
+    }
+  }
+
+  // Método para descargar la estructura actual como JSON
+  downloadCurrentStructure(): void {
+    try {
+      const currentCollaborators = this.collaborators();
+      
+      // Crear la estructura de datos para exportar
+      let exportData;
+      
+      if (currentCollaborators.length === 0) {
+        // Si no hay colaboradores, crear estructura de ejemplo
+        exportData = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          description: 'Estructura de ejemplo para colaboradores. Reemplaza los ejemplos con tus propios datos. NOTA: Al cargar este JSON se ELIMINARÁN todos los colaboradores existentes (excepto fundadores) y se crearán nuevos. Las fotos deben subirse manualmente después.',
+          collaborators: [
+            {
+              name: "Ejemplo: Juan Pérez",
+              role: "Ingeniero de IA Senior",
+              type: "Partner Tecnológico",
+              description: "Experto en machine learning con más de 10 años de experiencia en desarrollo de algoritmos de inteligencia artificial.",
+              bio: "Ingeniero con amplia experiencia en tecnologías emergentes y liderazgo de equipos técnicos.",
+              linkedinUrl: "https://linkedin.com/in/ejemplo",
+              website: "https://ejemplo.com",
+              isActive: true,
+              displayOrder: 1,
+              joinDate: "2024-01-15T00:00:00.000Z"
+            },
+            {
+              name: "Ejemplo: María González",
+              role: "Directora Académica",
+              type: "Partner Académico",
+              description: "Doctora en Ciencias de la Computación, especializada en investigación en IA y educación tecnológica.",
+              bio: "Investigadora y educadora con más de 15 años en el ámbito académico y tecnológico.",
+              linkedinUrl: "https://linkedin.com/in/ejemplo2",
+              website: "https://universidad-ejemplo.edu",
+              isActive: true,
+              displayOrder: 2,
+              joinDate: "2024-02-01T00:00:00.000Z"
+            },
+            {
+              name: "Ejemplo: Carlos Ruiz",
+              role: "CEO Empresa Cliente",
+              type: "Cliente Destacado",
+              description: "Líder empresarial que ha implementado exitosamente soluciones de IA en su organización.",
+              bio: "Ejecutivo con visión estratégica en la adopción de tecnologías disruptivas.",
+              linkedinUrl: "https://linkedin.com/in/ejemplo3",
+              website: "https://empresa-ejemplo.com",
+              isActive: true,
+              displayOrder: 3,
+              joinDate: "2024-03-01T00:00:00.000Z"
+            }
+          ]
+        };
+      } else {
+        // Si hay colaboradores, exportar los datos actuales (sin URLs de imágenes para mantener la carga manual)
+        exportData = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          description: 'Datos de colaboradores exportados. NOTA: Al cargar este JSON se ELIMINARÁN todos los colaboradores existentes (excepto fundadores) y se crearán nuevos. Las fotos deben subirse manualmente después.',
+          collaborators: currentCollaborators.map(collaborator => ({
+            id: collaborator.id,
+            name: collaborator.name,
+            role: collaborator.role,
+            type: collaborator.type,
+            description: collaborator.description,
+            bio: collaborator.bio,
+            linkedinUrl: collaborator.linkedinUrl,
+            website: collaborator.website,
+            isActive: collaborator.isActive,
+            displayOrder: collaborator.displayOrder,
+            joinDate: this.formatDateForExport(collaborator.joinDate),
+            isFounder: collaborator.isFounder,
+            founderOrder: collaborator.founderOrder,
+            fullBio: collaborator.fullBio,
+            // NO incluir logoUrl ni imageUrl para mantener carga manual
+            // logoUrl: collaborator.logoUrl,
+            // imageUrl: collaborator.imageUrl
+          }))
+        };
+      }
+
+      // Convertir a JSON con formato legible
+      const jsonString = JSON.stringify(exportData, null, 2);
+      
+      // Crear y descargar el archivo
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Nombre del archivo según si hay datos o es estructura de ejemplo
+      const fileName = currentCollaborators.length === 0 
+        ? `estructura-colaboradores-ejemplo-${new Date().toISOString().split('T')[0]}.json`
+        : `colaboradores-exportados-${new Date().toISOString().split('T')[0]}.json`;
+      
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Mensaje diferente según si hay datos o es estructura de ejemplo
+      const message = currentCollaborators.length === 0 
+        ? 'Se ha descargado la estructura de ejemplo. Puedes editarla y cargarla con tus propios datos. Recuerda subir las fotos manualmente después.'
+        : `Se ha descargado la estructura con ${currentCollaborators.length} colaboradores. Las fotos deben subirse manualmente después de cargar el JSON.`;
+      
+      this.toast.success(message);
+      
+    } catch (error: any) {
+      console.error('Error al descargar la estructura:', error);
+      this.toast.error(`Error al descargar la estructura: ${error.message}`);
+    }
+  }
+
+  // Método para activar la carga de archivo JSON
+  triggerJsonUpload(): void {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }
+  }
+
+  // Método para manejar la carga del archivo JSON
+  async handleJsonFile(event: Event): Promise<void> {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    
+    if (!file) return;
+
+    try {
+      this.toast.info('Procesando archivo de colaboradores...');
+      
+      // Leer el archivo
+      const content = await this.readFileAsText(file);
+      
+      // Parsear JSON
+      let collaboratorsData: any;
+      try {
+        collaboratorsData = JSON.parse(content);
+      } catch (parseError) {
+        throw new Error('El archivo no contiene un JSON válido');
+      }
+
+      // Validar estructura
+      if (!this.validateCollaboratorsStructure(collaboratorsData)) {
+        throw new Error('El archivo JSON no tiene la estructura correcta de colaboradores');
+      }
+
+      // Extraer los colaboradores
+      const collaborators = Array.isArray(collaboratorsData.collaborators) ? collaboratorsData.collaborators : [collaboratorsData.collaborators];
+      
+      // Obtener colaboradores existentes para eliminarlos
+      const existingCollaborators = await this.svc.getCollaboratorsAsPromise();
+      
+      // Eliminar todos los colaboradores existentes (excepto fundadores)
+      for (const existing of existingCollaborators) {
+        try {
+          if (existing.id && !existing.isFounder) {
+            await this.svc.deleteCollaborator(existing.id);
+          }
+        } catch (deleteError: any) {
+          console.warn(`Error eliminando colaborador ${existing.name}:`, deleteError);
+        }
+      }
+      
+      // Procesar cada colaborador nuevo
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const collaboratorData of collaborators) {
+        try {
+          // Convertir joinDate de string a Date si existe
+          if (collaboratorData.joinDate) {
+            collaboratorData.joinDate = new Date(collaboratorData.joinDate);
+          }
+
+          // Eliminar ID del JSON para forzar creación nueva
+          delete collaboratorData.id;
+          
+          // Crear nuevo colaborador
+          await this.svc.addCollaborator(collaboratorData);
+          successCount++;
+        } catch (collaboratorError: any) {
+          console.error(`Error procesando colaborador ${collaboratorData.name}:`, collaboratorError);
+          errorCount++;
+        }
+      }
+
+      // Mostrar resultado
+      if (errorCount === 0) {
+        this.toast.success(`Se han reemplazado todos los colaboradores con ${successCount} nuevos colaboradores. Los fundadores se mantuvieron intactos. Recuerda subir las fotos manualmente.`);
+      } else {
+        this.toast.warning(`Se cargaron ${successCount} colaboradores nuevos, ${errorCount} con errores. Los colaboradores anteriores fueron eliminados (excepto fundadores). Recuerda subir las fotos manualmente.`);
+      }
+
+      // Recargar la lista
+      this.svc.getCollaborators().subscribe((v: Collaborator[]) => this.collaborators.set(v));
+      
+      // Limpiar el input
+      target.value = '';
+      
+    } catch (error: any) {
+      this.toast.error(`Error al procesar el archivo: ${error.message}`);
+      target.value = '';
+    }
+  }
+
+  // Función auxiliar para leer archivo como texto
+  private readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = (e) => reject(new Error('Error al leer el archivo'));
+      reader.readAsText(file);
+    });
+  }
+
+  // Función para validar la estructura del JSON de colaboradores
+  private validateCollaboratorsStructure(data: any): boolean {
+    // Verificar que existe la propiedad collaborators
+    if (!data.collaborators) {
+      return false;
+    }
+
+    // Verificar que collaborators es un array
+    const collaborators = Array.isArray(data.collaborators) ? data.collaborators : [data.collaborators];
+    
+    // Validar cada colaborador
+    return collaborators.every((collaborator: any) => 
+      typeof collaborator.name === 'string' &&
+      typeof collaborator.role === 'string' &&
+      typeof collaborator.type === 'string' &&
+      typeof collaborator.description === 'string' &&
+      collaborator.name.trim().length > 0 &&
+      collaborator.role.trim().length > 0 &&
+      collaborator.description.trim().length > 0
+    );
+  }
+
+  // Función auxiliar para formatear fechas de forma segura
+  private formatDateForExport(date: any): string | null {
+    if (!date) return null;
+    
+    try {
+      if (date instanceof Date) {
+        return isNaN(date.getTime()) ? null : date.toISOString();
+      } else {
+        const parsedDate = new Date(date);
+        return isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString();
+      }
+    } catch (error) {
+      console.warn('Error formateando fecha:', date, error);
+      return null;
     }
   }
 }

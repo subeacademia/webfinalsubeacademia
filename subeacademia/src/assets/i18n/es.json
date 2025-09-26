@@ -715,10 +715,230 @@
       "manage_cursos": "Administrar Cursos",
       "manage_certificaciones": "Administrar Certificaciones",
       "download_json": "Descargar JSON",
+      "download_simple_example": "Ejemplo Simple",
+      "download_complete_examples": "Ejemplos Completos",
       "bulk_upload": "Carga Masiva",
       "new_asesoria": "Nueva Asesoría",
       "new_curso": "Nuevo Curso",
-      "new_certificacion": "Nueva Certificación"
+      "new_certificacion": "Nueva Certificación",
+      "certification_wizard": {
+        "title": "Wizard de Certificación",
+        "step_1": "Información Básica",
+        "step_2": "Clasificación",
+        "step_3": "Entrega",
+        "step_4": "Economía",
+        "step_5": "Avales y Sellos",
+        "step_6": "Evaluación y Competencias",
+        "step_7": "Vigencia y Recertificación",
+        "step_8": "Medios y Publicación",
+        "select_image": "Seleccionar Imagen",
+        "upload_to_firebase": "Subir a Firebase",
+        "uploading": "Subiendo...",
+        "remove": "Eliminar",
+        "current_image": "Imagen actual",
+        "or_enter_url": "O ingresar URL directamente:",
+        "file_formats": "PNG, JPG, WEBP hasta 5MB",
+        "basic_info": {
+          "title": "Título de la Certificación",
+          "slug": "Slug (generado automáticamente)",
+          "short_description": "Descripción Corta",
+          "long_description": "Descripción Larga"
+        },
+        "classification": {
+          "audience": "Audiencia",
+          "category": "Categoría",
+          "route_types": "Tipos de Ruta",
+          "formation": "Formación",
+          "validation": "Convalidación"
+        },
+        "delivery": {
+          "duration_hours": "Duración (horas)",
+          "version_plan": "Versión del Plan",
+          "modalities": "Modalidades",
+          "languages": "Idiomas",
+          "asynchronous": "Asincrónica",
+          "live": "En Vivo",
+          "hybrid": "Híbrida",
+          "presential": "Presencial",
+          "spanish": "Español",
+          "english": "Inglés",
+          "portuguese": "Portugués"
+        },
+        "economics": {
+          "price_clp": "Precio CLP",
+          "price_usd": "Precio USD",
+          "price_eur": "Precio EUR",
+          "pricing_notes": "Notas de Precios",
+          "payment_link": "Link de Pago (Opcional)"
+        },
+        "endorsers": {
+          "endorsers": "Avales",
+          "sube_ia": "SUBE-IA (Obligatorio)",
+          "archiads": "ARCHIADS (Opcional)",
+          "double_seal": "Sello Doble"
+        },
+        "evaluation": {
+          "methods": "Métodos de Evaluación",
+          "exam": "Examen",
+          "project": "Proyecto",
+          "interview": "Entrevista",
+          "defense": "Defensa",
+          "competencies": "Competencias",
+          "regulatory_alignment": "Alineación Regulatoria"
+        },
+        "validity": {
+          "validity_months": "Vigencia (meses)",
+          "state": "Estado",
+          "recertification_required": "Recertificación Requerida",
+          "recertification_hours": "Horas CEU Requeridas",
+          "recertification_type": "Tipo de Recertificación",
+          "course": "Curso",
+          "evaluation": "Evaluación",
+          "project": "Proyecto"
+        },
+        "media": {
+          "hero_image": "Imagen Hero",
+          "seal_image": "Imagen del Sello",
+          "meta_title": "Meta Título SEO",
+          "meta_description": "Meta Descripción SEO"
+        },
+        "navigation": {
+          "previous": "Anterior",
+          "next": "Siguiente",
+          "save_draft": "Guardar Borrador",
+          "create": "Crear Certificación",
+          "update": "Actualizar Certificación"
+        }
+      },
+      "applications_management": {
+        "title": "Gestión de Convalidaciones",
+        "stats": {
+          "total": "Total",
+          "pending": "Pendientes",
+          "approved": "Aprobadas",
+          "rejected": "Rechazadas"
+        },
+        "filters": {
+          "status": "Estado",
+          "certification": "Certificación",
+          "search": "Búsqueda",
+          "clear": "Limpiar Filtros",
+          "all_statuses": "Todos los estados",
+          "all_certifications": "Todas las certificaciones"
+        },
+        "table": {
+          "applicant": "Aplicante",
+          "certification": "Certificación",
+          "status": "Estado",
+          "date": "Fecha",
+          "actions": "Acciones",
+          "view": "Ver",
+          "manage": "Gestionar"
+        },
+        "status": {
+          "received": "Recibida",
+          "under_review": "En Revisión",
+          "interview_scheduled": "Entrevista Agendada",
+          "approved": "Aprobada",
+          "rejected": "Rechazada"
+        },
+        "management_modal": {
+          "title": "Gestionar Aplicación",
+          "general_info": "Información General",
+          "new_status": "Nuevo Estado",
+          "interview_date": "Fecha de Entrevista",
+          "notes": "Notas",
+          "cancel": "Cancelar",
+          "update": "Actualizar"
+        }
+      }
+    },
+    "certifications": {
+      "title": "Certificaciones",
+      "subtitle": "Valida tus competencias y conocimientos en Inteligencia Artificial con nuestras certificaciones oficiales",
+      "filters": {
+        "search_placeholder": "Buscar certificaciones...",
+        "audience": "Audiencia",
+        "category": "Categoría",
+        "route_type": "Tipo de Ruta",
+        "state": "Estado",
+        "modality": "Modalidad",
+        "language": "Idioma",
+        "validity": "Vigencia",
+        "all_audiences": "Todas las audiencias",
+        "all_categories": "Todas las categorías",
+        "all_routes": "Todas las rutas",
+        "all_states": "Todos los estados",
+        "all_modalities": "Todas las modalidades",
+        "all_languages": "Todos los idiomas",
+        "all": "Todas",
+        "with_validity": "Con vigencia",
+        "without_validity": "Sin vigencia",
+        "clear_filters": "Limpiar Filtros"
+      },
+      "labels": {
+        "audience": "Audiencia",
+        "category": "Categoría",
+        "duration": "Duración",
+        "validity": "Vigencia",
+        "endorsers": "Avalado por"
+      },
+      "badges": {
+        "available": "Disponible",
+        "coming_soon": "Próximamente",
+        "formation": "Formación",
+        "validation": "Convalidación"
+      },
+      "cta": {
+        "view_details": "Ver Detalles",
+        "pay_now": "Pagar Ahora",
+        "quote_in_company": "Cotizar in-company",
+        "enroll": "Inscribirme"
+      },
+      "detail": {
+        "back": "Volver",
+        "formation_tab": "Formación",
+        "validation_tab": "Convalidación",
+        "formation_info": {
+          "title": "Información de Formación",
+          "what_you_learn": "¿Qué aprenderás?",
+          "competencies": "Competencias que desarrollarás",
+          "modalities": "Modalidades Disponibles",
+          "upcoming_sessions": "Próximas Sesiones",
+          "enroll": "Inscribirse"
+        },
+        "validation_info": {
+          "title": "Proceso de Convalidación",
+          "how_it_works": "¿Cómo funciona la convalidación?",
+          "requirements": "Requisitos",
+          "application_form": "Postular a Convalidación",
+          "full_name": "Nombre Completo",
+          "email": "Email",
+          "portfolio": "Portafolio de Evidencias",
+          "experience": "Experiencia Relevante",
+          "submit": "Postular a Convalidación",
+          "submitting": "Enviando..."
+        },
+        "sidebar": {
+          "general_info": "Información General",
+          "prices": "Precios",
+          "audience": "Audiencia",
+          "category": "Categoría",
+          "duration": "Duración",
+          "validity": "Vigencia",
+          "languages": "Idiomas"
+        }
+      },
+      "empty": {
+        "coming_soon": "Próximamente Disponible",
+        "p1": "Estamos trabajando en nuevas certificaciones para ti.",
+        "p2": "Mantente atento a nuestras actualizaciones."
+      },
+      "loading": "Cargando certificaciones...",
+      "validator": {
+        "placeholder": "Ingresa el código del certificado",
+        "btn": "Validar"
+      }
     }
   }
 }

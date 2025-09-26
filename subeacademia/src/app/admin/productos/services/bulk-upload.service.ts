@@ -4,7 +4,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { CursosService } from '../../../features/productos/services/cursos.service';
 import { AsesoriasService } from '../../../features/productos/services/asesorias.service';
 import { CertificacionesService } from '../../../features/productos/services/certificaciones.service';
-import { Curso, Asesoria, Certificacion } from '../../../features/productos/data/producto.model';
+import { Curso, Asesoria, CertificacionLegacy } from '../../../features/productos/data/producto.model';
 
 export interface BulkUploadResult {
   success: boolean;
@@ -35,7 +35,7 @@ export class BulkUploadService {
   constructor(
     private cursosService: CursosService,
     private asesoriasService: AsesoriasService,
-    private certificacionesService: CertificacionesService
+    private CertificacionesService: CertificacionesService
   ) {}
 
   /**
@@ -122,26 +122,26 @@ export class BulkUploadService {
         processedItems += data.asesorias.length;
       }
 
-      // Procesar certificaciones
-      if (data.certificaciones && Array.isArray(data.certificaciones)) {
+      // Procesar CertificacionLegacyes
+      if (data.CertificacionLegacyes && Array.isArray(data.CertificacionLegacyes)) {
         progressCallback?.({
-          currentStep: 'Procesando certificaciones',
+          currentStep: 'Procesando CertificacionLegacyes',
           progress: Math.round((processedItems / totalItems) * 100),
           totalItems,
           processedItems
         });
 
-        const certificacionesResult = await this.processBatch(
-          data.certificaciones,
-          'certificacion',
-          this.certificacionesService.createCertificacion.bind(this.certificacionesService)
+        const CertificacionLegacyesResult = await this.processBatch(
+          data.CertificacionLegacyes,
+          'CertificacionLegacy',
+          this.CertificacionesService.createCertificacion.bind(this.CertificacionesService)
         );
         
-        result.summary.certificacionesCreadas = certificacionesResult.success;
-        result.totalProcessed += certificacionesResult.success;
-        result.totalErrors += certificacionesResult.errors;
-        result.errors.push(...certificacionesResult.errorMessages);
-        processedItems += data.certificaciones.length;
+        result.summary.certificacionesCreadas = CertificacionLegacyesResult.success;
+        result.totalProcessed += CertificacionLegacyesResult.success;
+        result.totalErrors += CertificacionLegacyesResult.errors;
+        result.errors.push(...CertificacionLegacyesResult.errorMessages);
+        processedItems += data.CertificacionLegacyes.length;
       }
 
       progressCallback?.({
@@ -165,13 +165,13 @@ export class BulkUploadService {
     let total = 0;
     if (data.cursos && Array.isArray(data.cursos)) total += data.cursos.length;
     if (data.asesorias && Array.isArray(data.asesorias)) total += data.asesorias.length;
-    if (data.certificaciones && Array.isArray(data.certificaciones)) total += data.certificaciones.length;
+    if (data.CertificacionLegacyes && Array.isArray(data.CertificacionLegacyes)) total += data.CertificacionLegacyes.length;
     return total;
   }
 
   private async processBatch(
     items: any[],
-    type: 'curso' | 'asesoria' | 'certificacion',
+    type: 'curso' | 'asesoria' | 'CertificacionLegacy',
     createFunction: (item: any) => Observable<string>
   ): Promise<{ success: number; errors: number; errorMessages: string[] }> {
     const result = {
@@ -222,7 +222,7 @@ export class BulkUploadService {
     return result;
   }
 
-  private validateAndPrepareItem(item: any, type: 'curso' | 'asesoria' | 'certificacion'): any {
+  private validateAndPrepareItem(item: any, type: 'curso' | 'asesoria' | 'CertificacionLegacy'): any {
     if (!item || typeof item !== 'object') {
       throw new Error('El elemento no es un objeto válido');
     }
@@ -267,10 +267,10 @@ export class BulkUploadService {
           tags: Array.isArray(item.tags) ? item.tags : []
         };
 
-      case 'certificacion':
+      case 'CertificacionLegacy':
         return {
           ...baseData,
-          tipo: 'certificacion' as const,
+          tipo: 'CertificacionLegacy' as const,
           entidadCertificadora: item.entidadCertificadora || 'Sube Academia',
           nivel: item.nivel || 'Básico'
         };
@@ -336,14 +336,14 @@ export class BulkUploadService {
           activo: true
         }
       ],
-      certificaciones: [
+      CertificacionLegacyes: [
         {
           titulo: "Certificación en IA para Negocios",
           descripcion: "Certificación oficial que valida tus conocimientos en aplicación de IA en entornos empresariales",
           precio: 199.99,
           entidadCertificadora: "Sube Academia",
           nivel: "Intermedio",
-          imagenDestacada: "https://ejemplo.com/certificacion-ia.jpg",
+          imagenDestacada: "https://ejemplo.com/CertificacionLegacy-ia.jpg",
           activo: true
         }
       ]
