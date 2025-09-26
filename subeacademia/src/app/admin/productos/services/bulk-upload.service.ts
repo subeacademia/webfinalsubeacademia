@@ -122,7 +122,31 @@ export class BulkUploadService {
         processedItems += data.asesorias.length;
       }
 
-      // Procesar CertificacionLegacyes
+      // Procesar certificaciones (nuevo modelo)
+      if (data.certificaciones && Array.isArray(data.certificaciones)) {
+        progressCallback?.({
+          currentStep: 'Procesando certificaciones',
+          progress: Math.round((processedItems / totalItems) * 100),
+          totalItems,
+          processedItems
+        });
+
+        const certificacionesResult = await this.processBatch(
+          data.certificaciones,
+          'certificacion',
+          (item: any) => this.CertificacionesService.createCertificacionWithValidation(item).pipe(
+            map(result => result.id || 'unknown-id')
+          )
+        );
+        
+        result.summary.certificacionesCreadas = certificacionesResult.success;
+        result.totalProcessed += certificacionesResult.success;
+        result.totalErrors += certificacionesResult.errors;
+        result.errors.push(...certificacionesResult.errorMessages);
+        processedItems += data.certificaciones.length;
+      }
+
+      // Procesar CertificacionLegacyes (modelo legacy - mantener compatibilidad)
       if (data.CertificacionLegacyes && Array.isArray(data.CertificacionLegacyes)) {
         progressCallback?.({
           currentStep: 'Procesando CertificacionLegacyes',
@@ -137,7 +161,7 @@ export class BulkUploadService {
           this.CertificacionesService.createCertificacion.bind(this.CertificacionesService)
         );
         
-        result.summary.certificacionesCreadas = CertificacionLegacyesResult.success;
+        result.summary.certificacionesCreadas += CertificacionLegacyesResult.success;
         result.totalProcessed += CertificacionLegacyesResult.success;
         result.totalErrors += CertificacionLegacyesResult.errors;
         result.errors.push(...CertificacionLegacyesResult.errorMessages);
@@ -165,13 +189,14 @@ export class BulkUploadService {
     let total = 0;
     if (data.cursos && Array.isArray(data.cursos)) total += data.cursos.length;
     if (data.asesorias && Array.isArray(data.asesorias)) total += data.asesorias.length;
+    if (data.certificaciones && Array.isArray(data.certificaciones)) total += data.certificaciones.length;
     if (data.CertificacionLegacyes && Array.isArray(data.CertificacionLegacyes)) total += data.CertificacionLegacyes.length;
     return total;
   }
 
   private async processBatch(
     items: any[],
-    type: 'curso' | 'asesoria' | 'CertificacionLegacy',
+    type: 'curso' | 'asesoria' | 'CertificacionLegacy' | 'certificacion',
     createFunction: (item: any) => Observable<string>
   ): Promise<{ success: number; errors: number; errorMessages: string[] }> {
     const result = {
@@ -222,12 +247,13 @@ export class BulkUploadService {
     return result;
   }
 
-  private validateAndPrepareItem(item: any, type: 'curso' | 'asesoria' | 'CertificacionLegacy'): any {
+  private validateAndPrepareItem(item: any, type: 'curso' | 'asesoria' | 'CertificacionLegacy' | 'certificacion'): any {
     if (!item || typeof item !== 'object') {
       throw new Error('El elemento no es un objeto válido');
     }
 
-    if (!item.titulo || typeof item.titulo !== 'string' || item.titulo.trim().length === 0) {
+    const titulo = item.titulo || item.title;
+    if (!titulo || typeof titulo !== 'string' || titulo.trim().length === 0) {
       throw new Error('El título es obligatorio y debe ser un texto válido');
     }
 
@@ -236,10 +262,10 @@ export class BulkUploadService {
     }
 
     const baseData = {
-      titulo: item.titulo.trim(),
+      titulo: titulo.trim(),
       descripcion: item.descripcion || 'Sin descripción',
       precio: Number(item.precio) || 0,
-      slug: this.generateSlug(item.titulo),
+      slug: this.generateSlug(titulo),
       imagenDestacada: item.imagenDestacada || '',
       activo: item.activo !== undefined ? Boolean(item.activo) : true,
       fechaCreacion: new Date(),
@@ -273,6 +299,81 @@ export class BulkUploadService {
           tipo: 'CertificacionLegacy' as const,
           entidadCertificadora: item.entidadCertificadora || 'Sube Academia',
           nivel: item.nivel || 'Básico'
+        };
+
+      case 'certificacion':
+        // Para el nuevo modelo de certificaciones, devolver el objeto tal como está
+        // ya que ya tiene la estructura correcta del modelo Certificacion
+        return {
+          ...item,
+          // Asegurar que los campos obligatorios estén presentes
+          title: titulo,
+          slug: item.slug || this.generateSlug(titulo),
+          shortDescription: item.shortDescription || item.descripcion,
+          longDescription: item.longDescription || item.descripcion,
+          state: item.state || 'Disponible',
+          active: item.activo !== undefined ? Boolean(item.activo) : true,
+          versionPlan: item.versionPlan || '2025.1',
+          audience: item.audience || 'Empresas',
+          category: item.category || 'Madurez Organizacional',
+          routeTypes: item.routeTypes || ['Formación'],
+          durationHours: item.durationHours || 0,
+          modalities: item.modalities || {
+            asincronica: true,
+            enVivo: false,
+            hibrida: false,
+            presencial: false
+          },
+          languages: item.languages || ['es'],
+          currencies: item.currencies || {
+            CLP: item.precio || 0,
+            USD: 0,
+            EUR: 0
+          },
+          pricingNotes: item.pricingNotes || '',
+          paymentLink: item.paymentLink || '',
+          endorsers: item.endorsers || ['SUBE-IA'],
+          doubleSeal: item.doubleSeal || false,
+          validityMonths: item.validityMonths || 24,
+          recertification: item.recertification || {
+            required: false,
+            type: 'curso',
+            hoursCEU: 0
+          },
+          evaluation: item.evaluation || {
+            exam: true,
+            project: false,
+            interview: false,
+            defense: false,
+            weights: {
+              exam: 100
+            }
+          },
+          validationTrack: item.validationTrack || {
+            enabled: false,
+            portfolioRequired: true,
+            allowedFormats: ['pdf', 'url'],
+            autoInterviewBooking: true,
+            SLA_days: 7
+          },
+          competencies: item.competencies || [],
+          regulatoryAlignment: item.regulatoryAlignment || [],
+          prerequisites: item.prerequisites || [],
+          pathways: item.pathways || {
+            predecessors: [],
+            successors: []
+          },
+          heroImageUrl: item.heroImageUrl || '',
+          sealImageUrl: item.sealImageUrl || '',
+          gallery: item.gallery || [],
+          seo: item.seo || {
+            metaTitle: titulo,
+            metaDescription: item.shortDescription || item.descripcion
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdBy: 'admin',
+          updatedBy: 'admin'
         };
 
       default:
