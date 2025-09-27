@@ -309,8 +309,8 @@ export class BulkUploadService {
           // Asegurar que los campos obligatorios estén presentes
           title: titulo,
           slug: item.slug || this.generateSlug(titulo),
-          shortDescription: item.shortDescription || item.descripcion,
-          longDescription: item.longDescription || item.descripcion,
+          shortDescription: item.shortDescription || item.descripcion || titulo,
+          longDescription: item.longDescription || item.descripcion || titulo,
           state: item.state || 'Disponible',
           active: item.activo !== undefined ? Boolean(item.activo) : true,
           versionPlan: item.versionPlan || '2025.1',
@@ -346,7 +346,10 @@ export class BulkUploadService {
             interview: false,
             defense: false,
             weights: {
-              exam: 100
+              exam: 100,
+              project: 0,
+              interview: 0,
+              defense: 0
             }
           },
           validationTrack: item.validationTrack || {
@@ -368,7 +371,7 @@ export class BulkUploadService {
           gallery: item.gallery || [],
           seo: item.seo || {
             metaTitle: titulo,
-            metaDescription: item.shortDescription || item.descripcion
+            metaDescription: item.shortDescription || item.descripcion || titulo
           },
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -434,6 +437,115 @@ export class BulkUploadService {
           precio: 299.99,
           tags: ["IA", "Consultoría", "Transformación Digital", "Estrategia"],
           imagenDestacada: "https://ejemplo.com/asesoria-ia.jpg",
+          activo: true
+        }
+      ],
+      certificaciones: [
+        {
+          // Identidad y estado
+          title: "Certificación en Madurez Organizacional en IA (Practitioner)",
+          slug: "certificacion-madurez-organizacional-ia-practitioner",
+          shortDescription: "Valida el nivel de madurez de la empresa según el ARES‑AI Framework.",
+          longDescription: "Esta certificación está diseñada para directivos y líderes de transformación que buscan validar y optimizar la madurez de su organización en la implementación de la IA, cubriendo desde la preparación hasta el escalado.",
+          state: "Disponible",
+          active: true,
+          versionPlan: "2025.1",
+          
+          // Clasificación
+          audience: "Empresas",
+          category: "Madurez Organizacional",
+          routeTypes: ["Formación"],
+          
+          // Entrega
+          durationHours: 0,
+          modalities: {
+            asincronica: true,
+            enVivo: false,
+            hibrida: false,
+            presencial: false
+          },
+          languages: ["es"],
+          
+          // Economía
+          currencies: {
+            CLP: 850000,
+            USD: 1000,
+            EUR: 900
+          },
+          pricingNotes: "",
+          paymentLink: "https://buy.stripe.com/example_link_formation",
+          
+          // Avales y sellos
+          endorsers: ["SUBE-IA"],
+          doubleSeal: false,
+          
+          // Vigencia y recertificación
+          validityMonths: 24,
+          recertification: {
+            required: false,
+            type: "curso",
+            hoursCEU: 0
+          },
+          
+          // Evaluación
+          evaluation: {
+            exam: true,
+            project: false,
+            interview: false,
+            defense: false,
+            weights: {
+              exam: 100
+            }
+          },
+          
+          // Convalidación
+          validationTrack: {
+            enabled: false,
+            portfolioRequired: true,
+            allowedFormats: ["pdf", "url"],
+            autoInterviewBooking: true,
+            SLA_days: 7
+          },
+          
+          // Competencias y alineación
+          competencies: [],
+          regulatoryAlignment: [],
+          
+          // Requisitos y rutas
+          prerequisites: [],
+          pathways: {
+            predecessors: [],
+            successors: []
+          },
+          
+          // Medios y SEO
+          heroImageUrl: "https://firebasestorage.googleapis.com/v0/b/sube-ia-tech.appspot.com/o/hero-images%2Fhero-madurez-ia.jpg?alt=media",
+          sealImageUrl: "",
+          gallery: [],
+          seo: {
+            metaTitle: "Certificación en Madurez Organizacional en IA (Practitioner)",
+            metaDescription: "Valida el nivel de madurez de la empresa según el ARES‑AI Framework."
+          },
+          
+          // Auditoría
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          createdBy: "admin",
+          updatedBy: "admin",
+          
+          // Campos legacy para compatibilidad
+          titulo: "Certificación en Madurez Organizacional en IA (Practitioner)",
+          descripcion: "Valida el nivel de madurez de la empresa según el ARES‑AI Framework. Esta certificación está diseñada para directivos y líderes de transformación que buscan validar y optimizar la madurez de su organización en la implementación de la IA, cubriendo desde la preparación hasta el escalado.",
+          imagenDestacada: "https://firebasestorage.googleapis.com/v0/b/sube-ia-tech.appspot.com/o/hero-images%2Fhero-madurez-ia.jpg?alt=media",
+          entidadCertificadora: "SUBE-IA",
+          nivel: "Intermedio",
+          precio: 850000,
+          duracionHoras: 0,
+          modalidad: "Asíncrona",
+          estado: "Disponible",
+          selloUrl: "",
+          fechaCreacion: new Date(),
+          fechaActualizacion: new Date(),
           activo: true
         }
       ],

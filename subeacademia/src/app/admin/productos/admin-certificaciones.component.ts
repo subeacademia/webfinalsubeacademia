@@ -400,12 +400,43 @@ export class AdminCertificacionesComponent implements OnInit, OnDestroy {
   formatoEjemplo = `{
   "certificaciones": [
     {
-      "titulo": "Certificación en IA",
-      "descripcion": "Certificación oficial en IA",
-      "precio": 199.99,
-      "entidadCertificadora": "Sube Academia",
-      "nivel": "Intermedio",
-      "activo": true
+      "title": "Certificación en Madurez Organizacional en IA (Practitioner)",
+      "slug": "certificacion-madurez-organizacional-ia-practitioner",
+      "shortDescription": "Valida el nivel de madurez de la empresa según el ARES‑AI Framework.",
+      "longDescription": "Esta certificación está diseñada para directivos y líderes de transformación que buscan validar y optimizar la madurez de su organización en la implementación de la IA.",
+      "state": "Disponible",
+      "active": true,
+      "versionPlan": "2025.1",
+      "audience": "Empresas",
+      "category": "Madurez Organizacional",
+      "routeTypes": ["Formación"],
+      "durationHours": 0,
+      "modalities": {
+        "asincronica": true,
+        "enVivo": false,
+        "hibrida": false,
+        "presencial": false
+      },
+      "languages": ["es"],
+      "currencies": {
+        "CLP": 850000,
+        "USD": 1000,
+        "EUR": 900
+      },
+      "endorsers": ["SUBE-IA"],
+      "validityMonths": 24,
+      "evaluation": {
+        "exam": true,
+        "project": false,
+        "interview": false,
+        "defense": false
+      },
+      "heroImageUrl": "https://ejemplo.com/hero-image.jpg",
+      "sealImageUrl": "https://ejemplo.com/seal-image.jpg",
+      "seo": {
+        "metaTitle": "Certificación en Madurez Organizacional en IA",
+        "metaDescription": "Valida el nivel de madurez de la empresa según el ARES‑AI Framework."
+      }
     }
   ]
 }`;
@@ -702,21 +733,33 @@ export class AdminCertificacionesComponent implements OnInit, OnDestroy {
         this.estadoCarga.progreso = 100;
 
         if (result.success) {
-          this.estadoCarga.mensaje = `¡Carga completada! Se crearon ${result.summary.certificacionesCreadas} certificaciones.`;
+          this.estadoCarga.mensaje = `¡Carga completada exitosamente! 
+            Cursos creados: ${result.summary.cursosCreados}, 
+            Asesorías creadas: ${result.summary.asesoriasCreadas}, 
+            Certificaciones creadas: ${result.summary.certificacionesCreadas}. 
+            Total procesado: ${result.totalProcessed} productos.`;
           this.estadoCarga.esError = false;
           
           setTimeout(() => {
             this.cargarCertificaciones();
           }, 1500);
         } else {
-          this.estadoCarga.mensaje = `Carga completada con errores. Procesadas: ${result.totalProcessed}, Errores: ${result.totalErrors}`;
+          this.estadoCarga.mensaje = `Carga completada con errores. Procesados: ${result.totalProcessed}, Errores: ${result.totalErrors}`;
           this.estadoCarga.esError = true;
+          
+          // Mostrar algunos errores específicos si los hay
+          if (result.errors.length > 0) {
+            const primerosErrores = result.errors.slice(0, 3).join('; ');
+            console.warn('Errores durante la carga masiva:', result.errors);
+            this.estadoCarga.mensaje += `. Ejemplos de errores: ${primerosErrores}`;
+          }
         }
       },
       error: (error) => {
         this.estadoCarga.procesando = false;
         this.estadoCarga.mensaje = `Error durante el procesamiento: ${error.message || 'Error desconocido'}`;
         this.estadoCarga.esError = true;
+        console.error('Error en carga masiva:', error);
       }
     });
   }
