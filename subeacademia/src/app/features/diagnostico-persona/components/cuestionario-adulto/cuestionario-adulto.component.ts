@@ -320,6 +320,8 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
       this.currentPage++;
       this.updateCurrentQuestions();
       this.cdr.detectChanges();
+      // Scroll al inicio para mejorar UX en móvil
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
     }
   }
 
@@ -329,6 +331,7 @@ export class CuestionarioAdultoComponent implements OnInit, OnDestroy {
       this.currentPage--;
       this.updateCurrentQuestions();
       this.cdr.detectChanges();
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
     }
   }
 
